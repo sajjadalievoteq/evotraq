@@ -61,12 +61,12 @@ class WorkbenchInstructionsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(2),
         side: BorderSide(color: colors.outlineVariant),
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16,vertical: 16),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TraqIcon(AppAssets.iconHelpCircle, size: 18, color: muted),
@@ -88,113 +88,93 @@ class WorkbenchInstructionsCard extends StatelessWidget {
                               color: muted,
                             ),
                       ),
-                      if (instructions.audience != null &&
-                          instructions.audience!.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Chip(
-                            visualDensity: VisualDensity.compact,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            label: Text(
-                              instructions.audience!,
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                            side: BorderSide(color: colors.outlineVariant),
-                            backgroundColor:
-                                colors.surface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
+
                     ],
                   ),
                 ),
               ],
             ),
-            if (hasHowTo) ...[
-              const SizedBox(height: 4),
-              Theme(
-                data: Theme.of(context).copyWith(
-                  dividerColor: Colors.transparent,
-                  splashFactory: reduceMotion
-                      ? NoSplash.splashFactory
-                      : Theme.of(context).splashFactory,
+          ),
+          if (hasHowTo) ...[
+            Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor: Colors.transparent,
+                splashFactory: reduceMotion
+                    ? NoSplash.splashFactory
+                    : Theme.of(context).splashFactory,
+              ),
+              child: ExpansionTile(
+                tilePadding: EdgeInsets.symmetric(horizontal: 16),
+                childrenPadding: const EdgeInsets.only(bottom: 4,left: 16,right: 16),
+                title: Text(
+                  'How to use',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: muted,
+                      ),
                 ),
-                child: ExpansionTile(
-                  tilePadding: EdgeInsets.zero,
-                  childrenPadding: const EdgeInsets.only(bottom: 4),
-                  title: Text(
-                    'How to use',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: muted,
-                        ),
-                  ),
-                  children: [
-                    for (final step in instructions.steps)
+                children: [
+                  for (final step in instructions.steps)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4, left: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('• ', style: TextStyle(color: muted)),
+                          Expanded(
+                            child: Text(
+                              step,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: muted),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (instructions.exampleInput != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Example input',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: muted,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    SelectableText(
+                      instructions.exampleInput!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontFamily: 'monospace',
+                          ),
+                    ),
+                    if (instructions.exampleNote != null)
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 4, left: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('• ', style: TextStyle(color: muted)),
-                            Expanded(
-                              child: Text(
-                                step,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(color: muted),
-                              ),
-                            ),
-                          ],
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          instructions.exampleNote!,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: muted),
                         ),
                       ),
-                    if (instructions.exampleInput != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Example input',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: muted,
-                            ),
-                      ),
-                      const SizedBox(height: 2),
-                      SelectableText(
-                        instructions.exampleInput!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontFamily: 'monospace',
-                            ),
-                      ),
-                      if (instructions.exampleNote != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            instructions.exampleNote!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: muted),
-                          ),
+                    if (onLoadExample != null) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton(
+                          onPressed: () =>
+                              onLoadExample!(instructions.exampleInput!),
+                          child: const Text('Load example'),
                         ),
-                      if (onLoadExample != null) ...[
-                        const SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: OutlinedButton(
-                            onPressed: () =>
-                                onLoadExample!(instructions.exampleInput!),
-                            child: const Text('Load example'),
-                          ),
-                        ),
-                      ],
+                      ),
                     ],
                   ],
-                ),
+                ],
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

@@ -11,6 +11,7 @@ part 'traq_theme_cards.dart';
 part 'traq_theme_inputs.dart';
 part 'traq_theme_menus.dart';
 part 'traq_theme_widgets.dart';
+part 'traq_theme_chips.dart';
 
 class TraqTheme {
   static String get appBarBackgroundAsset => TraqThemeAppBar.backgroundAsset;
@@ -75,6 +76,7 @@ class TraqTheme {
       popupMenuTheme: TraqThemeMenus.popupMenu(c, roundedMd),
       menuTheme: TraqThemeMenus.menu(c, roundedMd),
       dropdownMenuTheme: TraqThemeMenus.dropdown(c, roundedMd),
+      chipTheme: TraqThemeChips.chip(c, text, onPrimaryInk),
       tabBarTheme: TabBarThemeData(
         labelColor: Colors.white,
         unselectedLabelColor: Colors.white.withOpacity(0.6),

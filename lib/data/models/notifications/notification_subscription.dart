@@ -121,6 +121,8 @@ class CreateSubscriptionRequest extends Equatable {
   final String webhookUrl;
   final String subscriptionType;
   @JsonKey(includeIfNull: false)
+  final String? deliveryMethod;
+  @JsonKey(includeIfNull: false)
   final String? notificationFormat;
   final Map<String, dynamic>? queryParameters;
 
@@ -128,6 +130,7 @@ class CreateSubscriptionRequest extends Equatable {
     required this.subscriptionName,
     required this.webhookUrl,
     required this.subscriptionType,
+    this.deliveryMethod,
     this.notificationFormat,
     this.queryParameters,
   });
@@ -142,6 +145,7 @@ class CreateSubscriptionRequest extends Equatable {
         subscriptionName,
         webhookUrl,
         subscriptionType,
+        deliveryMethod,
         notificationFormat,
         queryParameters,
       ];

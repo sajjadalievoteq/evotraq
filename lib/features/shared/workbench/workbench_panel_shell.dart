@@ -87,7 +87,7 @@ class WorkbenchPanelShell extends StatelessWidget {
     if (expandBody) {
       return SelectionArea(
         child: Padding(
-          padding: const EdgeInsets.all(TraqSpacing.lg),
+          padding: EdgeInsets.fromLTRB(context.padding.top, context.padding.top, context.padding.top, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -96,6 +96,7 @@ class WorkbenchPanelShell extends StatelessWidget {
               if (instructionsBlock != null) instructionsBlock,
               Expanded(child: formCard),
               ...statusBlocks,
+              SizedBox(height: context.padding.top,)
             ],
           ),
         ),

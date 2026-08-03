@@ -68,6 +68,7 @@ CreateSubscriptionRequest _$CreateSubscriptionRequestFromJson(
   subscriptionName: json['subscriptionName'] as String,
   webhookUrl: json['webhookUrl'] as String,
   subscriptionType: json['subscriptionType'] as String,
+  deliveryMethod: json['deliveryMethod'] as String?,
   notificationFormat: json['notificationFormat'] as String?,
   queryParameters: json['queryParameters'] as Map<String, dynamic>?,
 );
@@ -78,6 +79,7 @@ Map<String, dynamic> _$CreateSubscriptionRequestToJson(
   'subscriptionName': instance.subscriptionName,
   'webhookUrl': instance.webhookUrl,
   'subscriptionType': instance.subscriptionType,
+  'deliveryMethod': ?instance.deliveryMethod,
   'notificationFormat': ?instance.notificationFormat,
   'queryParameters': ?instance.queryParameters,
 };

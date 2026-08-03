@@ -126,7 +126,21 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
       ),
     );
 
-    final centered = Center(child: content);
+    // Overflow-safe: center when there's room, scroll when the region is
+    // shorter than the content (prevents RenderFlex bottom-overflow in bounded
+    // panel bodies). Works whether height is bounded or unbounded.
+    final centered = LayoutBuilder(
+      builder: (context, constraints) {
+        final minHeight =
+            constraints.hasBoundedHeight ? constraints.maxHeight : 0.0;
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: minHeight),
+            child: Center(child: content),
+          ),
+        );
+      },
+    );
 
     if (reduceMotion) return centered;
 

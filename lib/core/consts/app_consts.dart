@@ -48,9 +48,7 @@ class Constants {
   static const String adminDatabasePartitioningRoute =
       '/admin/database-partitioning';
   static const String adminCacheRoute = '/admin/cache';
-  static const String adminJobQueueRoute = '/admin/job-queue';
-  static const String adminEtlManagementRoute = '/admin/etl-management';
-  static const String adminBulkExportRoute = '/admin/bulk-export';
+  static const String adminBackgroundJobsRoute = '/admin/background-jobs';
   static const String adminDataConsistencyIntegrityRoute =
       '/admin/data-consistency-integrity';
 
@@ -169,10 +167,8 @@ class Constants {
   static const String notificationsRoute = '/notifications';
   static const String notificationSubscriptionsRoute =
       '/notifications/subscriptions';
-  static const String notificationHistoryRoute = '/notifications/history';
   static const String notificationDetailRoute =
       '/notifications/:subscriptionId';
-  static const String notificationWebhooksRoute = '/notifications/webhooks';
 
   static const String barcodeScanRoute = '/barcode/scan';
   static const String barcodeGenerateRoute = '/barcode/generate';

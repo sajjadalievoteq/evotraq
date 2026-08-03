@@ -15,8 +15,6 @@ class WorkbenchRailItem {
   final String iconAsset;
   final String label;
 }
-
-/// Non-selectable section in a workbench rail (TOOLS / VALIDATION / …).
 class WorkbenchRailGroup {
   const WorkbenchRailGroup({
     required this.title,
@@ -39,7 +37,6 @@ class WorkbenchRail extends StatelessWidget {
   final String selectedId;
   final ValueChanged<String> onSelect;
 
-  /// Flat list of all selectable items across groups.
   static List<WorkbenchRailItem> flatten(List<WorkbenchRailGroup> groups) => [
         for (final g in groups) ...g.items,
       ];
@@ -47,41 +44,45 @@ class WorkbenchRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return ListView(
-      padding:  EdgeInsets.fromLTRB(context.padding.top, context.padding.top, context.padding.top, 0),
-      children: [
-        for (var gi = 0; gi < groups.length; gi++) ...[
-          if (gi > 0) const SizedBox(height: TraqSpacing.md),
-          _SectionHeader(title: groups[gi].title, colors: colors),
-          const SizedBox(height: TraqSpacing.xs),
-          for (final item in groups[gi].items)
-            _RailItem(
-              icon: item.iconAsset,
-              label: item.label,
-              selected: item.id == selectedId,
-              onTap: () => onSelect(item.id),
-              colors: colors,
-            ),
+    return Container(
+      color: colors.surface,
+      child: ListView(
+        padding:  EdgeInsets.only(top: context.padding.top),
+        children: [
+          for (var gi = 0; gi < groups.length; gi++) ...[
+            if (gi > 0) const SizedBox(height: TraqSpacing.md),
+            _SectionHeader(title: groups[gi].title, colors: colors),
+            const SizedBox(height: TraqSpacing.xs),
+            for (final item in groups[gi].items)
+              _RailItem(
+                icon: item.iconAsset,
+                label: item.label,
+                selected: item.id == selectedId,
+                onTap: () => onSelect(item.id),
+                colors: colors,
+              ),
+          ],
+          SizedBox(height: context.padding.top,)
         ],
-        SizedBox(height: context.padding.top,)
-      ],
+      ),
     );
   }
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.colors});
+  const _SectionHeader({required this.title, required this.colors, });
 
   final String title;
   final TraqColors colors;
 
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        TraqSpacing.md,
+      padding: EdgeInsets.fromLTRB(
+        context.padding.top,
         TraqSpacing.xs,
-        TraqSpacing.md,
+        context.padding.top,
         TraqSpacing.xs,
       ),
       child: Text(
@@ -118,15 +119,15 @@ class _RailItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: TraqSpacing.xs),
       child: Material(
-        color: selected ? colors.primaryMuted : Colors.transparent,
-        borderRadius: BorderRadius.circular(TraqRadius.sm.x),
+        color: selected ? colors.background: Colors.transparent,
+
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(TraqRadius.sm.x),
+
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: TraqSpacing.md,
-              vertical: TraqSpacing.sm,
+            padding: EdgeInsets.symmetric(
+              horizontal:          context.padding.top,
+              vertical: TraqSpacing.lg,
             ),
             child: Row(
               children: [

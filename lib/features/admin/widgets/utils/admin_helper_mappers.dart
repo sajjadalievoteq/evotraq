@@ -70,23 +70,6 @@ abstract final class AdminHelperMappers {
     }
   }
 
-  static Color etlStatusColor(BuildContext context, String status) {
-    switch (status.toUpperCase()) {
-      case 'ACTIVE':
-      case 'COMPLETED':
-        return AppColorMapper.successColor(context);
-      case 'RUNNING':
-        return AppColorMapper.infoColor(context);
-      case 'FAILED':
-        return AppColorMapper.errorColor(context);
-      case 'INACTIVE':
-      case 'SCHEDULED':
-        return AppColorMapper.warningColor(context);
-      default:
-        return AppColorMapper.neutralColor(context);
-    }
-  }
-
   static Color severityColor(BuildContext context, String severity) {
     return AppColorMapper.severity(context, severity);
   }

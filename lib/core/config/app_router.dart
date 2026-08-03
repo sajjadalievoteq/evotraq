@@ -14,9 +14,9 @@ import 'package:traqtrace_app/features/admin/widgets/performance_optimization_da
 import 'package:traqtrace_app/features/admin/screens/database_partitioning_dashboard.dart';
 import 'package:traqtrace_app/features/admin/screens/cache_management_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity_dashboard.dart';
-import 'package:traqtrace_app/features/automation_center/presentation/screen/automation_center_screen.dart';
-import 'package:traqtrace_app/features/automation_center/presentation/utils/automation_center_sections.dart';
-import 'package:traqtrace_app/features/notifications/presentation/widgets/notifications_shell.dart';
+import 'package:traqtrace_app/features/automation_center/screens/automation_center/automation_center_screen.dart';
+import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/notifications_shell.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_shell.dart';
 import 'package:traqtrace_app/features/epcis/widgets/epcis_shell.dart';
 import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
@@ -37,6 +37,7 @@ import 'package:traqtrace_app/features/admin/screens/system_settings_screen.dart
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/object_event_detail_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/utils/object_event_route_constants.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/object_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_batch_import/object_event_batch_import_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event/object_event_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event/aggregation_event_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_detail/aggregation_event_detail_screen.dart';
@@ -84,7 +85,7 @@ import 'package:traqtrace_app/features/operations/update_status/screens/update_s
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/commissioning_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/commissioning_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning/commissioning_screen.dart';
-import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_details_screen.dart';
+import 'package:traqtrace_app/features/automation_center/screens/subscription_details/subscription_details_screen.dart';
 import 'package:traqtrace_app/features/epcis/routes/transaction_event_validation_demo_route.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/journey_dashboard_screen.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/product_hierarchy_screen.dart';
@@ -600,7 +601,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: Constants.adminJobQueueRoute,
+        path: Constants.adminBackgroundJobsRoute,
         redirect: (context, state) {
           if (!authCubit.state.isAuthenticated) {
             return null;
@@ -609,59 +610,14 @@ class AppRouter {
             return Constants.homeRoute;
           }
           return AutomationCenterSections.location(
-            AutomationCenterSections.jobQueue,
+            AutomationCenterSections.backgroundJobs,
           );
         },
       ),
       GoRoute(
-        path: Constants.adminEtlManagementRoute,
-        redirect: (context, state) {
-          if (!authCubit.state.isAuthenticated) {
-            return null;
-          }
-          if (!authCubit.state.isAdmin) {
-            return Constants.homeRoute;
-          }
-          return AutomationCenterSections.location(
-            AutomationCenterSections.etl,
-          );
-        },
-      ),
-      GoRoute(
-        path: Constants.adminBulkExportRoute,
-        redirect: (context, state) {
-          if (!authCubit.state.isAuthenticated) {
-            return null;
-          }
-          if (!authCubit.state.isAdmin) {
-            return Constants.homeRoute;
-          }
-          return AutomationCenterSections.location(
-            AutomationCenterSections.bulkExport,
-          );
-        },
-      ),
-      GoRoute(
-        path: '/job-queue',
+        path: '/background-jobs',
         redirect: (context, state) => AutomationCenterSections.location(
-          AutomationCenterSections.jobQueue,
-        ),
-      ),
-      GoRoute(
-        path: '/bulk-export',
-        redirect: (context, state) => AutomationCenterSections.location(
-          AutomationCenterSections.bulkExport,
-        ),
-      ),
-      GoRoute(
-        path: '/etl',
-        redirect: (context, state) =>
-            AutomationCenterSections.location(AutomationCenterSections.etl),
-      ),
-      GoRoute(
-        path: '/bulk-import',
-        redirect: (context, state) => AutomationCenterSections.location(
-          AutomationCenterSections.bulkImport,
+          AutomationCenterSections.backgroundJobs,
         ),
       ),
       GoRoute(
@@ -932,8 +888,9 @@ class AppRouter {
           ),
           GoRoute(
             path: Constants.epcisObjectEventBatchImportRoute,
-            redirect: (context, state) => AutomationCenterSections.location(
-              AutomationCenterSections.bulkImport,
+            pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
+              key: state.pageKey,
+              child: const ObjectEventBatchImportScreen(),
             ),
           ),
           GoRoute(
@@ -1408,25 +1365,13 @@ class AppRouter {
       GoRoute(
         path: Constants.notificationsRoute,
         redirect: (context, state) => AutomationCenterSections.location(
-          AutomationCenterSections.statistics,
+          AutomationCenterSections.notificationActivity,
         ),
       ),
       GoRoute(
         path: Constants.notificationSubscriptionsRoute,
         redirect: (context, state) => AutomationCenterSections.location(
-          AutomationCenterSections.subscriptions,
-        ),
-      ),
-      GoRoute(
-        path: Constants.notificationHistoryRoute,
-        redirect: (context, state) => AutomationCenterSections.location(
-          AutomationCenterSections.webhookHistory,
-        ),
-      ),
-      GoRoute(
-        path: Constants.notificationWebhooksRoute,
-        redirect: (context, state) => AutomationCenterSections.location(
-          AutomationCenterSections.webhookHistory,
+          AutomationCenterSections.alertSubscriptions,
         ),
       ),
       ShellRoute(

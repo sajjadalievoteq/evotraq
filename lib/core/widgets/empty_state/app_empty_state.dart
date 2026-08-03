@@ -58,20 +58,20 @@ class AppEmptyState extends StatelessWidget {
       );
     }
 
-    if (!_isFiltered &&
-        primaryActionLabel != null &&
-        onPrimaryAction != null) {
-      actions.add(
-        EmptyStateHoverAction(
-          child: CustomButtonWidget(
-            title: primaryActionLabel!,
-            iconAsset: primaryActionIconAsset,
-            onTap: onPrimaryAction,
-          ),
-        ),
-      );
-    }
-
+    // if (!_isFiltered &&
+    //     primaryActionLabel != null &&
+    //     onPrimaryAction != null) {
+    //   actions.add(
+    //     EmptyStateHoverAction(
+    //       child: CustomButtonWidget(
+    //         title: primaryActionLabel!,
+    //         iconAsset: primaryActionIconAsset,
+    //         onTap: onPrimaryAction,
+    //       ),
+    //     ),
+    //   );
+    // }
+    //
     if (!_isFiltered &&
         secondaryActionLabel != null &&
         onSecondaryAction != null) {

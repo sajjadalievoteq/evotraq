@@ -65,66 +65,69 @@ class DashboardStatCard extends StatelessWidget {
             width: w,
             height: h,
             padding: EdgeInsets.all(dense ? 18 : 22),
-            child: Row(
+            child:Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 5,
+                  children: [
+                    if (iconAsset != null)
+                      SvgPicture.asset(
+                        iconAsset!,
+                        width: dense ? 18 : 24,
+                        height: dense ? 18 : 24,
+                        colorFilter:
+                        ColorFilter.mode(color, BlendMode.srcIn),
+                      )
+                    else
+                      Icon(icon!, color: color, size: dense ? 24 : 32),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: context.text.cap.copyWith(
+                          fontSize: dense ? 10 : 20,
+                          color: captionColor,
+                        ),
+                        maxLines: 2,
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ],
+                ),
                 Expanded(
-                  child: Column(
+                  child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 5,
-                        children: [
-                          if (iconAsset != null)
-                            SvgPicture.asset(
-                              iconAsset!,
-                              width: dense ? 18 : 24,
-                              height: dense ? 18 : 24,
-                              colorFilter:
-                                  ColorFilter.mode(color, BlendMode.srcIn),
-                            )
-                          else
-                            Icon(icon!, color: color, size: dense ? 24 : 32),
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: context.text.cap.copyWith(
-                                fontSize: dense ? 10 : 20,
-                                color: captionColor,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.left,
-                            ),
+
+                      Expanded(
+                        child: Text(
+                          value,
+                          style: context.text.h2.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: valueColor,
+                            fontSize: dense ? 20 : 44,
+                            height: dense ? 1.1 : 1.2,
                           ),
-                        ],
-                      ),
-                      Text(
-                        value,
-                        style: context.text.h2.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: valueColor,
-                          fontSize: dense ? 20 : 44,
-                          height: dense ? 1.1 : 1.2,
                         ),
                       ),
+                      if (sparkHeights != null) ...[
+                        SizedBox(width: dense ? 12 : 20),
+                        Expanded(
+                          child: DashboardMiniLineSparkline(
+                            heights: sparkHeights,
+                            lineColor: lineColor,
+                            minTrackHeight: dense ? 18 : 32,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-                if (sparkHeights != null) ...[
-                  SizedBox(width: dense ? 12 : 20),
-                  Expanded(
-                    child: DashboardMiniLineSparkline(
-                      heights: sparkHeights,
-                      lineColor: lineColor,
-                      minTrackHeight: dense ? 18 : 32,
-                    ),
-                  ),
-                ],
+
               ],
             ),
           ),

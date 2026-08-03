@@ -120,7 +120,6 @@ abstract final class NavIcons {
   
   static const String batchProcessing = AppAssets.iconSpinner;
   static const String jobQueueManagement = AppAssets.iconQueue;
-  static const String etlManagement = AppAssets.iconTransform;
   static const String bulkExport = AppAssets.iconDownload;
 
   

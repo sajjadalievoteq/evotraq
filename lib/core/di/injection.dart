@@ -12,7 +12,7 @@ import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 
-import 'package:traqtrace_app/data/services/notification_api_service.dart';
+import 'package:traqtrace_app/data/services/automation_center/notification_api_service.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_master_data_service.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
@@ -24,9 +24,7 @@ import 'package:traqtrace_app/features/admin/user_management/cubit/user_manageme
 import 'package:traqtrace_app/features/admin/user_approval/cubit/user_approval_cubit.dart';
 import 'package:traqtrace_app/features/admin/cbv_vocabulary/cubit/admin_cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
-import 'package:traqtrace_app/data/services/bulk_export_service.dart';
-import 'package:traqtrace_app/data/services/etl_service.dart';
-import 'package:traqtrace_app/data/services/job_queue_service.dart';
+import 'package:traqtrace_app/data/services/automation_center/job_queue_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
@@ -91,12 +89,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   final dioService = DioService()..setBaseUrl(appConfig.apiBaseUrl);
   getIt.registerLazySingleton<DioService>(() => dioService);
-  getIt.registerLazySingleton<BulkExportService>(
-    () => BulkExportService(getIt<DioService>()),
-  );
-  getIt.registerLazySingleton<ETLService>(
-    () => ETLService(getIt<DioService>()),
-  );
   getIt.registerLazySingleton<JobQueueService>(
     () => JobQueueService(dioService: getIt<DioService>()),
   );

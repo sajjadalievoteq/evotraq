@@ -46,6 +46,14 @@ class UserStrings {
   static const currentSessionTitle = 'Current Session';
   static const currentSessionSubtitle = 'This device • Active now';
   static const logOut = 'Log Out';
+  static const signOutSession = 'Sign out';
+  static const signOutOtherDevices = 'Sign out all other devices';
+  static const sessionSignedOut = 'Session signed out';
+  static const otherSessionsSignedOut = 'Other sessions signed out';
+  static const sessionsLoadError = 'Could not load sessions';
+  static const sessionsRetry = 'Retry';
+  static const currentSessionBadge = 'This device';
+  static const sessionActivePrefix = 'Last active ';
 
   static const notificationPreferencesTitle = 'Notification Preferences';
   static const applicationPreferencesTitle = 'Application Preferences';

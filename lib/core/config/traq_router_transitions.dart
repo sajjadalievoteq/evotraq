@@ -44,7 +44,7 @@ abstract final class TraqRouterTransitions {
     };
   }
 
-  /// Peer destinations: vertical slide + fade.
+  /// Peer destinations: horizontal slide (right-to-left) + fade.
   static Page<T> fadeThroughPage<T extends Object?>({
     required LocalKey key,
     required Widget child,
@@ -146,7 +146,8 @@ abstract final class TraqRouterTransitions {
     );
   }
 
-  /// Peer: slide up slightly while fading in; outgoing eases out.
+  /// Peer: slide in from the trailing edge (right-to-left in LTR) while fading
+  /// in; outgoing eases out toward the leading edge.
   static Widget _fadeThroughBuilder(
     BuildContext context,
     Animation<double> animation,
@@ -158,19 +159,27 @@ abstract final class TraqRouterTransitions {
       parent: secondaryAnimation,
       curve: TraqAnimationConstants.navCurve,
     );
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    // Enter from the trailing edge and settle at zero => right-to-left motion.
+    final enterDx = isRtl
+        ? -TraqAnimationConstants.navSharedAxisDx
+        : TraqAnimationConstants.navSharedAxisDx;
+    final exitDx = isRtl
+        ? TraqAnimationConstants.navSharedAxisOutgoingDx
+        : -TraqAnimationConstants.navSharedAxisOutgoingDx;
 
     return FadeTransition(
       opacity: Tween<double>(begin: 1, end: 0.4).animate(outgoing),
       child: SlideTransition(
         position: Tween<Offset>(
           begin: Offset.zero,
-          end: const Offset(0, -TraqAnimationConstants.navFadeThroughDy * 0.5),
+          end: Offset(exitDx, 0),
         ).animate(outgoing),
         child: FadeTransition(
           opacity: incoming,
           child: SlideTransition(
             position: Tween<Offset>(
-              begin: const Offset(0, TraqAnimationConstants.navFadeThroughDy),
+              begin: Offset(enterDx, 0),
               end: Offset.zero,
             ).animate(incoming),
             child: child,

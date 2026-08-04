@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
-import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
+import 'package:traqtrace_app/features/automation_center/utils/subscription_delivery_utils.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_action_menu.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_card_status_chip.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_meta_chip.dart';
@@ -72,8 +73,12 @@ class SubscriptionCard extends StatelessWidget {
                     icon: AppAssets.iconList,
                   ),
                   SubscriptionMetaChip(
-                    label: _deliveryLabel(),
-                    icon: _deliveryIcon(),
+                    label: SubscriptionDeliveryUtils.labelForEndpoint(
+                      subscription.webhookUrl,
+                    ),
+                    icon: SubscriptionDeliveryUtils.iconForEndpoint(
+                      subscription.webhookUrl,
+                    ),
                   ),
                 ],
               ),
@@ -102,19 +107,5 @@ class SubscriptionCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _deliveryLabel() {
-    final url = subscription.webhookUrl;
-    if (url.contains('@') && !url.startsWith('http')) {
-      return 'Email';
-    }
-    return 'Webhook';
-  }
-
-  String _deliveryIcon() {
-    return _deliveryLabel() == 'Email'
-        ? AppAssets.iconMail
-        : AppAssets.iconLink;
   }
 }

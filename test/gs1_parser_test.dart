@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/data/services/barcode/gs1_barcode_parser.dart';
 
 void main() {
   group('GS1BarcodeParser Tests', () {

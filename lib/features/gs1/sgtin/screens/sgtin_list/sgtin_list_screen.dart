@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_advanced_filters_panel.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_list_body.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_quick_filter_dialog.dart';
@@ -86,7 +86,7 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
   }
 
   void _search() {
-    final criteria = _buildSearchCriteria();
+    final criteria = _searchCriteria();
     if (criteria.parseError != null) {
       context.showError(criteria.parseError!);
       return;
@@ -119,7 +119,7 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
     final cubitState = context.read<SGTINCubit>().state;
     if (!cubitState.hasMoreData) return;
 
-    final criteria = _buildSearchCriteria();
+    final criteria = _searchCriteria();
     context.read<SGTINCubit>().fetchSGTINList(
       gtinCode: criteria.gtinCode,
       serialNumber: criteria.serialNumber,
@@ -139,7 +139,7 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
     String? serialNumber,
     String? epcUri,
     String? parseError,
-  }) _buildSearchCriteria() {
+  }) _searchCriteria() {
     var gtinCode = _gtinCodeController.text.trim().isEmpty
         ? null
         : _gtinCodeController.text.trim();

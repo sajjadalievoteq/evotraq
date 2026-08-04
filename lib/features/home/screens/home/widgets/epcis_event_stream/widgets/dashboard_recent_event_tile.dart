@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
+import 'package:traqtrace_app/features/epcis/utils/epcis_event_ui_utils.dart';
 
 class DashboardRecentEventTile extends StatelessWidget {
   const DashboardRecentEventTile({

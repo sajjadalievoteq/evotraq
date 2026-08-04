@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
-import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_status.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/utils/sscc_input_mode.dart';

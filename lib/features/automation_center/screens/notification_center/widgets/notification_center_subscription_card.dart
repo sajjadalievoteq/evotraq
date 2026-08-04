@@ -6,7 +6,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/notification_center_stat_tile.dart';
 
 class NotificationCenterSubscriptionCard extends StatelessWidget {
@@ -152,7 +152,7 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
                   const Spacer(),
                   Flexible(
                     child: Text(
-                      'Created: ${_formatDate(subscription.createdAt)}',
+                      'Created: ${RelativeTimeUtils.recentWithYesterdayOrDate(subscription.createdAt)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: c.textMuted,
                           ),
@@ -167,10 +167,5 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime? dateTime) {
-    if (dateTime == null) return 'Unknown';
-    return RelativeTimeUtils.recentWithYesterdayOrDate(dateTime);
   }
 }

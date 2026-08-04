@@ -179,6 +179,10 @@ class Constants {
   static const String authCheckUsernameEndpoint = '/auth/check-username';
   static const String authResendVerificationEmailEndpoint =
       '/auth/resend-verification-email';
+  static const String authLogoutEndpoint = '/auth/logout';
+  static const String authSessionsEndpoint = '/auth/sessions';
+  static const String authSessionsRevokeOthersEndpoint =
+      '/auth/sessions/revoke-others';
   static const String authPasswordResetRequestEndpoint =
       '/auth/password-reset-request';
   static const String authValidateResetTokenEndpoint =

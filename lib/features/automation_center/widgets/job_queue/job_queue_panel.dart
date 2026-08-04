@@ -6,10 +6,15 @@ import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/services/automation_center/job_queue_service.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_control_panel_dialog.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_job_details_dialog.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_purge_dialog.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_schedule_job_dialog.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_settings_dialog.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_worker_pool_config_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_active_jobs_tab.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_dashboard_tab.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_history_tab.dart';
@@ -17,6 +22,9 @@ import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_selected_tab_content.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_worker_pool_tab.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/utils/job_queue_dashboard_snapshot_builder.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/utils/job_queue_priority_utils.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/widgets/job_queue_error_view.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/widgets/job_queue_loading_view.dart';
 
 class JobQueuePanel extends StatefulWidget {
   final String baseUrl;
@@ -37,7 +45,8 @@ class JobQueuePanel extends StatefulWidget {
   JobQueuePanelState createState() => JobQueuePanelState();
 }
 
-class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMixin {
+class JobQueuePanelState extends State<JobQueuePanel>
+    with TickerProviderStateMixin {
   JobQueueService get _service => getIt<JobQueueService>();
 
   late TabController _tabController;
@@ -284,89 +293,14 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
     final embedded = widget.embedded;
 
     if (_isLoading) {
-      final skeletons = List.generate(
-        4,
-        (_) => TraqCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: TraqSpacing.xl,
-                width: 160,
-                decoration: BoxDecoration(
-                  color: c.surfaceMuted,
-                  borderRadius: TraqRadius.chip,
-                ),
-              ),
-              const SizedBox(height: TraqSpacing.md),
-              Container(
-                height: 48,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: c.surfaceMuted,
-                  borderRadius: TraqRadius.card,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-      if (embedded) {
-        return Column(
-          children: [
-            for (var i = 0; i < skeletons.length; i++) ...[
-              if (i > 0) const SizedBox(height: TraqSpacing.md),
-              skeletons[i],
-            ],
-          ],
-        );
-      }
-      return ListView.separated(
-        padding: TraqSpacing.surfacePad,
-        itemCount: skeletons.length,
-        separatorBuilder: (_, __) => const SizedBox(height: TraqSpacing.md),
-        itemBuilder: (_, i) => skeletons[i],
-      );
+      return JobQueueLoadingView(embedded: embedded);
     }
 
     if (_errorMessage != null) {
-      return Padding(
-        padding: embedded
-            ? const EdgeInsets.symmetric(vertical: TraqSpacing.lg)
-            : TraqSpacing.pagePad,
-        child: TraqCard(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TraqIcon(
-                AppAssets.iconAlert,
-                size: 48,
-                color: AppColorMapper.errorColor(context).withValues(alpha: 0.7),
-              ),
-              const SizedBox(height: TraqSpacing.lg),
-              Text(
-                'Unable to load job queue',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: c.textPrimary,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: TraqSpacing.sm),
-              Text(
-                _errorMessage!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: c.textMuted,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: TraqSpacing.xl),
-              FilledButton(
-                onPressed: _loadInitialData,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
+      return JobQueueErrorView(
+        message: _errorMessage!,
+        onRetry: _loadInitialData,
+        embedded: embedded,
       );
     }
 
@@ -542,7 +476,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
   Future<void> _retryJob(String jobId) async {
     try {
       await _service.retryJob(jobId);
-      context.showSuccess('Job resubmitted successfully');
+      context.showSuccess('Job retried successfully');
       refreshCurrentTab();
     } catch (e) {
       context.showError('Failed to retry job: $e');
@@ -552,369 +486,65 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
   void _showJobDetails(Map<String, dynamic> job) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Job Details: ${job['jobId']}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Job Type: ${job['jobType']}'),
-              Text('Status: ${job['status']}'),
-              Text('Priority: ${job['priority']}'),
-              if (job['submittedTime'] != null)
-                Text('Submitted: ${job['submittedTime']}'),
-              if (job['startTime'] != null) Text('Started: ${job['startTime']}'),
-              if (job['endTime'] != null) Text('Completed: ${job['endTime']}'),
-              if (job['executionTime'] != null)
-                Text('Duration: ${job['executionTime']}'),
-              if (job['progress'] != null) Text('Progress: ${job['progress']}%'),
-              if (job['errorMessage'] != null) ...[
-                const SizedBox(height: 8),
-                const Text('Error:', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(
-                  job['errorMessage'],
-                  style: TextStyle(color: AppColorMapper.errorColor(context)),
-                ),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+      builder: (context) => JobQueueJobDetailsDialog(job: job),
     );
   }
 
   void _showControlPanel() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Job Queue Control Panel'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: TraqIcon(AppAssets.iconMinus),
-              title: const Text('Pause Processing'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _pauseProcessing();
-              },
-            ),
-            ListTile(
-              leading: TraqIcon(AppAssets.iconArrowR),
-              title: const Text('Resume Processing'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _resumeProcessing();
-              },
-            ),
-            ListTile(
-              leading: TraqIcon(AppAssets.iconTune),
-              title: const Text('Configure Worker Pool'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _showWorkerPoolConfig();
-              },
-            ),
-            ListTile(
-              leading: TraqIcon(AppAssets.iconTrash),
-              title: const Text('Purge Old Jobs'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _showPurgeDialog();
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
+      builder: (context) => JobQueueControlPanelDialog(
+        onPause: _pauseProcessing,
+        onResume: _resumeProcessing,
+        onConfigureWorkers: _showWorkerPoolConfig,
+        onPurge: _showPurgeDialog,
       ),
     );
   }
 
-  void _showWorkerPoolConfig() {
-    final coreCtrl = TextEditingController(
-      text: '${_workerPoolStats['corePoolSize'] ?? 4}',
-    );
-    final maxCtrl = TextEditingController(
-      text: '${_workerPoolStats['maximumPoolSize'] ?? 8}',
-    );
-    final queueCtrl = TextEditingController(text: '100');
-    var saving = false;
-    String? formError;
-
-    // Prefill queue capacity from config endpoint when available.
-    _service.getWorkerPoolConfig().then((config) {
-      final qc = config['queueCapacity'];
-      if (qc != null) queueCtrl.text = '$qc';
-      final core = config['corePoolSize'];
-      if (core != null) coreCtrl.text = '$core';
-      final max = config['maxPoolSize'];
-      if (max != null) maxCtrl.text = '$max';
-    }).catchError((_) {});
-
-    showDialog(
+  Future<void> _showWorkerPoolConfig() async {
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            Future<void> save() async {
-              final core = int.tryParse(coreCtrl.text.trim());
-              final max = int.tryParse(maxCtrl.text.trim());
-              final queue = int.tryParse(queueCtrl.text.trim());
-              if (core == null ||
-                  core < 1 ||
-                  max == null ||
-                  max < 1 ||
-                  queue == null ||
-                  queue < 1) {
-                setDialogState(
-                  () => formError = 'Enter positive integers for all fields',
-                );
-                return;
-              }
-              if (max < core) {
-                setDialogState(
-                  () => formError = 'Max pool size must be ≥ core pool size',
-                );
-                return;
-              }
-              setDialogState(() {
-                saving = true;
-                formError = null;
-              });
-              try {
-                final result = await _service.configureWorkerPool(
-                  corePoolSize: core,
-                  maxPoolSize: max,
-                  queueCapacity: queue,
-                );
-                if (!dialogContext.mounted) return;
-                if (result['status'] == 'error') {
-                  setDialogState(() {
-                    saving = false;
-                    formError = '${result['message'] ?? 'Configuration failed'}';
-                  });
-                  return;
-                }
-                Navigator.of(dialogContext).pop();
-                if (!mounted) return;
-                context.showSuccess(
-                  '${result['message'] ?? 'Worker pool configured'}',
-                );
-                await _loadWorkerPoolStats();
-                if (_tabController.index == 4) refreshCurrentTab();
-              } catch (e) {
-                setDialogState(() {
-                  saving = false;
-                  formError = 'Failed to configure worker pool: $e';
-                });
-              }
-            }
-
-            return AlertDialog(
-              title: Row(
-                children: [
-                  TraqIcon(AppAssets.iconTune),
-                  const SizedBox(width: TraqSpacing.sm),
-                  const Text('Configure Worker Pool'),
-                ],
-              ),
-              content: SizedBox(
-                width: 400,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: coreCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Core pool size',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: TraqSpacing.md),
-                    TextField(
-                      controller: maxCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Max pool size',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: TraqSpacing.md),
-                    TextField(
-                      controller: queueCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Queue capacity',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    if (formError != null) ...[
-                      const SizedBox(height: TraqSpacing.md),
-                      Text(
-                        formError!,
-                        style: TextStyle(
-                          color: AppColorMapper.errorColor(context),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: saving
-                      ? null
-                      : () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton(
-                  onPressed: saving ? null : save,
-                  child: saving
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    ).whenComplete(() {
-      coreCtrl.dispose();
-      maxCtrl.dispose();
-      queueCtrl.dispose();
-    });
+      builder: (context) => JobQueueWorkerPoolConfigDialog(
+        initialCorePoolSize: '${_workerPoolStats['corePoolSize'] ?? 4}',
+        initialMaxPoolSize: '${_workerPoolStats['maximumPoolSize'] ?? 8}',
+        initialQueueCapacity: '100',
+        onPrefill: _service.getWorkerPoolConfig,
+        onSave: ({
+          required int corePoolSize,
+          required int maxPoolSize,
+          required int queueCapacity,
+        }) {
+          return _service.configureWorkerPool(
+            corePoolSize: corePoolSize,
+            maxPoolSize: maxPoolSize,
+            queueCapacity: queueCapacity,
+          );
+        },
+      ),
+    );
+    if (result == null || !mounted) return;
+    context.showSuccess('${result['message'] ?? 'Worker pool configured'}');
+    await _loadWorkerPoolStats();
+    if (_tabController.index == 4) refreshCurrentTab();
   }
 
-  void _showPurgeDialog() {
-    final daysCtrl = TextEditingController(text: '30');
-    var purging = false;
-    String? formError;
-
-    showDialog(
+  Future<void> _showPurgeDialog() async {
+    final outcome = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            Future<void> confirm() async {
-              final days = int.tryParse(daysCtrl.text.trim());
-              if (days == null || days < 1) {
-                setDialogState(
-                  () => formError = 'Enter a positive number of retention days',
-                );
-                return;
-              }
-              setDialogState(() {
-                purging = true;
-                formError = null;
-              });
-              try {
-                final result = await _service.purgeJobs(retentionDays: days);
-                if (!dialogContext.mounted) return;
-                Navigator.of(dialogContext).pop();
-                if (!mounted) return;
-                final count = result['purgedCount'] ?? 0;
-                context.showSuccess(
-                  'Purged $count job(s) older than $days day(s)',
-                );
-                await Future.wait([
-                  _loadJobHistory(),
-                  _loadDashboardData(),
-                ]);
-              } catch (e) {
-                setDialogState(() {
-                  purging = false;
-                  formError = 'Failed to purge jobs: $e';
-                });
-              }
-            }
-
-            return AlertDialog(
-              title: Row(
-                children: [
-                  TraqIcon(
-                    AppAssets.iconTrash,
-                    color: AppColorMapper.errorColor(context),
-                  ),
-                  const SizedBox(width: TraqSpacing.sm),
-                  const Text('Purge Old Jobs'),
-                ],
-              ),
-              content: SizedBox(
-                width: 400,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Permanently remove completed job history older than the '
-                      'retention period. This cannot be undone.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: TraqSpacing.lg),
-                    TextField(
-                      controller: daysCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Retain jobs from the last N days',
-                        border: OutlineInputBorder(),
-                        helperText: 'Jobs ending before this window are purged',
-                      ),
-                    ),
-                    if (formError != null) ...[
-                      const SizedBox(height: TraqSpacing.md),
-                      Text(
-                        formError!,
-                        style: TextStyle(
-                          color: AppColorMapper.errorColor(context),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: purging
-                      ? null
-                      : () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColorMapper.errorColor(context),
-                  ),
-                  onPressed: purging ? null : confirm,
-                  child: purging
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Purge'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    ).whenComplete(daysCtrl.dispose);
+      builder: (context) => JobQueuePurgeDialog(
+        onPurge: (days) => _service.purgeJobs(retentionDays: days),
+      ),
+    );
+    if (outcome == null || !mounted) return;
+    final days = outcome['days'] as int? ?? 0;
+    final result = outcome['result'] as Map<String, dynamic>? ?? {};
+    final count = result['purgedCount'] ?? 0;
+    context.showSuccess('Purged $count job(s) older than $days day(s)');
+    await Future.wait([
+      _loadJobHistory(),
+      _loadDashboardData(),
+    ]);
   }
 
   Future<void> _pauseProcessing() async {
@@ -937,291 +567,34 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
     }
   }
 
-  void _showQueueSettings() {
-    var autoRefresh = _autoRefresh;
-    final intervalCtrl = TextEditingController(
-      text: '$_refreshIntervalSeconds',
+  Future<void> _showQueueSettings() async {
+    final result = await showDialog<JobQueueSettingsResult>(
+      context: context,
+      builder: (context) => JobQueueSettingsDialog(
+        initialAutoRefresh: _autoRefresh,
+        initialIntervalSeconds: _refreshIntervalSeconds,
+      ),
     );
-    String? formError;
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Row(
-                children: [
-                  TraqIcon(AppAssets.iconSettings),
-                  const SizedBox(width: TraqSpacing.sm),
-                  const Text('Queue Settings'),
-                ],
-              ),
-              content: SizedBox(
-                width: 400,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Auto refresh'),
-                      subtitle: const Text(
-                        'Periodically reload the active tab',
-                      ),
-                      value: autoRefresh,
-                      onChanged: (v) => setDialogState(() => autoRefresh = v),
-                    ),
-                    const SizedBox(height: TraqSpacing.md),
-                    TextField(
-                      controller: intervalCtrl,
-                      enabled: autoRefresh,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Refresh interval (seconds)',
-                        border: OutlineInputBorder(),
-                        helperText: 'Between 2 and 120 seconds',
-                      ),
-                    ),
-                    if (formError != null) ...[
-                      const SizedBox(height: TraqSpacing.md),
-                      Text(
-                        formError!,
-                        style: TextStyle(
-                          color: AppColorMapper.errorColor(context),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    final interval = int.tryParse(intervalCtrl.text.trim());
-                    if (interval == null || interval < 2 || interval > 120) {
-                      setDialogState(
-                        () => formError =
-                            'Interval must be an integer between 2 and 120',
-                      );
-                      return;
-                    }
-                    Navigator.of(dialogContext).pop();
-                    _applyRefreshPreferences(
-                      autoRefresh: autoRefresh,
-                      intervalSeconds: interval,
-                    );
-                  },
-                  child: const Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    ).whenComplete(intervalCtrl.dispose);
-  }
-
-  void _showScheduleJobDialog() {
-    // TODO(scheduling): real deferred/cron execution requires a backend
-    // scheduled-submit endpoint + quartz/scheduler; out of scope here.
-    var selectedJobType = 'NOTIFICATION_BATCH';
-    var selectedPriority = 'MEDIUM';
-    var jobName = '';
-    var description = '';
-    final parameters = <Map<String, String>>[];
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Row(
-                children: [
-                  TraqIcon(
-                    AppAssets.iconClock,
-                    color: AppColorMapper.successColor(context),
-                  ),
-                  const SizedBox(width: TraqSpacing.sm),
-                  const Text('Submit Job'),
-                ],
-              ),
-              content: SizedBox(
-                width: 480,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Submits a job to the queue immediately '
-                        '(POST /jobs/submit).',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: context.colors.textMuted,
-                            ),
-                      ),
-                      const SizedBox(height: TraqSpacing.lg),
-                      TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Job Name *',
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) => jobName = value,
-                      ),
-                      const SizedBox(height: TraqSpacing.md),
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: 'Job Type *',
-                          border: OutlineInputBorder(),
-                        ),
-                        value: selectedJobType,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'NOTIFICATION_BATCH',
-                            child: Text('NOTIFICATION_BATCH'),
-                          ),
-                        ],
-                        onChanged: (value) => setDialogState(
-                          () => selectedJobType = value!,
-                        ),
-                      ),
-                      const SizedBox(height: TraqSpacing.sm),
-                      Text(
-                        'Runs processScheduledBatchNotifications — delivers '
-                        'due BATCH/SCHEDULED notification batches.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: context.colors.textMuted,
-                            ),
-                      ),
-                      const SizedBox(height: TraqSpacing.md),
-                      TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 2,
-                        onChanged: (value) => description = value,
-                      ),
-                      const SizedBox(height: TraqSpacing.md),
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: 'Priority',
-                          border: OutlineInputBorder(),
-                        ),
-                        value: selectedPriority,
-                        items: const [
-                          DropdownMenuItem(value: 'HIGH', child: Text('HIGH')),
-                          DropdownMenuItem(
-                            value: 'MEDIUM',
-                            child: Text('MEDIUM'),
-                          ),
-                          DropdownMenuItem(value: 'LOW', child: Text('LOW')),
-                        ],
-                        onChanged: (value) => setDialogState(
-                          () => selectedPriority = value!,
-                        ),
-                      ),
-                      const SizedBox(height: TraqSpacing.xl),
-                      Text(
-                        'Additional parameters (optional)',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: TraqSpacing.sm),
-                      ...parameters.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        return Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: TraqSpacing.sm),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Key',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  onChanged: (value) =>
-                                      parameters[index]['key'] = value,
-                                ),
-                              ),
-                              const SizedBox(width: TraqSpacing.sm),
-                              Expanded(
-                                child: TextField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Value',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  onChanged: (value) =>
-                                      parameters[index]['value'] = value,
-                                ),
-                              ),
-                              IconButton(
-                                icon: TraqIcon(
-                                  AppAssets.iconRemoveCircle,
-                                  color: AppColorMapper.errorColor(context),
-                                ),
-                                onPressed: () => setDialogState(
-                                  () => parameters.removeAt(index),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                      OutlinedButton.icon(
-                        onPressed: () => setDialogState(
-                          () => parameters.add({'key': '', 'value': ''}),
-                        ),
-                        icon: TraqIcon(AppAssets.iconPlus),
-                        label: const Text('Add Parameter'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    if (jobName.trim().isEmpty) {
-                      context.showError('Job name is required');
-                      return;
-                    }
-                    Navigator.of(context).pop();
-                    _submitJobNow(
-                      jobName: jobName.trim(),
-                      jobType: selectedJobType,
-                      description: description.trim(),
-                      priorityLabel: selectedPriority,
-                      parameters: parameters,
-                    );
-                  },
-                  child: const Text('Submit Job'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+    if (result == null) return;
+    _applyRefreshPreferences(
+      autoRefresh: result.autoRefresh,
+      intervalSeconds: result.intervalSeconds,
     );
   }
 
-  int _priorityFromLabel(String label) {
-    switch (label.toUpperCase()) {
-      case 'HIGH':
-        return 2;
-      case 'LOW':
-        return 8;
-      case 'MEDIUM':
-      default:
-        return 5;
-    }
+  Future<void> _showScheduleJobDialog() async {
+    final request = await showDialog<JobQueueScheduleSubmitRequest>(
+      context: context,
+      builder: (context) => const JobQueueScheduleJobDialog(),
+    );
+    if (request == null) return;
+    await _submitJobNow(
+      jobName: request.jobName,
+      jobType: request.jobType,
+      description: request.description,
+      priorityLabel: request.priorityLabel,
+      parameters: request.parameters,
+    );
   }
 
   Future<void> _submitJobNow({
@@ -1247,7 +620,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
       await _service.submitJob(
         jobType: jobType,
-        priority: _priorityFromLabel(priorityLabel),
+        priority: JobQueuePriorityUtils.fromLabel(priorityLabel),
         payload: jobPayload,
       );
       if (!mounted) return;

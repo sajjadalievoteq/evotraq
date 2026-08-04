@@ -19,11 +19,14 @@ class ProfileServiceConsts {
   static const appNotificationsKey = 'appNotifications';
   static const darkModeKey = 'darkMode';
   static const languageKey = 'language';
+  static const operationalGlnKey = 'operationalGln';
 
   static const noAuthTokenFound = 'No authentication token found';
   static const unexpectedResponseFormat = 'Unexpected response format';
   static const failedToFetchUserProfile = 'Failed to fetch user profile';
   static const failedToUpdateProfile = 'Failed to update profile';
+  static const failedToUpdateOperationalGln =
+      'Failed to update operational GLN';
   static const failedToChangePassword = 'Failed to change password';
   static const failedToUpdateNotificationPreferences =
       'Failed to update notification preferences';

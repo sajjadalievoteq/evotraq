@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
 class GLNSelector extends StatefulWidget {

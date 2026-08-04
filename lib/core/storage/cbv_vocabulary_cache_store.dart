@@ -21,19 +21,29 @@ class CbvVocabularyCacheStore {
   static const _jsonKey = 'cbv_vocabulary_cache_json_v1';
   static const _timestampKey = 'cbv_vocabulary_cache_ts_v1';
 
-  
-  
+  /// Persisted cache lifetime. A cold start with an entry older than this is
+  /// treated as a miss so stale vocabulary is never served indefinitely.
+  static const _ttl = Duration(hours: 12);
+
+
+
   static Future<CbvVocabularyCacheEntry?> read() async {
     try {
       final rawJson = await HiveStorage.getString(_jsonKey);
       final rawTimestamp = await HiveStorage.getInt(_timestampKey);
       if (rawJson == null || rawTimestamp == null) return null;
 
+      final cachedAt = DateTime.fromMillisecondsSinceEpoch(rawTimestamp);
+      // Expired: drop it and report a miss so the caller re-fetches.
+      if (DateTime.now().difference(cachedAt) > _ttl) {
+        await clear();
+        return null;
+      }
+
       final decoded = jsonDecode(rawJson);
       if (decoded is! Map) return null;
 
       final session = CbvVocabularySession.fromJson(Map<String, dynamic>.from(decoded));
-      final cachedAt = DateTime.fromMillisecondsSinceEpoch(rawTimestamp);
       return CbvVocabularyCacheEntry(session: session, cachedAt: cachedAt);
     } catch (_) {
       return null;

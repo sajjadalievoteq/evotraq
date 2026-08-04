@@ -5,8 +5,9 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/job_queue_dashboard_snapshot.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/sparkline_and_section.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/job_queue_empty_panel.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/status_badge.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
 
 class JobQueueSystemHealthPanel extends StatelessWidget {
   const JobQueueSystemHealthPanel({
@@ -218,7 +219,9 @@ class JobQueueRecentActivityCard extends StatelessWidget {
           title: '${job['jobType'] ?? 'Job'} ${job['status'] ?? ''}'.trim(),
           subtitle: '${job['jobId'] ?? ''}',
           status: '${job['status'] ?? ''}',
-          icon: _iconFor('${job['status'] ?? ''}'),
+          icon: StatusVisualMappers.queueJobStatusIcon(
+            '${job['status'] ?? ''}',
+          ),
         ),
     ];
 
@@ -241,7 +244,7 @@ class JobQueueRecentActivityCard extends StatelessWidget {
                         TraqIcon(
                           item.icon,
                           size: 16,
-                          color: AdminHelperMappers.bulkJobStatusColor(
+                          color: StatusVisualMappers.bulkJobStatusColor(
                             context,
                             item.status,
                           ),
@@ -278,21 +281,6 @@ class JobQueueRecentActivityCard extends StatelessWidget {
               ],
             ),
     );
-  }
-
-  String _iconFor(String status) {
-    switch (status.toUpperCase()) {
-      case 'COMPLETED':
-        return AppAssets.iconCheckCircle;
-      case 'FAILED':
-        return AppAssets.iconXCircle;
-      case 'CANCELLED':
-        return AppAssets.iconMinus;
-      case 'RUNNING':
-        return AppAssets.iconPlay;
-      default:
-        return AppAssets.iconClock;
-    }
   }
 }
 

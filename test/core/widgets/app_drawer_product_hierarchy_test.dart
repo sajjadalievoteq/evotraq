@@ -10,7 +10,7 @@ import 'package:traqtrace_app/core/models/system_settings_model.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/data/models/auth/auth_models.dart';
+import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 

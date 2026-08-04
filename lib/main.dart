@@ -27,7 +27,8 @@ import 'package:traqtrace_app/core/storage/hive_storage.dart';
 import 'package:traqtrace_app/core/auth/auth_session_bootstrap.dart';
 import 'package:traqtrace_app/features/splash/screens/Splash/splash_screen.dart';
 
-import 'package:traqtrace_app/data/services/system_settings_service.dart';
+import 'package:traqtrace_app/data/services/admin/system_settings_service.dart';
+import 'package:traqtrace_app/data/services/auth/auth_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 
@@ -102,8 +103,10 @@ class _TraqTraceAppState extends State<TraqTraceApp> {
       providers: [
         BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
         BlocProvider<ProfileCubit>(
-          create: (context) =>
-              ProfileCubit(profileService: getIt<ProfileService>()),
+          create: (context) => ProfileCubit(
+            profileService: getIt<ProfileService>(),
+            authService: getIt<AuthService>(),
+          ),
         ),
         BlocProvider<ThemeCubit>(
           create: (context) =>

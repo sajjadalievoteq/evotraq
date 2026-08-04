@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
-import 'package:traqtrace_app/features/gs1/models/validation_status.dart';
+import 'package:traqtrace_app/core/validation/validation_status.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -91,7 +91,7 @@ class _ValidatedTextFieldWrapperState extends State<ValidatedTextFieldWrapper> {
           focusNode: widget.focusNode,
           controller: widget.controller,
           decoration: widget.decoration.copyWith(
-            suffixIcon: _buildValidationIcon(widget.decoration.suffixIcon),
+            suffixIcon: _validationIcon(widget.decoration.suffixIcon),
             errorText: _validationStatus == ValidationStatus.invalid ? _errorText : null,
           ),
           readOnly: widget.readOnly,
@@ -150,7 +150,7 @@ class _ValidatedTextFieldWrapperState extends State<ValidatedTextFieldWrapper> {
     );
   }
 
-  Widget? _buildValidationIcon(Widget? existingIcon) {
+  Widget? _validationIcon(Widget? existingIcon) {
     if (_validationStatus == ValidationStatus.notValidated) {
       return existingIcon;
     }

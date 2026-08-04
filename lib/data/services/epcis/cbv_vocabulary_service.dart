@@ -85,7 +85,7 @@ class CbvVocabularyService {
 
   
   
-  void reset() {
+  Future<void> reset() async {
     _retryTimer?.cancel();
     _ttlTimer?.cancel();
     _retryTimer = null;
@@ -93,6 +93,16 @@ class CbvVocabularyService {
     _inFlight = null;
     _attempt = 0;
     _networkStarted = false;
+
+    // Invalidate ALL cached vocabulary so the next session re-fetches from the
+    // backend. Without this, a new login (or a change to the backend vocabulary)
+    // keeps serving the previous session's cached terms: hydrateFromCache()
+    // early-returns on the surviving _session, and the master-data in-memory
+    // cache short-circuits the network fetch.
+    _session = null;
+    _cacheHydrated = false;
+    _masterDataService.clearCache();
+    await CbvVocabularyCacheStore.clear();
   }
 
   

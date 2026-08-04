@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/auth/auth_models.dart';
+import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/data/services/profile_service_consts.dart';
 
 class ProfileService {
@@ -105,6 +105,44 @@ class ProfileService {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message: ProfileServiceConsts.failedToUpdateProfile,
+        responseBody: _stringifyResponseData(e.response?.data),
+        originalException: e,
+      );
+    }
+  }
+
+  /// Partial profile update for the Operational GLN preference.
+  ///
+  /// Pass a 13-digit code to set, or `null`/blank to clear. Other profile
+  /// fields are left unchanged on the server.
+  Future<User> updateOperationalGln(String? operationalGln) async {
+    final headers = await _getAuthHeaders();
+    final value = operationalGln?.trim() ?? '';
+    try {
+      final response = await _dioService.put(
+        '${_dioService.baseUrl}${ProfileServiceConsts.userProfilePath}',
+        data: jsonEncode({
+          ProfileServiceConsts.operationalGlnKey: value,
+        }),
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = _decodeJsonMap(response.data);
+        return User.fromJson(data);
+      }
+
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: ProfileServiceConsts.failedToUpdateOperationalGln,
+        responseBody: _stringifyResponseData(response.data),
+      );
+    } on DioException catch (e) {
+      throw ApiException(
+        statusCode: e.response?.statusCode,
+        message: ProfileServiceConsts.failedToUpdateOperationalGln,
         responseBody: _stringifyResponseData(e.response?.data),
         originalException: e,
       );

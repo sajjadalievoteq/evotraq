@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/admin/widgets/storage_event_type_row.dart';
+import 'package:traqtrace_app/features/admin/widgets/storage_stat_metric.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/number_format_utils.dart';
 import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
-import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -36,7 +37,7 @@ class StorageStatisticsCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildStorageMetric(
+                  child: StorageStatMetric(
                     'Total Events',
                     _formatNumber(storage.totalEvents),
                     NavIcons.epcisEvents,
@@ -45,7 +46,7 @@ class StorageStatisticsCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildStorageMetric(
+                  child: StorageStatMetric(
                     'Storage Used',
                     '${storage.storageUsedGB.toStringAsFixed(2)} GB',
                     NavIcons.databasePartitioning,
@@ -54,7 +55,7 @@ class StorageStatisticsCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildStorageMetric(
+                  child: StorageStatMetric(
                     'Partitions',
                     '${storage.partitionDistribution.length}',
                     AppAssets.iconGrid,
@@ -63,7 +64,7 @@ class StorageStatisticsCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildStorageMetric(
+                  child: StorageStatMetric(
                     'Compression Ratio',
                     '${storage.compressionRatio.toStringAsFixed(1)}:1',
                     AppAssets.iconCompress,
@@ -81,7 +82,7 @@ class StorageStatisticsCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ...storage.eventTypeDistribution.entries.map((entry) => 
-              _buildEventTypeRow(context, entry.key, entry.value)
+              StorageEventTypeRow(entry.key, entry.value)
             ).toList(),
             
             const SizedBox(height: 24),
@@ -93,7 +94,7 @@ class StorageStatisticsCard extends StatelessWidget {
             const SizedBox(height: 12),
             SizedBox(
               height: 200,
-              child: _buildPartitionChart(context),
+              child: _StoragePartitionChart(storage: storage),
             ),
             
             const SizedBox(height: 24),
@@ -147,114 +148,6 @@ class StorageStatisticsCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildStorageMetric(String title, String value, String iconAsset, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          TraqIcon(iconAsset, color: color, size: 24),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 11),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEventTypeRow(
-    BuildContext context,
-    String eventType,
-    double percentage,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              eventType,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          ),
-          Expanded(
-            child: LinearProgressIndicator(
-              value: percentage / 100,
-              backgroundColor: Colors.grey.withOpacity(0.3),
-              valueColor: AlwaysStoppedAnimation(
-                EpcisEventUiUtils.eventTypeColor(context, eventType),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text('${percentage.toStringAsFixed(1)}%'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPartitionChart(BuildContext context) {
-    final maxCount = storage.partitionDistribution.values.isNotEmpty 
-        ? storage.partitionDistribution.values.reduce((a, b) => a > b ? a : b)
-        : 1;
-    
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: storage.partitionDistribution.entries.map((entry) {
-          final height = (entry.value / maxCount) * 160;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  _formatNumber(entry.value),
-                  style: const TextStyle(fontSize: 10),
-                ),
-                Container(
-                  width: 40,
-                  height: height,
-                  decoration: BoxDecoration(
-                    color: AppColorMapper.infoColor(context),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    entry.key,
-                    style: const TextStyle(fontSize: 9),
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
       ),
     );
   }
@@ -329,6 +222,58 @@ class StorageStatisticsCard extends StatelessWidget {
             child: const Text('Compress'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StoragePartitionChart extends StatelessWidget {
+  const _StoragePartitionChart({required this.storage});
+  final StorageStatistics storage;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxCount = storage.partitionDistribution.values.isNotEmpty
+        ? storage.partitionDistribution.values.reduce((a, b) => a > b ? a : b)
+        : 1;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: storage.partitionDistribution.entries.map((entry) {
+          final height = (entry.value / maxCount) * 160;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  NumberFormatUtils.compactKilo(entry.value),
+                  style: const TextStyle(fontSize: 10),
+                ),
+                Container(
+                  width: 40,
+                  height: height,
+                  decoration: BoxDecoration(
+                    color: AppColorMapper.infoColor(context),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SizedBox(
+                  width: 40,
+                  child: Text(
+                    entry.key,
+                    style: const TextStyle(fontSize: 9),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }

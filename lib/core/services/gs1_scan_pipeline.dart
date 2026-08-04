@@ -1,5 +1,6 @@
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
+import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 
 abstract final class Gs1ScanPipeline {

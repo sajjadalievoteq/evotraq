@@ -21,8 +21,8 @@ class NotificationConnectionStatus extends StatelessWidget {
       label: live ? 'Live connection' : 'Offline',
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: TraqSpacing.md,
-          vertical: TraqSpacing.sm,
+          horizontal: TraqSpacing.sm,
+
         ),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
@@ -31,18 +31,20 @@ class NotificationConnectionStatus extends StatelessWidget {
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TraqIcon(
               live ? AppAssets.iconCheckCircle : AppAssets.iconCircle,
-              size: 16,
+              size: 14,
               color: color,
             ),
-            const SizedBox(width: TraqSpacing.sm),
+            const SizedBox(width: TraqSpacing.xs),
             Text(
               live ? 'Live' : 'Offline',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: color,
                     fontWeight: FontWeight.w700,
+                height: 1
                   ),
             ),
           ],

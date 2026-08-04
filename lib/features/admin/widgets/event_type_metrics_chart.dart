@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_event_visualization_utils.dart';
+import 'package:traqtrace_app/features/admin/widgets/event_type_metrics_row.dart';
 import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
@@ -38,10 +37,13 @@ class EventTypeMetricsChart extends StatelessWidget {
             const SizedBox(height: 16),
             SizedBox(
               height: 300,
-              child: _buildChart(context),
+              child: _EventTypeChartCanvas(
+                eventTypeMetrics: eventTypeMetrics,
+                metricType: metricType,
+              ),
             ),
             const SizedBox(height: 16),
-            _buildMetricsSummary(context),
+            _EventTypeMetricsSummary(eventTypeMetrics: eventTypeMetrics),
           ],
         ),
       ),
@@ -63,18 +65,31 @@ class EventTypeMetricsChart extends StatelessWidget {
     }
   }
 
-  Widget _buildChart(BuildContext context) {
-    final eventTypes = eventTypeMetrics.keys.toList();
-    final maxValue = _getMaxValue();
+}
 
+class _EventTypeChartCanvas extends StatelessWidget {
+  const _EventTypeChartCanvas({
+    required this.eventTypeMetrics,
+    required this.metricType,
+  });
+
+  final Map<String, EventTypeMetrics> eventTypeMetrics;
+  final String metricType;
+
+  @override
+  Widget build(BuildContext context) {
+    final values = _getValues();
+    final maxValue = values.isEmpty
+        ? 0.0
+        : values.reduce((double a, double b) => a > b ? a : b);
     if (maxValue == 0) {
       return const Center(child: Text('No data to display'));
     }
 
     return CustomPaint(
       painter: BarChartPainter(
-        eventTypes: eventTypes,
-        values: _getValues(),
+        eventTypes: eventTypeMetrics.keys.toList(),
+        values: values,
         maxValue: maxValue,
         metricType: metricType,
         brightness: Theme.of(context).brightness,
@@ -99,13 +114,14 @@ class EventTypeMetricsChart extends StatelessWidget {
       }
     }).toList();
   }
+}
 
-  double _getMaxValue() {
-    final values = _getValues();
-    return values.isEmpty ? 0 : values.reduce((a, b) => a > b ? a : b);
-  }
+class _EventTypeMetricsSummary extends StatelessWidget {
+  const _EventTypeMetricsSummary({required this.eventTypeMetrics});
+  final Map<String, EventTypeMetrics> eventTypeMetrics;
 
-  Widget _buildMetricsSummary(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         const Text(
@@ -117,151 +133,11 @@ class EventTypeMetricsChart extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ...eventTypeMetrics.entries.map((entry) {
-          return _buildEventTypeRow(context, entry.key, entry.value);
+          return EventTypeMetricsRow(entry.key, entry.value);
         }).toList(),
       ],
     );
   }
-
-  Widget _buildEventTypeRow(
-    BuildContext context,
-    String eventType,
-    EventTypeMetrics metrics,
-  ) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(
-              color: AdminEventVisualizationUtils.eventTypeColor(
-                eventType,
-                context: context,
-              ),
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: Text(
-              eventType,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${metrics.eventsPerSecond.toStringAsFixed(1)} eps',
-                  style: const TextStyle(fontSize: 12),
-                ),
-                Text(
-                  'Throughput',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${metrics.averageProcessingTime.toStringAsFixed(1)}ms',
-                  style: const TextStyle(fontSize: 12),
-                ),
-                Text(
-                  'Avg Time',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${metrics.successRate.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AdminHelperMappers.successRateColor(
-                      context,
-                      metrics.successRate,
-                    ),
-                  ),
-                ),
-                Text(
-                  'Success',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  metrics.totalProcessed.toString(),
-                  style: const TextStyle(fontSize: 12),
-                ),
-                Text(
-                  'Total',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (metrics.totalErrors > 0)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    metrics.totalErrors.toString(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColorMapper.errorColor(context),
-                    ),
-                  ),
-                  Text(
-                    'Errors',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
 }
 
 class BarChartPainter extends CustomPainter {

@@ -5,10 +5,10 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
-import 'package:traqtrace_app/features/epcis/providers/transaction_document_provider.dart';
-import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
-import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
-import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
+import 'package:traqtrace_app/features/epcis/cubit/transaction_document_cubit.dart';
+import 'package:traqtrace_app/features/epcis/cubit/transaction_events_cubit.dart';
+import 'package:traqtrace_app/features/epcis/cubit/transformation_events_cubit.dart';
+import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 
 /// Provides EPCIS cubits for the feature route subtree.
 ///

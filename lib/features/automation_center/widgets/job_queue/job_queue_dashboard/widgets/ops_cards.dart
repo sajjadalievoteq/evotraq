@@ -4,8 +4,9 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/sparkline_and_section.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/job_queue_empty_panel.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/status_badge.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
 
 class JobQueueJobTypeChart extends StatelessWidget {
   const JobQueueJobTypeChart({
@@ -45,7 +46,7 @@ class JobQueueJobTypeChart extends StatelessWidget {
                             for (var i = 0; i < entries.length; i++)
                               PieChartSectionData(
                                 value: entries[i].value.toDouble(),
-                                color: AdminHelperMappers.jobTypeColor(
+                                color: StatusVisualMappers.jobTypeColor(
                                   context,
                                   entries[i].key,
                                 ),
@@ -90,7 +91,7 @@ class JobQueueJobTypeChart extends StatelessWidget {
                               width: 10,
                               height: 10,
                               decoration: BoxDecoration(
-                                color: AdminHelperMappers.jobTypeColor(
+                                color: StatusVisualMappers.jobTypeColor(
                                   context,
                                   e.key,
                                 ),

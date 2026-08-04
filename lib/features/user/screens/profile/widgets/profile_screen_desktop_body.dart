@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/data/models/auth/auth_models.dart';
+import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/features/user/screens/profile/widgets/profile_info_module.dart';
 import 'package:traqtrace_app/features/user/screens/profile/widgets/profile_preferences_module.dart';
 import 'package:traqtrace_app/features/user/screens/profile/widgets/profile_security_module.dart';

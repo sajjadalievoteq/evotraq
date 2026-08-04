@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/job_queue_empty_panel.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/sparkline_and_section.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/status_badge.dart';
 
 class JobQueuePriorityDistributionCard extends StatelessWidget {
   const JobQueuePriorityDistributionCard({
@@ -61,7 +61,10 @@ class _PriorityBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final pct = total > 0 ? count / total : 0.0;
-    final color = _priorityColor(context, int.tryParse(priority) ?? 5);
+    final color = StatusVisualMappers.jobPriorityColor(
+      context,
+      int.tryParse(priority) ?? 5,
+    );
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return Padding(
@@ -134,10 +137,4 @@ class _PriorityBar extends StatelessWidget {
     );
   }
 
-  Color _priorityColor(BuildContext context, int p) {
-    if (p <= 2) return AppColorMapper.errorColor(context);
-    if (p <= 4) return AppColorMapper.warningColor(context);
-    if (p <= 7) return AppColorMapper.infoColor(context);
-    return AppColorMapper.neutralColor(context);
-  }
 }

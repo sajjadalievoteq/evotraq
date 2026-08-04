@@ -5,7 +5,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
-import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 

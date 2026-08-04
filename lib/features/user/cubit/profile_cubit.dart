@@ -1,16 +1,21 @@
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/data/services/auth/auth_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
 import '../../../data/models/profile/profile_models.dart';
 import 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileService _profileService;
+  final AuthService _authService;
 
-  ProfileCubit({required ProfileService profileService})
-    : _profileService = profileService,
-      super(const ProfileState());
+  ProfileCubit({
+    required ProfileService profileService,
+    required AuthService authService,
+  }) : _profileService = profileService,
+       _authService = authService,
+       super(const ProfileState());
 
   Future<void> loadProfile() async {
     emit(state.copyWith(status: ProfileStatus.loading));
@@ -29,8 +34,73 @@ class ProfileCubit extends Cubit<ProfileState> {
       ));
 
       await loadProfilePicture();
+      await loadSessions();
     } catch (e) {
       emit(state.copyWith(status: ProfileStatus.error, error: e.toString()));
+    }
+  }
+
+  Future<void> loadSessions() async {
+    emit(
+      state.copyWith(
+        sessionsStatus: SessionsStatus.loading,
+        clearSessionsError: true,
+      ),
+    );
+    try {
+      final sessions = await _authService.listSessions();
+      emit(
+        state.copyWith(
+          sessionsStatus: SessionsStatus.success,
+          sessions: sessions,
+          clearSessionsError: true,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          sessionsStatus: SessionsStatus.error,
+          sessionsError: e.toString(),
+        ),
+      );
+    }
+  }
+
+  Future<bool> revokeSession(String sessionId) async {
+    emit(state.copyWith(isRevokingSession: true, clearSessionsError: true));
+    try {
+      await _authService.revokeSession(sessionId);
+      await loadSessions();
+      emit(state.copyWith(isRevokingSession: false));
+      return true;
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isRevokingSession: false,
+          sessionsError: e.toString(),
+        ),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> revokeOtherSessions() async {
+    emit(
+      state.copyWith(isRevokingOtherSessions: true, clearSessionsError: true),
+    );
+    try {
+      await _authService.revokeOtherSessions();
+      await loadSessions();
+      emit(state.copyWith(isRevokingOtherSessions: false));
+      return true;
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isRevokingOtherSessions: false,
+          sessionsError: e.toString(),
+        ),
+      );
+      return false;
     }
   }
 

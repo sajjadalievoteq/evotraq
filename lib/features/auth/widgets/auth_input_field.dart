@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/auth/utils/auth_email_validator.dart';
-
-enum AuthInputFieldType { email, password, username, text }
+import 'package:traqtrace_app/features/auth/utils/auth_input_field_utils.dart';
+import 'package:traqtrace_app/features/auth/widgets/input/auth_input_field_type.dart';
+import 'package:traqtrace_app/features/auth/widgets/input/auth_input_prefix_icon.dart';
+import 'package:traqtrace_app/features/auth/widgets/input/auth_input_suffix_icon.dart';
 
 class AuthInputField extends StatefulWidget {
   final TextEditingController controller;
@@ -55,107 +53,13 @@ class _AuthInputFieldState extends State<AuthInputField> {
     _obscureText = widget.type == AuthInputFieldType.password;
   }
 
-  String _defaultPrefixAsset() {
-    switch (widget.type) {
-      case AuthInputFieldType.password:
-        return AppAssets.iconLock;
-      case AuthInputFieldType.email:
-        return AppAssets.iconMail;
-      case AuthInputFieldType.username:
-        return AppAssets.iconUser;
-      default:
-        return AppAssets.iconInfo;
-    }
-  }
-
-  Widget _svgIcon(String asset, {double size = 22}) {
-    final themeColor = context.colors.textMuted;
-    return SvgPicture.asset(
-      asset,
-      width: size,
-      height: size,
-      colorFilter: ColorFilter.mode(
-        themeColor.withOpacity(0.75),
-        BlendMode.srcIn,
-      ),
-      placeholderBuilder: (_) => SizedBox(
-        width: size,
-        height: size,
-        child: const Center(
-          child: SizedBox(
-            width: 12,
-            height: 12,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      ),
-    );
-  }
-
-  TextInputType _getKeyboardType() {
-    switch (widget.type) {
-      case AuthInputFieldType.email:
-        return TextInputType.emailAddress;
-      case AuthInputFieldType.password:
-        return TextInputType.visiblePassword;
-      default:
-        return TextInputType.text;
-    }
-  }
-
-  String? _defaultValidator(String? value) {
-    switch (widget.type) {
-      case AuthInputFieldType.email:
-        return AuthEmailValidator.validate(value);
-      default:
-        if (value == null || value.isEmpty) {
-          return 'Please enter ${widget.labelText.toLowerCase()}';
-        }
-        return null;
-    }
-  }
-
-  Widget _buildPrefixIcon() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 8),
-      child: widget.prefixAsset != null
-          ? _svgIcon(widget.prefixAsset!, size: 22)
-          : (widget.prefixIcon != null
-                ? Icon(widget.prefixIcon, size: 22)
-                : _svgIcon(_defaultPrefixAsset(), size: 22)),
-    );
-  }
-
-  Widget? _buildSuffixIcon() {
-    if (widget.suffixIcon != null) {
-      return Padding(
-        padding: const EdgeInsets.only(left: 8, right: 16),
-        child: widget.suffixIcon,
-      );
-    }
-
-    if (widget.type != AuthInputFieldType.password) {
-      return null;
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 8),
-      child: IconButton(
-        icon: _svgIcon(
-          _obscureText ? AppAssets.iconEyeOff : AppAssets.iconEye,
-          size: 22,
-        ),
-        onPressed: () {
-          setState(() {
-            _obscureText = !_obscureText;
-          });
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final showPasswordToggle =
+        widget.suffixIcon == null &&
+        widget.type == AuthInputFieldType.password;
+    final hasSuffix = widget.suffixIcon != null || showPasswordToggle;
+
     return TextFormField(
       controller: widget.controller,
       focusNode: widget.focusNode,
@@ -163,7 +67,7 @@ class _AuthInputFieldState extends State<AuthInputField> {
           ? _obscureText
           : false,
       enabled: widget.enabled,
-      keyboardType: _getKeyboardType(),
+      keyboardType: AuthInputFieldUtils.keyboardType(widget.type),
       autofillHints: switch (widget.type) {
         AuthInputFieldType.email => const [AutofillHints.email],
         AuthInputFieldType.username => const [AutofillHints.username],
@@ -188,16 +92,37 @@ class _AuthInputFieldState extends State<AuthInputField> {
         ),
         labelText: widget.labelText,
         hintText: widget.hintText,
-        prefixIcon: _buildPrefixIcon(),
+        prefixIcon: AuthInputPrefixIcon(
+          prefixIcon: widget.prefixIcon,
+          prefixAsset:
+              widget.prefixAsset ??
+              AuthInputFieldUtils.defaultPrefixAsset(widget.type),
+        ),
         prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-        suffixIcon: _buildSuffixIcon(),
+        suffixIcon: hasSuffix
+            ? AuthInputSuffixIcon(
+                obscureText: _obscureText,
+                showPasswordToggle: showPasswordToggle,
+                onToggleObscure: () {
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
+                },
+                suffixIcon: widget.suffixIcon,
+              )
+            : null,
         suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
         helperText: widget.helperText,
         helperStyle: widget.helperText == null
             ? null
             : TextStyle(color: widget.helperTextColor),
       ),
-      validator: widget.validator ?? _defaultValidator,
+      validator: widget.validator ??
+          (value) => AuthInputFieldUtils.defaultValidator(
+                widget.type,
+                widget.labelText,
+                value,
+              ),
     );
   }
 }

@@ -3,7 +3,7 @@ import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
-import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
+import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/utils/sscc_input_mode.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';

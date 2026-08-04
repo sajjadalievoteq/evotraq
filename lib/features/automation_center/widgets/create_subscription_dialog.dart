@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
-import 'package:traqtrace_app/features/automation_center/utils/notification_constants.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_advanced_section.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_dropdown_section.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/create_subscription_form_fields.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_delivery_test_progress_dialog.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_delivery_test_result_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/notification_subscription_help.dart';
-import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CreateSubscriptionDialog extends StatefulWidget {
   final NotificationSubscription? subscription;
@@ -32,22 +31,6 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
   String _selectedDeliveryMethod = 'WEBHOOK';
 
   bool get _isEditing => widget.subscription != null;
-
-  List<Map<String, String>> _getAvailableFormats() {
-    if (_selectedDeliveryMethod == 'EMAIL') {
-      return NotificationConstants.notificationFormats
-          .where(
-            (format) =>
-                format['value'] == 'SUMMARY' ||
-                format['value'] == 'EMAIL_HTML',
-          )
-          .toList();
-    } else {
-      return NotificationConstants.notificationFormats
-          .where((format) => format['value'] != 'EMAIL_HTML')
-          .toList();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,116 +88,11 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
             },
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FormBuilderTextField(
-                    name: 'subscriptionName',
-                    decoration: const InputDecoration(
-                      labelText: 'Subscription Name',
-                      hintText: 'Enter a descriptive name',
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.minLength(3),
-                    ]),
-                  ),
-                  const SizedBox(height: 12),
-                  SubscriptionDropdownSection<String>(
-                    name: 'deliveryMethod',
-                    label: 'Delivery Method',
-                    options: NotificationConstants.deliveryMethods,
-                    validator: FormBuilderValidators.required(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedDeliveryMethod = value;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  if (_selectedDeliveryMethod == 'WEBHOOK')
-                    FormBuilderTextField(
-                      key: const ValueKey('webhookUrl'),
-                      name: 'webhookUrl',
-                      decoration: const InputDecoration(
-                        labelText: 'Webhook Endpoint URL',
-                        hintText: 'https://your-api.com/webhooks/notifications',
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        helperText:
-                            'HTTP endpoint that will receive POST requests',
-                        helperStyle: TextStyle(),
-                      ),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(),
-                        FormBuilderValidators.url(),
-                      ]),
-                    )
-                  else
-                    FormBuilderTextField(
-                      key: const ValueKey('emailAddress'),
-                      name: 'emailAddress',
-                      decoration: const InputDecoration(
-                        labelText: 'Email Address',
-                        hintText: 'your.email@company.com',
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        helperText: 'Email address to receive notifications',
-                        helperStyle: TextStyle(),
-                      ),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(),
-                        FormBuilderValidators.email(),
-                      ]),
-                    ),
-                  const SizedBox(height: 12),
-                  SubscriptionDropdownSection<String>(
-                    name: 'subscriptionType',
-                    label: 'Subscription Type',
-                    options: NotificationConstants.subscriptionTypes,
-                    validator: FormBuilderValidators.required(),
-                  ),
-                  const SizedBox(height: 12),
-                  FormBuilderDropdown<String>(
-                    key: ValueKey(
-                      'notificationFormat_$_selectedDeliveryMethod',
-                    ),
-                    name: 'notificationFormat',
-                    decoration: const InputDecoration(
-                      labelText: 'Notification Format',
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    validator: FormBuilderValidators.required(),
-                    isDense: true,
-                    initialValue: _selectedDeliveryMethod == 'EMAIL'
-                        ? 'EMAIL_HTML'
-                        : 'SUMMARY',
-                    items: _getAvailableFormats()
-                        .map(
-                          (option) => DropdownMenuItem<String>(
-                            value: option['value'],
-                            child: Text(
-                              option['label']!,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w500),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 12),
-                  const SubscriptionAdvancedSection(),
-                ],
+              child: CreateSubscriptionFormFields(
+                selectedDeliveryMethod: _selectedDeliveryMethod,
+                onDeliveryMethodChanged: (value) {
+                  setState(() => _selectedDeliveryMethod = value);
+                },
               ),
             ),
           ),
@@ -295,7 +173,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
             if (state.webhookTestResult != null ||
                 state.emailTestResult != null) {
               Navigator.of(context).pop();
-              Map<String, dynamic> result =
+              final Map<String, dynamic> result =
                   state.webhookTestResult ?? state.emailTestResult!;
               _showTestResult(context, result);
             } else if (state.status == NotificationStatus.error) {
@@ -303,14 +181,8 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
               context.showError('Test failed: ${state.error}');
             }
           },
-          child: AlertDialog(
-            content: Row(
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(width: 16),
-                Text('Testing ${deliveryMethod.toLowerCase()}...'),
-              ],
-            ),
+          child: SubscriptionDeliveryTestProgressDialog(
+            deliveryMethod: deliveryMethod,
           ),
         ),
       );
@@ -323,15 +195,9 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(success ? 'Test Successful' : 'Test Failed'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
+      builder: (context) => SubscriptionDeliveryTestResultDialog(
+        success: success,
+        message: message,
       ),
     );
   }

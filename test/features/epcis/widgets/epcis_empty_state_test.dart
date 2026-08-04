@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
-import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_ui_constants.dart';
-import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/utils/object_event_detail_ui_constants.dart';
-import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_events_list/utils/object_event_list_ui_constants.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/utils/aggregation_event_ui_constants.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_detail/utils/object_event_detail_ui_constants.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_events_list/utils/object_event_list_ui_constants.dart';
 
 void main() {
   Widget wrap(Widget child) {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
-import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_branding_entrance.dart';
 
 class AuthBrandingSection extends StatelessWidget {
   const AuthBrandingSection({
@@ -30,18 +30,6 @@ class AuthBrandingSection extends StatelessWidget {
   final String subtitle;
   final String logoAssetPath;
 
-  /// One entrance controller for the branding panel (not one per section).
-  Widget _entrance({required List<Widget> children}) {
-    return TraqStaggeredEntrance(
-      slide: TraqEntranceSlide.fromRight,
-      slidePx: TraqAnimationConstants.brandingSlidePx,
-      duration: TraqAnimationConstants.brandingEntrance,
-      stagger: TraqAnimationConstants.brandingStagger,
-      beginScale: 1,
-      children: children,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final t = context.text;
@@ -56,7 +44,7 @@ class AuthBrandingSection extends StatelessWidget {
                 : TraqAnimationConstants.brandingSlidePx;
 
         if (!isLarge) {
-          return _entrance(
+          return AuthBrandingEntrance(
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -116,7 +104,7 @@ class AuthBrandingSection extends StatelessWidget {
         return SizedBox(
           height: panelHeight,
           width: layoutWidth,
-          child: _entrance(
+          child: AuthBrandingEntrance(
             children: [
               SizedBox(
                 height: panelHeight,

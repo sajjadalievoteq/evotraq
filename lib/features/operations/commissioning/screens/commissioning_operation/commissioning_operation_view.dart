@@ -8,6 +8,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
+import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_batch.dart';
@@ -40,7 +41,7 @@ import 'package:traqtrace_app/features/operations/commissioning/screens/commissi
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_partial_success_result.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
-import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
 import 'widgets/commissioning_partial_success_dialog.dart';
 
 class CommissioningOperationView extends StatefulWidget {

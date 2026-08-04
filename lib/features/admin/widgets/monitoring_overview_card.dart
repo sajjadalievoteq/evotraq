@@ -3,7 +3,10 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
+import 'package:traqtrace_app/features/admin/utils/monitoring_overview_status_utils.dart';
+import 'package:traqtrace_app/features/admin/widgets/monitoring_overview_metric_card.dart';
+import 'package:traqtrace_app/features/admin/widgets/monitoring_overview_quick_stats.dart';
 
 class MonitoringOverviewCard extends StatelessWidget {
   final PerformanceMetrics? performance;
@@ -21,9 +24,21 @@ class MonitoringOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final overallStatus = _getOverallStatus();
+    final performanceStatus =
+        MonitoringOverviewStatusUtils.performanceStatus(performance);
+    final storageStatus =
+        MonitoringOverviewStatusUtils.storageStatus(storage);
+    final integrityStatus =
+        MonitoringOverviewStatusUtils.integrityStatus(integrity);
+    final alertsStatus = MonitoringOverviewStatusUtils.alertsStatus(alerts);
+    final overallStatus = MonitoringOverviewStatusUtils.overallStatus(
+      alerts: alerts,
+      performanceStatus: performanceStatus,
+      storageStatus: storageStatus,
+      integrityStatus: integrityStatus,
+    );
     final overallStatusColor =
-        AdminHelperMappers.monitoringOverallStatusColor(context, overallStatus);
+        StatusVisualMappers.monitoringOverallStatusColor(context, overallStatus);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -33,25 +48,27 @@ class MonitoringOverviewCard extends StatelessWidget {
             Row(
               children: [
                 TraqIcon(
-                  AdminHelperMappers.monitoringOverallStatusIcon(overallStatus),
+                  StatusVisualMappers.monitoringOverallStatusIcon(overallStatus),
                   color: overallStatusColor,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(
+                const Text(
                   'System Overview',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: overallStatusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: overallStatusColor.withOpacity(0.3)),
+                    border:
+                        Border.all(color: overallStatusColor.withOpacity(0.3)),
                   ),
                   child: Text(
                     overallStatus,
@@ -68,45 +85,45 @@ class MonitoringOverviewCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildMetricCard(
-                    'Performance',
-                    _getPerformanceStatus(),
-                    AdminHelperMappers.monitoringPerformanceStatusColor(
+                  child: MonitoringOverviewMetricCard(
+                    title: 'Performance',
+                    status: performanceStatus,
+                    color: StatusVisualMappers.monitoringPerformanceStatusColor(
                       context,
-                      _getPerformanceStatus(),
+                      performanceStatus,
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: _buildMetricCard(
-                    'Storage',
-                    _getStorageStatus(),
-                    AdminHelperMappers.monitoringStorageStatusColor(
+                  child: MonitoringOverviewMetricCard(
+                    title: 'Storage',
+                    status: storageStatus,
+                    color: StatusVisualMappers.monitoringStorageStatusColor(
                       context,
-                      _getStorageStatus(),
+                      storageStatus,
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: _buildMetricCard(
-                    'Integrity',
-                    _getIntegrityStatus(),
-                    AdminHelperMappers.monitoringIntegrityStatusColor(
+                  child: MonitoringOverviewMetricCard(
+                    title: 'Integrity',
+                    status: integrityStatus,
+                    color: StatusVisualMappers.monitoringIntegrityStatusColor(
                       context,
-                      _getIntegrityStatus(),
+                      integrityStatus,
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: _buildMetricCard(
-                    'Alerts',
-                    _getAlertsStatus(),
-                    AdminHelperMappers.monitoringAlertsStatusColor(
+                  child: MonitoringOverviewMetricCard(
+                    title: 'Alerts',
+                    status: alertsStatus,
+                    color: StatusVisualMappers.monitoringAlertsStatusColor(
                       context,
-                      _getAlertsStatus(),
+                      alertsStatus,
                     ),
                   ),
                 ),
@@ -119,11 +136,17 @@ class MonitoringOverviewCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColorMapper.errorColor(context).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColorMapper.errorColor(context).withOpacity(0.3)),
+                  border: Border.all(
+                    color: AppColorMapper.errorColor(context).withOpacity(0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context), size: 20),
+                    TraqIcon(
+                      AppAssets.iconAlert,
+                      color: AppColorMapper.errorColor(context),
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -135,8 +158,7 @@ class MonitoringOverviewCard extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () {
-                      },
+                      onPressed: () {},
                       child: const Text('View'),
                     ),
                   ],
@@ -144,145 +166,13 @@ class MonitoringOverviewCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 16),
-            _buildQuickStats(),
+            MonitoringOverviewQuickStats(
+              performance: performance,
+              storage: storage,
+            ),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildMetricCard(String title, String status, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            status,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickStats() {
-    if (performance == null) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Quick Stats',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatRow('Events/sec', performance!.eventsPerSecond.toStringAsFixed(1)),
-            ),
-            Expanded(
-              child: _buildStatRow('Avg Processing', '${performance!.averageProcessingTimeMs.toStringAsFixed(1)}ms'),
-            ),
-            Expanded(
-              child: _buildStatRow('Success Rate', '${performance!.successRate.toStringAsFixed(1)}%'),
-            ),
-            if (storage != null)
-              Expanded(
-                child: _buildStatRow('Storage', '${storage!.storageUtilizationGB.toStringAsFixed(1)}GB'),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatRow(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.grey[600],
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _getOverallStatus() {
-    if (alerts.any((alert) => alert.severity.toUpperCase() == 'CRITICAL')) {
-      return 'CRITICAL';
-    }
-    if (alerts.any((alert) => alert.severity.toUpperCase() == 'HIGH')) {
-      return 'WARNING';
-    }
-    if (_getPerformanceStatus() == 'POOR' || _getStorageStatus() == 'CRITICAL' || _getIntegrityStatus() == 'POOR') {
-      return 'DEGRADED';
-    }
-    return 'HEALTHY';
-  }
-
-  String _getPerformanceStatus() {
-    if (performance == null) return 'UNKNOWN';
-    if (performance!.successRate < 90) return 'POOR';
-    if (performance!.successRate < 95) return 'FAIR';
-    if (performance!.averageProcessingTimeMs > 1000) return 'SLOW';
-    return 'GOOD';
-  }
-
-  String _getStorageStatus() {
-    if (storage == null) return 'UNKNOWN';
-    if (storage!.storageUtilizationGB > 50) return 'CRITICAL';
-    if (storage!.storageUtilizationGB > 25) return 'HIGH';
-    if (storage!.storageUtilizationGB > 10) return 'MODERATE';
-    return 'LOW';
-  }
-
-  String _getIntegrityStatus() {
-    if (integrity == null) return 'UNKNOWN';
-    if (integrity!.overallIntegrityScore < 70) return 'POOR';
-    if (integrity!.overallIntegrityScore < 90) return 'FAIR';
-    return 'EXCELLENT';
-  }
-
-  String _getAlertsStatus() {
-    if (alerts.isEmpty) return 'NONE';
-    if (alerts.any((alert) => alert.severity.toUpperCase() == 'CRITICAL')) return 'CRITICAL';
-    if (alerts.any((alert) => alert.severity.toUpperCase() == 'HIGH')) return 'HIGH';
-    return 'ACTIVE';
-  }
-
 }

@@ -3,6 +3,7 @@ import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_validator.dart';
+import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_epc_type_utils.dart';
 

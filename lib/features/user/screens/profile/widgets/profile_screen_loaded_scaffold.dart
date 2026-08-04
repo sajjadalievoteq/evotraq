@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/data/models/auth/auth_models.dart';
+import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/features/user/screens/profile/widgets/profile_screen_desktop_body.dart';
 import 'package:traqtrace_app/features/user/screens/profile/widgets/profile_screen_mobile_body.dart';
 import 'package:traqtrace_app/features/user/utils/user_strings.dart';

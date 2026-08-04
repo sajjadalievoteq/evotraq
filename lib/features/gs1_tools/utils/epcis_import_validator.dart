@@ -55,7 +55,13 @@ class EpcisImportValidationResult {
 /// Three-gate validator: format → schema/structure → content.
 /// Rejects on the first failing gate (later gates are not run).
 abstract final class EpcisImportValidator {
-  static EpcisImportValidationResult validate(String rawInput) {
+  static EpcisImportValidationResult validate(
+    String rawInput, {
+    Set<String>? validBizSteps,
+    Set<String>? validDispositions,
+  }) {
+    final allowedBizSteps = validBizSteps ?? const <String>{};
+    final allowedDispositions = validDispositions ?? const <String>{};
     final text = rawInput.trim();
     if (text.isEmpty) {
       return const EpcisImportValidationResult(issues: [
@@ -237,7 +243,13 @@ abstract final class EpcisImportValidator {
         .map((e) => Map<String, dynamic>.from(e as Map))
         .toList();
     for (var i = 0; i < events.length; i++) {
-      _validateEventContent(events[i], '\$.epcisBody.eventList[$i]', contentIssues);
+      _validateEventContent(
+        events[i],
+        '\$.epcisBody.eventList[$i]',
+        contentIssues,
+        allowedBizSteps: allowedBizSteps,
+        allowedDispositions: allowedDispositions,
+      );
     }
 
     if (contentIssues.isNotEmpty) {
@@ -326,7 +338,7 @@ abstract final class EpcisImportValidator {
     Map<String, dynamic> event,
     String path,
     List<EpcisImportIssue> issues,
-  ) {
+    {required Set<String> allowedBizSteps, required Set<String> allowedDispositions}) {
     _validateIsoInstant(event['eventTime'] as String?, '$path.eventTime', issues);
 
     final tz = event['eventTimeZoneOffset'] as String?;
@@ -341,7 +353,7 @@ abstract final class EpcisImportValidator {
     final bizStep = event['bizStep'];
     if (bizStep is String && bizStep.trim().isNotEmpty) {
       final short = CbvVocabularyFormatter.shortName(bizStep);
-      if (!EpcisImportTemplate.knownBizSteps.contains(short)) {
+      if (allowedBizSteps.isNotEmpty && !allowedBizSteps.contains(short)) {
         issues.add(EpcisImportIssue(
           gate: EpcisImportGate.content,
           path: '$path.bizStep',
@@ -353,7 +365,8 @@ abstract final class EpcisImportValidator {
     final disposition = event['disposition'];
     if (disposition is String && disposition.trim().isNotEmpty) {
       final short = CbvVocabularyFormatter.shortName(disposition);
-      if (!EpcisImportTemplate.knownDispositions.contains(short)) {
+      if (allowedDispositions.isNotEmpty &&
+          !allowedDispositions.contains(short)) {
         issues.add(EpcisImportIssue(
           gate: EpcisImportGate.content,
           path: '$path.disposition',

@@ -7,8 +7,11 @@ import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
-import 'package:traqtrace_app/data/models/auth/auth_models.dart' as _i2;
-import 'package:traqtrace_app/data/services/auth_service/auth_service.dart'
+import 'package:traqtrace_app/data/models/auth/auth_response.dart' as _i2;
+import 'package:traqtrace_app/data/models/auth/login_request.dart' as _i6;
+import 'package:traqtrace_app/data/models/auth/register_request.dart' as _i7;
+import 'package:traqtrace_app/data/models/auth/user.dart' as _i8;
+import 'package:traqtrace_app/data/services/auth/auth_service.dart'
     as _i3;
 
 // ignore_for_file: type=lint
@@ -31,7 +34,7 @@ class _FakeAuthResponse_0 extends _i1.SmartFake implements _i2.AuthResponse {
     : super(parent, parentInvocation);
 }
 
-class _FakeUser_1 extends _i1.SmartFake implements _i2.User {
+class _FakeUser_1 extends _i1.SmartFake implements _i8.User {
   _FakeUser_1(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
@@ -45,7 +48,7 @@ class MockAuthService extends _i1.Mock implements _i3.AuthService {
   }
 
   @override
-  _i4.Future<_i2.AuthResponse> login(_i2.LoginRequest? request) =>
+  _i4.Future<_i2.AuthResponse> login(_i6.LoginRequest? request) =>
       (super.noSuchMethod(
             Invocation.method(#login, [request]),
             returnValue: _i4.Future<_i2.AuthResponse>.value(
@@ -55,7 +58,7 @@ class MockAuthService extends _i1.Mock implements _i3.AuthService {
           as _i4.Future<_i2.AuthResponse>);
 
   @override
-  _i4.Future<void> register(_i2.RegisterRequest? request) =>
+  _i4.Future<void> register(_i7.RegisterRequest? request) =>
       (super.noSuchMethod(
             Invocation.method(#register, [request]),
             returnValue: _i4.Future<void>.value(),
@@ -85,14 +88,14 @@ class MockAuthService extends _i1.Mock implements _i3.AuthService {
           as _i4.Future<bool>);
 
   @override
-  _i4.Future<_i2.User> getCurrentUser() =>
+  _i4.Future<_i8.User> getCurrentUser() =>
       (super.noSuchMethod(
             Invocation.method(#getCurrentUser, []),
-            returnValue: _i4.Future<_i2.User>.value(
+            returnValue: _i4.Future<_i8.User>.value(
               _FakeUser_1(this, Invocation.method(#getCurrentUser, [])),
             ),
           )
-          as _i4.Future<_i2.User>);
+          as _i4.Future<_i8.User>);
 
   @override
   _i4.Future<void> logout() =>

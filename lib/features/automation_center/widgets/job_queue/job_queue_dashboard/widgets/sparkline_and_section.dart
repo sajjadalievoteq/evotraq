@@ -141,7 +141,7 @@ class JobQueueDashboardSection extends StatelessWidget {
                   ),
                 ),
               ),
-              if (trailing != null) trailing!,
+              ?trailing,
             ],
           ),
           const SizedBox(height: TraqSpacing.md),

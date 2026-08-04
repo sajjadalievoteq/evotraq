@@ -1,0 +1,968 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/services/scanner_detection_service.dart';
+import 'package:traqtrace_app/core/utils/barcode_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
+import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
+import 'package:traqtrace_app/data/services/barcode/gs1_barcode_api_service.dart';
+import 'package:traqtrace_app/features/barcode/models/scan_mode.dart';
+import 'package:traqtrace_app/features/barcode/widgets/scanner/gs1_barcode_scanner_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+
+typedef GS1BarcodeCallback = void Function(
+  String gs1ElementString,
+  Map<String, dynamic> parsedBarcode,
+  Map<String, dynamic>? verificationResult,
+);
+
+class GS1BarcodeScannerScreen extends StatefulWidget {
+  final String? title;
+
+  final GS1BarcodeCallback? onBarcodeDetected;
+
+  final bool verifyWithBackend;
+
+  final ScanMode scanMode;
+
+  final bool embedded;
+
+  const GS1BarcodeScannerScreen({
+    Key? key,
+    this.title,
+    this.onBarcodeDetected,
+    this.verifyWithBackend = true,
+    this.scanMode = ScanMode.single,
+    this.embedded = false,
+  }) : super(key: key);
+
+  @override
+  State<GS1BarcodeScannerScreen> createState() =>
+      _GS1BarcodeScannerScreenState();
+}
+
+class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
+  GS1BarcodeApiService? _apiService;
+  late final ScannerDetectionService _scannerDetection;
+
+  BarcodeDetails? _details;
+  Map<String, dynamic>? _verificationResult;
+  bool _isProcessing = false;
+  String? _errorMessage;
+
+  Key _scannerKey = UniqueKey();
+
+  bool _isCameraActive = false;
+
+  bool _isWiredActive = false;
+
+  Timer? _autoConfirmTimer;
+
+  String _wiredBuffer = '';
+
+  final TextEditingController _manualController = TextEditingController();
+  final FocusNode _manualFocusNode = FocusNode();
+  final FocusNode _wiredFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _scannerDetection = ScannerDetectionService();
+    _scannerDetection.addListener(_onScannerDetectionChanged);
+    try {
+      _apiService = getIt<GS1BarcodeApiService>();
+    } catch (_) {
+    }
+
+    
+    
+    if (_scannerDetection.supportsWired) {
+      _isWiredActive = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _wiredFocusNode.requestFocus();
+      });
+    }
+  }
+
+  void _onScannerDetectionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _autoConfirmTimer?.cancel();
+    _scannerDetection.removeListener(_onScannerDetectionChanged);
+    _manualController.dispose();
+    _manualFocusNode.dispose();
+    _wiredFocusNode.dispose();
+    super.dispose();
+  }
+
+
+  Future<void> _handleDetection(String raw, {bool fromWiredScanner = false}) async {
+    if (_isProcessing) return;
+    if (_details != null && widget.scanMode == ScanMode.single) return;
+
+    if (fromWiredScanner) {
+      _scannerDetection.onWiredScannerBurst();
+    }
+
+    setState(() {
+      _isProcessing = true;
+      _errorMessage = null;
+    });
+
+    try {
+      HapticFeedback.mediumImpact();
+    } catch (_) {}
+
+    try {
+      final details = extractBarcodeDetails(raw.trim());
+
+      Map<String, dynamic>? verResult;
+      if (widget.verifyWithBackend && details.isValid && _apiService != null) {
+        verResult = await _apiService!.verifyGS1Barcode(details.gs1ElementString);
+      }
+
+      if (mounted) {
+        setState(() {
+          _details = details;
+          _verificationResult = verResult;
+          _isProcessing = false;
+          _isCameraActive = false;
+          _manualController.clear();
+        });
+
+        if (widget.onBarcodeDetected != null) {
+          _autoConfirmTimer?.cancel();
+          _autoConfirmTimer = Timer(const Duration(seconds: 2), () {
+            if (mounted && _details != null) _useBarcode();
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error processing barcode: $e';
+          _isProcessing = false;
+        });
+      }
+    }
+  }
+
+  void _scanAgain() {
+    _autoConfirmTimer?.cancel();
+    _autoConfirmTimer = null;
+    _scannerDetection.resetWiredConfirmation();
+    setState(() {
+      _details = null;
+      _verificationResult = null;
+      _errorMessage = null;
+      _isCameraActive = false;
+      _wiredBuffer = '';
+      _scannerKey = UniqueKey();
+      if (_scannerDetection.supportsWired) {
+        _isWiredActive = true;
+      } else {
+        _isWiredActive = false;
+      }
+    });
+    if (_isWiredActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _wiredFocusNode.requestFocus();
+      });
+    }
+  }
+
+  void _useBarcode() {
+    final d = _details!;
+    widget.onBarcodeDetected?.call(
+      d.rawBarcode,
+      Gs1Parser.parseBarcode(d.rawBarcode),
+      _verificationResult,
+    );
+    if (Navigator.canPop(context)) Navigator.pop(context);
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    final body = _details != null ? _buildDetailsView() : _buildScannerView();
+
+    if (!widget.embedded) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title ?? 'Scan GS1 Barcode'),
+        ),
+        body: body,
+      );
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
+          child: Row(
+            children: [
+              TraqIcon(NavIcons.generateVerifyBarcode, color: colorScheme.primary, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  widget.title ?? 'Scan GS1 Barcode',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              IconButton(
+                icon: TraqIcon(AppAssets.iconX),
+                tooltip: 'Close',
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        ),
+        Divider(height: 1, color: colorScheme.outlineVariant),
+        Expanded(child: body),
+      ],
+    );
+  }
+
+  Widget _buildScannerView() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isScannable = _scannerDetection.isScannable;
+    final showCameraButton = _scannerDetection.canOfferCamera;
+    final showWiredToggle =
+        _scannerDetection.supportsWired && _scannerDetection.canOfferCamera;
+
+    return KeyboardListener(
+      focusNode: _wiredFocusNode,
+      onKeyEvent: (event) {
+        if (!_isWiredActive) return;
+        if (event is KeyDownEvent) {
+          if (event.logicalKey == LogicalKeyboardKey.enter ||
+              event.logicalKey == LogicalKeyboardKey.numpadEnter) {
+            if (_wiredBuffer.isNotEmpty) {
+              _handleDetection(_wiredBuffer, fromWiredScanner: true);
+              _wiredBuffer = '';
+            }
+          } else if (event.character != null &&
+              event.character!.isNotEmpty) {
+            _wiredBuffer += event.character!;
+          }
+        }
+      },
+      child: Column(
+        children: [
+          if (isScannable && (showCameraButton || showWiredToggle))
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(
+                children: [
+                  if (showCameraButton) ...[
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isCameraActive = !_isCameraActive;
+                            if (_isCameraActive) {
+                              _isWiredActive = false;
+                              _wiredBuffer = '';
+                              _scannerKey = UniqueKey();
+                            } else if (_scannerDetection.supportsWired) {
+                              _isWiredActive = true;
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => _wiredFocusNode.requestFocus(),
+                              );
+                            }
+                          });
+                        },
+                        icon: TraqIcon(
+                          AppAssets.iconCamera,
+                          size: 16,
+                        ),
+                        label: Text(
+                          _isCameraActive ? 'Stop Camera' : 'Scan with Camera',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: _isCameraActive
+                            ? OutlinedButton.styleFrom(
+                                foregroundColor: colorScheme.error,
+                                side: BorderSide(color: colorScheme.error),
+                              )
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  if (showWiredToggle)
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isWiredActive = !_isWiredActive;
+                            if (_isWiredActive) {
+                              _isCameraActive = false;
+                              _wiredBuffer = '';
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => _wiredFocusNode.requestFocus(),
+                              );
+                            }
+                          });
+                        },
+                        icon: TraqIcon(AppAssets.iconKeyboard, size: 16),
+                        label: Text(
+                          _isWiredActive ? 'Disconnect' : 'Wired Scanner',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: _isWiredActive
+                            ? OutlinedButton.styleFrom(
+                                foregroundColor: colorScheme.primary,
+                                side: BorderSide(color: colorScheme.primary),
+                              )
+                            : null,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+          if (_isCameraActive && showCameraButton)
+            Expanded(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: GS1BarcodeScannerWidget(
+                    key: _scannerKey,
+                    onGS1BarcodeDetected: _handleDetection,
+                    scanMode: widget.scanMode,
+                    onCameraBecameAvailable:
+                        _scannerDetection.reportCameraAvailable,
+                    onCameraUnavailable:
+                        _scannerDetection.reportCameraUnavailable,
+                  ),
+                ),
+              ),
+            ),
+
+          if (_isWiredActive)
+            Expanded(
+              flex: 3,
+              child: _WiredScannerReadyView(
+                availability: _scannerDetection.availability,
+                isProcessing: _isProcessing,
+              ),
+            ),
+
+          if (_errorMessage != null)
+            _ErrorBanner(
+              message: _errorMessage!,
+              onDismiss: () => setState(() => _errorMessage = null),
+            ),
+
+          _ManualInputSection(
+            controller: _manualController,
+            focusNode: _manualFocusNode,
+            isProcessing: _isProcessing,
+            onSubmit: _handleDetection,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailsView() {
+    return _BarcodeDetailsView(
+      details: _details!,
+      verificationResult: _verificationResult,
+      isProcessing: _isProcessing,
+      onScanAgain: _scanAgain,
+      onUse: widget.onBarcodeDetected != null ? _useBarcode : null,
+      autoConfirm: widget.onBarcodeDetected != null,
+    );
+  }
+}
+
+
+class _TypeChip extends StatelessWidget {
+  const _TypeChip({required this.type});
+  final Gs1BarcodeType type;
+
+  static const _labels = {
+    Gs1BarcodeType.sgtin: 'SGTIN',
+    Gs1BarcodeType.gtin: 'GTIN',
+    Gs1BarcodeType.sscc: 'SSCC',
+    Gs1BarcodeType.gln: 'GLN',
+    Gs1BarcodeType.unknown: 'Unknown',
+  };
+
+  Color _color(BuildContext context) {
+    final palette = OperationPalette.of(context);
+    switch (type) {
+      case Gs1BarcodeType.sgtin:   return Theme.of(context).colorScheme.primary;
+      case Gs1BarcodeType.gtin:    return palette.epcGtin;
+      case Gs1BarcodeType.sscc:    return palette.epcSscc;
+      case Gs1BarcodeType.gln:     return AppColorMapper.infoColor(context);
+      case Gs1BarcodeType.unknown: return Theme.of(context).colorScheme.outline;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _color(context);
+    return Chip(
+      label: Text(
+        _labels[type] ?? 'Unknown',
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
+      backgroundColor: color,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+}
+
+
+class _BarcodeDetailsView extends StatefulWidget {
+  const _BarcodeDetailsView({
+    required this.details,
+    required this.isProcessing,
+    required this.onScanAgain,
+    this.verificationResult,
+    this.onUse,
+    this.autoConfirm = false,
+  });
+
+  final BarcodeDetails details;
+  final Map<String, dynamic>? verificationResult;
+  final bool isProcessing;
+  final VoidCallback onScanAgain;
+  final VoidCallback? onUse;
+  final bool autoConfirm;
+
+  @override
+  State<_BarcodeDetailsView> createState() => _BarcodeDetailsViewState();
+}
+
+class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _countdownController;
+
+  @override
+  void initState() {
+    super.initState();
+    _countdownController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+      value: 1.0,
+    );
+    if (widget.autoConfirm) {
+      _countdownController.animateTo(0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _countdownController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final success = AppColorMapper.successColor(context);
+    final warning = AppColorMapper.warningColor(context);
+    final rows = widget.details.displayRows;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.autoConfirm) ...[
+            AnimatedBuilder(
+              animation: _countdownController,
+              builder: (_, __) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LinearProgressIndicator(
+                    value: _countdownController.value,
+                    backgroundColor: colorScheme.surfaceContainerHighest,
+                    color: colorScheme.primary,
+                    minHeight: 3,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Auto-confirming in ${(_countdownController.value * 2).ceil()}s…',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _TypeChip(type: widget.details.type),
+              if (widget.details.isValid)
+                Chip(
+                  avatar: TraqIcon(AppAssets.iconCheck, size: 14, color: success),
+                  label: Text('Valid',
+                      style: TextStyle(fontSize: 12, color: success)),
+                  backgroundColor: success.withValues(alpha: 0.1),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                )
+              else
+                Chip(
+                  avatar: TraqIcon(AppAssets.iconAlert, color: warning, size: 14),
+                  label: Text('Invalid GS1',
+                      style: TextStyle(fontSize: 12, color: warning)),
+                  backgroundColor: warning.withValues(alpha: 0.1),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+
+          SelectableText(
+            widget.details.gs1ElementString,
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 11,
+              color: colorScheme.onSurface.withOpacity(0.45),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Card(
+            child: rows.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text('No parseable fields found in this barcode.'),
+                  )
+                : Column(
+                    children: rows.asMap().entries.map((entry) {
+                      final isLast = entry.key == rows.length - 1;
+                      final label = entry.value.key;
+                      final value = entry.value.value;
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    label,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: colorScheme.onSurface
+                                          .withOpacity(0.55),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    value,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (!isLast)
+                            Divider(
+                              height: 1,
+                              indent: 16,
+                              endIndent: 16,
+                              color: colorScheme.outlineVariant,
+                            ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+          ),
+
+          if (widget.verificationResult != null) ...[
+            const SizedBox(height: 12),
+            _VerificationCard(result: widget.verificationResult!),
+          ],
+
+          const SizedBox(height: 24),
+
+          if (widget.isProcessing)
+            const Center(child: CircularProgressIndicator())
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: widget.onScanAgain,
+                    icon: TraqIcon(NavIcons.generateVerifyBarcode, size: 18),
+                    label: const Text('Scan Again'),
+                  ),
+                ),
+                if (widget.onUse != null) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: widget.onUse,
+                      icon: TraqIcon(AppAssets.iconCheck, size: 18),
+                      label: const Text('Use Barcode'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class _VerificationCard extends StatelessWidget {
+  const _VerificationCard({required this.result});
+  final Map<String, dynamic> result;
+
+  @override
+  Widget build(BuildContext context) {
+    final ok = result['verified'] == true || result['valid'] == true;
+    final success = AppColorMapper.successColor(context);
+    final warning = AppColorMapper.warningColor(context);
+    final color = ok ? success : warning;
+    return Card(
+      color: color.withValues(alpha: 0.1),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            TraqIcon(
+              ok ? AppAssets.iconVerified : AppAssets.iconInfo,
+              color: color,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ok ? 'Backend Verified' : 'Backend Result',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: color,
+                    ),
+                  ),
+                  if (result['message'] != null)
+                    Text(
+                      result['message'].toString(),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _ManualInputSection extends StatelessWidget {
+  const _ManualInputSection({
+    required this.controller,
+    required this.focusNode,
+    required this.isProcessing,
+    required this.onSubmit,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool isProcessing;
+  final ValueChanged<String> onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Expanded(child: Divider()),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  'or enter barcode manually',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colorScheme.onSurface.withOpacity(0.45),
+                  ),
+                ),
+              ),
+              const Expanded(child: Divider()),
+            ],
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: controller,
+            focusNode: focusNode,
+            enabled: !isProcessing,
+            decoration: const InputDecoration(
+              hintText: 'e.g. (01)12345678901234(21)SN001',
+              border: OutlineInputBorder(),
+              prefixIcon: TraqIcon(AppAssets.iconKeyboard),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              isDense: true,
+            ),
+            onSubmitted: (v) {
+              if (v.trim().isNotEmpty) onSubmit(v.trim());
+            },
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.tonal(
+              onPressed: isProcessing
+                  ? null
+                  : () {
+                      final v = controller.text.trim();
+                      if (v.isNotEmpty) onSubmit(v);
+                    },
+              child: isProcessing
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Parse Barcode'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class _WiredScannerReadyView extends StatefulWidget {
+  const _WiredScannerReadyView({
+    required this.availability,
+    required this.isProcessing,
+  });
+
+  final ScannerAvailability availability;
+  final bool isProcessing;
+
+  @override
+  State<_WiredScannerReadyView> createState() => _WiredScannerReadyViewState();
+}
+
+class _WiredScannerReadyViewState extends State<_WiredScannerReadyView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+  late final Animation<double> _scale;
+  late final Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _scale = Tween<double>(begin: 0.92, end: 1.08).animate(
+      CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+    );
+    _opacity = Tween<double>(begin: 0.4, end: 1.0).animate(
+      CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final connected = widget.availability == ScannerAvailability.wiredConnected;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: connected
+              ? colorScheme.primary.withValues(alpha: 0.4)
+              : colorScheme.outline.withValues(alpha: 0.25),
+        ),
+      ),
+      child: widget.isProcessing
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedBuilder(
+                  animation: _pulse,
+                  builder: (_, __) => Transform.scale(
+                    scale: _scale.value,
+                    child: Opacity(
+                      opacity: _opacity.value,
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: (connected
+                                  ? colorScheme.primary
+                                  : colorScheme.outline)
+                              .withValues(alpha: 0.08),
+                        ),
+                        child: TraqIcon(NavIcons.generateVerifyBarcode,
+                          size: 48,
+                          color: connected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Point scanner at barcode',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  connected
+                      ? 'Scanner ready — waiting for scan'
+                      : 'Scan a barcode to confirm connection',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: connected
+                            ? AppColorMapper.successColor(context)
+                            : AppColorMapper.warningColor(context),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      connected ? 'Scanner active' : 'Awaiting first scan',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color:
+                                colorScheme.onSurface.withValues(alpha: 0.45),
+                          ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+
+class _ErrorBanner extends StatelessWidget {
+  const _ErrorBanner({required this.message, required this.onDismiss});
+  final String message;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            TraqIcon(AppAssets.iconAlert,
+                color: colorScheme.onErrorContainer, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                    color: colorScheme.onErrorContainer, fontSize: 13),
+              ),
+            ),
+            IconButton(
+              onPressed: onDismiss,
+              icon: TraqIcon(AppAssets.iconX,
+                  color: colorScheme.onErrorContainer, size: 18),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+            

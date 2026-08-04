@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
-import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
+import 'package:traqtrace_app/features/epcis/utils/epcis_event_ui_utils.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_step_style.dart';
 

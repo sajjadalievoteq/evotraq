@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
-import 'package:traqtrace_app/features/automation_center/screens/subscription_management/utils/filter_subscriptions.dart';
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
+import 'package:traqtrace_app/features/automation_center/utils/subscription_filter_utils.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_management_empty_state.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card.dart';
 
@@ -36,7 +36,7 @@ class SubscriptionManagementList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filteredSubscriptions =
-        filterManagementSubscriptions(subscriptions, selectedFilter);
+        SubscriptionFilterUtils.filterManagement(subscriptions, selectedFilter);
 
     if (filteredSubscriptions.isEmpty) {
       return SubscriptionManagementEmptyState(
@@ -63,8 +63,10 @@ class SubscriptionManagementList extends StatelessWidget {
     ];
 
     if (shrinkWrap) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      // Embedded in a bounded panel body: scroll within the available height
+      // (padding comes from the surrounding card).
+      return ListView(
+        padding: EdgeInsets.zero,
         children: cards,
       );
     }

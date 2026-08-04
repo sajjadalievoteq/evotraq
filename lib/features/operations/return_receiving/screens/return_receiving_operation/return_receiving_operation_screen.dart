@@ -22,7 +22,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/operation/opera
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation/widgets/return_receiving_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation/widgets/return_receiving_review_step.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
-import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';

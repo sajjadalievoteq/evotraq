@@ -74,42 +74,4 @@ abstract final class EpcisImportTemplate {
     'AggregationEvent',
   };
 
-  /// Well-known GS1 CBV bizStep short names (compact JSON-LD form).
-  static const Set<String> knownBizSteps = {
-    'commissioning',
-    'decommissioning',
-    'packing',
-    'unpacking',
-    'shipping',
-    'receiving',
-    'accepting',
-    'inspecting',
-    'storing',
-    'arriving',
-    'departing',
-    'holding',
-    'picking',
-    'void_shipping',
-    'void_receiving',
-  };
-
-  /// Well-known GS1 CBV disposition short names.
-  static const Set<String> knownDispositions = {
-    'active',
-    'inactive',
-    'in_progress',
-    'in_transit',
-    'in_possession',
-    'destroyed',
-    'recalled',
-    'reserved',
-    'retail_sold',
-    'returned',
-    'expired',
-    'damaged',
-    'disposed',
-    'encoded',
-    'completeness_verified',
-    'completeness_inferred',
-  };
 }

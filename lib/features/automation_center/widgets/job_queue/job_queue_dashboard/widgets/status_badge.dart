@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 
 enum JobQueueStatusTone { ok, warn, err, muted, info }
 
@@ -20,10 +18,9 @@ class JobQueueStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _color(context);
+    final color = _toneColor(context);
     return Semantics(
       label: 'Status $label',
-
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: TraqSpacing.md,
@@ -31,17 +28,8 @@ class JobQueueStatusBadge extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: color,
-          borderRadius:  TraqRadius.button,
+          borderRadius: TraqRadius.button,
           border: Border.all(color: color.withValues(alpha: 0.35)),
-          // boxShadow: pulse
-          //     ? [
-          //         BoxShadow(
-          //           color: color.withValues(alpha: 0.25),
-          //           blurRadius: 8,
-          //           spreadRadius: 0,
-          //         ),
-          //       ]
-          //     : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -49,7 +37,7 @@ class JobQueueStatusBadge extends StatelessWidget {
             Container(
               width: 6,
               height: 6,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
@@ -68,7 +56,7 @@ class JobQueueStatusBadge extends StatelessWidget {
     );
   }
 
-  Color _color(BuildContext context) {
+  Color _toneColor(BuildContext context) {
     switch (tone) {
       case JobQueueStatusTone.ok:
         return AppColorMapper.successColor(context);
@@ -116,52 +104,6 @@ class JobQueueStatusBadgeInline extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class JobQueueEmptyPanel extends StatelessWidget {
-  const JobQueueEmptyPanel({
-    super.key,
-    required this.title,
-    this.subtitle,
-    this.iconAsset = AppAssets.iconList,
-  });
-
-  final String title;
-  final String? subtitle;
-  final String iconAsset;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: TraqSpacing.xl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TraqIcon(iconAsset, size: 28, color: c.textMuted),
-          const SizedBox(height: TraqSpacing.md),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: c.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: TraqSpacing.xs),
-            Text(
-              subtitle!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: c.textMuted,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ],
       ),
     );
   }

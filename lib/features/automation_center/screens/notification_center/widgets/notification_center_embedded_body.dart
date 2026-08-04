@@ -30,7 +30,6 @@ class NotificationCenterEmbeddedBody extends StatelessWidget {
     final c = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,13 +55,15 @@ class NotificationCenterEmbeddedBody extends StatelessWidget {
         const SizedBox(height: TraqSpacing.lg),
         Divider(height: 1, color: c.border),
         const SizedBox(height: TraqSpacing.lg),
-        NotificationCenterBody(
-          state: state,
-          selectedFilter: selectedFilter,
-          shrinkWrap: true,
-          onRefresh: onRefresh,
-          onClearFilters: onClearFilters,
-          onPrimaryAction: onPrimaryAction,
+        Expanded(
+          child: NotificationCenterBody(
+            state: state,
+            selectedFilter: selectedFilter,
+            shrinkWrap: true,
+            onRefresh: onRefresh,
+            onClearFilters: onClearFilters,
+            onPrimaryAction: onPrimaryAction,
+          ),
         ),
       ],
     );

@@ -41,13 +41,11 @@ class NotificationCenterLoadingSkeleton extends StatelessWidget {
     );
 
     if (shrinkWrap) {
-      return Column(
-        children: [
-          for (var i = 0; i < cards.length; i++) ...[
-            if (i > 0) const SizedBox(height: TraqSpacing.md),
-            cards[i],
-          ],
-        ],
+      return ListView.separated(
+        padding: EdgeInsets.zero,
+        itemCount: cards.length,
+        separatorBuilder: (_, __) => const SizedBox(height: TraqSpacing.md),
+        itemBuilder: (_, i) => cards[i],
       );
     }
 

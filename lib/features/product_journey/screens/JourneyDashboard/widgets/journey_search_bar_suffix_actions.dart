@@ -3,7 +3,7 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
+import 'package:traqtrace_app/features/barcode/widgets/dialog/gs1_barcode_scan_dialog.dart';
 
 class JourneySearchBarSuffixActions extends StatelessWidget {
   const JourneySearchBarSuffixActions({

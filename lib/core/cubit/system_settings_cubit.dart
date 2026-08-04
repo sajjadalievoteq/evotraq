@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
-import 'package:traqtrace_app/data/services/system_settings_service.dart';
+import 'package:traqtrace_app/data/services/admin/system_settings_service.dart';
+import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 
 class SystemSettingsState extends Equatable {
   final SystemSettings settings;
@@ -110,6 +114,11 @@ class SystemSettingsCubit extends Cubit<SystemSettingsState> {
       emit(
         state.copyWith(settings: settings, dataStatistics: null, error: null),
       );
+      // Industry mode changes the vocabulary the backend serves; force a
+      // re-fetch so CBV pickers reflect the new mode instead of stale terms.
+      if (getIt.isRegistered<CbvVocabularyService>()) {
+        unawaited(getIt<CbvVocabularyService>().refresh());
+      }
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
       rethrow;

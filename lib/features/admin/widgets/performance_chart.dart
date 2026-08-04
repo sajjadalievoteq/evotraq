@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/operation_palette.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
+import 'package:traqtrace_app/features/admin/widgets/performance_chart_legend_item.dart';
 
 class PerformanceChart extends StatelessWidget {
   final List<PerformanceMetrics> metrics;
@@ -26,7 +27,7 @@ class PerformanceChart extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          _getChartTitle(),
+          _chartTitle(chartType),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -35,15 +36,65 @@ class PerformanceChart extends StatelessWidget {
         const SizedBox(height: 8),
         SizedBox(
           height: 200,
-          child: _buildChart(),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return CustomPaint(
+                painter: LineChartPainter(
+                  metrics: metrics,
+                  chartType: chartType,
+                  brightness: Theme.of(context).brightness,
+                ),
+                size: Size(constraints.maxWidth, constraints.maxHeight),
+              );
+            },
+          ),
         ),
         const SizedBox(height: 4),
-        _buildLegend(context),
+        SizedBox(
+          height: 20,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              PerformanceChartLegendItem(
+                'Object',
+                AppColorMapper.eventTypeColor(
+                  context,
+                  'Object',
+                  scheme: AppEventColorScheme.admin,
+                ),
+              ),
+              PerformanceChartLegendItem(
+                'Aggregation',
+                AppColorMapper.eventTypeColor(
+                  context,
+                  'Aggregation',
+                  scheme: AppEventColorScheme.admin,
+                ),
+              ),
+              PerformanceChartLegendItem(
+                'Transaction',
+                AppColorMapper.eventTypeColor(
+                  context,
+                  'Transaction',
+                  scheme: AppEventColorScheme.admin,
+                ),
+              ),
+              PerformanceChartLegendItem(
+                'Transform',
+                AppColorMapper.eventTypeColor(
+                  context,
+                  'Transformation',
+                  scheme: AppEventColorScheme.admin,
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  String _getChartTitle() {
+  static String _chartTitle(String chartType) {
     switch (chartType) {
       case 'response_time':
         return 'Average Response Time Trends';
@@ -56,89 +107,6 @@ class PerformanceChart extends StatelessWidget {
       default:
         return 'Performance Metrics';
     }
-  }
-
-  Widget _buildChart() {
-    if (metrics.isEmpty) {
-      return const Center(child: Text('No data available'));
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return CustomPaint(
-          painter: LineChartPainter(
-            metrics: metrics,
-            chartType: chartType,
-            brightness: Theme.of(context).brightness,
-          ),
-          size: Size(constraints.maxWidth, constraints.maxHeight),
-        );
-      },
-    );
-  }
-
-  Widget _buildLegend(BuildContext context) {
-    return SizedBox(
-      height: 20,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildLegendItem(
-            'Object',
-            AppColorMapper.eventTypeColor(
-              context,
-              'Object',
-              scheme: AppEventColorScheme.admin,
-            ),
-          ),
-          _buildLegendItem(
-            'Aggregation',
-            AppColorMapper.eventTypeColor(
-              context,
-              'Aggregation',
-              scheme: AppEventColorScheme.admin,
-            ),
-          ),
-          _buildLegendItem(
-            'Transaction',
-            AppColorMapper.eventTypeColor(
-              context,
-              'Transaction',
-              scheme: AppEventColorScheme.admin,
-            ),
-          ),
-          _buildLegendItem(
-            'Transform',
-            AppColorMapper.eventTypeColor(
-              context,
-              'Transformation',
-              scheme: AppEventColorScheme.admin,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegendItem(String label, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 3),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 10),
-        ),
-      ],
-    );
   }
 }
 
@@ -161,8 +129,7 @@ class LineChartPainter extends CustomPainter {
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
-    final pointPaint = Paint()
-      ..style = PaintingStyle.fill;
+    final pointPaint = Paint()..style = PaintingStyle.fill;
 
     final double maxY = _getMaxValue();
     final double minY = _getMinValue();
@@ -171,11 +138,8 @@ class LineChartPainter extends CustomPainter {
     if (rangeY == 0) return;
 
     _drawGrid(canvas, size);
-
     _drawAxes(canvas, size);
-
     _drawDataLines(canvas, size, paint, pointPaint, minY, rangeY);
-
     _drawLabels(canvas, size, minY, maxY);
   }
 
@@ -221,8 +185,14 @@ class LineChartPainter extends CustomPainter {
     );
   }
 
-  void _drawDataLines(Canvas canvas, Size size, Paint paint, Paint pointPaint,
-      double minY, double rangeY) {
+  void _drawDataLines(
+    Canvas canvas,
+    Size size,
+    Paint paint,
+    Paint pointPaint,
+    double minY,
+    double rangeY,
+  ) {
     final p = brightness == Brightness.dark
         ? OperationPalette.dark
         : OperationPalette.light;
@@ -246,7 +216,9 @@ class LineChartPainter extends CustomPainter {
 
       for (int i = 0; i < series.length; i++) {
         final x = 40 + (size.width - 60) * i / (series.length - 1);
-        final y = size.height - 30 - (size.height - 30) * (series[i] - minY) / rangeY;
+        final y = size.height -
+            30 -
+            (size.height - 30) * (series[i] - minY) / rangeY;
 
         if (isFirst) {
           path.moveTo(x, y);
@@ -263,7 +235,7 @@ class LineChartPainter extends CustomPainter {
   }
 
   void _drawLabels(Canvas canvas, Size size, double minY, double maxY) {
-    final textStyle = const TextStyle(
+    const textStyle = TextStyle(
       color: Colors.black,
       fontSize: 10,
     );
@@ -271,7 +243,7 @@ class LineChartPainter extends CustomPainter {
     for (int i = 0; i <= 5; i++) {
       final value = minY + (maxY - minY) * i / 5;
       final y = size.height - 30 - (size.height - 30) * i / 5;
-      
+
       final textSpan = TextSpan(
         text: value.toStringAsFixed(1),
         style: textStyle,
@@ -289,10 +261,25 @@ class LineChartPainter extends CustomPainter {
     switch (chartType) {
       case 'response_time':
         return [
-          metrics.map((m) => m.eventTypeMetrics['OBJECT']?.averageProcessingTime ?? 0.0).toList(),
-          metrics.map((m) => m.eventTypeMetrics['AGGREGATION']?.averageProcessingTime ?? 0.0).toList(),
-          metrics.map((m) => m.eventTypeMetrics['TRANSACTION']?.averageProcessingTime ?? 0.0).toList(),
-          metrics.map((m) => m.eventTypeMetrics['TRANSFORMATION']?.averageProcessingTime ?? 0.0).toList(),
+          metrics
+              .map((m) =>
+                  m.eventTypeMetrics['OBJECT']?.averageProcessingTime ?? 0.0)
+              .toList(),
+          metrics
+              .map((m) =>
+                  m.eventTypeMetrics['AGGREGATION']?.averageProcessingTime ??
+                  0.0)
+              .toList(),
+          metrics
+              .map((m) =>
+                  m.eventTypeMetrics['TRANSACTION']?.averageProcessingTime ??
+                  0.0)
+              .toList(),
+          metrics
+              .map((m) =>
+                  m.eventTypeMetrics['TRANSFORMATION']?.averageProcessingTime ??
+                  0.0)
+              .toList(),
         ];
       case 'throughput':
         return [

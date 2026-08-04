@@ -1,5 +1,5 @@
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
-import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/data/services/barcode/epc_uri_converter.dart';
+import 'package:traqtrace_app/data/services/barcode/gs1_barcode_parser.dart';
 import 'package:traqtrace_app/core/utils/epc_uri_validators.dart' as epc_validators;
 
 abstract final class Gs1Parser {

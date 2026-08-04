@@ -1,6 +1,3 @@
-import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
-
-export 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart'
-    show GS1BarcodeScanDialog, Gs1BarcodeScanTrigger;
+import 'package:traqtrace_app/features/barcode/widgets/dialog/gs1_barcode_scan_dialog.dart';
 
 typedef BarcodeScanner = Gs1BarcodeScanTrigger;

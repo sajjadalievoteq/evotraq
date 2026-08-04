@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_event_visualization_utils.dart';
+import 'package:traqtrace_app/features/admin/widgets/storage_utilization_metric_card.dart';
+import 'package:traqtrace_app/features/admin/widgets/storage_utilization_legend_item.dart';
+import 'package:traqtrace_app/features/admin/utils/admin_event_visualization_utils.dart';
 import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/operation_palette.dart';
@@ -36,23 +37,30 @@ class StorageUtilizationChart extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 220,
-                  child: _buildPieChart(context),
+                  child: _StoragePieChart(storageStats: storageStats),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildStorageLegend(context),
+                  child: _StorageLegend(storageStats: storageStats),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            _buildStorageMetrics(context),
+            _StorageMetrics(storageStats: storageStats),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPieChart(BuildContext context) {
+}
+
+class _StoragePieChart extends StatelessWidget {
+  const _StoragePieChart({required this.storageStats});
+  final StorageStatistics storageStats;
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       height: 200,
       width: 200,
@@ -65,8 +73,14 @@ class StorageUtilizationChart extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildStorageLegend(BuildContext context) {
+class _StorageLegend extends StatelessWidget {
+  const _StorageLegend({required this.storageStats});
+  final StorageStatistics storageStats;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -79,7 +93,7 @@ class StorageUtilizationChart extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ...storageStats.eventTypeDistribution.entries.map((entry) {
-          return _buildLegendItem(
+          return StorageUtilizationLegendItem(
             entry.key,
             entry.value,
             AdminEventVisualizationUtils.eventTypeColor(entry.key, context: context),
@@ -88,40 +102,14 @@ class StorageUtilizationChart extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildLegendItem(String eventType, double percentage, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              eventType,
-              style: const TextStyle(fontSize: 12),
-            ),
-          ),
-          Text(
-            '${percentage.toStringAsFixed(1)}%',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+class _StorageMetrics extends StatelessWidget {
+  const _StorageMetrics({required this.storageStats});
+  final StorageStatistics storageStats;
 
-  Widget _buildStorageMetrics(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         const Divider(),
@@ -129,82 +117,55 @@ class StorageUtilizationChart extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _buildMetricCard(
+              child: StorageUtilizationMetricCard(
                 'Total Storage',
                 '${storageStats.totalStorageCapacityGB.toStringAsFixed(0)} GB',
                 NavIcons.databasePartitioning,
                 AppColorMapper.chartColor(context, 0),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildMetricCard(
-                    'Compression',
-                    '${storageStats.compressionRatio.toStringAsFixed(1)}:1',
-                    AppAssets.iconCompress,
-                    AppColorMapper.chartColor(context, 1),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildMetricCard(
-                    'Partitions',
-                    storageStats.partitionDistribution.length.toString(),
-                    NavIcons.masterData,
-                    AppColorMapper.chartColor(context, 2),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildMetricCard(
-                    'Avg Size',
-                    '${storageStats.averagePartitionSize.toStringAsFixed(1)} MB',
-                    AppAssets.iconFolder,
-                    AppColorMapper.chartColor(context, 3),
-                  ),
-                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: StorageUtilizationMetricCard(
+                'Compression',
+                '${storageStats.compressionRatio.toStringAsFixed(1)}:1',
+                AppAssets.iconCompress,
+                AppColorMapper.chartColor(context, 1),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: StorageUtilizationMetricCard(
+                'Partitions',
+                storageStats.partitionDistribution.length.toString(),
+                NavIcons.masterData,
+                AppColorMapper.chartColor(context, 2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: StorageUtilizationMetricCard(
+                'Avg Size',
+                '${storageStats.averagePartitionSize.toStringAsFixed(1)} MB',
+                AppAssets.iconFolder,
+                AppColorMapper.chartColor(context, 3),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        _buildPartitionDistribution(context),
+        _PartitionDistribution(storageStats: storageStats),
       ],
     );
   }
+}
 
-  Widget _buildMetricCard(String title, String value, String iconAsset, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          TraqIcon(iconAsset, color: color, size: 24),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 10,
-              color: color.withOpacity(0.8),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+class _PartitionDistribution extends StatelessWidget {
+  const _PartitionDistribution({required this.storageStats});
+  final StorageStatistics storageStats;
 
-  Widget _buildPartitionDistribution(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     if (storageStats.partitionDistribution.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -261,7 +222,6 @@ class StorageUtilizationChart extends StatelessWidget {
       ],
     );
   }
-
 }
 
 class PieChartPainter extends CustomPainter {

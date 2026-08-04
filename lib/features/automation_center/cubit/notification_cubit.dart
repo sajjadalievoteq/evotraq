@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/services/automation_center/notification_api_service.dart' as api;
 import 'package:traqtrace_app/data/services/websocket_service.dart';
-import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
-import 'package:traqtrace_app/data/models/notifications/realtime_notification.dart';
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
+import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 
 class NotificationCubit extends Cubit<NotificationState> {

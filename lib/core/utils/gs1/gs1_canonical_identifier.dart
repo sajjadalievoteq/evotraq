@@ -1,7 +1,7 @@
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/gs1_ai_normalizer.dart';
 import 'package:traqtrace_app/core/utils/epc_uri_validators.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/data/services/barcode/epc_uri_converter.dart';
 
 
 enum Gs1CanonicalKind {

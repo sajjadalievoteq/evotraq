@@ -4,7 +4,7 @@ import 'package:traqtrace_app/core/theme/operation_palette.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/status_badge.dart';
 
 class JobQueueActiveJobCard extends StatelessWidget {
@@ -24,7 +24,7 @@ class JobQueueActiveJobCard extends StatelessWidget {
     final status = '${job['status'] ?? ''}';
     final startTime = '${job['startTime'] ?? ''}';
     final elapsedTime = '${job['elapsedTime'] ?? ''}';
-    final statusColor = AdminHelperMappers.queueJobStatusColor(context, status);
+    final statusColor = StatusVisualMappers.queueJobStatusColor(context, status);
     final c = context.colors;
 
     return TraqCard(
@@ -41,18 +41,18 @@ class JobQueueActiveJobCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: OperationPalette.soft(
-                    AdminHelperMappers.jobTypeColor(context, jobType),
+                    StatusVisualMappers.jobTypeColor(context, jobType),
                   ),
                   borderRadius: TraqRadius.chip,
                   border: Border.all(
-                    color: AdminHelperMappers.jobTypeColor(context, jobType)
+                    color: StatusVisualMappers.jobTypeColor(context, jobType)
                         .withValues(alpha: 0.35),
                   ),
                 ),
                 child: Text(
                   jobType,
                   style: context.text.cap.copyWith(
-                    color: AdminHelperMappers.jobTypeColor(context, jobType),
+                    color: StatusVisualMappers.jobTypeColor(context, jobType),
                     fontWeight: FontWeight.w600,
                   ),
                 ),

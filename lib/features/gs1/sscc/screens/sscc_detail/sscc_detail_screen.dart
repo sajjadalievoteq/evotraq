@@ -9,14 +9,14 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_route_constants.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
-import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
+import 'package:traqtrace_app/core/extensions/validation_feedback_extension.dart';
+import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_status.dart';
-import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
@@ -34,7 +34,7 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_form_validation.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
-import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
+import 'package:traqtrace_app/features/barcode/widgets/dialog/gs1_barcode_scan_dialog.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
     as edit_rules;
 
@@ -72,10 +72,11 @@ class SSCCDetailScreen extends StatefulWidget {
 
 
 class _SSCCDetailScreenState extends State<SSCCDetailScreen>
-    with GS1FormValidationMixin<SSCCDetailScreen>, SsccDetailScreenFields {
+    with SsccDetailScreenFields {
   final _formKey = GlobalKey<FormState>();
   final _pharmaExtensionKey =
       GlobalKey<SSCCPharmaceuticalExtensionWidgetState>();
+  late final ValidationCubit _validationCubit;
   GLN? _issuingGln;
   String? _issuingGlnError;
   GLN? _shipFromGln;
@@ -107,9 +108,20 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   bool _forceMountAllSections = false;
   final ScrollController _scrollController = ScrollController();
 
+  void _setFieldError(String fieldName, String? error) {
+    if (_validationCubit.getFieldError(fieldName) == error) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _validationCubit.setFieldError(fieldName, error);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _validationCubit = ValidationCubit();
     _formFieldsHydrated = widget.awaitingListSelection ||
         widget.isCreating ||
         widget.routeSsccCode == null ||
@@ -271,6 +283,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   void dispose() {
     disposeSsccDetailFields();
     _scrollController.dispose();
+    _validationCubit.close();
     super.dispose();
   }
 
@@ -497,8 +510,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
     if (validationErrors.isNotEmpty) {
       _scrollToFormTop();
-      showValidationErrors(
-        context,
+      context.showValidationErrors(
         validationErrors,
         title: 'Cannot save SSCC — fix these fields',
       );
@@ -524,8 +536,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
           ssccCode = fixedSSCC;
           setSsccFieldSeedOrController('ssccCode', ssccCode);
         } else {
-          showValidationErrors(
-            context,
+          context.showValidationErrors(
             [
               'SSCC Code: must be 18 digits or a valid GS1 (00) barcode (current: ${ssccCode.length} digits)',
             ],
@@ -541,8 +552,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       serialReference = ssccCode.substring(8, 17);
       checkDigit = ssccCode.substring(17);
     } else {
-      showValidationErrors(
-        context,
+      context.showValidationErrors(
         ['SSCC Code: ${_ssccCodeMissingMessage()}'],
         title: 'Cannot save SSCC — fix these fields',
       );
@@ -740,8 +750,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
             });
             final message = userFacingSsccErrorMessage(state.error);
             if (_hasSubmittedForm) {
-              showValidationErrors(
-                context,
+              context.showValidationErrors(
                 [message],
                 title: 'Cannot save SSCC',
               );
@@ -880,14 +889,17 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       body: body,
     );
 
-    if (widget.embedded) {
-      return scaffold;
+    Widget result = scaffold;
+    if (!widget.embedded) {
+      final cubit = _ssccCubit;
+      if (cubit != null) {
+        result = BlocProvider<SSCCCubit>.value(value: cubit, child: scaffold);
+      }
     }
-    final cubit = _ssccCubit;
-    if (cubit == null) {
-      return scaffold;
-    }
-    return BlocProvider<SSCCCubit>.value(value: cubit, child: scaffold);
+    return BlocProvider<ValidationCubit>.value(
+      value: _validationCubit,
+      child: result,
+    );
   }
 
   SsccDetailFormBlocBody _formBlocBody({
@@ -972,7 +984,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
         setState(() {
           _issuingGln = gln;
           _issuingGlnError = validateIssuingGlnRequired(gln?.glnCode);
-          setFieldError('gln', _issuingGlnError);
+          _setFieldError('gln', _issuingGlnError);
         });
       },
       onInputModeChanged: (mode) {
@@ -989,7 +1001,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       onGenerateSsccCode: _generateSSCCCode,
       onScanSsccCode: _scanSSCCCode,
       onClearSsccCode: () => setState(clearSsccCodeFields),
-      setFieldError: setFieldError,
+      setFieldError: _setFieldError,
       onSyncExtensionDigitFromSscc: _syncExtensionDigitFromSscc,
       onManualSsccCodeChanged: () => setState(() {}),
     );

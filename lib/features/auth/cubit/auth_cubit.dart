@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
+import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
-import 'package:traqtrace_app/data/models/auth/auth_models.dart';
-import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
+import 'package:traqtrace_app/data/services/auth/auth_service.dart';
+import 'package:traqtrace_app/data/models/auth/login_request.dart';
+import 'package:traqtrace_app/data/models/auth/register_request.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthService _authService;
@@ -105,6 +108,7 @@ class AuthCubit extends Cubit<AuthState> {
       );
       _preloadGlnPickerCatalog();
       _startCbvVocabulary();
+      unawaited(OperationalGlnStore.backfillIfNeeded(user));
     } on TimeoutException {
       await _awaitMinSplash(startedAt, minSplashDelay);
       await _forceUnauthenticated();
@@ -144,6 +148,7 @@ class AuthCubit extends Cubit<AuthState> {
       );
       _preloadGlnPickerCatalog();
       _startCbvVocabulary();
+      unawaited(OperationalGlnStore.backfillIfNeeded(user));
     } on TimeoutException {
       emit(
         state.copyWith(
@@ -235,9 +240,16 @@ class AuthCubit extends Cubit<AuthState> {
       );
       _preloadGlnPickerCatalog();
       _startCbvVocabulary();
+      unawaited(OperationalGlnStore.backfillIfNeeded(user));
     } catch (e) {
       await _forceUnauthenticated();
     }
+  }
+
+  /// Replaces the cached authenticated user without changing auth status.
+  void applyCachedUser(User user) {
+    if (state.status != AuthStatus.authenticated) return;
+    emit(state.copyWith(user: user));
   }
 
   Future<void> requestPasswordReset(String email) async {
@@ -456,6 +468,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   void _resetCbvVocabulary() {
     if (!getIt.isRegistered<CbvVocabularyService>()) return;
-    getIt<CbvVocabularyService>().reset();
+    unawaited(getIt<CbvVocabularyService>().reset());
   }
 }

@@ -5,8 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/auth/auth_models.dart';
-import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
+import 'package:traqtrace_app/data/models/auth/user.dart';
+import 'package:traqtrace_app/data/models/auth/login_request.dart';
+import 'package:traqtrace_app/data/models/auth/register_request.dart';
+import 'package:traqtrace_app/data/models/auth/auth_response.dart';
+import 'package:traqtrace_app/data/services/auth/auth_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 
@@ -44,7 +47,10 @@ void main() {
       ),
       act: (cubit) => cubit.sessionExpired(),
       expect: () => [
-        const AuthState(status: AuthStatus.unauthenticated),
+        const AuthState(
+          status: AuthStatus.unauthenticated,
+          bootstrapCompleted: true,
+        ),
       ],
       verify: (_) {
         verify(mockAuthService.logout()).called(1);
@@ -80,7 +86,10 @@ void main() {
       wait: const Duration(milliseconds: 200),
       expect: () => [
         const AuthState(status: AuthStatus.loading),
-        const AuthState(status: AuthStatus.unauthenticated),
+        const AuthState(
+          status: AuthStatus.unauthenticated,
+          bootstrapCompleted: true,
+        ),
       ],
     );
   });

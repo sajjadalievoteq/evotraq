@@ -8,7 +8,7 @@ import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_search_result.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/data/services/barcode/epc_uri_converter.dart';
 
 class ProductJourneyService {
   ProductJourneyService({

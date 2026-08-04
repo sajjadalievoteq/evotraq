@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
-import 'package:traqtrace_app/data/models/notifications/realtime_notification.dart';
+import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart';
 
 class WebSocketService {
   WebSocketChannel? _channel;

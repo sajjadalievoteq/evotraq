@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
 
 /// Provides [SGTINCubit] for the SGTIN feature route subtree.
 ///

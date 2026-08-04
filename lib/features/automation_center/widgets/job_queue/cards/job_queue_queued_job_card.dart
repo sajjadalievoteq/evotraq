@@ -4,7 +4,7 @@ import 'package:traqtrace_app/core/theme/operation_palette.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
 
 class JobQueueQueuedJobCard extends StatelessWidget {
   final Map<String, dynamic> job;
@@ -24,7 +24,7 @@ class JobQueueQueuedJobCard extends StatelessWidget {
     final priority = job['priority'] ?? 5;
     final queuePosition = job['queuePosition'] ?? 0;
     final submittedTime = '${job['submittedTime'] ?? ''}';
-    final typeColor = AdminHelperMappers.jobTypeColor(context, jobType);
+    final typeColor = StatusVisualMappers.jobTypeColor(context, jobType);
     final c = context.colors;
 
     return Padding(

@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -14,11 +14,11 @@ import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sg
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_scaffold.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_detail_skeleton.dart';
-import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 
 class SGTINDetailScreen extends StatefulWidget {
   const SGTINDetailScreen({
@@ -49,9 +49,9 @@ class SGTINDetailScreen extends StatefulWidget {
   State<SGTINDetailScreen> createState() => _SGTINDetailScreenState();
 }
 
-class _SGTINDetailScreenState extends State<SGTINDetailScreen>
-    with GS1FormValidationMixin<SGTINDetailScreen> {
+class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
   final _formKey = GlobalKey<FormState>();
+  late final ValidationCubit _validationCubit;
 
   late bool _isEditing;
   bool _isLocalLoading = false;
@@ -75,9 +75,20 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
 
   SGTIN? _loadedSgtin;
 
+  void _setFieldError(String fieldName, String? error) {
+    if (_validationCubit.getFieldError(fieldName) == error) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _validationCubit.setFieldError(fieldName, error);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _validationCubit = ValidationCubit();
     _isEditing = widget.isEditing;
 
     _serialNumberController = TextEditingController();
@@ -121,6 +132,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
     _expiryDateController.dispose();
     _regulatoryMarketController.dispose();
     _regulatoryStatusController.dispose();
+    _validationCubit.close();
     super.dispose();
   }
 
@@ -281,6 +293,13 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider<ValidationCubit>.value(
+      value: _validationCubit,
+      child: _detailBody(context),
+    );
+  }
+
+  Widget _detailBody(BuildContext context) {
     if (widget.awaitingListSelection) {
       return BlocBuilder<SGTINCubit, SGTINState>(
         builder: (context, state) {
@@ -405,7 +424,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
           _pickDate((d) => setState(() => _productionDate = d)),
       onPickBestBefore: () =>
           _pickDate((d) => setState(() => _bestBeforeDate = d)),
-      setFieldError: setFieldError,
+      setFieldError: _setFieldError,
       onDecommission: _decommission,
       onSubmit: _submit,
     );

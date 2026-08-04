@@ -301,13 +301,13 @@ class SSCCPharmaceuticalExtensionWidgetState
   SSCCPharmaceuticalExtension? buildExtension({int? ssccId, String? ssccCode}) {
     if (!hasData) return null;
 
-    return _buildExtensionFromFields().copyWith(
+    return _extensionFromFields().copyWith(
       ssccId: ssccId ?? widget.ssccId,
       ssccCode: ssccCode ?? widget.ssccCode,
     );
   }
 
-  SSCCPharmaceuticalExtension _buildExtensionFromFields() {
+  SSCCPharmaceuticalExtension _extensionFromFields() {
     return SSCCPharmaceuticalExtension(
       id: _extension?.id,
       ssccId: widget.ssccId,
@@ -404,7 +404,7 @@ class SSCCPharmaceuticalExtensionWidgetState
       int ssccId, String ssccCode) async {
     try {
       final service = getIt<SSCCPharmaceuticalExtensionService>();
-      final extensionToSave = _buildExtensionFromFields().copyWith(
+      final extensionToSave = _extensionFromFields().copyWith(
         ssccId: ssccId,
         ssccCode: ssccCode,
       );

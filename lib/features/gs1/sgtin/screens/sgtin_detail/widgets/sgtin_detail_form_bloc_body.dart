@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_form_body.dart';
 
 class SgtinDetailFormBlocBody extends StatelessWidget {

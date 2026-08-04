@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/admin/widgets/bulk_jobs_summary.dart';
+import 'package:traqtrace_app/features/admin/widgets/bulk_jobs_empty_state.dart';
+import 'package:traqtrace_app/features/admin/widgets/bulk_job_detail_row.dart';
+import 'package:traqtrace_app/features/admin/widgets/bulk_job_status_chip.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
 
 class BulkJobsPanel extends StatefulWidget {
   final List<BulkJobStatus> jobs;
@@ -49,7 +53,14 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                   ),
                 ),
                 const Spacer(),
-                _buildFilterDropdown(),
+                _BulkJobsFilterDropdown(
+                  selectedFilter: _selectedFilter,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedFilter = value;
+                    });
+                  },
+                ),
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: widget.onRefresh,
@@ -59,13 +70,18 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
               ],
             ),
             const SizedBox(height: 16),
-            _buildJobsSummary(filteredJobs),
+            BulkJobsSummary(filteredJobs),
             const SizedBox(height: 16),
             SizedBox(
               height: 400,
               child: filteredJobs.isEmpty
-                  ? _buildEmptyState()
-                  : _buildJobsList(filteredJobs),
+                  ? const BulkJobsEmptyState()
+                  : _BulkJobsList(
+                      jobs: filteredJobs,
+                      onCancel: widget.onJobCancel,
+                      onRetry: widget.onJobRetry,
+                      onShowDetails: _showJobDetails,
+                    ),
             ),
           ],
         ),
@@ -73,13 +89,92 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
     );
   }
 
-  Widget _buildFilterDropdown() {
+
+  List<BulkJobStatus> _getFilteredJobs() {
+    if (_selectedFilter == 'ALL') {
+      return widget.jobs;
+    }
+    return widget.jobs.where((job) => job.status == _selectedFilter).toList();
+  }
+
+  void _showJobDetails(BulkJobStatus job) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          width: 500,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  TraqIcon(
+                    StatusVisualMappers.bulkJobStatusIcon(job.status),
+                    color: StatusVisualMappers.bulkJobStatusColor(context, job.status),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Job Details',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: TraqIcon(AppAssets.iconX),
+                  ),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 16),
+              BulkJobDetailRow('Job ID', job.jobId),
+              BulkJobDetailRow('Type', job.jobType),
+              BulkJobDetailRow('Status', job.status),
+              BulkJobDetailRow('Progress', '${job.progressPercentage.toStringAsFixed(1)}%'),
+              BulkJobDetailRow('Records Processed', '${job.processedEvents}/${job.totalEvents}'),
+              BulkJobDetailRow('Started', DisplayDateUtils.dmHm(job.startTime)),
+              if (job.endTime != null)
+                BulkJobDetailRow('Completed', DisplayDateUtils.dmHm(job.endTime!)),
+              if (job.errors.isNotEmpty)
+                BulkJobDetailRow('Errors', job.errors.join(', ')),
+              if (job.metadata.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Text(
+                  'Metadata:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                ...job.metadata.entries.map(
+                  (entry) => BulkJobDetailRow(entry.key, entry.value.toString()),
+                ).toList(),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+}
+
+class _BulkJobsFilterDropdown extends StatelessWidget {
+  const _BulkJobsFilterDropdown({
+    required this.selectedFilter,
+    required this.onChanged,
+  });
+
+  final String selectedFilter;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
     return DropdownButton<String>(
-      value: _selectedFilter,
+      value: selectedFilter,
       onChanged: (value) {
-        setState(() {
-          _selectedFilter = value!;
-        });
+        if (value != null) onChanged(value);
       },
       items: const [
         DropdownMenuItem(value: 'ALL', child: Text('All Jobs')),
@@ -90,100 +185,53 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
       ],
     );
   }
+}
 
-  Widget _buildJobsSummary(List<BulkJobStatus> jobs) {
-    final running = jobs.where((j) => j.status == 'RUNNING').length;
-    final completed = jobs.where((j) => j.status == 'COMPLETED').length;
-    final failed = jobs.where((j) => j.status == 'FAILED').length;
-    final pending = jobs.where((j) => j.status == 'PENDING').length;
+class _BulkJobsList extends StatelessWidget {
+  const _BulkJobsList({
+    required this.jobs,
+    required this.onCancel,
+    required this.onRetry,
+    required this.onShowDetails,
+  });
 
-    return Row(
-      children: [
-        _buildSummaryCard('Running', running, AppColorMapper.infoColor(context)),
-        const SizedBox(width: 8),
-        _buildSummaryCard('Completed', completed, AppColorMapper.successColor(context)),
-        const SizedBox(width: 8),
-        _buildSummaryCard('Failed', failed, AppColorMapper.errorColor(context)),
-        const SizedBox(width: 8),
-        _buildSummaryCard('Pending', pending, AppColorMapper.warningColor(context)),
-      ],
-    );
-  }
+  final List<BulkJobStatus> jobs;
+  final Function(String) onCancel;
+  final Function(String) onRetry;
+  final ValueChanged<BulkJobStatus> onShowDetails;
 
-  Widget _buildSummaryCard(String label, int count, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        child: Column(
-          children: [
-            Text(
-              count.toString(),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: color.withOpacity(0.8),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TraqIcon(
-            AppAssets.iconX,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No bulk jobs found',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Bulk processing jobs will appear here when started',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[500],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildJobsList(List<BulkJobStatus> jobs) {
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: jobs.length,
       itemBuilder: (context, index) {
         final job = jobs[index];
-        return _buildJobCard(job);
+        return _BulkJobCard(
+          job: job,
+          onCancel: onCancel,
+          onRetry: onRetry,
+          onShowDetails: onShowDetails,
+        );
       },
     );
   }
+}
 
-  Widget _buildJobCard(BulkJobStatus job) {
+class _BulkJobCard extends StatelessWidget {
+  const _BulkJobCard({
+    required this.job,
+    required this.onCancel,
+    required this.onRetry,
+    required this.onShowDetails,
+  });
+
+  final BulkJobStatus job;
+  final Function(String) onCancel;
+  final Function(String) onRetry;
+  final ValueChanged<BulkJobStatus> onShowDetails;
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: Padding(
@@ -194,8 +242,8 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
             Row(
               children: [
                 TraqIcon(
-                  AdminHelperMappers.bulkJobStatusIcon(job.status),
-                  color: AdminHelperMappers.bulkJobStatusColor(context, job.status),
+                  StatusVisualMappers.bulkJobStatusIcon(job.status),
+                  color: StatusVisualMappers.bulkJobStatusColor(context, job.status),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -219,7 +267,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                     ],
                   ),
                 ),
-                _buildStatusChip(job.status),
+                BulkJobStatusChip(job.status),
               ],
             ),
             const SizedBox(height: 12),
@@ -227,7 +275,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
               value: job.progressPercentage / 100,
               backgroundColor: Colors.grey[300],
               valueColor: AlwaysStoppedAnimation<Color>(
-                AdminHelperMappers.bulkJobStatusColor(context, job.status),
+                StatusVisualMappers.bulkJobStatusColor(context, job.status),
               ),
             ),
             const SizedBox(height: 8),
@@ -302,7 +350,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
               children: [
                 if (job.status == 'RUNNING')
                   TextButton.icon(
-                    onPressed: () => widget.onJobCancel(job.jobId),
+                    onPressed: () => onCancel(job.jobId),
                     icon: TraqIcon(AppAssets.iconX, size: 16),
                     label: const Text('Cancel'),
                     style: TextButton.styleFrom(
@@ -311,7 +359,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                   ),
                 if (job.status == 'FAILED')
                   TextButton.icon(
-                    onPressed: () => widget.onJobRetry(job.jobId),
+                    onPressed: () => onRetry(job.jobId),
                     icon: TraqIcon(AppAssets.iconRefresh, size: 16),
                     label: const Text('Retry'),
                     style: TextButton.styleFrom(
@@ -319,7 +367,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                     ),
                   ),
                 TextButton.icon(
-                  onPressed: () => _showJobDetails(job),
+                  onPressed: () => onShowDetails(job),
                   icon: TraqIcon(AppAssets.iconInfo, size: 16),
                   label: const Text('Details'),
                 ),
@@ -327,119 +375,6 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatusChip(String status) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AdminHelperMappers.bulkJobStatusColor(context, status).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AdminHelperMappers.bulkJobStatusColor(context, status).withOpacity(0.3),
-        ),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          color: AdminHelperMappers.bulkJobStatusColor(context, status),
-        ),
-      ),
-    );
-  }
-
-  List<BulkJobStatus> _getFilteredJobs() {
-    if (_selectedFilter == 'ALL') {
-      return widget.jobs;
-    }
-    return widget.jobs.where((job) => job.status == _selectedFilter).toList();
-  }
-
-  void _showJobDetails(BulkJobStatus job) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        child: Container(
-          width: 500,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  TraqIcon(
-                    AdminHelperMappers.bulkJobStatusIcon(job.status),
-                    color: AdminHelperMappers.bulkJobStatusColor(context, job.status),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Job Details',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: TraqIcon(AppAssets.iconX),
-                  ),
-                ],
-              ),
-              const Divider(),
-              const SizedBox(height: 16),
-              _buildDetailRow('Job ID', job.jobId),
-              _buildDetailRow('Type', job.jobType),
-              _buildDetailRow('Status', job.status),
-              _buildDetailRow('Progress', '${job.progressPercentage.toStringAsFixed(1)}%'),
-              _buildDetailRow('Records Processed', '${job.processedEvents}/${job.totalEvents}'),
-              _buildDetailRow('Started', DisplayDateUtils.dmHm(job.startTime)),
-              if (job.endTime != null)
-                _buildDetailRow('Completed', DisplayDateUtils.dmHm(job.endTime!)),
-              if (job.errors.isNotEmpty)
-                _buildDetailRow('Errors', job.errors.join(', ')),
-              if (job.metadata.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                const Text(
-                  'Metadata:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                ...job.metadata.entries.map(
-                  (entry) => _buildDetailRow(entry.key, entry.value.toString()),
-                ).toList(),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(color: Colors.grey[700]),
-            ),
-          ),
-        ],
       ),
     );
   }

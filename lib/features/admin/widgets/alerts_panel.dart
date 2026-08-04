@@ -3,7 +3,9 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
+import 'package:traqtrace_app/features/admin/utils/admin_alert_format_utils.dart';
+import 'package:traqtrace_app/features/admin/widgets/alerts_panel_row.dart';
 
 class AlertsPanel extends StatelessWidget {
   final List<PerformanceAlert> alerts;
@@ -20,8 +22,9 @@ class AlertsPanel extends StatelessWidget {
     if (alerts.isEmpty) {
       return const SizedBox.shrink();
     }
-    final highestSeverity = _getHighestSeverity();
-    final highestSeverityColor = AdminHelperMappers.severityColor(context, highestSeverity);
+    final highestSeverity = AdminAlertFormatUtils.highestSeverity(alerts);
+    final highestSeverityColor =
+        StatusVisualMappers.severityColor(context, highestSeverity);
 
     return Card(
       color: highestSeverityColor.withOpacity(0.05),
@@ -32,7 +35,8 @@ class AlertsPanel extends StatelessWidget {
           children: [
             Row(
               children: [
-                TraqIcon(AppAssets.iconAlert,
+                TraqIcon(
+                  AppAssets.iconAlert,
                   color: highestSeverityColor,
                   size: 24,
                 ),
@@ -53,7 +57,14 @@ class AlertsPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            ...alerts.take(3).map((alert) => _buildAlertRow(context, alert)).toList(),
+            ...alerts
+                .take(3)
+                .map(
+                  (alert) => AlertsPanelRow(
+                    alert: alert,
+                    onAcknowledge: onAlertAcknowledge,
+                  ),
+                ),
             if (alerts.length > 3)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -69,82 +80,6 @@ class AlertsPanel extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildAlertRow(BuildContext context, PerformanceAlert alert) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AdminHelperMappers.severityColor(context, alert.severity).withOpacity(0.3),
-        ),
-      ),
-      child: Row(
-        children: [
-          TraqIcon(
-            AdminHelperMappers.severityIcon(alert.severity),
-            color: AdminHelperMappers.severityColor(context, alert.severity),
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  alert.message,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  '${alert.type} • ${_formatTime(alert.triggeredAt)}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (!alert.acknowledged)
-            TextButton(
-              onPressed: () => onAlertAcknowledge(alert.id),
-              child: const Text(
-                'Acknowledge',
-                style: TextStyle(fontSize: 12),
-              ),
-            ),
-          if (alert.acknowledged)
-            TraqIcon(AppAssets.iconCheck,
-              color: AppColorMapper.successColor(context),
-              size: 16,
-            ),
-        ],
-      ),
-    );
-  }
-
-  String _getHighestSeverity() {
-    if (alerts.any((alert) => alert.severity.toUpperCase() == 'CRITICAL')) {
-      return 'CRITICAL';
-    }
-    if (alerts.any((alert) => alert.severity.toUpperCase() == 'HIGH')) {
-      return 'HIGH';
-    }
-    if (alerts.any((alert) => alert.severity.toUpperCase() == 'MEDIUM')) {
-      return 'MEDIUM';
-    }
-    return 'LOW';
-  }
-
-  String _formatTime(DateTime dateTime) {
-    return '${dateTime.hour.toString().padLeft(2, '0')}:'
-           '${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   void _showAllAlertsDialog(BuildContext context) {
@@ -186,20 +121,30 @@ class AlertsPanel extends StatelessWidget {
                             Row(
                               children: [
                                 TraqIcon(
-                                  AdminHelperMappers.severityIcon(alert.severity),
-                                  color: AdminHelperMappers.severityColor(context, alert.severity),
+                                  StatusVisualMappers.severityIcon(
+                                    alert.severity,
+                                  ),
+                                  color: StatusVisualMappers.severityColor(
+                                    context,
+                                    alert.severity,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   alert.severity.toUpperCase(),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: AdminHelperMappers.severityColor(context, alert.severity),
+                                    color: StatusVisualMappers.severityColor(
+                                      context,
+                                      alert.severity,
+                                    ),
                                   ),
                                 ),
                                 const Spacer(),
                                 Text(
-                                  _formatDateTime(alert.triggeredAt),
+                                  AdminAlertFormatUtils.formatDateTime(
+                                    alert.triggeredAt,
+                                  ),
                                   style: TextStyle(
                                     color: Colors.grey[600],
                                     fontSize: 12,
@@ -218,19 +163,19 @@ class AlertsPanel extends StatelessWidget {
                             ),
                             if (alert.details.isNotEmpty) ...[
                               const SizedBox(height: 8),
-                              Text(
+                              const Text(
                                 'Details:',
-                                style: const TextStyle(fontWeight: FontWeight.w500),
+                                style: TextStyle(fontWeight: FontWeight.w500),
                               ),
-                              ...alert.details.entries.map((entry) => 
-                                Text(
+                              ...alert.details.entries.map(
+                                (entry) => Text(
                                   '${entry.key}: ${entry.value}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
                                   ),
-                                )
-                              ).toList(),
+                                ),
+                              ),
                             ],
                             const SizedBox(height: 8),
                             Row(
@@ -240,13 +185,16 @@ class AlertsPanel extends StatelessWidget {
                                   Text(
                                     'Acknowledged',
                                     style: TextStyle(
-                                      color: AppColorMapper.successColor(context),
+                                      color: AppColorMapper.successColor(
+                                        context,
+                                      ),
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 if (!alert.acknowledged)
                                   ElevatedButton(
-                                    onPressed: () => onAlertAcknowledge(alert.id),
+                                    onPressed: () =>
+                                        onAlertAcknowledge(alert.id),
                                     child: const Text('Acknowledge'),
                                   ),
                               ],
@@ -263,9 +211,5 @@ class AlertsPanel extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

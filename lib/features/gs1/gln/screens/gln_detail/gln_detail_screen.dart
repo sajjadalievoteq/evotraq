@@ -15,7 +15,6 @@ import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
-import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
@@ -27,6 +26,7 @@ import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/utils/gln_loca
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
+import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 
 class GLNDetailScreen extends StatefulWidget {
   final String? glnId;
@@ -53,10 +53,11 @@ class GLNDetailScreen extends StatefulWidget {
 }
 
 class _GLNDetailScreenState extends State<GLNDetailScreen>
-    with GS1FormValidationMixin<GLNDetailScreen>, GlnDetailScreenFields {
+    with GlnDetailScreenFields {
   final _formKey = GlobalKey<FormState>();
   final _pharmaExtensionKey =
       GlobalKey<GLNPharmaceuticalExtensionWidgetState>();
+  late final ValidationCubit _validationCubit;
 
   String _operatingStatus = 'ACTIVE';
   String _industryClassification = 'HEALTHCARE';
@@ -84,9 +85,20 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
 
   bool _formFieldsHydrated = true;
 
+  void _setFieldError(String fieldName, String? error) {
+    if (_validationCubit.getFieldError(fieldName) == error) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _validationCubit.setFieldError(fieldName, error);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _validationCubit = ValidationCubit();
     _formFieldsHydrated = widget.glnId == null && !widget.awaitingListSelection;
 
     if (!widget.embedded) {
@@ -129,6 +141,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     } else {
       _glnCubit?.close();
     }
+    _validationCubit.close();
     super.dispose();
   }
 
@@ -282,7 +295,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     final postalCode = glnFieldText('postalCode');
     final country = glnFieldText('country');
 
-    final isValid = validateAllFields({
+    final isValid = _validationCubit.validateAllFields({
       'glnCode': {
         'value': glnCode,
         'validator': GlnFieldValidators.validateGlnCode,
@@ -511,7 +524,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
           onSubmit: () {
             _submitForm();
           },
-          setFieldError: setFieldError,
+          setFieldError: _setFieldError,
           glnCodeController: glnCodeController,
           gs1CompanyPrefixController: gs1CompanyPrefixController,
           locationReferenceDigitsController: locationReferenceDigitsController,
@@ -617,13 +630,16 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       body: body,
     );
 
-    if (widget.embedded) {
-      return scaffold;
+    Widget result = scaffold;
+    if (!widget.embedded) {
+      final cubit = _glnCubit;
+      if (cubit != null) {
+        result = BlocProvider<GLNCubit>.value(value: cubit, child: scaffold);
+      }
     }
-    final cubit = _glnCubit;
-    if (cubit == null) {
-      return scaffold;
-    }
-    return BlocProvider<GLNCubit>.value(value: cubit, child: scaffold);
+    return BlocProvider<ValidationCubit>.value(
+      value: _validationCubit,
+      child: result,
+    );
   }
 }

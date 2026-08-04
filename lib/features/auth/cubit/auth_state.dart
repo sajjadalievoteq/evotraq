@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:traqtrace_app/data/models/auth/auth_models.dart';
+import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 
 enum AuthStatus {

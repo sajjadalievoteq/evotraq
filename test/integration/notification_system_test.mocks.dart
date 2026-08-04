@@ -6,9 +6,9 @@
 import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart'
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart'
     as _i2;
-import 'package:traqtrace_app/data/models/notifications/realtime_notification.dart'
+import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart'
     as _i6;
 import 'package:traqtrace_app/data/services/automation_center/notification_api_service.dart'
     as _i3;

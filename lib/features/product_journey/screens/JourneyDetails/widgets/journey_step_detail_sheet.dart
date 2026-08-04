@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
-import 'package:traqtrace_app/features/epcis/presentation/object_events/utils/object_event_route_constants.dart';
+import 'package:traqtrace_app/features/epcis/object_events/utils/object_event_route_constants.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDetails/widgets/journey_detail_row.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_formatters.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_step_style.dart';

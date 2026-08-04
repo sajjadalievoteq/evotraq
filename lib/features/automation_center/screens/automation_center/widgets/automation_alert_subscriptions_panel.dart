@@ -37,6 +37,7 @@ class _AutomationAlertSubscriptionsPanelState
     return AutomationWorkbenchPanel(
       title: 'Alert Subscriptions',
       instructions: _instructions,
+      fillBody: true,
       actions: [
         IconButton(
           tooltip: 'Help',

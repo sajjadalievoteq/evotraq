@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/admin/widgets/performance_metric_tile.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
-import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -48,11 +49,11 @@ class PerformanceMetricsCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildMetricTile(
+                  child: PerformanceMetricTile(
                     'Events/Second',
                     performance.eventsPerSecond.toStringAsFixed(2),
                     NavIcons.performanceOptimization,
-                    AdminHelperMappers.performanceColor(
+                    StatusVisualMappers.performanceColor(
                       context,
                       performance.eventsPerSecond,
                       100,
@@ -62,11 +63,11 @@ class PerformanceMetricsCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildMetricTile(
+                  child: PerformanceMetricTile(
                     'Avg Processing Time',
                     '${performance.averageProcessingTimeMs.toStringAsFixed(1)}ms',
                     NavIcons.performanceTests,
-                    AdminHelperMappers.performanceColor(
+                    StatusVisualMappers.performanceColor(
                       context,
                       performance.averageProcessingTimeMs,
                       100,
@@ -83,11 +84,11 @@ class PerformanceMetricsCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildMetricTile(
+                  child: PerformanceMetricTile(
                     'Success Rate',
                     '${performance.successRate.toStringAsFixed(1)}%',
                     AppAssets.iconCheckCircle,
-                    AdminHelperMappers.performanceColor(
+                    StatusVisualMappers.performanceColor(
                       context,
                       performance.successRate,
                       95,
@@ -97,11 +98,11 @@ class PerformanceMetricsCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildMetricTile(
+                  child: PerformanceMetricTile(
                     'Error Rate',
                     '${performance.errorRate.toStringAsFixed(2)}%',
                     AppAssets.iconXCircle,
-                    AdminHelperMappers.performanceColor(
+                    StatusVisualMappers.performanceColor(
                       context,
                       performance.errorRate,
                       1,
@@ -118,11 +119,11 @@ class PerformanceMetricsCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildMetricTile(
+                  child: PerformanceMetricTile(
                     'Memory Usage',
                     '${performance.memoryUsagePercentage.toStringAsFixed(1)}%',
                     NavIcons.eventSerialization,
-                    AdminHelperMappers.performanceColor(
+                    StatusVisualMappers.performanceColor(
                       context,
                       performance.memoryUsagePercentage,
                       70,
@@ -133,11 +134,11 @@ class PerformanceMetricsCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildMetricTile(
+                  child: PerformanceMetricTile(
                     'CPU Usage',
                     '${performance.cpuUsagePercentage.toStringAsFixed(1)}%',
                     NavIcons.eventSerialization,
-                    AdminHelperMappers.performanceColor(
+                    StatusVisualMappers.performanceColor(
                       context,
                       performance.cpuUsagePercentage,
                       70,
@@ -154,11 +155,11 @@ class PerformanceMetricsCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildMetricTile(
+                  child: PerformanceMetricTile(
                     'DB Connections',
                     '${performance.activeConnections}',
                     NavIcons.databasePartitioning,
-                    AdminHelperMappers.performanceColor(
+                    StatusVisualMappers.performanceColor(
                       context,
                       performance.databaseConnectionUtilization,
                       70,
@@ -169,11 +170,11 @@ class PerformanceMetricsCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildMetricTile(
+                  child: PerformanceMetricTile(
                     'Queued Transactions',
                     '${performance.queuedTransactions}',
                     NavIcons.jobQueueManagement,
-                    AdminHelperMappers.performanceColor(
+                    StatusVisualMappers.performanceColor(
                       context,
                       performance.queuedTransactions.toDouble(),
                       5,
@@ -212,35 +213,6 @@ class PerformanceMetricsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricTile(String title, String value, String iconAsset, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          TraqIcon(iconAsset, color: color, size: 24),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 11),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showIsolationDialog(BuildContext context) {
     showDialog(

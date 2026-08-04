@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_action_button.dart';
-import 'package:traqtrace_app/features/auth/widgets/auth_staggered_entrance.dart';
 
 class BuildSuccessMessage extends StatelessWidget {
   final String title;
@@ -25,10 +25,10 @@ class BuildSuccessMessage extends StatelessWidget {
     final primary = c.primary;
     final textSecondary = c.textSecondary;
 
-    return AuthStaggeredEntrance(
+    return TraqStaggeredEntrance(
       children: [
         const SizedBox(height: 40),
-        AuthIconPop(
+        TraqIconPop(
           child: SvgPicture.asset(
             AppAssets.iconCheck,
             width: 100,

@@ -3,8 +3,6 @@ import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
 import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
 
-export 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
-
 BarcodeDetails extractBarcodeDetails(String rawBarcode) {
   final parsed = Gs1Parser.parseBarcode(rawBarcode);
 

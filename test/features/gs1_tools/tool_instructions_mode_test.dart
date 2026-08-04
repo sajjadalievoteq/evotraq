@@ -3,14 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/data/services/barcode_generation_service.dart';
+import 'package:traqtrace_app/data/services/barcode/barcode_generation_service.dart';
+import 'package:traqtrace_app/data/services/epcis/cbv_master_data_service.dart';
+import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
 import 'package:traqtrace_app/data/services/epcis/epcis_serialization_service.dart';
-import 'package:traqtrace_app/data/services/gs1_barcode_api_service.dart';
+import 'package:traqtrace_app/data/services/barcode/gs1_barcode_api_service.dart';
 import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/ai_element_tool.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/barcode_tool.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/validate_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/ai_element_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/barcode_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/validate_tool.dart';
 
 /// The instructions card must describe the mode that is actually selected.
 void main() {
@@ -21,6 +23,10 @@ void main() {
       barcodeGenerationService: BarcodeGenerationService(dioService: dio),
       gs1BarcodeApiService: GS1BarcodeApiService(dioService: dio),
       serializationService: EPCISSerializationService(dioService: dio),
+      cbvVocabularyService: CbvVocabularyService(
+        masterDataService: CbvMasterDataService(dioService: dio),
+        dioService: dio,
+      ),
     );
   }
 

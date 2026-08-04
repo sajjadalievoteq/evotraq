@@ -9,8 +9,8 @@ import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_list_utils.dart';
-import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/utils/aggregation_event_list_utils.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
 

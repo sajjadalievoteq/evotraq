@@ -48,6 +48,7 @@ class _AutomationNotificationActivityPanelState
         return AutomationWorkbenchPanel(
           title: 'Delivery Activity',
           instructions: _instructions,
+          fillBody: true,
           actions: [
             IconButton(
               tooltip: live

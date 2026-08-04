@@ -182,13 +182,13 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
             bindRefresh: (fn) => _refreshList = fn,
             onRequestCreate: _onRequestCreate,
           ),
-          detail: _buildRightPane(),
+          detail: _rightPane(),
         ),
       ),
     );
   }
 
-  Widget _buildRightPane() {
+  Widget _rightPane() {
     final viewPane = BlocBuilder<TCubit, TState>(
       builder: (context, state) {
         final listLoading = widget.isListLoading?.call(state) ?? false;

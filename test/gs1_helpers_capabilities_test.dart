@@ -4,8 +4,8 @@ import 'package:traqtrace_app/core/utils/gs1/gs1_ai_table.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_element_string_builder.dart';
 import 'package:traqtrace_app/core/utils/gs1/ndc_gtin_converter.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
-import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/data/services/barcode/epc_uri_converter.dart';
+import 'package:traqtrace_app/data/services/barcode/gs1_barcode_parser.dart';
 
 void main() {
   setUp(() {

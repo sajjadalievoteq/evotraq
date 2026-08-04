@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/data/services/barcode/epc_uri_converter.dart';
 
 abstract final class Gs1Converter {
   static String? barcodeToEpc(String barcode) {

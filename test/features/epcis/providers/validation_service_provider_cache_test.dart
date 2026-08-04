@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/data/services/epcis/validation_service.dart';
-import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
+import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';

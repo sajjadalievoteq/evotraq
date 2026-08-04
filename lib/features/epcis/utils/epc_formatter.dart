@@ -1,6 +1,6 @@
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/data/services/barcode/epc_uri_converter.dart';
 
 
 class EPCFormatter {

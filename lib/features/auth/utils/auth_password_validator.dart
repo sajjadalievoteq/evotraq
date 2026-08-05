@@ -1,10 +1,10 @@
 abstract final class AuthPasswordValidator {
-  static const int minLength = 8;
+  static const int minLength = 12;
 
   static String? validate(
     String? value, {
     String emptyMessage = 'Please enter a password',
-    String tooShortMessage = 'Password must be at least 8 characters',
+    String tooShortMessage = 'Password must be at least 12 characters',
   }) {
     if (value == null || value.isEmpty) {
       return emptyMessage;

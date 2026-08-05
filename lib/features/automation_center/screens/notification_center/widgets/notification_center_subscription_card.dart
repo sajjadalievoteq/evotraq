@@ -7,7 +7,8 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
-import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/notification_center_stat_tile.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_card_status_chip.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_stat_tile.dart';
 
 class NotificationCenterSubscriptionCard extends StatelessWidget {
   const NotificationCenterSubscriptionCard({
@@ -25,13 +26,13 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
         (stats.successfulNotifications > 0 ||
             stats.failedNotifications > 0 ||
             stats.totalNotifications > 0);
-    final statusActive = subscription.status == 'ACTIVE';
-    final statusColor =
-        statusActive ? AppColorMapper.successColor(context) : c.textMuted;
 
     return TraqCard(
       padding: EdgeInsets.zero,
       child: InkWell(
+        // Keep hardcoded navigation (same as before). The management
+        // [SubscriptionCard] uses an [onViewDetails] callback; wiring that
+        // here would require call-site changes outside this consolidation.
         onTap: () => context.go('/notifications/${subscription.id}'),
         borderRadius: TraqRadius.card,
         child: Padding(
@@ -79,26 +80,29 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final narrow = constraints.maxWidth < 360;
+                    // Preserve NC's 4-metric bordered tiles (Delivered / Failed /
+                    // Matched / Success Rate). [SubscriptionStatsRow] shows a
+                    // different 3-metric compact layout for the management card.
                     final tiles = [
-                      NotificationCenterStatTile(
+                      SubscriptionStatTile(
                         label: 'Delivered',
                         value: '${stats.successfulNotifications}',
                         color: AppColorMapper.successColor(context),
                         iconAsset: AppAssets.iconCheckCircle,
                       ),
-                      NotificationCenterStatTile(
+                      SubscriptionStatTile(
                         label: 'Failed',
                         value: '${stats.failedNotifications}',
                         color: AppColorMapper.errorColor(context),
                         iconAsset: AppAssets.iconXCircle,
                       ),
-                      NotificationCenterStatTile(
+                      SubscriptionStatTile(
                         label: 'Matched',
                         value: '${stats.totalNotifications}',
                         color: AppColorMapper.infoColor(context),
                         iconAsset: NavIcons.notifications,
                       ),
-                      NotificationCenterStatTile(
+                      SubscriptionStatTile(
                         label: 'Success Rate',
                         value:
                             '${(stats.successRate * 100).toStringAsFixed(0)}%',
@@ -134,21 +138,7 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
               const SizedBox(height: TraqSpacing.sm),
               Row(
                 children: [
-                  TraqIcon(
-                    statusActive
-                        ? AppAssets.iconCheckCircle
-                        : AppAssets.iconPause,
-                    size: 16,
-                    color: statusColor,
-                  ),
-                  const SizedBox(width: TraqSpacing.xs),
-                  Text(
-                    subscription.status,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: statusColor,
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
+                  SubscriptionCardStatusChip(status: subscription.status),
                   const Spacer(),
                   Flexible(
                     child: Text(

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_api_consts.dart';
@@ -76,7 +77,7 @@ class GTINService {
     }
   }
 
-  Future<List<GTIN>> getGTINs({
+  Future<Map<String, dynamic>> getGTINsPaginated({
     String? manufacturer,
     String? status,
     int page = 0,
@@ -84,7 +85,7 @@ class GTINService {
   }) async {
     final queryParams = <String, dynamic>{
       'page': page,
-      'size': size,
+      'size': PageResponseUtils.clampSize(size),
       'manufacturer': ?manufacturer,
       'status': ?status,
     };
@@ -99,13 +100,18 @@ class GTINService {
 
     if (response.statusCode == 200) {
       try {
-        final data = json.decode(response.data);
-        if (data['content'] != null) {
-          return (data['content'] as List)
-              .map((item) => GTIN.fromJson(item))
-              .toList();
-        }
-        return [];
+        final raw = PageResponseUtils.normalizeBody(json.decode(response.data));
+        final gtins = PageResponseUtils.contentList(raw)
+            .map((item) => GTIN.fromJson(item as Map<String, dynamic>))
+            .toList();
+        return {
+          'gtins': gtins,
+          'totalElements': raw['totalElements'] ?? gtins.length,
+          'totalPages': PageResponseUtils.totalPages(raw),
+          'currentPage': PageResponseUtils.pageNumber(raw, fallback: page),
+          'pageSize': PageResponseUtils.pageSize(raw, fallback: size),
+          'hasMoreData': !PageResponseUtils.isLast(raw),
+        };
       } catch (e) {
         final ex = ApiException(
           statusCode: response.statusCode,
@@ -113,7 +119,7 @@ class GTINService {
           originalException: e,
           responseBody: response.data is String ? response.data as String? : null,
         );
-        _log('getGTINs:fromJson', ex, path: _base, body: ex.responseBody);
+        _log('getGTINsPaginated:fromJson', ex, path: _base, body: ex.responseBody);
         throw ex;
       }
     } else {
@@ -122,10 +128,45 @@ class GTINService {
         message: 'Failed to load GTINs: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String? : null,
       );
-      _log('getGTINs', ex,
+      _log('getGTINsPaginated', ex,
           path: _base, statusCode: response.statusCode, body: ex.responseBody);
       throw ex;
     }
+  }
+
+  Future<List<GTIN>> getGTINs({
+    String? manufacturer,
+    String? status,
+    int page = 0,
+    int size = 20,
+  }) async {
+    final result = await getGTINsPaginated(
+      manufacturer: manufacturer,
+      status: status,
+      page: page,
+      size: size,
+    );
+    return result['gtins'] as List<GTIN>;
+  }
+
+  Future<List<GTIN>> fetchAllGTINs({
+    String? manufacturer,
+    String? status,
+  }) async {
+    final all = <GTIN>[];
+    var page = 0;
+    while (true) {
+      final result = await getGTINsPaginated(
+        manufacturer: manufacturer,
+        status: status,
+        page: page,
+        size: PageResponseUtils.maxPageSize,
+      );
+      all.addAll(result['gtins'] as List<GTIN>);
+      if (!(result['hasMoreData'] as bool? ?? false)) break;
+      page++;
+    }
+    return all;
   }
 
   Future<Map<String, dynamic>> searchGTINsAdvanced({

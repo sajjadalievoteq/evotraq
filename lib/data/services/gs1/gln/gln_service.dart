@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
@@ -20,33 +21,65 @@ class GLNService {
     GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
   };
 
-  Future<List<GLN>> getAllGLNs({int? page, int? size}) async {
-    String url = _base;
-    if (page != null && size != null) {
-      url += '?page=$page&size=$size';
-    }
-
+  Future<Map<String, dynamic>> getAllGLNsPaginated({
+    int page = 0,
+    int size = PageResponseUtils.defaultPageSize,
+  }) async {
     final response = await _dioService.get(
-      url,
+      _base,
+      queryParameters: {
+        'page': page.toString(),
+        'size': PageResponseUtils.clampSize(size).toString(),
+      },
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (kDebugMode) {
-      debugPrint('[GLNService] getAllGLNs status=${response.statusCode}');
+      debugPrint('[GLNService] getAllGLNsPaginated status=${response.statusCode}');
     }
 
     if (response.statusCode == 200) {
-      final decoded = json.decode(response.data);
-      return parseGlnListFromResponseData(decoded);
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: GlnApiMessages.failedToLoadGlns(response.statusMessage),
-        responseBody: response.data is String ? response.data as String? : null,
-      );
+      final raw = PageResponseUtils.normalizeBody(json.decode(response.data));
+      final glns = parseGlnListFromResponseData(raw);
+      return {
+        'glns': glns,
+        'totalElements': raw['totalElements'] ?? glns.length,
+        'totalPages': PageResponseUtils.totalPages(raw),
+        'currentPage': PageResponseUtils.pageNumber(raw, fallback: page),
+        'pageSize': PageResponseUtils.pageSize(raw, fallback: size),
+        'hasMoreData': !PageResponseUtils.isLast(raw),
+      };
     }
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: GlnApiMessages.failedToLoadGlns(response.statusMessage),
+      responseBody: response.data is String ? response.data as String? : null,
+    );
+  }
+
+  Future<List<GLN>> getAllGLNs({int? page, int? size}) async {
+    if (page != null && size != null) {
+      final result = await getAllGLNsPaginated(page: page, size: size);
+      return result['glns'] as List<GLN>;
+    }
+    return fetchAllGLNs();
+  }
+
+  Future<List<GLN>> fetchAllGLNs() async {
+    final all = <GLN>[];
+    var page = 0;
+    while (true) {
+      final result = await getAllGLNsPaginated(
+        page: page,
+        size: PageResponseUtils.maxPageSize,
+      );
+      all.addAll(result['glns'] as List<GLN>);
+      if (!(result['hasMoreData'] as bool? ?? false)) break;
+      page++;
+    }
+    return all;
   }
 
   Future<GLN> getGLNById(String id) async {
@@ -173,6 +206,55 @@ class GLNService {
     );
   }
 
+  Future<Map<String, dynamic>> _getGlnListPage(
+    String url, {
+    Map<String, String>? queryParameters,
+    required int page,
+    required int size,
+  }) async {
+    final params = <String, String>{
+      ...?queryParameters,
+      'page': page.toString(),
+      'size': PageResponseUtils.clampSize(size).toString(),
+    };
+    final response = await _dioService.get(
+      url,
+      queryParameters: params,
+      headers: _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      return PageResponseUtils.normalizeBody(json.decode(response.data));
+    }
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: GlnApiMessages.failedToSearchGlns(response.statusMessage),
+      responseBody: response.data is String ? response.data as String? : null,
+    );
+  }
+
+  Future<List<GLN>> _fetchAllGlnListPages(
+    String url, {
+    Map<String, String>? queryParameters,
+  }) async {
+    final all = <GLN>[];
+    var page = 0;
+    while (true) {
+      final raw = await _getGlnListPage(
+        url,
+        queryParameters: queryParameters,
+        page: page,
+        size: PageResponseUtils.maxPageSize,
+      );
+      all.addAll(parseGlnListFromResponseData(raw));
+      if (PageResponseUtils.isLast(raw)) break;
+      page++;
+    }
+    return all;
+  }
+
   Future<List<GLN>> searchGLNs({
     String? searchTerm,
     String? locationType,
@@ -180,41 +262,28 @@ class GLNService {
     int? page,
     int? size,
   }) async {
-    var queryParams = <String, String>{};
+    final baseParams = <String, String>{};
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      queryParams['search'] = searchTerm;
+      baseParams['search'] = searchTerm;
     }
     if (locationType != null && locationType.isNotEmpty) {
-      queryParams['locationType'] = locationType;
+      baseParams['locationType'] = locationType;
     }
     if (active != null) {
-      queryParams['active'] = active.toString();
-    }
-    if (page != null) {
-      queryParams['page'] = page.toString();
-    }
-    if (size != null) {
-      queryParams['size'] = size.toString();
+      baseParams['active'] = active.toString();
     }
 
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${GlnMasterDataApiConsts.search}',
-      queryParameters: queryParams,
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final decoded = json.decode(response.data);
-      return parseGlnListFromResponseData(decoded);
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: GlnApiMessages.failedToSearchGlns(response.statusMessage),
-        responseBody: response.data is String ? response.data as String? : null,
+    final url = '${_dioService.baseUrl}${GlnMasterDataApiConsts.search}';
+    if (page != null && size != null) {
+      final raw = await _getGlnListPage(
+        url,
+        queryParameters: baseParams,
+        page: page,
+        size: size,
       );
+      return parseGlnListFromResponseData(raw);
     }
+    return _fetchAllGlnListPages(url, queryParameters: baseParams);
   }
 
   Future<Map<String, dynamic>> searchGLNsAdvanced({
@@ -269,43 +338,15 @@ class GLNService {
   }
 
   Future<List<GLN>> getExpiredLicenseGLNs() async {
-    final response = await _dioService.get(
+    return _fetchAllGlnListPages(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.expiredLicenses}',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.data);
-      return parseGlnListFromResponseData(responseData);
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: GlnApiMessages.failedExpiredLicenses(response.statusMessage),
-        responseBody: response.data is String ? response.data as String? : null,
-      );
-    }
   }
 
   Future<List<GLN>> getChildGLNs(String parentGlnCode) async {
-    final response = await _dioService.get(
+    return _fetchAllGlnListPages(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.parentChildrenPath(parentGlnCode)}',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.data);
-      return parseGlnListFromResponseData(responseData);
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: GlnApiMessages.failedChildGlns(response.statusMessage),
-        responseBody: response.data is String ? response.data as String? : null,
-      );
-    }
   }
 
   Future<bool> validateGLNCode(String glnCode) async {

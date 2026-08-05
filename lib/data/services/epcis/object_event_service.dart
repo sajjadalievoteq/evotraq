@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart';
@@ -28,34 +29,53 @@ class ObjectEventService {
   }
 
   Future<Map<String, dynamic>> getAllEventsPaginated(int page, int size) async {
+    final raw = await _getObjectEventsPage(_baseUrl, page: page, size: size);
+    final content = PageResponseUtils.contentList(raw)
+        .map((e) => ObjectEvent.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return PageResponseUtils.toResultMap(content: content, raw: raw);
+  }
+
+  Future<Map<String, dynamic>> _getObjectEventsPage(
+    String path, {
+    Map<String, String>? queryParameters,
+    required int page,
+    required int size,
+  }) async {
     final headers = await _getHeaders();
+    final params = <String, String>{
+      ...?queryParameters,
+      ObjectEventApiConstants.queryPage: page.toString(),
+      ObjectEventApiConstants.querySize:
+          PageResponseUtils.clampSize(size).toString(),
+    };
     final response = await _dioService.get(
-      _baseUrl,
-      queryParameters: {
-        ObjectEventApiConstants.queryPage: page.toString(),
-        ObjectEventApiConstants.querySize: size.toString(),
-      },
+      path,
+      queryParameters: params,
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.data);
-      final List<dynamic> content = data['content'];
-
-      return {
-        'content': content.map((e) => ObjectEvent.fromJson(e)).toList(),
-        'totalElements': data['totalElements'],
-        'totalPages': data['totalPages'],
-        'currentPage': data['number'],
-        'size': data['size'],
-        'first': data['first'],
-        'last': data['last'],
-      };
-    } else {
-      throw Exception('Failed to load events: ${response.statusCode}');
+      return PageResponseUtils.normalizeBody(json.decode(response.data));
     }
+    throw Exception('Failed to load object events: ${response.statusCode}');
+  }
+
+  Future<List<ObjectEvent>> _fetchAllObjectEvents(
+    String path, {
+    Map<String, String>? queryParameters,
+  }) {
+    return PageResponseUtils.fetchAllPages(
+      fetchPage: (page, size) => _getObjectEventsPage(
+        path,
+        queryParameters: queryParameters,
+        page: page,
+        size: size,
+      ),
+      parseItem: ObjectEvent.fromJson,
+    );
   }
 
   Future<ObjectEvent> getObjectEventById(String id) async {
@@ -408,109 +428,43 @@ class ObjectEventService {
   }
 
   Future<List<ObjectEvent>> findObjectEventsByAction(String action) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentAction}/$action',
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by action: ${response.statusCode}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByEPC(String epc) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentEpc}',
       queryParameters: {ObjectEventApiConstants.queryEpc: epc},
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by EPC: ${response.statusCode}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByEPCs(List<String> epcs) async {
-    final headers = await _getHeaders();
-    final epcsParam = epcs.join(',');
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentEpcs}',
-      queryParameters: {ObjectEventApiConstants.queryEpcs: epcsParam},
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
+      queryParameters: {ObjectEventApiConstants.queryEpcs: epcs.join(',')},
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by EPCs: ${response.data}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByEPCClass(String epcClass) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentEpcClass}',
       queryParameters: {ObjectEventApiConstants.queryEpcClass: epcClass},
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by EPC class: ${response.statusCode}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByILMD(
     String property,
     String value,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentIlmd}',
       queryParameters: {
         ObjectEventApiConstants.queryProperty: property,
         ObjectEventApiConstants.queryValue: value,
       },
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by ILMD: ${response.data}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByQuantity(
@@ -518,121 +472,56 @@ class ObjectEventService {
     double minQuantity,
     double maxQuantity,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentQuantity}',
       queryParameters: {
         ObjectEventApiConstants.queryEpcClass: epcClass,
         ObjectEventApiConstants.queryMin: minQuantity.toString(),
         ObjectEventApiConstants.queryMax: maxQuantity.toString(),
       },
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by quantity: ${response.statusCode}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByBusinessStep(
     String businessStep,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep',
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by business step: ${response.data}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByDisposition(
     String disposition,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentDisposition}/$disposition',
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by disposition: ${response.data}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByLocation(
     String locationGLN,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentLocation}',
       queryParameters: {
         ObjectEventApiConstants.queryLocationGln: locationGLN,
       },
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by location: ${response.data}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByTimeWindow(
     DateTime startTime,
     DateTime endTime,
   ) async {
-    final headers = await _getHeaders();
-    final startTimeStr = startTime.toUtc().toIso8601String();
-    final endTimeStr = endTime.toUtc().toIso8601String();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentTimeRange}',
       queryParameters: {
-        ObjectEventApiConstants.queryStartTime: startTimeStr,
-        ObjectEventApiConstants.queryEndTime: endTimeStr,
+        ObjectEventApiConstants.queryStartTime:
+            startTime.toUtc().toIso8601String(),
+        ObjectEventApiConstants.queryEndTime:
+            endTime.toUtc().toIso8601String(),
       },
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by time window: ${response.data}',
-      );
-    }
   }
 
   Future<List<ObjectEvent>> findObjectEventsByLocationAndTimeWindow(
@@ -640,29 +529,16 @@ class ObjectEventService {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    final headers = await _getHeaders();
-    final startTimeStr = startTime.toUtc().toIso8601String();
-    final endTimeStr = endTime.toUtc().toIso8601String();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentLocation}/${ObjectEventApiConstants.segmentTimeRange}',
       queryParameters: {
         ObjectEventApiConstants.queryLocationGln: locationGLN,
-        ObjectEventApiConstants.queryStartTime: startTimeStr,
-        ObjectEventApiConstants.queryEndTime: endTimeStr,
+        ObjectEventApiConstants.queryStartTime:
+            startTime.toUtc().toIso8601String(),
+        ObjectEventApiConstants.queryEndTime:
+            endTime.toUtc().toIso8601String(),
       },
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by location and time window: ${response.data}',
-      );
-    }
   }
 
   Future<Map<String, dynamic>> getEventStatistics({
@@ -720,21 +596,7 @@ class ObjectEventService {
   }
 
   Future<List<ObjectEvent>> findEPCHistory(String epc) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}',
-      queryParameters: {ObjectEventApiConstants.queryEpc: epc},
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception('Failed to fetch EPC history: ${response.statusCode}');
-    }
+    return findObjectEventsByEPC(epc);
   }
 
   Future<ObjectEvent> getCurrentStatusOfEPC(String epc) async {
@@ -863,30 +725,14 @@ class ObjectEventService {
   Future<List<ObjectEvent>> findObjectEventsWithSensorData(
     Map<String, dynamic> sensorCriteria,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      _baseUrl,
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.data);
-      final List<dynamic> content = data['content'];
-      return content
-          .map((e) => ObjectEvent.fromJson(e))
-          .where(
-            (event) =>
-                event.sensorElementList != null &&
-                event.sensorElementList!.isNotEmpty,
-          )
-          .toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events with sensor data: ${response.data}',
-      );
-    }
+    final all = await _fetchAllObjectEvents(_baseUrl);
+    return all
+        .where(
+          (event) =>
+              event.sensorElementList != null &&
+              event.sensorElementList!.isNotEmpty,
+        )
+        .toList();
   }
 
   Future<bool> validateEPC(String epc) async {
@@ -923,23 +769,10 @@ class ObjectEventService {
     String businessStep,
     String epc,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep/${ObjectEventApiConstants.segmentEpc}',
       queryParameters: {ObjectEventApiConstants.queryEpc: epc},
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch object events by business step and EPC: ${response.data}',
-      );
-    }
   }
 
   Future<Map<String, dynamic>> searchObjectEvents({
@@ -993,40 +826,21 @@ class ObjectEventService {
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.data);
-      final List<dynamic> content = data['content'];
-      return {
-        'content': content.map((e) => ObjectEvent.fromJson(e)).toList(),
-        'totalElements': data['totalElements'],
-        'totalPages': data['totalPages'],
-        'currentPage': data['number'],
-        'size': data['size'],
-        'first': data['first'],
-        'last': data['last'],
-      };
+      final raw = PageResponseUtils.normalizeBody(json.decode(response.data));
+      final content = PageResponseUtils.contentList(raw)
+          .map((e) => ObjectEvent.fromJson(e as Map<String, dynamic>))
+          .toList();
+      return PageResponseUtils.toResultMap(content: content, raw: raw);
     } else {
       throw Exception('Failed to search object events: ${response.statusCode}');
     }
   }
 
   Future<List<ObjectEvent>> getEpcHistory(String epc) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllObjectEvents(
       '$_baseUrl/${ObjectEventApiConstants.segmentEpc}/${ObjectEventApiConstants.segmentHistory}',
       queryParameters: {ObjectEventApiConstants.queryEpc: epc},
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception(
-        'Failed to fetch EPC history: ${response.statusCode}',
-      );
-    }
   }
 
   String _localTimezoneOffset() {

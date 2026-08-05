@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
-import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/notification_center_embedded_body.dart';
-import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/notification_center_standalone_scaffold.dart';
+import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/notification_center_body.dart';
+import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/notification_connection_status.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_embedded_body.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_filter_chips.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_standalone_scaffold.dart';
+
+/// Notification-center filter options (UI labels only; filter logic stays in
+/// [SubscriptionFilterUtils.filterCenter]).
+const List<SubscriptionFilterOption> kNotificationCenterFilterOptions = [
+  SubscriptionFilterOption(label: 'All subscriptions', value: 'all'),
+  SubscriptionFilterOption(label: 'With deliveries', value: 'activity'),
+  SubscriptionFilterOption(label: 'Active only', value: 'active'),
+];
 
 /// Aggregate delivery activity for subscriptions (not a per-event inbox).
 class NotificationCenterScreen extends StatefulWidget {
@@ -72,29 +87,140 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
       builder: (context, state) {
         final live = _isLive(state);
         if (widget.embedded) {
-          return NotificationCenterEmbeddedBody(
-            state: state,
-            live: live,
+          return _buildEmbedded(context, state, live);
+        }
+        return _buildStandalone(context, state, live);
+      },
+    );
+  }
+
+  Widget _buildEmbedded(
+    BuildContext context,
+    NotificationState state,
+    bool live,
+  ) {
+    final c = context.colors;
+    return SubscriptionEmbeddedBody(
+      description: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              'Aggregate Delivered / Failed counters per subscription. '
+              'This is not a per-event notification inbox.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: c.textMuted,
+                  ),
+            ),
+          ),
+          const SizedBox(width: TraqSpacing.sm),
+          NotificationConnectionStatus(live: live),
+        ],
+      ),
+      filterChips: SubscriptionFilterChips(
+        options: kNotificationCenterFilterOptions,
+        selectedFilter: _selectedFilter,
+        onFilterSelected: (filter) => setState(() => _selectedFilter = filter),
+      ),
+      body: NotificationCenterBody(
+        state: state,
+        selectedFilter: _selectedFilter,
+        shrinkWrap: true,
+        onRefresh: refresh,
+        onClearFilters: () => setState(() => _selectedFilter = 'all'),
+        onPrimaryAction: goManageSubscriptions,
+      ),
+    );
+  }
+
+  Widget _buildStandalone(
+    BuildContext context,
+    NotificationState state,
+    bool live,
+  ) {
+    final c = context.colors;
+    return SubscriptionStandaloneScaffold(
+      title: 'Delivery Activity',
+      actions: [
+        IconButton(
+          icon: TraqIcon(
+            live ? AppAssets.iconWifi : AppAssets.iconWifiOff,
+            color: live
+                ? AppColorMapper.successColor(context)
+                : AppColorMapper.errorColor(context),
+          ),
+          onPressed: () => _toggleWebSocketConnection(live),
+          tooltip: live
+              ? 'Connected to real-time updates'
+              : 'Disconnected',
+        ),
+        IconButton(
+          icon: TraqIcon(AppAssets.iconSettings),
+          onPressed: goManageSubscriptions,
+          tooltip: 'Manage Subscriptions',
+        ),
+        IconButton(
+          icon: TraqIcon(AppAssets.iconRefresh),
+          onPressed: refresh,
+          tooltip: 'Refresh',
+        ),
+      ],
+      header: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Delivery activity',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: c.textPrimary,
+                              ),
+                    ),
+                    const SizedBox(height: TraqSpacing.sm),
+                    Text(
+                      'Aggregate Delivered / Failed counters per '
+                      'subscription. This is not a per-event '
+                      'notification inbox.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: c.textMuted,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: TraqSpacing.sm),
+              NotificationConnectionStatus(live: live),
+            ],
+          ),
+          const SizedBox(height: TraqSpacing.lg),
+          SubscriptionFilterChips(
+            options: kNotificationCenterFilterOptions,
             selectedFilter: _selectedFilter,
             onFilterSelected: (filter) =>
                 setState(() => _selectedFilter = filter),
-            onRefresh: refresh,
-            onClearFilters: () => setState(() => _selectedFilter = 'all'),
-            onPrimaryAction: goManageSubscriptions,
-          );
-        }
-        return NotificationCenterStandaloneScaffold(
-          state: state,
-          live: live,
-          selectedFilter: _selectedFilter,
-          onFilterSelected: (filter) =>
-              setState(() => _selectedFilter = filter),
-          onToggleLive: () => _toggleWebSocketConnection(live),
-          onManageSubscriptions: goManageSubscriptions,
-          onRefresh: refresh,
-          onClearFilters: () => setState(() => _selectedFilter = 'all'),
-        );
-      },
+          ),
+        ],
+      ),
+      body: NotificationCenterBody(
+        state: state,
+        selectedFilter: _selectedFilter,
+        shrinkWrap: false,
+        onRefresh: refresh,
+        onClearFilters: () => setState(() => _selectedFilter = 'all'),
+        onPrimaryAction: goManageSubscriptions,
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: goManageSubscriptions,
+        icon: TraqIcon(AppAssets.iconPlus),
+        label: const Text('Add Subscription'),
+      ),
     );
   }
 

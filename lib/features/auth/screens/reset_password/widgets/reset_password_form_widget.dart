@@ -75,7 +75,7 @@ class _ResetPasswordFormWidgetState extends State<ResetPasswordFormWidget> {
           const SizedBox(height: 16),
           AuthHeroSubtitle(
             subtitle:
-                'Your password must be at least 8 characters long and include a mix of letters, numbers, and symbols.',
+                'Your password must be at least 12 characters long and include a mix of letters, numbers, and symbols.',
             color: c.textSecondary,
           ),
           const SizedBox(height: 32),

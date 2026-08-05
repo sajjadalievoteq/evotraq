@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
@@ -135,227 +136,90 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  Future<List<SSCCPharmaceuticalExtension>> findColdChainShipments() async {
+  Future<Map<String, dynamic>> _getPharmaExtensionPage(
+    String path, {
+    required int page,
+    required int size,
+  }) async {
     final response = await _dioService.get(
-      '$_legacyQueryBase/cold-chain',
+      path,
+      queryParameters: {
+        'page': page.toString(),
+        'size': PageResponseUtils.clampSize(size).toString(),
+      },
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch cold chain shipments: ${response.statusCode}',
-      );
+      return PageResponseUtils.normalizeBody(jsonDecode(response.data));
     }
+    throw ApiException(
+      message: 'Failed to fetch pharmaceutical extensions: ${response.statusCode}',
+    );
+  }
+
+  Future<List<SSCCPharmaceuticalExtension>> _fetchAllPharmaExtensions(
+    String path,
+  ) {
+    return PageResponseUtils.fetchAllPages(
+      fetchPage: (page, size) => _getPharmaExtensionPage(
+        path,
+        page: page,
+        size: size,
+      ),
+      parseItem: SSCCPharmaceuticalExtension.fromJson,
+    );
+  }
+
+  Future<List<SSCCPharmaceuticalExtension>> findColdChainShipments() async {
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/cold-chain');
   }
 
   Future<List<SSCCPharmaceuticalExtension>>
       findTemperatureMonitoredShipments() async {
-    final response = await _dioService.get(
-      '$_legacyQueryBase/temperature-monitored',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch temperature monitored shipments: ${response.statusCode}',
-      );
-    }
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/temperature-monitored');
   }
 
   Future<List<SSCCPharmaceuticalExtension>> findGdpCompliantShipments() async {
-    final response = await _dioService.get(
-      '$_legacyQueryBase/gdp-compliant',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch GDP compliant shipments: ${response.statusCode}',
-      );
-    }
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/gdp-compliant');
   }
 
   Future<List<SSCCPharmaceuticalExtension>>
       findControlledSubstanceShipments() async {
-    final response = await _dioService.get(
-      '$_legacyQueryBase/controlled-substance',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch controlled substance shipments: ${response.statusCode}',
-      );
-    }
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/controlled-substance');
   }
 
   Future<List<SSCCPharmaceuticalExtension>> findByDeaSchedule(
       String deaSchedule) async {
-    final response = await _dioService.get(
+    return _fetchAllPharmaExtensions(
       '$_legacyQueryBase/dea-schedule/$deaSchedule',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch DEA schedule shipments: ${response.statusCode}',
-      );
-    }
   }
 
   Future<List<SSCCPharmaceuticalExtension>> findHazmatShipments() async {
-    final response = await _dioService.get(
-      '$_legacyQueryBase/hazmat',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch hazmat shipments: ${response.statusCode}',
-      );
-    }
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/hazmat');
   }
 
   Future<List<SSCCPharmaceuticalExtension>> findChainOfCustodyShipments() async {
-    final response = await _dioService.get(
-      '$_legacyQueryBase/chain-of-custody',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch chain of custody shipments: ${response.statusCode}',
-      );
-    }
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/chain-of-custody');
   }
 
   Future<List<SSCCPharmaceuticalExtension>>
       findSignatureRequiredShipments() async {
-    final response = await _dioService.get(
-      '$_legacyQueryBase/signature-required',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch signature required shipments: ${response.statusCode}',
-      );
-    }
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/signature-required');
   }
 
   Future<List<SSCCPharmaceuticalExtension>> findClinicalTrialShipments() async {
-    final response = await _dioService.get(
-      '$_legacyQueryBase/clinical-trial',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch clinical trial shipments: ${response.statusCode}',
-      );
-    }
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/clinical-trial');
   }
 
   Future<List<SSCCPharmaceuticalExtension>> findFragileShipments() async {
-    final response = await _dioService.get(
-      '$_legacyQueryBase/fragile',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch fragile shipments: ${response.statusCode}',
-      );
-    }
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/fragile');
   }
 
   Future<List<SSCCPharmaceuticalExtension>> findDoNotStackShipments() async {
-    final response = await _dioService.get(
-      '$_legacyQueryBase/do-not-stack',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data
-          .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
-          .toList();
-    } else {
-      throw ApiException(message:
-        'Failed to fetch do-not-stack shipments: ${response.statusCode}',
-      );
-    }
+    return _fetchAllPharmaExtensions('$_legacyQueryBase/do-not-stack');
   }
 }

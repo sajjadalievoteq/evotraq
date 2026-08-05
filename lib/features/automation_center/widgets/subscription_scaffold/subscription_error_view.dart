@@ -4,13 +4,15 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-class SubscriptionManagementError extends StatelessWidget {
-  const SubscriptionManagementError({
+class SubscriptionErrorView extends StatelessWidget {
+  const SubscriptionErrorView({
     super.key,
+    required this.title,
     required this.message,
     required this.onRetry,
   });
 
+  final String title;
   final String message;
   final VoidCallback onRetry;
 
@@ -30,7 +32,7 @@ class SubscriptionManagementError extends StatelessWidget {
             ),
             const SizedBox(height: TraqSpacing.lg),
             Text(
-              'Error Loading Subscriptions',
+              title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: c.textPrimary,
                   ),

@@ -135,7 +135,7 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
                   if (value == null || value.isEmpty) {
                     return UserStrings.enterNewPassword;
                   }
-                  if (value.length < 8) {
+                  if (value.length < 12) {
                     return UserStrings.passwordAtLeast8Chars;
                   }
                   return null;

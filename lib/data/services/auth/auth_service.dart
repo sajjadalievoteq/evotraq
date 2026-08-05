@@ -102,6 +102,12 @@ class AuthService {
       return 'Incorrect username/email or password.';
     }
 
+    if (statusCode == 429 ||
+        normalized.contains('too many') ||
+        normalized.contains('rate limit')) {
+      return 'Too many attempts. Please wait a moment and try again.';
+    }
+
     if (normalized.contains('password') &&
         normalized.contains('confirm') &&
         normalized.contains('match')) {

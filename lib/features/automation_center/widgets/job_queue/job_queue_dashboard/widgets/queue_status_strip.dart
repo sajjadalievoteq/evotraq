@@ -96,8 +96,6 @@ class JobQueueStatusStrip extends StatelessWidget {
             child: _Toolbar(
               lastUpdated: snapshot.lastUpdated,
               autoRefresh: snapshot.autoRefresh,
-              onRefresh: onRefresh,
-              onSchedule: onSchedule,
               onToggleAutoRefresh: onToggleAutoRefresh,
               onSettings: onSettings,
             ),
@@ -159,16 +157,12 @@ class _Toolbar extends StatelessWidget {
   const _Toolbar({
     required this.lastUpdated,
     required this.autoRefresh,
-    required this.onRefresh,
-    required this.onSchedule,
     required this.onToggleAutoRefresh,
     this.onSettings,
   });
 
   final DateTime? lastUpdated;
   final bool autoRefresh;
-  final VoidCallback onRefresh;
-  final VoidCallback onSchedule;
   final ValueChanged<bool> onToggleAutoRefresh;
   final VoidCallback? onSettings;
 
@@ -201,26 +195,15 @@ class _Toolbar extends StatelessWidget {
             ),
           ],
         ),
-        // Secondary action — outlined, not solid blue.
-        OutlinedButton.icon(
-          onPressed: onRefresh,
-          icon: TraqIcon(AppAssets.iconRefresh, size: 14),
-          label: const Text('Refresh'),
-        ),
         if (onSettings != null)
           IconButton(
+
+            padding: EdgeInsets.zero,
             tooltip: 'Queue settings',
             onPressed: onSettings,
             icon: TraqIcon(AppAssets.iconSettings),
           ),
-        // Primary action — theme primary (not ad-hoc green).
-        // CustomElevatedButton is full-bleed; FilledButton uses the same
-        // TraqTheme primary filled style for compact toolbars.
-        FilledButton.icon(
-          onPressed: onSchedule,
-          icon: TraqIcon(AppAssets.iconClock, size: 14),
-          label: const Text('Schedule Job'),
-        ),
+
       ],
     );
   }

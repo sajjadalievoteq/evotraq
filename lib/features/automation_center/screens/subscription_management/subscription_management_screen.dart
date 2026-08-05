@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
-import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_management_embedded_body.dart';
-import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_management_standalone_scaffold.dart';
+import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_management_body.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/notification_subscription_help.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_embedded_body.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_filter_chips.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_standalone_scaffold.dart';
+
+/// Subscription-management filter options (UI labels only; filter logic stays
+/// in [SubscriptionFilterUtils.filterManagement]).
+const List<SubscriptionFilterOption> kSubscriptionManagementFilterOptions = [
+  SubscriptionFilterOption(label: 'All', value: 'all'),
+  SubscriptionFilterOption(label: 'Email Only', value: 'email'),
+  SubscriptionFilterOption(label: 'Active', value: 'active'),
+  SubscriptionFilterOption(label: 'Paused', value: 'paused'),
+];
 
 class SubscriptionManagementScreen extends StatefulWidget {
   const SubscriptionManagementScreen({super.key, this.embedded = false});
@@ -39,9 +53,28 @@ class SubscriptionManagementScreenState
   @override
   Widget build(BuildContext context) {
     if (widget.embedded) {
-      return SubscriptionManagementEmbeddedBody(
+      return _buildEmbedded(context);
+    }
+    return _buildStandalone(context);
+  }
+
+  Widget _buildEmbedded(BuildContext context) {
+    final c = context.colors;
+    return SubscriptionEmbeddedBody(
+      description: Text(
+        'Filter by delivery method or status. Supports webhook and email delivery.',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: c.textMuted,
+            ),
+      ),
+      filterChips: SubscriptionFilterChips(
+        options: kSubscriptionManagementFilterOptions,
         selectedFilter: _selectedFilter,
         onFilterSelected: (filter) => setState(() => _selectedFilter = filter),
+      ),
+      body: SubscriptionManagementBody(
+        selectedFilter: _selectedFilter,
+        shrinkWrap: true,
         onRefresh: refresh,
         onEdit: (sub) => _editSubscription(sub.id),
         onDelete: (sub) => _deleteSubscription(sub.id),
@@ -50,20 +83,69 @@ class SubscriptionManagementScreenState
         onViewDetails: (sub) => _viewSubscriptionDetails(sub.id),
         onClearFilters: () => setState(() => _selectedFilter = 'all'),
         onCreate: () => _showCreateSubscriptionDialog(context),
-      );
-    }
-    return SubscriptionManagementStandaloneScaffold(
-      selectedFilter: _selectedFilter,
-      onFilterSelected: (filter) => setState(() => _selectedFilter = filter),
-      onRefresh: refresh,
-      onHelp: () => _showHelpDialog(context),
-      onCreate: () => _showCreateSubscriptionDialog(context),
-      onEdit: (sub) => _editSubscription(sub.id),
-      onDelete: (sub) => _deleteSubscription(sub.id),
-      onPause: (sub) => _pauseSubscription(sub.id),
-      onResume: (sub) => _resumeSubscription(sub.id),
-      onViewDetails: (sub) => _viewSubscriptionDetails(sub.id),
-      onClearFilters: () => setState(() => _selectedFilter = 'all'),
+      ),
+    );
+  }
+
+  Widget _buildStandalone(BuildContext context) {
+    final c = context.colors;
+    return SubscriptionStandaloneScaffold(
+      title: 'Manage Subscriptions',
+      actions: [
+        IconButton(
+          icon: TraqIcon(AppAssets.iconInfo),
+          onPressed: () => _showHelpDialog(context),
+          tooltip: 'Help',
+        ),
+        IconButton(
+          icon: TraqIcon(AppAssets.iconRefresh),
+          onPressed: refresh,
+          tooltip: 'Refresh',
+        ),
+      ],
+      header: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Alert Subscription Management',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: c.textPrimary,
+                ),
+          ),
+          const SizedBox(height: TraqSpacing.sm),
+          Text(
+            'Configure webhook and email alert subscriptions for EPCIS events.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: c.textMuted,
+                ),
+          ),
+          const SizedBox(height: TraqSpacing.lg),
+          SubscriptionFilterChips(
+            options: kSubscriptionManagementFilterOptions,
+            selectedFilter: _selectedFilter,
+            onFilterSelected: (filter) =>
+                setState(() => _selectedFilter = filter),
+          ),
+        ],
+      ),
+      body: SubscriptionManagementBody(
+        selectedFilter: _selectedFilter,
+        shrinkWrap: false,
+        onRefresh: refresh,
+        onEdit: (sub) => _editSubscription(sub.id),
+        onDelete: (sub) => _deleteSubscription(sub.id),
+        onPause: (sub) => _pauseSubscription(sub.id),
+        onResume: (sub) => _resumeSubscription(sub.id),
+        onViewDetails: (sub) => _viewSubscriptionDetails(sub.id),
+        onClearFilters: () => setState(() => _selectedFilter = 'all'),
+        onCreate: () => _showCreateSubscriptionDialog(context),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showCreateSubscriptionDialog(context),
+        label: TraqIcon(AppAssets.iconPlus),
+        tooltip: 'Create Subscription',
+      ),
     );
   }
 

@@ -34,7 +34,7 @@ class GlnPickerCatalog {
   }
 
   Future<List<GLN>> _fetch() async {
-    final glns = await _glnService.getAllGLNs(page: 0, size: 500);
+    final glns = await _glnService.fetchAllGLNs();
     _cache = List<GLN>.from(glns);
     return items;
   }

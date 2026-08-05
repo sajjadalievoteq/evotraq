@@ -22,7 +22,7 @@ class GTINCubit extends Cubit<GTINState> {
     if (!forceRefresh && _pickerCache != null) {
       return _pickerCache!;
     }
-    final gtins = await _gtinService.getGTINs(page: page, size: size);
+    final gtins = await _gtinService.fetchAllGTINs();
     _pickerCache = gtins;
     return gtins;
   }
@@ -112,13 +112,14 @@ class GTINCubit extends Cubit<GTINState> {
         gtins = result['gtins'] as List<GTIN>;
         hasMoreData = result['hasMoreData'] as bool;
       } else {
-        gtins = await _gtinService.getGTINs(
+        final result = await _gtinService.getGTINsPaginated(
           manufacturer: manufacturer,
           status: status,
           page: page,
           size: size,
         );
-        hasMoreData = gtins.length >= size;
+        gtins = result['gtins'] as List<GTIN>;
+        hasMoreData = result['hasMoreData'] as bool;
       }
 
       final bool ascending = state.gtinListSortAscending;

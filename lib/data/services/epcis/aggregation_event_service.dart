@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 
 class AggregationEventService {
@@ -118,112 +119,92 @@ class AggregationEventService {
     }
   }
 
-  Future<List<AggregationEvent>> getAllAggregationEvents(
+  Future<Map<String, dynamic>> getAllAggregationEvents(
     int page,
     int size, {
     String sortBy = 'eventTime',
     String direction = 'DESC',
   }) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    final raw = await _getAggregationEventsPage(
       _baseUrl,
-      queryParameters: {
-        'page': page.toString(),
-        'size': size.toString(),
+      page: page,
+      size: size,
+      extraQueryParameters: {
         'sortBy': sortBy,
         'direction': direction,
       },
+    );
+    final content = PageResponseUtils.contentList(raw)
+        .map((json) => AggregationEvent.fromJson(json as Map<String, dynamic>))
+        .toList();
+    return PageResponseUtils.toResultMap(content: content, raw: raw);
+  }
+
+  Future<Map<String, dynamic>> _getAggregationEventsPage(
+    String path, {
+    Map<String, String>? extraQueryParameters,
+    required int page,
+    required int size,
+  }) async {
+    final headers = await _getHeaders();
+    final queryParameters = <String, String>{
+      ...?extraQueryParameters,
+      'page': page.toString(),
+      'size': PageResponseUtils.clampSize(size).toString(),
+    };
+    final response = await _dioService.get(
+      path,
+      queryParameters: queryParameters,
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.data);
-      if (data['content'] != null && data['content'] is List) {
-        final List<dynamic> eventList = data['content'];
-
-        return eventList
-            .map((json) => AggregationEvent.fromJson(json))
-            .toList();
-      } else {
-        if (data is List) {
-          return data.map((json) => AggregationEvent.fromJson(json)).toList();
-        }
-        throw Exception(
-          'Invalid response format: content field missing or invalid',
-        );
-      }
-    } else {
-      throw Exception(
-        'Failed to get all aggregation events: ${response.statusCode} - ${response.data}',
-      );
+      return PageResponseUtils.normalizeBody(json.decode(response.data));
     }
+    throw Exception(
+      'Failed to get aggregation events: ${response.statusCode} - ${response.data}',
+    );
+  }
+
+  Future<List<AggregationEvent>> _fetchAllAggregationEvents(
+    String path, {
+    Map<String, String>? extraQueryParameters,
+  }) {
+    return PageResponseUtils.fetchAllPages(
+      fetchPage: (page, size) => _getAggregationEventsPage(
+        path,
+        extraQueryParameters: extraQueryParameters,
+        page: page,
+        size: size,
+      ),
+      parseItem: AggregationEvent.fromJson,
+    );
   }
 
   Future<List<AggregationEvent>> findAggregationEventsByAction(
     String action,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/action/$action',
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.data);
-      return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
-    } else {
-      throw Exception(
-        'Failed to find aggregation events: ${response.statusCode}',
-      );
-    }
+    return _fetchAllAggregationEvents('$_baseUrl/action/$action');
   }
 
   Future<List<AggregationEvent>> findAggregationEventsByParentEPC(
     String parentEPC,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllAggregationEvents(
       '$_baseUrl/parent',
-      queryParameters: {'parentEPC': parentEPC},
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
+      extraQueryParameters: {'parentEPC': parentEPC},
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.data);
-      return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
-    } else {
-      throw Exception(
-        'Failed to find aggregation events: ${response.statusCode}',
-      );
-    }
   }
 
   Future<List<AggregationEvent>> findAggregationEventsByChildEPC(
     String childEPC,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
+    return _fetchAllAggregationEvents(
       '$_baseUrl/child',
-      queryParameters: {'childEPC': childEPC},
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
+      extraQueryParameters: {'childEPC': childEPC},
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.data);
-      return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
-    } else {
-      throw Exception(
-        'Failed to find aggregation events: ${response.statusCode}',
-      );
-    }
   }
 
   Future<List<AggregationEvent>> findAggregationEventsByParentEPCAndAction(
@@ -245,43 +226,13 @@ class AggregationEventService {
   Future<List<AggregationEvent>> findAggregationEventsByBusinessStep(
     String businessStep,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/business-step/$businessStep',
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.data);
-      return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
-    } else {
-      throw Exception(
-        'Failed to find aggregation events: ${response.statusCode}',
-      );
-    }
+    return _fetchAllAggregationEvents('$_baseUrl/business-step/$businessStep');
   }
 
   Future<List<AggregationEvent>> findAggregationEventsByDisposition(
     String disposition,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/disposition/$disposition',
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.data);
-      return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
-    } else {
-      throw Exception(
-        'Failed to find aggregation events: ${response.statusCode}',
-      );
-    }
+    return _fetchAllAggregationEvents('$_baseUrl/disposition/$disposition');
   }
 
   /// Resolves the active parent of [childEPC] via `/container` only.
@@ -332,32 +283,8 @@ class AggregationEventService {
     String businessStep,
     String parentEPC,
   ) async {
-    final headers = await _getHeaders();
-
-    try {
-      final response = await _dioService.get(
-        '$_baseUrl/parent',
-        queryParameters: {'parentEPC': parentEPC},
-        headers: headers,
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.data);
-
-        List<AggregationEvent> events = jsonData
-            .map((data) => AggregationEvent.fromJson(data))
-            .where((event) => event.businessStep == businessStep)
-            .toList();
-
-        return events;
-      } else {
-        throw Exception(_getDetailedErrorMessage(response));
-      }
-    } catch (e) {
-      rethrow;
-    }
+    final events = await findAggregationEventsByParentEPC(parentEPC);
+    return events.where((event) => event.businessStep == businessStep).toList();
   }
 
   Future<List<AggregationEvent>> findAggregationEventsByLocationAndTimeWindow(
@@ -365,39 +292,20 @@ class AggregationEventService {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    final headers = await _getHeaders();
-
-    try {
-      final String start = startTime.toIso8601String();
-      final String end = endTime.toIso8601String();
-
-      final response = await _dioService.get(
-        '$_baseUrl/time-range',
-        queryParameters: {'startTime': start, 'endTime': end},
-        headers: headers,
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.data);
-
-        List<AggregationEvent> events = jsonData
-            .map((data) => AggregationEvent.fromJson(data))
-            .where(
-              (event) =>
-                  (event.readPoint?.glnCode == locationGLN) ||
-                  (event.businessLocation?.glnCode == locationGLN),
-            )
-            .toList();
-
-        return events;
-      } else {
-        throw Exception(_getDetailedErrorMessage(response));
-      }
-    } catch (e) {
-      rethrow;
-    }
+    final events = await _fetchAllAggregationEvents(
+      '$_baseUrl/time-range',
+      extraQueryParameters: {
+        'startTime': startTime.toIso8601String(),
+        'endTime': endTime.toIso8601String(),
+      },
+    );
+    return events
+        .where(
+          (event) =>
+              (event.readPoint?.glnCode == locationGLN) ||
+              (event.businessLocation?.glnCode == locationGLN),
+        )
+        .toList();
   }
 
   /// @Deprecated Prefer [PackingOperationService.createPackingOperation]

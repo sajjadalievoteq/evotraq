@@ -303,7 +303,6 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
 
     try {
       List<AggregationEvent> events = [];
-      var usedPaginatedEndpoint = false;
 
       if (effectiveLocationGLN != null &&
           startTime != null &&
@@ -336,12 +335,37 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
         events =
             await _service.findAggregationEventsByAction(effectiveAction);
       } else {
-        usedPaginatedEndpoint = true;
-        events = await _service.getAllAggregationEvents(
+        final result = await _service.getAllAggregationEvents(
           page,
           effectiveSize,
           direction: state.sortOrder,
         );
+        events = result['content'] as List<AggregationEvent>;
+        events = await _enrichWithGlns(events);
+
+        final nextEvents = isLoadMore
+            ? [...state.aggregationEvents, ...events]
+            : events;
+        final isLast = result['last'] as bool? ?? true;
+
+        emit(state.copyWith(
+          status: AggregationEventsStatus.success,
+          aggregationEvents: nextEvents,
+          isListLoading: false,
+          isFetchingMore: false,
+          hasMoreData: !isLast,
+          page: page,
+          pageSize: effectiveSize,
+          filterAction: effectiveAction,
+          filterBizStep: effectiveBizStepRaw,
+          filterDisposition: effectiveDispositionRaw,
+          filterLocationGLN: effectiveLocationGLN,
+          filterParentEPC: effectiveParentEPC,
+          filterChildEPC: effectiveChildEPC,
+          filterSearchText: effectiveSearchText,
+          clearListFetchError: true,
+        ));
+        return;
       }
 
       events = AggregationEventListUtils.filterByDisposition(
@@ -356,26 +380,23 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
         events,
         effectiveSearchText,
       );
-      if (!usedPaginatedEndpoint) {
-        events = AggregationEventListUtils.sortByEventTime(
-          events,
-          state.sortOrder,
-        );
-      }
+      events = AggregationEventListUtils.sortByEventTime(
+        events,
+        state.sortOrder,
+      );
 
       events = await _enrichWithGlns(events);
 
       final nextEvents = isLoadMore
           ? [...state.aggregationEvents, ...events]
           : events;
-      final hasMore = usedPaginatedEndpoint && events.length >= effectiveSize;
 
       emit(state.copyWith(
         status: AggregationEventsStatus.success,
         aggregationEvents: nextEvents,
         isListLoading: false,
         isFetchingMore: false,
-        hasMoreData: hasMore,
+        hasMoreData: false,
         page: page,
         pageSize: effectiveSize,
         filterAction: effectiveAction,

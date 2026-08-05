@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
@@ -248,132 +249,96 @@ class SSCCService {
     );
   }
 
-  Future<List<SSCC>> findSSCCsByUnitType(UnitType unitType) async {
+  Future<Map<String, dynamic>> _getSsccListPage(
+    String path, {
+    Map<String, String>? queryParameters,
+    required int page,
+    required int size,
+  }) async {
+    final params = <String, String>{
+      ...?queryParameters,
+      'page': page.toString(),
+      'size': PageResponseUtils.clampSize(size).toString(),
+    };
     final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathContainerType(unitType.name)}',
+      path,
+      queryParameters: params,
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => SSCC.fromJson(item)).toList();
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by container type: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
+      return PageResponseUtils.normalizeBody(json.decode(response.data));
     }
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Failed to load SSCC list: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String : null,
+    );
+  }
+
+  Future<List<SSCC>> _fetchAllSsccListPages(
+    String path, {
+    Map<String, String>? queryParameters,
+  }) async {
+    final all = <SSCC>[];
+    var page = 0;
+    while (true) {
+      final raw = await _getSsccListPage(
+        path,
+        queryParameters: queryParameters,
+        page: page,
+        size: PageResponseUtils.maxPageSize,
+      );
+      all.addAll(parseSsccListFromContent(PageResponseUtils.contentList(raw)));
+      if (PageResponseUtils.isLast(raw)) break;
+      page++;
+    }
+    return all;
+  }
+  Future<List<SSCC>> findSSCCsByUnitType(UnitType unitType) async {
+    return _fetchAllSsccListPages(
+      '${_dioService.baseUrl}${SsccServiceConstants.pathContainerType(unitType.name)}',
+    );
   }
 
   Future<List<SSCC>> findSSCCsByStatus(LogisticUnitStatus status) async {
-    final response = await _dioService.get(
+    return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathContainerStatus(status.name)}',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => SSCC.fromJson(item)).toList();
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by container status: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
-    }
   }
 
   Future<List<SSCC>> findSSCCsBySourceLocation(String sourceGlnCode) async {
-    final response = await _dioService.get(
+    return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathSourceLocation(sourceGlnCode)}',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => SSCC.fromJson(item)).toList();
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by source location: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
-    }
   }
 
   Future<List<SSCC>> findSSCCsByDestinationLocation(String destinationGlnCode) async {
-    final response = await _dioService.get(
+    return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathDestinationLocation(destinationGlnCode)}',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => SSCC.fromJson(item)).toList();
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by destination location: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
-    }
   }
 
   Future<List<SSCC>> findSSCCsPackedBetween(DateTime startDate, DateTime endDate) async {
-    final response = await _dioService.get(
+    return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathPackedBetween}',
       queryParameters: {
         'startDate': startDate.toIso8601String(),
         'endDate': endDate.toIso8601String(),
       },
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => SSCC.fromJson(item)).toList();
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to find SSCCs packed between dates: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
-    }
   }
 
   Future<List<SSCC>> findSSCCsShippedBetween(DateTime startDate, DateTime endDate) async {
-    final response = await _dioService.get(
+    return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathShippedBetween}',
       queryParameters: {
         'startDate': startDate.toIso8601String(),
         'endDate': endDate.toIso8601String(),
       },
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => SSCC.fromJson(item)).toList();
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to find SSCCs shipped between dates: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
-    }
   }
 
   Future<List<SSCC>> findChildSSCCs(String parentSsccCode) async {
@@ -399,23 +364,9 @@ class SSCCService {
   }
 
   Future<List<SSCC>> findSSCCsByGs1CompanyPrefix(String gs1CompanyPrefix) async {
-    final response = await _dioService.get(
+    return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathCompanyPrefix(gs1CompanyPrefix)}',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => SSCC.fromJson(item)).toList();
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by GS1 company prefix: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
-    }
   }
 
   Future<List<SSCC>> searchSSCCs({
@@ -424,31 +375,16 @@ class SSCCService {
     String? sourceLocationId,
     String? destinationLocationId,
   }) async {
-    final queryParams = <String, dynamic>{
-      if (unitType != null) 'containerType': unitType.name,
-      if (status != null) 'containerStatus': status.name,
-      'sourceLocationId': sourceLocationId,
-      'destinationLocationId': destinationLocationId,
-    };
-
-    final response = await _dioService.get(
+    return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathSearch}',
-      queryParameters: queryParams,
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
+      queryParameters: {
+        if (unitType != null) 'containerType': unitType.name,
+        if (status != null) 'containerStatus': status.name,
+        if (sourceLocationId != null) 'sourceLocationId': sourceLocationId,
+        if (destinationLocationId != null)
+          'destinationLocationId': destinationLocationId,
+      },
     );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => SSCC.fromJson(item)).toList();
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to search SSCCs: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
-    }
   }
 
   Future<Map<String, dynamic>> searchSSCCsAdvanced({

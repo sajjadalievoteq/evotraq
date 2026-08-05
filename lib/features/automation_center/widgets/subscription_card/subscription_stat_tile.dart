@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-class NotificationCenterStatTile extends StatelessWidget {
-  const NotificationCenterStatTile({
+/// Bordered vertical stat tile used by delivery-activity cards.
+///
+/// Distinct from [SubscriptionStatItem], which is the compact horizontal
+/// metric used inside [SubscriptionStatsRow] on the management card.
+class SubscriptionStatTile extends StatelessWidget {
+  const SubscriptionStatTile({
     super.key,
     required this.label,
     required this.value,

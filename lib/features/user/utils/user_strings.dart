@@ -29,7 +29,7 @@ class UserStrings {
 
   static const changePasswordTitle = 'Change Password';
   static const passwordHelpText =
-      'Your password must be at least 8 characters long and include a mix of letters, numbers, and symbols.';
+      'Your password must be at least 12 characters long and include a mix of letters, numbers, and symbols.';
   static const currentPasswordLabel = 'Current Password';
   static const newPasswordLabel = 'New Password';
   static const confirmNewPasswordLabel = 'Confirm New Password';
@@ -37,7 +37,7 @@ class UserStrings {
 
   static const enterCurrentPassword = 'Please enter your current password';
   static const enterNewPassword = 'Please enter your new password';
-  static const passwordAtLeast8Chars = 'Password must be at least 8 characters';
+  static const passwordAtLeast8Chars = 'Password must be at least 12 characters';
   static const confirmNewPassword = 'Please confirm your new password';
   static const passwordsDoNotMatch = 'Passwords do not match';
 

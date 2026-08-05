@@ -76,6 +76,11 @@ class ApiException implements Exception {
                 !BackendErrorParser.isGenericFallbackMessage(message)
             ? message
             : 'There was a conflict with the current state of the resource.';
+      case 429:
+        return message.isNotEmpty &&
+                !BackendErrorParser.isGenericFallbackMessage(message)
+            ? message
+            : 'Too many attempts. Please wait a moment and try again.';
       case 422:
         return message.isNotEmpty &&
                 !BackendErrorParser.isGenericFallbackMessage(message)

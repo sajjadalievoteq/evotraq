@@ -17,6 +17,7 @@ class HomeState extends Equatable {
     this.throughputLoading = false,
     this.healthLoading = false,
     this.refreshFailed = false,
+    this.liveUpdatesConnected = false,
   });
 
   final HomeLoadStatus status;
@@ -29,10 +30,8 @@ class HomeState extends Equatable {
   final bool throughputLoading;
   final bool healthLoading;
 
-  
-  
-  
   final bool refreshFailed;
+  final bool liveUpdatesConnected;
 
   bool get isLoading => status == HomeLoadStatus.loading;
   bool get hasError => status == HomeLoadStatus.failure;
@@ -50,6 +49,7 @@ class HomeState extends Equatable {
     bool? throughputLoading,
     bool? healthLoading,
     bool? refreshFailed,
+    bool? liveUpdatesConnected,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -62,20 +62,22 @@ class HomeState extends Equatable {
       throughputLoading: throughputLoading ?? this.throughputLoading,
       healthLoading: healthLoading ?? this.healthLoading,
       refreshFailed: refreshFailed ?? this.refreshFailed,
+      liveUpdatesConnected: liveUpdatesConnected ?? this.liveUpdatesConnected,
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        stats,
-        recentEvents,
-        healthStatus,
-        lastDataRefreshAt,
-        errorMessage,
-        throughputHours,
-        throughputLoading,
-        healthLoading,
-        refreshFailed,
-      ];
+    status,
+    stats,
+    recentEvents,
+    healthStatus,
+    lastDataRefreshAt,
+    errorMessage,
+    throughputHours,
+    throughputLoading,
+    healthLoading,
+    refreshFailed,
+    liveUpdatesConnected,
+  ];
 }

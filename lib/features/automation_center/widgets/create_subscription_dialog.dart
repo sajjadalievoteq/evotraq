@@ -38,7 +38,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       listener: (context, state) {
         if (state.status == NotificationStatus.subscriptionCreated ||
             state.status == NotificationStatus.subscriptionUpdated) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         } else if (state.status == NotificationStatus.error) {
           setState(() {
             _isLoading = false;
@@ -99,7 +99,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         ),
         actions: [
           TextButton(
-            onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+            onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
             child: const Text('Cancel'),
           ),
           Row(

@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/features/automation_center/utils/subscription_delivery_utils.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_action_menu.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_card_status_chip.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_status_chip.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_meta_chip.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_stats_row.dart';
 
@@ -52,7 +52,7 @@ class SubscriptionCard extends StatelessWidget {
                           ),
                     ),
                   ),
-                  SubscriptionCardStatusChip(status: subscription.status),
+                  SubscriptionStatusChip(status: subscription.status),
                   const SizedBox(width: TraqSpacing.sm),
                   SubscriptionActionMenu(
                     subscription: subscription,

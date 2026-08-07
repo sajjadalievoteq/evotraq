@@ -26,6 +26,7 @@ import 'package:traqtrace_app/features/admin/cbv_vocabulary/cubit/admin_cbv_voca
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/data/services/automation_center/job_queue_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/job_queue_cubit.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
 import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
@@ -187,7 +188,12 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => NotificationApiService(dioService: getIt<DioService>()),
   );
 
-  getIt.registerLazySingleton<WebSocketService>(() => WebSocketService());
+  getIt.registerLazySingleton<WebSocketService>(
+    () => WebSocketService(
+      tokenManager: getIt<TokenManager>(),
+      baseUrl: appConfig.apiBaseUrl,
+    ),
+  );
 
   getIt.registerLazySingleton<ShippingOperationService>(
     () => ShippingOperationService(dioService: getIt<DioService>()),
@@ -353,6 +359,9 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt<DioService>().onUnauthorized = () {
     unawaited(getIt<AuthCubit>().sessionExpired());
   };
+  getIt<WebSocketService>().onAuthenticationFailed = () {
+    unawaited(getIt<AuthCubit>().sessionExpired());
+  };
   getIt.registerSingleton<CbvVocabularyCubit>(
     CbvVocabularyCubit(service: getIt<CbvVocabularyService>()),
   );
@@ -374,5 +383,12 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
   getIt.registerFactory<GTINCubit>(
     () => GTINCubit(gtinService: getIt<GTINService>()),
+  );
+
+  getIt.registerFactory<JobQueueCubit>(
+    () => JobQueueCubit(
+      service: getIt<JobQueueService>(),
+      webSocketService: getIt<WebSocketService>(),
+    ),
   );
 }

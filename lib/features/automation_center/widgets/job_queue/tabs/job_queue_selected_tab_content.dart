@@ -20,8 +20,6 @@ class JobQueueSelectedTabContent extends StatelessWidget {
   final List<String> jobTypes;
   final VoidCallback onDashboardRefresh;
   final VoidCallback onSchedule;
-  final ValueChanged<bool> onToggleAutoRefresh;
-  final VoidCallback onSettings;
   final VoidCallback onOpenActive;
   final VoidCallback onOpenQueue;
   final VoidCallback onOpenHistory;
@@ -47,8 +45,6 @@ class JobQueueSelectedTabContent extends StatelessWidget {
     required this.jobTypes,
     required this.onDashboardRefresh,
     required this.onSchedule,
-    required this.onToggleAutoRefresh,
-    required this.onSettings,
     required this.onOpenActive,
     required this.onOpenQueue,
     required this.onOpenHistory,
@@ -70,8 +66,6 @@ class JobQueueSelectedTabContent extends StatelessWidget {
           embedded: true,
           onRefresh: onDashboardRefresh,
           onSchedule: onSchedule,
-          onToggleAutoRefresh: onToggleAutoRefresh,
-          onSettings: onSettings,
           onOpenActive: onOpenActive,
           onOpenQueue: onOpenQueue,
           onOpenHistory: onOpenHistory,

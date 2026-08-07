@@ -14,15 +14,11 @@ class JobQueueStatusStrip extends StatelessWidget {
     required this.snapshot,
     required this.onRefresh,
     required this.onSchedule,
-    required this.onToggleAutoRefresh,
-    this.onSettings,
   });
 
   final JobQueueDashboardSnapshot snapshot;
   final VoidCallback onRefresh;
   final VoidCallback onSchedule;
-  final ValueChanged<bool> onToggleAutoRefresh;
-  final VoidCallback? onSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +91,6 @@ class JobQueueStatusStrip extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: _Toolbar(
               lastUpdated: snapshot.lastUpdated,
-              autoRefresh: snapshot.autoRefresh,
-              onToggleAutoRefresh: onToggleAutoRefresh,
-              onSettings: onSettings,
             ),
           ),
         ],
@@ -156,15 +149,9 @@ class _StripMetricTile extends StatelessWidget {
 class _Toolbar extends StatelessWidget {
   const _Toolbar({
     required this.lastUpdated,
-    required this.autoRefresh,
-    required this.onToggleAutoRefresh,
-    this.onSettings,
   });
 
   final DateTime? lastUpdated;
-  final bool autoRefresh;
-  final ValueChanged<bool> onToggleAutoRefresh;
-  final VoidCallback? onSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -173,38 +160,9 @@ class _Toolbar extends StatelessWidget {
         ? '—'
         : DateFormat.Hms().format(lastUpdated!.toLocal());
 
-    return Wrap(
-      spacing: TraqSpacing.sm,
-      runSpacing: TraqSpacing.sm,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text(
-          'Updated $time',
-          style: context.text.cap.copyWith(color: c.textMuted),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Auto',
-              style: context.text.cap.copyWith(color: c.textMuted),
-            ),
-            Switch.adaptive(
-              value: autoRefresh,
-              onChanged: onToggleAutoRefresh,
-            ),
-          ],
-        ),
-        if (onSettings != null)
-          IconButton(
-
-            padding: EdgeInsets.zero,
-            tooltip: 'Queue settings',
-            onPressed: onSettings,
-            icon: TraqIcon(AppAssets.iconSettings),
-          ),
-
-      ],
+    return Text(
+      'Updated $time',
+      style: context.text.cap.copyWith(color: c.textMuted),
     );
   }
 }

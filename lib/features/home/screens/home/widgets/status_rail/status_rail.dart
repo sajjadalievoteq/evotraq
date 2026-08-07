@@ -28,10 +28,12 @@ class StatusRail extends StatelessWidget {
               p.healthStatus != c.healthStatus ||
               p.stats != c.stats ||
               p.status != c.status ||
-              p.lastDataRefreshAt != c.lastDataRefreshAt,
+              p.lastDataRefreshAt != c.lastDataRefreshAt ||
+              p.liveUpdatesConnected != c.liveUpdatesConnected,
           builder: (context, state) {
             final health = state.healthStatus;
-            final healthy = health?.backendHealthy == true &&
+            final healthy =
+                health?.backendHealthy == true &&
                 health?.databaseHealthy == true &&
                 health?.cacheHealthy == true;
 
@@ -39,7 +41,9 @@ class StatusRail extends StatelessWidget {
             final zoneText = statusRailTimeZoneLabel(now);
 
             final clock = Column(
-              crossAxisAlignment:layout.isTabletUp? CrossAxisAlignment.end:CrossAxisAlignment.start,
+              crossAxisAlignment: layout.isTabletUp
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
@@ -81,9 +85,13 @@ class StatusRail extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    TraqIcon(AppAssets.iconCircle, color: healthy
+                    TraqIcon(
+                      AppAssets.iconCircle,
+                      color: healthy
                           ? context.colors.success
-                          : context.colors.warning, size: 10),
+                          : context.colors.warning,
+                      size: 10,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       healthy
@@ -103,11 +111,8 @@ class StatusRail extends StatelessWidget {
               ],
             );
 
-            final refreshedAt = state.lastDataRefreshAt;
             final version = state.healthStatus?.backendVersion?.trim();
-            final subtitle = homeFreshnessAndVersionLine(
-              refreshedAt: refreshedAt,
-              now: now,
+            final servicesVersion = homeServicesVersion(
               backendVersion: version,
             );
             final statusBlock = Column(
@@ -122,16 +127,11 @@ class StatusRail extends StatelessWidget {
                     color: context.colors.primary,
                   ),
                 ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    subtitle,
-                    style: context.text.bodySm.copyWith(
-                      color: context.colors.textSecondary,
-                      height: 1.35,
-                    ),
-                  ),
-                ],
+                const SizedBox(height: 10),
+                _LiveUpdatesIndicator(
+                  isLive: state.liveUpdatesConnected,
+                  servicesVersion: servicesVersion,
+                ),
               ],
             );
 
@@ -169,10 +169,7 @@ class StatusRail extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        clock,
-                        if (showHealth) healthChip,
-                      ],
+                      children: [clock, if (showHealth) healthChip],
                     ),
                   ],
                 ),
@@ -181,6 +178,82 @@ class StatusRail extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _LiveUpdatesIndicator extends StatelessWidget {
+  const _LiveUpdatesIndicator({
+    required this.isLive,
+    required this.servicesVersion,
+  });
+
+  final bool isLive;
+  final String? servicesVersion;
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = isLive
+        ? context.colors.success
+        : context.colors.textMuted;
+
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: isLive
+          ? HomeStrings.liveDashboardUpdatesSemantics
+          : HomeStrings.dashboardUpdatesNotLiveSemantics,
+      child: ExcludeSemantics(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: statusColor,
+                shape: BoxShape.circle,
+                boxShadow: isLive
+                    ? [
+                        BoxShadow(
+                          color: statusColor.withOpacity(0.32),
+                          blurRadius: 5,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : null,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 1,
+              height: 14,
+              color: statusColor.withOpacity(0.30),
+            ),
+            const SizedBox(width: 8),
+
+            Text(
+              isLive
+                  ? HomeStrings.liveDashboardUpdates
+                  : HomeStrings.dashboardUpdatesNotLive,
+              style: context.text.body.copyWith(
+                color: statusColor,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (servicesVersion != null) ...[
+              const SizedBox(width: 8),
+              Text(
+                servicesVersion!,
+                style: context.text.bodySm.copyWith(
+                  color: context.colors.textMuted,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

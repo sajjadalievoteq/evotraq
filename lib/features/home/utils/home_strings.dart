@@ -1,9 +1,10 @@
-﻿abstract final class HomeStrings {
+abstract final class HomeStrings {
   static const appBarTitle = 'Home';
   static const unknownError = 'Unknown error';
   static const retry = 'Retry';
 
-  static String loadHomeFailed(String message) => 'Failed to load home: $message';
+  static String loadHomeFailed(String message) =>
+      'Failed to load home: $message';
 
   static const operationsHeaderTitle = 'Dashboard';
 
@@ -76,16 +77,15 @@
   static const statusRailHealthy = 'HEALTHY';
   static const statusRailDegraded = 'DEGRADED';
 
-  static String dataRefreshed(String relativePhrase) =>
-      'Data refreshed $relativePhrase';
+  static const liveDashboardUpdates = 'Live';
+  static const dashboardUpdatesNotLive = 'Not live';
+  static const liveDashboardUpdatesSemantics =
+      'Live dashboard updates are active';
+  static const dashboardUpdatesNotLiveSemantics =
+      'Live dashboard updates are unavailable. Periodic refresh is active';
 
-  static String servicesVersion(String versionLabel) => 'Services $versionLabel';
-
-  static const relativeJustNow = 'just now';
-  static String relativeSecondsAgo(int seconds) => '${seconds}s ago';
-  static String relativeMinutesAgo(int minutes) => '$minutes min ago';
-  static const relativeOneHourAgo = '1 hr ago';
-  static String relativeHoursAgo(int hours) => '$hours hrs ago';
+  static String servicesVersion(String versionLabel) =>
+      'Services $versionLabel';
 
   static const greetingMorning = 'Good morning';
   static const greetingAfternoon = 'Good afternoon';

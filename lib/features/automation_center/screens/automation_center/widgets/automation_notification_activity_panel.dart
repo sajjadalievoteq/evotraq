@@ -31,7 +31,8 @@ class _AutomationNotificationActivityPanelState
     audience: 'Operators',
     steps: [
       'Filter to subscriptions with deliveries or active status.',
-      'Toggle Live to connect for real-time updates when available.',
+      'Toggle Live to pause or resume Delivery Activity updates (does not '
+          'affect Background Jobs or Home).',
       'Open a subscription to inspect details.',
     ],
   );
@@ -40,26 +41,37 @@ class _AutomationNotificationActivityPanelState
   Widget build(BuildContext context) {
     return BlocBuilder<NotificationCubit, NotificationState>(
       buildWhen: (prev, next) =>
-          prev.status != next.status ||
+          prev.connectionStatus != next.connectionStatus ||
+          prev.notificationLiveEnabled != next.notificationLiveEnabled ||
           prev.subscriptions != next.subscriptions,
       builder: (context, state) {
-        final live = state.status == NotificationStatus.webSocketConnected ||
-            context.read<NotificationCubit>().isWebSocketConnected;
+        final live = state.notificationLiveEnabled &&
+            state.connectionStatus == NotificationConnectionStatus.connected;
+        final connecting = state.notificationLiveEnabled &&
+            state.connectionStatus == NotificationConnectionStatus.connecting;
         return AutomationWorkbenchPanel(
           title: 'Delivery Activity',
           instructions: _instructions,
           fillBody: true,
           actions: [
             IconButton(
-              tooltip: live
-                  ? 'Connected to real-time updates'
-                  : 'Connect to real-time updates',
+              tooltip: !state.notificationLiveEnabled
+                  ? 'Resume Delivery Activity live updates'
+                  : connecting
+                      ? 'Connecting…'
+                      : live
+                          ? 'Pause Delivery Activity live updates'
+                          : 'Retry Delivery Activity live updates',
               onPressed: () => _screenKey.currentState?.toggleLive(),
               icon: TraqIcon(
-                live ? AppAssets.iconWifi : AppAssets.iconWifiOff,
+                live || connecting
+                    ? AppAssets.iconWifi
+                    : AppAssets.iconWifiOff,
                 color: live
                     ? AppColorMapper.successColor(context)
-                    : AppColorMapper.errorColor(context),
+                    : connecting
+                        ? AppColorMapper.warningColor(context)
+                        : AppColorMapper.errorColor(context),
               ),
             ),
             IconButton(
@@ -76,7 +88,6 @@ class _AutomationNotificationActivityPanelState
           ],
           child: NotificationCenterScreen(
             key: _screenKey,
-            embedded: true,
           ),
         );
       },

@@ -11,6 +11,7 @@ import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/home/system_health_status.dart';
 import 'package:traqtrace_app/data/services/auth/auth_service.dart';
 import 'package:traqtrace_app/data/services/home/dashboard_service.dart';
+import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -19,7 +20,7 @@ import 'package:traqtrace_app/features/home/cubit/home_state.dart';
 
 import 'home_cubit_test.mocks.dart';
 
-@GenerateMocks([DashboardService])
+@GenerateMocks([DashboardService, WebSocketService])
 class _StubAuthService extends Mock implements AuthService {}
 
 class _TestAuthCubit extends AuthCubit {
@@ -33,6 +34,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockDashboardService mockService;
+  late MockWebSocketService mockWs;
+  late StreamController<Map<String, dynamic>> dashboardPushController;
+  late StreamController<bool> connectionController;
   late _StubAuthService mockAuthService;
   late _TestAuthCubit authCubit;
   late HomeOverviewSessionStore sessionStore;
@@ -91,6 +95,7 @@ void main() {
       mockService,
       sessionStore,
       authCubit: authCubit,
+      webSocketService: mockWs,
       pollInterval: pollInterval ?? const Duration(seconds: 60),
     );
   }
@@ -102,10 +107,22 @@ void main() {
     mockAuthService = _StubAuthService();
     authCubit = authCubitFor('ADMIN');
     sessionStore = HomeOverviewSessionStore();
+
+    mockWs = MockWebSocketService();
+    dashboardPushController = StreamController<Map<String, dynamic>>.broadcast();
+    connectionController = StreamController<bool>.broadcast();
+    when(mockWs.dashboardSummaryStream)
+        .thenAnswer((_) => dashboardPushController.stream);
+    when(mockWs.connectionStream).thenAnswer((_) => connectionController.stream);
+    when(mockWs.isConnected).thenReturn(false);
+    when(mockWs.connect()).thenReturn(null);
+    when(mockWs.disconnect()).thenReturn(null);
   });
 
   tearDown(() async {
     await authCubit.close();
+    await dashboardPushController.close();
+    await connectionController.close();
     await HiveStorage.resetForTests();
     if (await hiveDir.exists()) {
       await hiveDir.delete(recursive: true);
@@ -465,6 +482,159 @@ void main() {
       await cubit.close();
       await Future<void>.delayed(const Duration(milliseconds: 100));
       expect(summaryCalls, 0);
+    });
+  });
+
+  group('websocket heartbeat push', () {
+    Map<String, dynamic> pushPayload({required int gtin, String eventId = 'push'}) => {
+          'counts': {'gtin': gtin, 'gln': 0, 'sgtin': 0, 'sscc': 0},
+          'eventCounts': {
+            'Object': 0,
+            'Aggregation': 0,
+            'Transaction': 0,
+            'Transformation': 0,
+            'totalEvents': 0,
+          },
+          'recentEvents': [
+            {
+              'id': eventId,
+              'eventType': 'ObjectEvent',
+              'action': 'ADD',
+              'eventTime': '2026-07-14T10:00:00Z',
+              'epcList': <String>[],
+            },
+          ],
+          'throughput': {'buckets': <Map<String, dynamic>>[], 'totalCount': 0},
+        };
+
+    Future<HomeCubit> seedReadyCubit() async {
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer(
+        (_) async => (stats: stats(gtin: 1), recentEvents: events('initial')),
+      );
+      when(mockService.getSystemHealth()).thenAnswer((_) async => health(up: true));
+
+      final cubit = buildCubit();
+      await cubit.load(accountEmail: 'user@example.com');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(cubit.state.status, HomeLoadStatus.success);
+      return cubit;
+    }
+
+    test('a pushed snapshot updates state without a REST call', () async {
+      final cubit = await seedReadyCubit();
+      clearInteractions(mockService);
+
+      dashboardPushController.add(pushPayload(gtin: 42, eventId: 'ws-1'));
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(cubit.state.stats?.gtinCount, 42);
+      expect(cubit.state.recentEvents?.first.id, 'ws-1');
+      verifyNever(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      ));
+
+      await cubit.close();
+    });
+
+    test('a malformed push is swallowed and does not clobber state', () async {
+      final cubit = await seedReadyCubit();
+
+      dashboardPushController.add(<String, dynamic>{'counts': 'not-a-map'});
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(cubit.state.stats?.gtinCount, 1);
+      expect(cubit.state.status, HomeLoadStatus.success);
+
+      await cubit.close();
+    });
+
+    test('connecting triggers an immediate REST re-sync and stops the fallback poll', () async {
+      final cubit = await seedReadyCubit();
+      cubit.startPolling(accountEmail: 'user@example.com'); // simulate a prior disconnected state
+      clearInteractions(mockService);
+
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer(
+        (_) async => (stats: stats(gtin: 5), recentEvents: events('resynced')),
+      );
+
+      connectionController.add(true);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(cubit.state.stats?.gtinCount, 5);
+      verify(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).called(1);
+
+      await cubit.close();
+    });
+
+    test('disconnecting starts the REST fallback poll', () async {
+      final cubit = await seedReadyCubit();
+
+      var summaryCalls = 0;
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer((_) async {
+        summaryCalls++;
+        return (stats: stats(gtin: 7), recentEvents: events('fallback'));
+      });
+
+      connectionController.add(false);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(summaryCalls, greaterThanOrEqualTo(1));
+
+      await cubit.close();
+    });
+
+    test('a push preserves a non-default throughput selection', () async {
+      final cubit = await seedReadyCubit();
+      when(mockService.fetchThroughput(168)).thenAnswer(
+        (_) async => (buckets: {5: 10}, total: 10),
+      );
+      await cubit.loadThroughput(168);
+      expect(cubit.state.throughputHours, 168);
+      expect(cubit.state.stats?.throughputBuckets, {5: 10});
+
+      // The heartbeat push always uses the default (24h) window with different figures — a
+      // non-default selection must keep the previously-fetched throughput, not the push's.
+      final withDifferentThroughput = pushPayload(gtin: 42);
+      withDifferentThroughput['throughput'] = {
+        'buckets': [
+          {'hourIndex': 1, 'count': 999},
+        ],
+        'totalCount': 999,
+      };
+      dashboardPushController.add(withDifferentThroughput);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(cubit.state.throughputHours, 168);
+      expect(cubit.state.stats?.gtinCount, 42);
+      expect(cubit.state.stats?.throughputBuckets, {5: 10});
+      expect(cubit.state.stats?.throughputTotal, 10);
+
+      await cubit.close();
+    });
+
+    test('close() cancels websocket subscriptions but never disconnects the shared socket',
+        () async {
+      final cubit = await seedReadyCubit();
+
+      await cubit.close();
+
+      verifyNever(mockWs.disconnect());
+      // Emitting after close must not throw (subscriptions were cancelled).
+      expect(() => dashboardPushController.add(pushPayload(gtin: 1)), returnsNormally);
+      expect(() => connectionController.add(true), returnsNormally);
     });
   });
 }

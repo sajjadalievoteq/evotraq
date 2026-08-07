@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
-if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
+    if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -30,7 +30,6 @@ import 'package:traqtrace_app/features/splash/screens/Splash/splash_screen.dart'
 import 'package:traqtrace_app/data/services/admin/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/auth/auth_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
-import 'package:traqtrace_app/data/services/websocket_service.dart';
 
 void main() async {
   try {
@@ -56,15 +55,6 @@ void main() async {
 
     debugPrint('Starting TraqTraceApp...');
     runApp(const TraqTraceApp());
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint('Initializing WebSocket...');
-      try {
-        getIt<WebSocketService>().initialize(appConfig.apiBaseUrl, '');
-      } catch (e) {
-        debugPrint('WebSocket initialization failed: $e');
-      }
-    });
   } catch (e, stackTrace) {
     debugPrint('FATAL ERROR DURING APP START: $e');
     debugPrint(stackTrace.toString());
@@ -119,7 +109,7 @@ class _TraqTraceAppState extends State<TraqTraceApp> {
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         buildWhen: (previous, current) =>
-        previous.isDarkMode != current.isDarkMode,
+            previous.isDarkMode != current.isDarkMode,
         builder: (context, themeState) {
           return BlocListener<AuthCubit, AuthState>(
             listener: (context, state) {
@@ -140,22 +130,20 @@ class _TraqTraceAppState extends State<TraqTraceApp> {
                 ...GlobalMaterialLocalizations.delegates,
                 TypedLocaleDelegate(),
               ],
-              builder: (context, child) =>
-                  SnackBarInteractionScope(
-                    child: AppScreenUtilInit(
-                      child: AppLayoutBuilder(
-                        builder: (context, layout) =>
-                            BlocBuilder<AuthCubit, AuthState>(
-                              buildWhen: (p, n) =>
+              builder: (context, child) => SnackBarInteractionScope(
+                child: AppScreenUtilInit(
+                  child: AppLayoutBuilder(
+                    builder: (context, layout) =>
+                        BlocBuilder<AuthCubit, AuthState>(
+                          buildWhen: (p, n) =>
                               p.bootstrapCompleted != n.bootstrapCompleted,
-                              builder: (context, auth) =>
-                              auth.bootstrapCompleted
-                                  ? (child ?? const SizedBox.shrink())
-                                  : const SplashScreen(),
-                            ),
-                      ),
-                    ),
+                          builder: (context, auth) => auth.bootstrapCompleted
+                              ? (child ?? const SizedBox.shrink())
+                              : const SplashScreen(),
+                        ),
                   ),
+                ),
+              ),
             ),
           );
         },

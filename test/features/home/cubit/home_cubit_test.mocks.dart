@@ -6,11 +6,14 @@
 import 'dart:async' as _i5;
 
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart'
+    as _i8;
 import 'package:traqtrace_app/data/models/home/dashboard_stats.dart' as _i2;
 import 'package:traqtrace_app/data/models/home/recent_event.dart' as _i6;
 import 'package:traqtrace_app/data/models/home/system_health_status.dart'
     as _i3;
 import 'package:traqtrace_app/data/services/home/dashboard_service.dart' as _i4;
+import 'package:traqtrace_app/data/services/websocket_service.dart' as _i7;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -100,4 +103,86 @@ class MockDashboardService extends _i1.Mock implements _i4.DashboardService {
             ),
           )
           as _i5.Future<({Map<int, int> buckets, int total})>);
+}
+
+/// A class which mocks [WebSocketService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockWebSocketService extends _i1.Mock implements _i7.WebSocketService {
+  MockWebSocketService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Stream<_i8.RealtimeNotification> get notificationStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#notificationStream),
+            returnValue: _i5.Stream<_i8.RealtimeNotification>.empty(),
+          )
+          as _i5.Stream<_i8.RealtimeNotification>);
+
+  @override
+  _i5.Stream<Map<String, dynamic>> get jobQueueEventStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#jobQueueEventStream),
+            returnValue: _i5.Stream<Map<String, dynamic>>.empty(),
+          )
+          as _i5.Stream<Map<String, dynamic>>);
+
+  @override
+  _i5.Stream<Map<String, dynamic>> get dashboardSummaryStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#dashboardSummaryStream),
+            returnValue: _i5.Stream<Map<String, dynamic>>.empty(),
+          )
+          as _i5.Stream<Map<String, dynamic>>);
+
+  @override
+  _i5.Stream<bool> get connectionStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#connectionStream),
+            returnValue: _i5.Stream<bool>.empty(),
+          )
+          as _i5.Stream<bool>);
+
+  @override
+  bool get isConnected =>
+      (super.noSuchMethod(Invocation.getter(#isConnected), returnValue: false)
+          as bool);
+
+  @override
+  void initialize(String? baseUrl, String? accessToken) => super.noSuchMethod(
+    Invocation.method(#initialize, [baseUrl, accessToken]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void connect() => super.noSuchMethod(
+    Invocation.method(#connect, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void disconnect() => super.noSuchMethod(
+    Invocation.method(#disconnect, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void subscribeToNotifications(String? subscriptionId) => super.noSuchMethod(
+    Invocation.method(#subscribeToNotifications, [subscriptionId]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void updateAccessToken(String? newToken) => super.noSuchMethod(
+    Invocation.method(#updateAccessToken, [newToken]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
 }

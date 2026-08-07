@@ -225,6 +225,22 @@ class MockWebSocketService extends _i1.Mock implements _i5.WebSocketService {
           as _i4.Stream<_i6.RealtimeNotification>);
 
   @override
+  _i4.Stream<Map<String, dynamic>> get jobQueueEventStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#jobQueueEventStream),
+            returnValue: _i4.Stream<Map<String, dynamic>>.empty(),
+          )
+          as _i4.Stream<Map<String, dynamic>>);
+
+  @override
+  _i4.Stream<Map<String, dynamic>> get dashboardSummaryStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#dashboardSummaryStream),
+            returnValue: _i4.Stream<Map<String, dynamic>>.empty(),
+          )
+          as _i4.Stream<Map<String, dynamic>>);
+
+  @override
   _i4.Stream<bool> get connectionStream =>
       (super.noSuchMethod(
             Invocation.getter(#connectionStream),

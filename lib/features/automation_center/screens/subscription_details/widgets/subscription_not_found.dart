@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 
 class SubscriptionNotFound extends StatelessWidget {
   const SubscriptionNotFound({super.key});
@@ -35,7 +36,8 @@ class SubscriptionNotFound extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => context.go('/notifications/subscriptions'),
+            onPressed: () =>
+                context.go(AutomationCenterSections.alertSubscriptionsLocation),
             child: const Text('Back to Subscriptions'),
           ),
         ],

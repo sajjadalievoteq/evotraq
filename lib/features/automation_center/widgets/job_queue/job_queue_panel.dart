@@ -1,43 +1,37 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/data/services/automation_center/job_queue_service.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/job_queue_cubit.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/job_queue_state.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_control_panel_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_job_details_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_purge_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_schedule_job_dialog.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_settings_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_worker_pool_config_dialog.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/job_queue_dashboard_snapshot.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_active_jobs_tab.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_dashboard_tab.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_history_tab.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_queue_tab.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_selected_tab_content.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_worker_pool_tab.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/utils/job_queue_dashboard_snapshot_builder.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/utils/job_queue_filters.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/utils/job_queue_priority_utils.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/widgets/job_queue_error_view.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/widgets/job_queue_loading_view.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_loading_skeleton.dart';
 
 class JobQueuePanel extends StatefulWidget {
-  final String baseUrl;
-  final TokenManager tokenManager;
-
   /// When true, content is intrinsic-height for a parent single-scroll pane
   /// (Automation Center). Admin full-page use keeps [embedded] false.
   final bool embedded;
 
   const JobQueuePanel({
     Key? key,
-    required this.baseUrl,
-    required this.tokenManager,
     this.embedded = false,
   }) : super(key: key);
 
@@ -46,28 +40,16 @@ class JobQueuePanel extends StatefulWidget {
 }
 
 class JobQueuePanelState extends State<JobQueuePanel>
-    with TickerProviderStateMixin {
-  JobQueueService get _service => getIt<JobQueueService>();
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  /// Owns the cubit lifecycle for this panel: created from the DI factory, provided down to the
+  /// tabs via [BlocProvider.value], and closed in [dispose]. Live updates arrive over the shared
+  /// WebSocket; there is no periodic refresh timer anymore.
+  late final JobQueueCubit _cubit = getIt<JobQueueCubit>();
 
   late TabController _tabController;
-  late Timer _refreshTimer;
 
-  Map<String, dynamic> _dashboardData = {};
-  List<Map<String, dynamic>> _activeJobs = [];
-  List<Map<String, dynamic>> _queuedJobs = [];
-  List<Map<String, dynamic>> _jobHistory = [];
-  Map<String, dynamic> _workerPoolStats = {};
-  Map<String, dynamic> _queueHealth = {};
-
-  bool _isLoading = true;
-  String? _errorMessage;
   String _selectedJobType = 'ALL';
   String _selectedStatus = 'ALL';
-  bool _autoRefresh = true;
-  int _refreshIntervalSeconds = 5;
-  DateTime? _lastUpdated;
-  final List<double> _activeSparkline = <double>[];
-  final List<double> _queuedSparkline = <double>[];
 
   final List<String> _jobTypes = ['ALL', 'NOTIFICATION_BATCH'];
   final List<String> _jobStatuses = [
@@ -83,239 +65,103 @@ class JobQueuePanelState extends State<JobQueuePanel>
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-    _loadInitialData();
-    _startPeriodicRefresh();
+    WidgetsBinding.instance.addObserver(this);
+    // Initial REST load happens in the cubit constructor; connect the socket for live push.
+    _cubit.connectWebSocket();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
-    _refreshTimer.cancel();
+    // Only closes this cubit's own subscriptions; the shared WebSocketService keeps running.
+    _cubit.close();
     super.dispose();
   }
 
-  void _startPeriodicRefresh() {
-    _refreshTimer = Timer.periodic(
-      Duration(seconds: _refreshIntervalSeconds),
-      (timer) {
-        if (mounted && _autoRefresh) {
-          refreshCurrentTab();
-        }
-      },
-    );
-  }
-
-  void _restartRefreshTimer() {
-    _refreshTimer.cancel();
-    _startPeriodicRefresh();
-  }
-
-  void _setAutoRefresh(bool enabled) {
-    setState(() => _autoRefresh = enabled);
-  }
-
-  void _applyRefreshPreferences({
-    required bool autoRefresh,
-    required int intervalSeconds,
-  }) {
-    setState(() {
-      _autoRefresh = autoRefresh;
-      _refreshIntervalSeconds = intervalSeconds.clamp(2, 120);
-    });
-    _restartRefreshTimer();
-  }
-
-  void _recordSparklineSample() {
-    _activeSparkline.add(_activeJobs.length.toDouble());
-    _queuedSparkline.add(_queuedJobs.length.toDouble());
-    if (_activeSparkline.length > 16) {
-      _activeSparkline.removeAt(0);
-    }
-    if (_queuedSparkline.length > 16) {
-      _queuedSparkline.removeAt(0);
-    }
-    _lastUpdated = DateTime.now();
-  }
-
-  void refreshCurrentTab() {
-    switch (_tabController.index) {
-      case 0:
-        _loadDashboardData();
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _cubit.handleAppResumed();
         break;
-      case 1:
-        _loadActiveJobs();
-        break;
-      case 2:
-        _loadQueuedJobs();
-        break;
-      case 3:
-        _loadJobHistory();
-        break;
-      case 4:
-        _loadWorkerPoolStats();
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        _cubit.handleAppPaused();
         break;
     }
   }
+
+  // ---- Public API driven via GlobalKey<JobQueuePanelState> from the parent panel ----
+
+  void refreshCurrentTab() => _cubit.refresh();
 
   void showScheduleJobDialog() => _showScheduleJobDialog();
 
-  /// Opens the operations Control Panel. Exposed for the panel header action now
-  /// that the duplicate top summary header (which used to host it) was removed.
+  /// Opens the operations Control Panel. Exposed for the panel header action.
   void showControlPanel() => _showControlPanel();
 
-  Future<void> _loadInitialData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  // ---- Filter selection over the live snapshot lists (filtering itself is in JobQueueFilters) ----
 
-    try {
-      await Future.wait([
-        _loadDashboardData(),
-        _loadActiveJobs(),
-        _loadQueueHealth(),
-        _loadQueuedJobs(),
-        _loadJobHistory(),
-        _loadWorkerPoolStats(),
-      ]);
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load job queue data: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+  void _onStatusFilterChanged(String value) {
+    setState(() => _selectedStatus = value);
   }
 
-  Future<void> _loadDashboardData() async {
-    try {
-      final data = await _service.getDashboard();
-      setState(() {
-        _dashboardData = data;
-        _recordSparklineSample();
-      });
-    } catch (e) {
-      debugPrint('Error loading dashboard data: $e');
-    }
-  }
-
-  Future<void> _loadActiveJobs() async {
-    try {
-      final jobs = await _service.getActiveJobs();
-      setState(() {
-        _activeJobs = jobs;
-      });
-    } catch (e) {
-      debugPrint('Error loading active jobs: $e');
-    }
-  }
-
-  Future<void> _loadQueuedJobs() async {
-    try {
-      final jobs = await _service.getQueuedJobs(
-        status: _selectedStatus,
-        limit: 100,
-      );
-      setState(() {
-        _queuedJobs = jobs;
-      });
-    } catch (e) {
-      debugPrint('Error loading queued jobs: $e');
-    }
-  }
-
-  Future<void> _loadJobHistory() async {
-    try {
-      final history = await _service.getJobHistory(
-        jobType: _selectedJobType,
-        limit: 100,
-      );
-      setState(() {
-        _jobHistory = history;
-      });
-    } catch (e) {
-      debugPrint('Error loading job history: $e');
-    }
-  }
-
-  Future<void> _loadWorkerPoolStats() async {
-    try {
-      final stats = await _service.getWorkerPoolStats();
-      setState(() {
-        _workerPoolStats = stats;
-      });
-    } catch (e) {
-      debugPrint('Error loading worker pool stats: $e');
-    }
-  }
-
-  Future<void> _loadQueueHealth() async {
-    try {
-      final health = await _service.getQueueHealth();
-      setState(() {
-        _queueHealth = health;
-      });
-    } catch (e) {
-      debugPrint('Error loading queue health: $e');
-    }
+  void _onJobTypeFilterChanged(String value) {
+    setState(() => _selectedJobType = value);
   }
 
   void _openTab(int index) {
     _tabController.animateTo(index);
     setState(() {});
-    refreshCurrentTab();
-  }
-
-  void _onStatusFilterChanged(String value) {
-    setState(() => _selectedStatus = value);
-    _loadQueuedJobs();
-  }
-
-  void _onJobTypeFilterChanged(String value) {
-    setState(() => _selectedJobType = value);
-    _loadJobHistory();
-  }
-
-  void _refreshDashboard() {
-    _loadDashboardData();
-    _loadActiveJobs();
-    _loadQueueHealth();
-    _loadQueuedJobs();
-    _loadJobHistory();
-    _loadWorkerPoolStats();
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider<JobQueueCubit>.value(
+      value: _cubit,
+      child: BlocBuilder<JobQueueCubit, JobQueueState>(
+        builder: (context, state) {
+          final embedded = widget.embedded;
+          final snapshot = state.snapshot;
+
+          if (snapshot == null) {
+            if (state.status == JobQueueStatus.error) {
+              return SubscriptionErrorView(
+                title: 'Unable to load job queue',
+                message: state.error ?? 'Failed to load job queue data',
+                onRetry: _cubit.loadInitial,
+                padding: embedded
+                    ? const EdgeInsets.symmetric(vertical: TraqSpacing.lg)
+                    : TraqSpacing.pagePad,
+              );
+            }
+            return SubscriptionLoadingSkeleton(
+              shrinkWrap: false,
+              asColumn: embedded,
+              itemCount: 4,
+              shape: SubscriptionSkeletonShape.jobQueueCard,
+            );
+          }
+
+          return _buildContent(context, snapshot);
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, JobQueueDashboardSnapshot snapshot) {
     final c = context.colors;
     final embedded = widget.embedded;
 
-    if (_isLoading) {
-      return JobQueueLoadingView(embedded: embedded);
-    }
-
-    if (_errorMessage != null) {
-      return JobQueueErrorView(
-        message: _errorMessage!,
-        onRetry: _loadInitialData,
-        embedded: embedded,
-      );
-    }
-
-    final dashboardSnapshot = buildJobQueueDashboardSnapshot(
-      dashboardData: _dashboardData,
-      workerPoolStats: _workerPoolStats,
-      queueHealth: _queueHealth,
-      activeJobs: _activeJobs,
-      queuedJobs: _queuedJobs,
-      jobHistory: _jobHistory,
-      activeSparkline: _activeSparkline,
-      queuedSparkline: _queuedSparkline,
-      lastUpdated: _lastUpdated,
-      autoRefresh: _autoRefresh,
-    );
+    final activeJobs = snapshot.activeJobsList;
+    final queuedJobs =
+        JobQueueFilters.byStatus(snapshot.queuedJobsList, _selectedStatus);
+    final jobHistory =
+        JobQueueFilters.byJobType(snapshot.recentHistory, _selectedJobType);
+    final workerPoolStats = snapshot.workerPoolStats;
 
     final tabBar = Material(
       color: c.surface,
@@ -351,10 +197,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
             text: 'Workers',
           ),
         ],
-        onTap: (_) {
-          setState(() {});
-          refreshCurrentTab();
-        },
+        onTap: (_) => setState(() {}),
       ),
     );
 
@@ -368,19 +211,17 @@ class JobQueuePanelState extends State<JobQueuePanel>
           const SizedBox(height: TraqSpacing.md),
           JobQueueSelectedTabContent(
             tabIndex: _tabController.index,
-            dashboardSnapshot: dashboardSnapshot,
-            activeJobs: _activeJobs,
-            queuedJobs: _queuedJobs,
-            jobHistory: _jobHistory,
-            workerPoolStats: _workerPoolStats,
+            dashboardSnapshot: snapshot,
+            activeJobs: activeJobs,
+            queuedJobs: queuedJobs,
+            jobHistory: jobHistory,
+            workerPoolStats: workerPoolStats,
             selectedStatus: _selectedStatus,
             statuses: _jobStatuses,
             selectedJobType: _selectedJobType,
             jobTypes: _jobTypes,
-            onDashboardRefresh: _refreshDashboard,
+            onDashboardRefresh: refreshCurrentTab,
             onSchedule: showScheduleJobDialog,
-            onToggleAutoRefresh: _setAutoRefresh,
-            onSettings: _showQueueSettings,
             onOpenActive: () => _openTab(1),
             onOpenQueue: () => _openTab(2),
             onOpenHistory: () => _openTab(3),
@@ -412,24 +253,22 @@ class JobQueuePanelState extends State<JobQueuePanel>
                       controller: _tabController,
                       children: [
                         JobQueueDashboardTab(
-                          snapshot: dashboardSnapshot,
+                          snapshot: snapshot,
                           embedded: false,
-                          onRefresh: _refreshDashboard,
+                          onRefresh: refreshCurrentTab,
                           onSchedule: showScheduleJobDialog,
-                          onToggleAutoRefresh: _setAutoRefresh,
-                          onSettings: _showQueueSettings,
                           onOpenActive: () => _openTab(1),
                           onOpenQueue: () => _openTab(2),
                           onOpenHistory: () => _openTab(3),
                           onOpenWorkers: () => _openTab(4),
                         ),
                         JobQueueActiveJobsTab(
-                          activeJobs: _activeJobs,
+                          activeJobs: activeJobs,
                           fill: true,
                           onCancel: _cancelJob,
                         ),
                         JobQueueQueueTab(
-                          queuedJobs: _queuedJobs,
+                          queuedJobs: queuedJobs,
                           fill: true,
                           selectedStatus: _selectedStatus,
                           statuses: _jobStatuses,
@@ -438,7 +277,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
                           onCancel: _cancelJob,
                         ),
                         JobQueueHistoryTab(
-                          jobHistory: _jobHistory,
+                          jobHistory: jobHistory,
                           fill: true,
                           selectedJobType: _selectedJobType,
                           jobTypes: _jobTypes,
@@ -447,7 +286,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
                           onRetry: _retryJob,
                         ),
                         JobQueueWorkerPoolTab(
-                          workerPoolStats: _workerPoolStats,
+                          workerPoolStats: workerPoolStats,
                           fill: true,
                           onConfigure: _showWorkerPoolConfig,
                         ),
@@ -465,20 +304,22 @@ class JobQueuePanelState extends State<JobQueuePanel>
 
   Future<void> _cancelJob(String jobId) async {
     try {
-      await _service.cancelJob(jobId);
+      await _cubit.cancelJob(jobId);
+      if (!mounted) return;
       context.showSuccess('Job cancelled successfully');
-      refreshCurrentTab();
     } catch (e) {
+      if (!mounted) return;
       context.showError('Failed to cancel job: $e');
     }
   }
 
   Future<void> _retryJob(String jobId) async {
     try {
-      await _service.retryJob(jobId);
+      await _cubit.retryJob(jobId);
+      if (!mounted) return;
       context.showSuccess('Job retried successfully');
-      refreshCurrentTab();
     } catch (e) {
+      if (!mounted) return;
       context.showError('Failed to retry job: $e');
     }
   }
@@ -503,19 +344,20 @@ class JobQueuePanelState extends State<JobQueuePanel>
   }
 
   Future<void> _showWorkerPoolConfig() async {
+    final stats = _cubit.state.snapshot?.workerPoolStats ?? const {};
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => JobQueueWorkerPoolConfigDialog(
-        initialCorePoolSize: '${_workerPoolStats['corePoolSize'] ?? 4}',
-        initialMaxPoolSize: '${_workerPoolStats['maximumPoolSize'] ?? 8}',
+        initialCorePoolSize: '${stats['corePoolSize'] ?? 4}',
+        initialMaxPoolSize: '${stats['maximumPoolSize'] ?? 8}',
         initialQueueCapacity: '100',
-        onPrefill: _service.getWorkerPoolConfig,
+        onPrefill: _cubit.getWorkerPoolConfig,
         onSave: ({
           required int corePoolSize,
           required int maxPoolSize,
           required int queueCapacity,
         }) {
-          return _service.configureWorkerPool(
+          return _cubit.configureWorkerPool(
             corePoolSize: corePoolSize,
             maxPoolSize: maxPoolSize,
             queueCapacity: queueCapacity,
@@ -525,15 +367,13 @@ class JobQueuePanelState extends State<JobQueuePanel>
     );
     if (result == null || !mounted) return;
     context.showSuccess('${result['message'] ?? 'Worker pool configured'}');
-    await _loadWorkerPoolStats();
-    if (_tabController.index == 4) refreshCurrentTab();
   }
 
   Future<void> _showPurgeDialog() async {
     final outcome = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => JobQueuePurgeDialog(
-        onPurge: (days) => _service.purgeJobs(retentionDays: days),
+        onPurge: (days) => _cubit.purgeJobs(retentionDays: days),
       ),
     );
     if (outcome == null || !mounted) return;
@@ -541,45 +381,28 @@ class JobQueuePanelState extends State<JobQueuePanel>
     final result = outcome['result'] as Map<String, dynamic>? ?? {};
     final count = result['purgedCount'] ?? 0;
     context.showSuccess('Purged $count job(s) older than $days day(s)');
-    await Future.wait([
-      _loadJobHistory(),
-      _loadDashboardData(),
-    ]);
   }
 
   Future<void> _pauseProcessing() async {
     try {
-      await _service.pauseQueue();
+      await _cubit.pauseQueue();
+      if (!mounted) return;
       context.showInfo('Job processing paused');
-      _loadDashboardData();
     } catch (e) {
+      if (!mounted) return;
       context.showError('Failed to pause processing: $e');
     }
   }
 
   Future<void> _resumeProcessing() async {
     try {
-      await _service.resumeQueue();
+      await _cubit.resumeQueue();
+      if (!mounted) return;
       context.showInfo('Job processing resumed');
-      _loadDashboardData();
     } catch (e) {
+      if (!mounted) return;
       context.showError('Failed to resume processing: $e');
     }
-  }
-
-  Future<void> _showQueueSettings() async {
-    final result = await showDialog<JobQueueSettingsResult>(
-      context: context,
-      builder: (context) => JobQueueSettingsDialog(
-        initialAutoRefresh: _autoRefresh,
-        initialIntervalSeconds: _refreshIntervalSeconds,
-      ),
-    );
-    if (result == null) return;
-    _applyRefreshPreferences(
-      autoRefresh: result.autoRefresh,
-      intervalSeconds: result.intervalSeconds,
-    );
   }
 
   Future<void> _showScheduleJobDialog() async {
@@ -618,14 +441,13 @@ class JobQueuePanelState extends State<JobQueuePanel>
         jobPayload['operation'] = 'processScheduledBatchNotifications';
       }
 
-      await _service.submitJob(
+      await _cubit.submitJob(
         jobType: jobType,
         priority: JobQueuePriorityUtils.fromLabel(priorityLabel),
         payload: jobPayload,
       );
       if (!mounted) return;
       context.showSuccess('Job "$jobName" submitted successfully');
-      _loadInitialData();
     } catch (e) {
       if (!mounted) return;
       context.showError('Failed to submit job: $e');

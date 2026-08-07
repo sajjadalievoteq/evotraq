@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-/// Skeleton placeholder shapes used by the two subscription list screens.
+/// Skeleton placeholder shapes used by subscription lists and the job queue.
 enum SubscriptionSkeletonShape {
-  /// Notification Center: title bar + tall block.
+  /// Notification Center: title bar + tall block (content height 56).
   activityCard,
+
+  /// Job queue: title bar + content block (content height 48).
+  jobQueueCard,
 
   /// Subscription Management: title + two text lines.
   managementCard,
@@ -16,11 +19,17 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
     required this.shrinkWrap,
     this.itemCount = 3,
     this.shape = SubscriptionSkeletonShape.activityCard,
+    this.asColumn = false,
   });
 
   final bool shrinkWrap;
   final int itemCount;
   final SubscriptionSkeletonShape shape;
+
+  /// When true, lays out skeletons in an intrinsic [Column] (job-queue
+  /// embedded). When false, uses [ListView.separated] with padding driven by
+  /// [shrinkWrap] (subscription panels / standalone job queue).
+  final bool asColumn;
 
   @override
   Widget build(BuildContext context) {
@@ -28,29 +37,14 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
     final cards = List.generate(itemCount, (_) {
       switch (shape) {
         case SubscriptionSkeletonShape.activityCard:
-          return TraqCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: TraqSpacing.xl,
-                  width: 160,
-                  decoration: BoxDecoration(
-                    color: c.surfaceMuted,
-                    borderRadius: TraqRadius.chip,
-                  ),
-                ),
-                const SizedBox(height: TraqSpacing.md),
-                Container(
-                  height: 56,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: c.surfaceMuted,
-                    borderRadius: TraqRadius.card,
-                  ),
-                ),
-              ],
-            ),
+          return _TitleAndBlockCard(
+            colors: c,
+            contentHeight: 56,
+          );
+        case SubscriptionSkeletonShape.jobQueueCard:
+          return _TitleAndBlockCard(
+            colors: c,
+            contentHeight: 48,
           );
         case SubscriptionSkeletonShape.managementCard:
           return TraqCard(
@@ -90,6 +84,17 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
       }
     });
 
+    if (asColumn) {
+      return Column(
+        children: [
+          for (var i = 0; i < cards.length; i++) ...[
+            if (i > 0) const SizedBox(height: TraqSpacing.md),
+            cards[i],
+          ],
+        ],
+      );
+    }
+
     if (shrinkWrap) {
       return ListView.separated(
         padding: EdgeInsets.zero,
@@ -104,6 +109,44 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
       itemCount: cards.length,
       separatorBuilder: (_, __) => const SizedBox(height: TraqSpacing.md),
       itemBuilder: (_, i) => cards[i],
+    );
+  }
+}
+
+class _TitleAndBlockCard extends StatelessWidget {
+  const _TitleAndBlockCard({
+    required this.colors,
+    required this.contentHeight,
+  });
+
+  final TraqColors colors;
+  final double contentHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return TraqCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: TraqSpacing.xl,
+            width: 160,
+            decoration: BoxDecoration(
+              color: colors.surfaceMuted,
+              borderRadius: TraqRadius.chip,
+            ),
+          ),
+          const SizedBox(height: TraqSpacing.md),
+          Container(
+            height: contentHeight,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: colors.surfaceMuted,
+              borderRadius: TraqRadius.card,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

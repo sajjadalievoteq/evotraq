@@ -12,24 +12,24 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 class _MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
 
 AuthState _authenticated() => AuthState(
-      status: AuthStatus.authenticated,
-      user: User(
-        id: 1,
-        username: 'u',
-        email: 'u@t.com',
-        firstName: 'U',
-        lastName: 'T',
-        role: 'USER',
-        enabled: true,
-      ),
-      token: 'tok',
-    );
+  status: AuthStatus.authenticated,
+  user: User(
+    id: 1,
+    username: 'u',
+    email: 'u@t.com',
+    firstName: 'U',
+    lastName: 'T',
+    role: 'USER',
+    enabled: true,
+  ),
+  token: 'tok',
+);
 
 AuthState _loadingWithUser() => AuthState(
-      status: AuthStatus.loading,
-      user: _authenticated().user,
-      token: 'tok',
-    );
+  status: AuthStatus.loading,
+  user: _authenticated().user,
+  token: 'tok',
+);
 
 List<String> _collectRedirectTrail({
   required AppRouter router,
@@ -109,14 +109,11 @@ void main() {
       'authenticated→unauthenticated on protected route redirects to login',
       () {
         when(() => authCubit.state).thenReturn(_authenticated());
-        expect(
-          appRouter.computeRedirect(path: Constants.homeRoute),
-          isNull,
-        );
+        expect(appRouter.computeRedirect(path: Constants.homeRoute), isNull);
 
-        when(() => authCubit.state).thenReturn(
-          const AuthState(status: AuthStatus.unauthenticated),
-        );
+        when(
+          () => authCubit.state,
+        ).thenReturn(const AuthState(status: AuthStatus.unauthenticated));
         final result = appRouter.computeRedirect(path: Constants.homeRoute);
         expect(result, isNotNull);
         final uri = Uri.parse(result!);
@@ -169,18 +166,11 @@ void main() {
       if (authorization != null) {
         headers['Authorization'] = authorization;
       }
-      return RequestOptions(
-        path: '/api/home/overview',
-        headers: headers,
-      );
+      return RequestOptions(path: '/api/home/overview', headers: headers);
     }
 
     Response resp(RequestOptions options, {Object? data, int status = 403}) {
-      return Response(
-        requestOptions: options,
-        data: data,
-        statusCode: status,
-      );
+      return Response(requestOptions: options, data: data, statusCode: status);
     }
 
     test('401 with Bearer after grace → teardown', () async {
@@ -192,26 +182,23 @@ void main() {
       expect(unauthorizedCalls, 1);
     });
 
-    test('403 with Bearer after grace → teardown', () async {
+    test('403 with Bearer preserves the authenticated session', () async {
       dio.resetUnauthorizedGuardsForTest(expireGrace: true);
       await dio.handleAuthFailureStatus(
         options: opts(authorization: 'Bearer real-token'),
         statusCode: 403,
         response: resp(opts(authorization: 'Bearer real-token')),
       );
-      expect(unauthorizedCalls, 1);
+      expect(unauthorizedCalls, 0);
     });
 
     test('403 without Bearer → no teardown', () async {
       dio.resetUnauthorizedGuardsForTest(expireGrace: true);
-      await dio.handleAuthFailureStatus(
-        options: opts(),
-        statusCode: 403,
-      );
+      await dio.handleAuthFailureStatus(options: opts(), statusCode: 403);
       expect(unauthorizedCalls, 0);
     });
 
-    test('403 during startup grace → no teardown', () async {
+    test('403 after auth settles does not tear down', () async {
       dio.markAuthSettled();
       await dio.handleAuthFailureStatus(
         options: opts(authorization: 'Bearer real-token'),
@@ -234,16 +221,19 @@ void main() {
       expect(unauthorizedCalls, 0);
     });
 
-    test('JWT-invalid 403 with Bearer → teardown', () async {
-      dio.resetUnauthorizedGuardsForTest(expireGrace: true);
-      final options = opts(authorization: 'Bearer real-token');
-      await dio.handleAuthFailureStatus(
-        options: options,
-        statusCode: 403,
-        response: resp(options, data: {'message': 'Invalid JWT token'}),
-      );
-      expect(unauthorizedCalls, 1);
-    });
+    test(
+      'even a JWT-worded 403 remains forbidden, not session expiry',
+      () async {
+        dio.resetUnauthorizedGuardsForTest(expireGrace: true);
+        final options = opts(authorization: 'Bearer real-token');
+        await dio.handleAuthFailureStatus(
+          options: options,
+          statusCode: 403,
+          response: resp(options, data: {'message': 'Invalid JWT token'}),
+        );
+        expect(unauthorizedCalls, 0);
+      },
+    );
 
     test('401 with no token → no teardown', () async {
       dio.resetUnauthorizedGuardsForTest(expireGrace: true);
@@ -255,7 +245,10 @@ void main() {
       dio.setCachedAuthTokenForTest('cached-token');
       expect(await dio.getAuthToken(), 'cached-token');
       dio.setCachedAuthTokenForTest(null);
-      expect(dio.requestHadBearerToken(opts(authorization: 'Bearer x')), isTrue);
+      expect(
+        dio.requestHadBearerToken(opts(authorization: 'Bearer x')),
+        isTrue,
+      );
       expect(dio.requestHadBearerToken(opts()), isFalse);
     });
   });

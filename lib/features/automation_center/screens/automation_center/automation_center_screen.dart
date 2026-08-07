@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/automation_center/screens/automation_cent
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_background_jobs_panel.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_alert_subscriptions_panel.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_notification_activity_panel.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/lazy_indexed_stack.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/notifications_shell.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_scaffold.dart';
@@ -58,38 +59,58 @@ class _AutomationCenterViewState extends State<_AutomationCenterView> {
     context.go(AutomationCenterSections.location(next));
   }
 
+  Widget _panelFor(String sectionId) {
+    switch (sectionId) {
+      case AutomationCenterSections.alertSubscriptions:
+        return const KeyedSubtree(
+          key: ValueKey(AutomationCenterSections.alertSubscriptions),
+          child: AutomationAlertSubscriptionsPanel(),
+        );
+      case AutomationCenterSections.notificationActivity:
+        return const KeyedSubtree(
+          key: ValueKey(AutomationCenterSections.notificationActivity),
+          child: AutomationNotificationActivityPanel(),
+        );
+      case AutomationCenterSections.backgroundJobs:
+        return const KeyedSubtree(
+          key: ValueKey(AutomationCenterSections.backgroundJobs),
+          child: AutomationBackgroundJobsPanel(),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isAdmin = context.select<AuthCubit, bool>(
       (cubit) => cubit.state.isAdmin,
     );
+    final visibleSections =
+        AutomationCenterSections.orderedFor(isAdmin: isAdmin);
+    // Non-admins deep-linked to Background Jobs are redirected by the router;
+    // fall back to the first visible section if needed.
+    final selected = visibleSections.contains(_selectedSection)
+        ? _selectedSection
+        : visibleSections.first;
+    final index = AutomationCenterSections.indexOf(
+      selected,
+      isAdmin: isAdmin,
+    );
+
     return Title(
       title: 'Automation Center',
       color: Colors.white,
       child: WorkbenchScaffold(
         title: 'Automation Center',
         groups: AutomationCenterSections.groupsFor(isAdmin: isAdmin),
-        selectedId: _selectedSection,
+        selectedId: selected,
         onSelect: _selectSection,
         panelBuilder: (context, selectedId) {
-          return IndexedStack(
-            index: AutomationCenterSections.indexOf(selectedId),
+          return LazyIndexedStack(
+            index: index,
             children: [
-              const KeyedSubtree(
-                key: ValueKey(AutomationCenterSections.alertSubscriptions),
-                child: AutomationAlertSubscriptionsPanel(),
-              ),
-              const KeyedSubtree(
-                key: ValueKey(AutomationCenterSections.notificationActivity),
-                child: AutomationNotificationActivityPanel(),
-              ),
-                if (isAdmin)
-                const KeyedSubtree(
-                  key: ValueKey(AutomationCenterSections.backgroundJobs),
-                  child: AutomationBackgroundJobsPanel(),
-                )
-              else
-                const SizedBox.shrink(),
+              for (final sectionId in visibleSections) _panelFor(sectionId),
             ],
           );
         },

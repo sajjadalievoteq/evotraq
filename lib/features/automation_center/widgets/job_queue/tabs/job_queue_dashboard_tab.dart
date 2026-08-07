@@ -8,8 +8,6 @@ class JobQueueDashboardTab extends StatelessWidget {
   final bool embedded;
   final VoidCallback onRefresh;
   final VoidCallback onSchedule;
-  final ValueChanged<bool> onToggleAutoRefresh;
-  final VoidCallback onSettings;
   final VoidCallback onOpenActive;
   final VoidCallback onOpenQueue;
   final VoidCallback onOpenHistory;
@@ -21,8 +19,6 @@ class JobQueueDashboardTab extends StatelessWidget {
     required this.embedded,
     required this.onRefresh,
     required this.onSchedule,
-    required this.onToggleAutoRefresh,
-    required this.onSettings,
     required this.onOpenActive,
     required this.onOpenQueue,
     required this.onOpenHistory,
@@ -35,8 +31,6 @@ class JobQueueDashboardTab extends StatelessWidget {
       snapshot: snapshot,
       onRefresh: onRefresh,
       onSchedule: onSchedule,
-      onToggleAutoRefresh: onToggleAutoRefresh,
-      onSettings: onSettings,
       onOpenActive: onOpenActive,
       onOpenQueue: onOpenQueue,
       onOpenHistory: onOpenHistory,

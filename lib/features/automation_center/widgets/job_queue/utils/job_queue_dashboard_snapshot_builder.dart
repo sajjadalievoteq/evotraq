@@ -11,7 +11,6 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
   required List<double> activeSparkline,
   required List<double> queuedSparkline,
   required DateTime? lastUpdated,
-  required bool autoRefresh,
 }) {
   final workerPool =
       dashboardData['workerPool'] as Map<String, dynamic>? ?? {};
@@ -85,11 +84,12 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
     priorityDistribution: priority,
     jobTypeDistribution: types,
     activeJobsList: activeJobs,
+    queuedJobsList: queuedJobs,
     recentHistory: jobHistory,
+    workerPoolStats: workerPoolStats,
     issues: issues,
     activeSparkline: List<double>.from(activeSparkline),
     queuedSparkline: List<double>.from(queuedSparkline),
     lastUpdated: lastUpdated,
-    autoRefresh: autoRefresh,
   );
 }

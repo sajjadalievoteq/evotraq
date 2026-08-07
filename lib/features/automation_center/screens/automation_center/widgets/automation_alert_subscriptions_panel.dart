@@ -57,7 +57,6 @@ class _AutomationAlertSubscriptionsPanelState
       ],
       child: SubscriptionManagementScreen(
         key: _screenKey,
-        embedded: true,
       ),
     );
   }

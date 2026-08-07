@@ -23,24 +23,10 @@ String utcOffsetLabel(Duration offset) {
   );
 }
 
-String? homeFreshnessAndVersionLine({
-  required DateTime? refreshedAt,
-  required DateTime now,
-  required String? backendVersion,
-}) {
-  final refresh = refreshedAt;
+String? homeServicesVersion({required String? backendVersion}) {
   final ver = backendVersion?.trim();
-  final parts = <String>[];
-  if (refresh != null) {
-    parts.add(
-      HomeStrings.dataRefreshed(relativeRefreshPhrase(refresh, now)),
-    );
-  }
-  if (ver != null && ver.isNotEmpty) {
-    parts.add(formatBackendVersionLine(ver));
-  }
-  if (parts.isEmpty) return null;
-  return parts.join(' · ');
+  if (ver == null || ver.isEmpty) return null;
+  return formatBackendVersionLine(ver);
 }
 
 String formatBackendVersionLine(String raw) {
@@ -50,32 +36,13 @@ String formatBackendVersionLine(String raw) {
   return HomeStrings.servicesVersion(withV);
 }
 
-String relativeRefreshPhrase(DateTime refreshedAt, DateTime now) {
-  var diff = now.difference(refreshedAt);
-  if (diff.isNegative) diff = Duration.zero;
-
-  final secs = diff.inSeconds;
-  if (secs < 3) return HomeStrings.relativeJustNow;
-  if (secs < 60) return HomeStrings.relativeSecondsAgo(secs);
-  if (diff.inMinutes < 60) {
-    return HomeStrings.relativeMinutesAgo(diff.inMinutes);
-  }
-  if (diff.inHours < 24) {
-    final h = diff.inHours;
-    return h == 1
-        ? HomeStrings.relativeOneHourAgo
-        : HomeStrings.relativeHoursAgo(h);
-  }
-  return DateFormat.yMMMd().add_jm().format(refreshedAt);
-}
-
 String greetingFor(DateTime now) {
   final h = now.hour;
   return h < 12
       ? HomeStrings.greetingMorning
       : h < 17
-          ? HomeStrings.greetingAfternoon
-          : HomeStrings.greetingEvening;
+      ? HomeStrings.greetingAfternoon
+      : HomeStrings.greetingEvening;
 }
 
 String nominalStatusLine(bool healthy, DateTime now) {

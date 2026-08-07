@@ -10,6 +10,7 @@ import 'package:traqtrace_app/data/models/automation_center/notification_subscri
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription_dialog.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_details_body.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_not_found.dart';
 
@@ -144,13 +145,19 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
   }
 
   void _editSubscription(NotificationSubscription subscription) {
-    showDialog(
+    final cubit = context.read<NotificationCubit>();
+    showDialog<bool>(
       context: context,
-      builder: (context) => CreateSubscriptionDialog(
-        subscription: subscription,
+      builder: (_) => BlocProvider.value(
+        value: cubit,
+        child: CreateSubscriptionDialog(
+          subscription: subscription,
+        ),
       ),
-    ).then((_) {
-      _loadSubscription();
+    ).then((changed) {
+      if (changed == true) {
+        _loadSubscription();
+      }
     });
   }
 
@@ -183,7 +190,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
               context
                   .read<NotificationCubit>()
                   .deleteSubscription(widget.subscriptionId);
-              context.go('/notifications/subscriptions');
+              context.go(AutomationCenterSections.alertSubscriptionsLocation);
             },
             style: TextButton.styleFrom(
               foregroundColor: AppColorMapper.errorColor(context),

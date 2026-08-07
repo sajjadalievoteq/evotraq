@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_panel.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/automation_workbench_panel.dart';
@@ -27,7 +24,7 @@ class _AutomationBackgroundJobsPanelState
     useCase:
         'Use for operational visibility into the job queue. Supported submit '
         'type: notification batch processing.',
-    audience: 'Admins / Operators',
+    audience: 'Admins',
     steps: [
       'Review dashboard counts, then drill into Active, Queued, or History.',
       'Cancel running/queued jobs or retry failed ones from the row actions.',
@@ -60,8 +57,6 @@ class _AutomationBackgroundJobsPanelState
       child: JobQueuePanel(
         key: _panelKey,
         embedded: true,
-        baseUrl: getIt<AppConfig>().apiBaseUrl,
-        tokenManager: getIt<TokenManager>(),
       ),
     );
   }

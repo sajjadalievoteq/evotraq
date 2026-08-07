@@ -17,12 +17,13 @@ class JobQueueDashboardSnapshot {
     required this.priorityDistribution,
     required this.jobTypeDistribution,
     required this.activeJobsList,
+    required this.queuedJobsList,
     required this.recentHistory,
+    required this.workerPoolStats,
     required this.issues,
     required this.activeSparkline,
     required this.queuedSparkline,
     required this.lastUpdated,
-    required this.autoRefresh,
   });
 
   final bool healthy;
@@ -40,12 +41,17 @@ class JobQueueDashboardSnapshot {
   final Map<String, int> priorityDistribution;
   final Map<String, int> jobTypeDistribution;
   final List<Map<String, dynamic>> activeJobsList;
+  final List<Map<String, dynamic>> queuedJobsList;
   final List<Map<String, dynamic>> recentHistory;
+
+  /// Raw worker-pool statistics map (as returned by the API / WS payload), retained so the
+  /// Workers tab renders its detailed fields from the single snapshot source of truth.
+  final Map<String, dynamic> workerPoolStats;
+
   final List<String> issues;
   final List<double> activeSparkline;
   final List<double> queuedSparkline;
   final DateTime? lastUpdated;
-  final bool autoRefresh;
 
   int get totalKnownJobs =>
       activeJobs + queuedJobs + completedJobs + failedJobs;

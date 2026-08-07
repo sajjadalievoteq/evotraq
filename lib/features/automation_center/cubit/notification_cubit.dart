@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/data/services/automation_center/notification_api_service.dart' as api;
+import 'package:traqtrace_app/data/services/automation_center/notification_api_service.dart'
+    as api;
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart';
@@ -16,73 +17,134 @@ class NotificationCubit extends Cubit<NotificationState> {
   /// Prevents redundant re-fetches when switching between the panels that
   /// share this cubit. Manual refresh / mutations pass `force: true`.
   bool _subscriptionsLoaded = false;
+  bool _loadInFlight = false;
+  bool _forceReloadPending = false;
 
   NotificationCubit({
     required api.NotificationApiService apiService,
     required WebSocketService webSocketService,
-  })  : _apiService = apiService,
-        _webSocketService = webSocketService,
-        super(const NotificationState()) {
+  }) : _apiService = apiService,
+       _webSocketService = webSocketService,
+       super(const NotificationState()) {
     _initializeWebSocketListeners();
+    _syncConnectionFromService();
   }
 
   void _initializeWebSocketListeners() {
-    _realtimeSubscription = _webSocketService.notificationStream.listen(
-      (notification) {
-        _onRealtimeNotificationReceived(notification.toJson());
-      },
-    );
-    _connectionSubscription = _webSocketService.connectionStream.listen(
-      (connected) {
-        emit(state.copyWith(
-          status: connected
-              ? NotificationStatus.webSocketConnected
-              : NotificationStatus.webSocketDisconnected,
-        ));
-      },
-    );
+    _realtimeSubscription = _webSocketService.notificationStream.listen((
+      notification,
+    ) {
+      _onRealtimeNotificationReceived(notification.toJson());
+    });
+    _connectionSubscription = _webSocketService.connectionStream.listen((
+      connected,
+    ) {
+      if (isClosed) return;
+      if (connected) {
+        emit(
+          state.copyWith(
+            connectionStatus: NotificationConnectionStatus.connected,
+          ),
+        );
+      } else if (state.connectionStatus ==
+          NotificationConnectionStatus.connecting) {
+        emit(
+          state.copyWith(connectionStatus: NotificationConnectionStatus.failed),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            connectionStatus: NotificationConnectionStatus.disconnected,
+          ),
+        );
+      }
+    });
+  }
+
+  void _syncConnectionFromService() {
+    if (_webSocketService.isConnected) {
+      emit(
+        state.copyWith(
+          connectionStatus: NotificationConnectionStatus.connected,
+        ),
+      );
+    } else if (_webSocketService.isConnecting) {
+      emit(
+        state.copyWith(
+          connectionStatus: NotificationConnectionStatus.connecting,
+        ),
+      );
+    }
   }
 
   Future<void> loadSubscriptions({bool force = false}) async {
     // Skip redundant fetches: load once on entry, then serve cached data when
     // switching panels. A load already in flight is also skipped. `force` (Refresh
-    // button, auto-refresh, and post-mutation reloads) always re-fetches.
-    if (!force &&
-        (_subscriptionsLoaded ||
-            state.status == NotificationStatus.loading)) {
+    // button and post-mutation reloads) always re-fetches.
+    // One in-flight fetch at a time (covers force-refresh races too).
+    if (_loadInFlight) {
+      // A mutation/manual refresh racing the initial load must not be lost.
+      // Coalesce any number of forced requests into exactly one follow-up.
+      if (force) _forceReloadPending = true;
       return;
     }
+    if (!force && _subscriptionsLoaded) return;
+    _loadInFlight = true;
     try {
-      emit(state.copyWith(status: NotificationStatus.loading));
+      if (!isClosed) {
+        emit(state.copyWith(status: NotificationStatus.loading));
+      }
       // Backend returns the full active list (no server-side paging).
       final subscriptions = await _apiService.getSubscriptions();
 
       _subscriptionsLoaded = true;
-      emit(state.copyWith(
-        status: NotificationStatus.success,
-        subscriptions: subscriptions,
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.success,
+          subscriptions: subscriptions,
+          error: null,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to load subscriptions: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to load subscriptions: $e',
+        ),
+      );
+    } finally {
+      _loadInFlight = false;
+      if (_forceReloadPending && !isClosed) {
+        _forceReloadPending = false;
+        unawaited(loadSubscriptions(force: true));
+      }
     }
   }
 
   Future<void> loadSubscription(String id) async {
     try {
-      emit(state.copyWith(status: NotificationStatus.loading));
+      if (!isClosed) {
+        emit(state.copyWith(status: NotificationStatus.loading));
+      }
       final subscription = await _apiService.getSubscription(id);
-      emit(state.copyWith(
-        status: NotificationStatus.success,
-        selectedSubscription: subscription,
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.success,
+          selectedSubscription: subscription,
+          error: null,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to load subscription: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to load subscription: $e',
+        ),
+      );
     }
   }
 
@@ -95,7 +157,9 @@ class NotificationCubit extends Cubit<NotificationState> {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      emit(state.copyWith(status: NotificationStatus.loading));
+      if (!isClosed) {
+        emit(state.copyWith(status: NotificationStatus.loading));
+      }
       final request = CreateSubscriptionRequest(
         subscriptionName: subscriptionName,
         webhookUrl: webhookUrl,
@@ -106,17 +170,24 @@ class NotificationCubit extends Cubit<NotificationState> {
       );
 
       final subscription = await _apiService.createSubscription(request);
-      emit(state.copyWith(
-        status: NotificationStatus.subscriptionCreated,
-        lastCreatedSubscription: subscription,
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.subscriptionCreated,
+          lastCreatedSubscription: subscription,
+          error: null,
+        ),
+      );
 
       await loadSubscriptions(force: true);
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to create subscription: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to create subscription: $e',
+        ),
+      );
     }
   }
 
@@ -130,7 +201,9 @@ class NotificationCubit extends Cubit<NotificationState> {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      emit(state.copyWith(status: NotificationStatus.loading));
+      if (!isClosed) {
+        emit(state.copyWith(status: NotificationStatus.loading));
+      }
       final request = CreateSubscriptionRequest(
         subscriptionName: subscriptionName,
         webhookUrl: webhookUrl,
@@ -141,34 +214,48 @@ class NotificationCubit extends Cubit<NotificationState> {
       );
 
       final subscription = await _apiService.updateSubscription(id, request);
-      emit(state.copyWith(
-        status: NotificationStatus.subscriptionUpdated,
-        lastUpdatedSubscription: subscription,
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.subscriptionUpdated,
+          lastUpdatedSubscription: subscription,
+          error: null,
+        ),
+      );
 
       await loadSubscriptions(force: true);
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to update subscription: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to update subscription: $e',
+        ),
+      );
     }
   }
 
   Future<void> deleteSubscription(String id) async {
     try {
       await _apiService.deleteSubscription(id);
-      emit(state.copyWith(
-        status: NotificationStatus.subscriptionDeleted,
-        lastDeletedSubscriptionId: id,
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.subscriptionDeleted,
+          lastDeletedSubscriptionId: id,
+          error: null,
+        ),
+      );
 
       await loadSubscriptions(force: true);
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to delete subscription: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to delete subscription: $e',
+        ),
+      );
     }
   }
 
@@ -177,10 +264,13 @@ class NotificationCubit extends Cubit<NotificationState> {
       await _apiService.pauseSubscription(id);
       await loadSubscriptions(force: true);
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to pause subscription: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to pause subscription: $e',
+        ),
+      );
     }
   }
 
@@ -189,44 +279,65 @@ class NotificationCubit extends Cubit<NotificationState> {
       await _apiService.resumeSubscription(id);
       await loadSubscriptions(force: true);
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to resume subscription: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to resume subscription: $e',
+        ),
+      );
     }
   }
 
   Future<void> testWebhook(String webhookUrl) async {
     try {
       final result = await _apiService.testWebhook(webhookUrl);
-      emit(state.copyWith(
-        status: NotificationStatus.success,
-        webhookTestResult: result,
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.success,
+          webhookTestResult: result,
+          error: null,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to test webhook: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to test webhook: $e',
+        ),
+      );
     }
   }
 
   Future<void> testEmail(String emailAddress) async {
     try {
       final result = await _apiService.testEmail(emailAddress);
-      emit(state.copyWith(
-        status: NotificationStatus.success,
-        emailTestResult: result,
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.success,
+          emailTestResult: result,
+          error: null,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to test email: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to test email: $e',
+        ),
+      );
     }
   }
 
-  Future<void> loadWebhookHistory(String subscriptionId, {int page = 0, int size = 20}) async {
+  Future<void> loadWebhookHistory(
+    String subscriptionId, {
+    int page = 0,
+    int size = 20,
+  }) async {
     try {
       final webhookHistory = await _apiService.getWebhookHistory(
         subscriptionId,
@@ -234,83 +345,111 @@ class NotificationCubit extends Cubit<NotificationState> {
         size: size,
       );
 
-      emit(state.copyWith(
-        status: NotificationStatus.success,
-        webhookHistory: webhookHistory,
-        lastLoadedHistorySubscriptionId: subscriptionId,
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.success,
+          webhookHistory: webhookHistory,
+          lastLoadedHistorySubscriptionId: subscriptionId,
+          error: null,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to load webhook history: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to load webhook history: $e',
+        ),
+      );
     }
   }
 
   Future<void> loadSubscriptionStats(String subscriptionId) async {
     try {
       final stats = await _apiService.getSubscriptionStats(subscriptionId);
-      emit(state.copyWith(
-        status: NotificationStatus.success,
-        lastLoadedStats: stats,
-        lastLoadedStatsSubscriptionId: subscriptionId,
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.success,
+          lastLoadedStats: stats,
+          lastLoadedStatsSubscriptionId: subscriptionId,
+          error: null,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to load subscription stats: $e',
-      ));
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: NotificationStatus.error,
+          error: 'Failed to load subscription stats: $e',
+        ),
+      );
     }
   }
 
-  void connectWebSocket() {
-    try {
-      _webSocketService.connect();
-      emit(state.copyWith(status: NotificationStatus.webSocketConnected));
-    } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to connect to WebSocket: $e',
-      ));
+  /// Ensures the shared application socket is connecting/connected and enables
+  /// local Delivery Activity consumption of notification pushes.
+  ///
+  /// Does not claim ownership of the shared [WebSocketService]; never disconnects it.
+  void enableNotificationLive() {
+    if (isClosed) return;
+    emit(
+      state.copyWith(
+        notificationLiveEnabled: true,
+        connectionStatus: _webSocketService.isConnected
+            ? NotificationConnectionStatus.connected
+            : NotificationConnectionStatus.connecting,
+      ),
+    );
+    _webSocketService.connect();
+  }
+
+  /// Stops applying notification pushes locally. Job-queue and home consumers
+  /// keep using the shared socket.
+  void disableNotificationLive() {
+    if (isClosed) return;
+    emit(state.copyWith(notificationLiveEnabled: false));
+  }
+
+  void setNotificationLive(bool enabled) {
+    if (enabled) {
+      enableNotificationLive();
+    } else {
+      disableNotificationLive();
     }
   }
 
-  void disconnectWebSocket() {
-    try {
-      _webSocketService.disconnect();
-      emit(state.copyWith(status: NotificationStatus.webSocketDisconnected));
-    } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to disconnect from WebSocket: $e',
-      ));
-    }
-  }
+  /// @Deprecated — use [enableNotificationLive]. Kept for call-site migration.
+  void connectWebSocket() => enableNotificationLive();
+
+  /// No longer disconnects the shared socket. Disables local notification Live only.
+  void disconnectWebSocket() => disableNotificationLive();
 
   bool get isWebSocketConnected => _webSocketService.isConnected;
 
+  bool get isNotificationLive =>
+      state.notificationLiveEnabled &&
+      state.connectionStatus == NotificationConnectionStatus.connected;
+
   void _onRealtimeNotificationReceived(Map<String, dynamic> notificationJson) {
+    if (isClosed || !state.notificationLiveEnabled) return;
     try {
       final notification = RealtimeNotification.fromJson(notificationJson);
-      emit(state.copyWith(
-        status: NotificationStatus.success,
-        lastRealtimeNotification: notification,
-      ));
+      emit(state.copyWith(lastRealtimeNotification: notification));
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.error,
-        error: 'Failed to process realtime notification: $e',
-      ));
+      // Malformed push must not clobber subscription list status/error.
+      print('Failed to process realtime notification: $e');
     }
   }
 
   @override
-  Future<void> close() {
-    _realtimeSubscription?.cancel();
+  Future<void> close() async {
+    await _realtimeSubscription?.cancel();
     _realtimeSubscription = null;
-    _connectionSubscription?.cancel();
+    await _connectionSubscription?.cancel();
     _connectionSubscription = null;
-    
+    // Never disconnect the shared WebSocketService singleton here.
     return super.close();
   }
 }

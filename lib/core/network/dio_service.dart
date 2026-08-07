@@ -9,19 +9,11 @@ class DioService {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final AppConfig _appConfig;
 
-  
-  
   void Function()? onUnauthorized;
 
   DateTime? _lastUnauthorizedNotifyAt;
   static const Duration _unauthorizedDebounce = Duration(seconds: 2);
 
-  
-  static const Duration unauthorizedStartupGrace = Duration(seconds: 3);
-  DateTime? _unauthorizedGraceUntil;
-
-  
-  
   String? _cachedAuthToken;
 
   static final DioService _instance = DioService._internal();
@@ -158,7 +150,6 @@ class DioService {
     debugPrint(buffer.toString());
   }
 
-  
   static const Set<String> _publicAuthPathSuffixes = {
     '/auth/login',
     '/auth/register',
@@ -175,10 +166,9 @@ class DioService {
     return _publicAuthPathSuffixes.any(path.endsWith);
   }
 
-  
   bool requestHadBearerToken(RequestOptions options) {
-    final raw = options.headers['Authorization'] ??
-        options.headers['authorization'];
+    final raw =
+        options.headers['Authorization'] ?? options.headers['authorization'];
     if (raw == null) return false;
     final value = raw.toString().trim();
     if (value.isEmpty) return false;
@@ -190,21 +180,13 @@ class DioService {
     return true;
   }
 
-  
-  
-  
-  
-  
   bool looksLikePermissionDenied(Response? response) {
     if (response == null) return false;
     final raw = response.data;
-    final text = raw is String
-        ? raw
-        : (raw == null ? '' : raw.toString());
+    final text = raw is String ? raw : (raw == null ? '' : raw.toString());
     final lower = text.toLowerCase();
     if (lower.isEmpty) return false;
 
-    
     const sessionMarkers = [
       'expiredjwt',
       'jwt expired',
@@ -231,37 +213,21 @@ class DioService {
     return permissionMarkers.any(lower.contains);
   }
 
-  bool get _isInUnauthorizedGrace {
-    final until = _unauthorizedGraceUntil;
-    return until != null && DateTime.now().isBefore(until);
-  }
+  /// Retained as a bootstrap hook for callers. Bearer-token detection now
+  /// provides the startup-race guard, so a real authenticated 401 is never
+  /// ignored for an arbitrary grace period.
+  void markAuthSettled() {}
 
-  
-  void markAuthSettled() {
-    _unauthorizedGraceUntil =
-        DateTime.now().add(unauthorizedStartupGrace);
-  }
-
-  
-  
-  
-  
-  
   Future<void> handleUnauthorized(RequestOptions options) async {
     if (_isPublicAuthRequest(options)) return;
-    
-    if (!requestHadBearerToken(options)) return;
-    if (_isInUnauthorizedGrace) return;
 
+    if (!requestHadBearerToken(options)) return;
     try {
       await removeAuthToken();
-    } catch (_) {
-      
-    }
+    } catch (_) {}
     notifyUnauthorizedDebounced();
   }
 
-  
   Future<void> handleAuthFailureStatus({
     required RequestOptions options,
     required int? statusCode,
@@ -275,8 +241,6 @@ class DioService {
     }
 
     if (statusCode == 403) {
-      
-      
       // 403 = authenticated but NOT authorized (e.g. a role-restricted
       // endpoint like dashboard/GLNs for a USER). This must never log the user
       // out. Invalid/expired sessions come back as 401 (handled above), so on a
@@ -297,7 +261,6 @@ class DioService {
     );
   }
 
-  
   void notifyUnauthorizedDebounced() {
     final now = DateTime.now();
     if (_lastUnauthorizedNotifyAt != null &&
@@ -314,12 +277,6 @@ class DioService {
     bool expireGrace = false,
   }) {
     _lastUnauthorizedNotifyAt = null;
-    if (expireGrace) {
-      _unauthorizedGraceUntil =
-          DateTime.now().subtract(const Duration(seconds: 1));
-    } else if (clearGrace) {
-      _unauthorizedGraceUntil = null;
-    }
   }
 
   @visibleForTesting
@@ -327,16 +284,13 @@ class DioService {
     resetUnauthorizedGuardsForTest();
   }
 
-  
   Future<void> warmAuthTokenFromStorage() async {
     try {
       final token = await _secureStorage.read(key: AppConfig.authTokenKey);
       if (token != null && token.isNotEmpty) {
         _cachedAuthToken = token;
       }
-    } catch (_) {
-      
-    }
+    } catch (_) {}
   }
 
   @visibleForTesting
@@ -394,8 +348,6 @@ class DioService {
     );
   }
 
-  
-  
   Duration? _sendTimeoutForBody(dynamic data) {
     if (data == null) return null;
     return Duration(milliseconds: AppConfig.sendTimeout);

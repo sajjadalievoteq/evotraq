@@ -7,7 +7,7 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_card_status_chip.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_status_chip.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_stat_tile.dart';
 
 class NotificationCenterSubscriptionCard extends StatelessWidget {
@@ -138,7 +138,7 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
               const SizedBox(height: TraqSpacing.sm),
               Row(
                 children: [
-                  SubscriptionCardStatusChip(status: subscription.status),
+                  SubscriptionStatusChip(status: subscription.status),
                   const Spacer(),
                   Flexible(
                     child: Text(

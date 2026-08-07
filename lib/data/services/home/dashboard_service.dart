@@ -42,6 +42,14 @@ class DashboardService {
     }
 
     final data = json.decode(response.data) as Map<String, dynamic>;
+    return parseSummaryPayload(data);
+  }
+
+  /// Parses a raw `DashboardSummaryResponseDTO` JSON map — shared by the REST read above and by
+  /// [HomeCubit]'s WebSocket heartbeat handler, since the backend broadcasts that exact same DTO.
+  static ({DashboardStats stats, List<RecentEvent> recentEvents}) parseSummaryPayload(
+    Map<String, dynamic> data,
+  ) {
     final stats = DashboardStats.fromSummaryJson(data);
     final rawEvents = data['recentEvents'] as List<dynamic>? ?? const [];
     final recentEvents = rawEvents

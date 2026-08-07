@@ -17,8 +17,6 @@ class JobQueueDashboard extends StatelessWidget {
     required this.snapshot,
     required this.onRefresh,
     required this.onSchedule,
-    required this.onToggleAutoRefresh,
-    this.onSettings,
     this.onOpenActive,
     this.onOpenQueue,
     this.onOpenHistory,
@@ -28,8 +26,6 @@ class JobQueueDashboard extends StatelessWidget {
   final JobQueueDashboardSnapshot snapshot;
   final VoidCallback onRefresh;
   final VoidCallback onSchedule;
-  final ValueChanged<bool> onToggleAutoRefresh;
-  final VoidCallback? onSettings;
   final VoidCallback? onOpenActive;
   final VoidCallback? onOpenQueue;
   final VoidCallback? onOpenHistory;
@@ -50,8 +46,6 @@ class JobQueueDashboard extends StatelessWidget {
           snapshot: snapshot,
           onRefresh: onRefresh,
           onSchedule: onSchedule,
-          onToggleAutoRefresh: onToggleAutoRefresh,
-          onSettings: onSettings,
         ),
         const SizedBox(height: TraqSpacing.lg),
         _MetricsGrid(

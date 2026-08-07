@@ -27,7 +27,7 @@ abstract final class AutomationCenterSections {
         WorkbenchRailItem(
           id: notificationActivity,
           iconAsset: NavIcons.notificationCenter,
-          label: 'Notification Activity',
+          label: 'Delivery Activity',
         ),
       ],
     ),
@@ -47,11 +47,27 @@ abstract final class AutomationCenterSections {
     return ordered.contains(section) ? section! : alertSubscriptions;
   }
 
-  static int indexOf(String section) => ordered.indexOf(normalize(section));
+  /// Sections visible for the current role (excludes admin-only for non-admins).
+  static List<String> orderedFor({required bool isAdmin}) {
+    return ordered
+        .where((id) => isAdmin || !adminOnly.contains(id))
+        .toList(growable: false);
+  }
+
+  static int indexOf(String section, {required bool isAdmin}) {
+    final visible = orderedFor(isAdmin: isAdmin);
+    final normalized = normalize(section);
+    final index = visible.indexOf(normalized);
+    return index < 0 ? 0 : index;
+  }
 
   static String location(String section) {
     return '${Constants.automationCenterRoute}?section=${normalize(section)}';
   }
+
+  /// Deep link back to Alert Subscriptions (and subscription details return).
+  static String get alertSubscriptionsLocation =>
+      location(alertSubscriptions);
 
   static List<WorkbenchRailGroup> groupsFor({required bool isAdmin}) {
     if (isAdmin) return groups;

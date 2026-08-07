@@ -12,6 +12,7 @@ import 'package:traqtrace_app/data/services/auth/auth_service.dart';
 import 'package:traqtrace_app/data/models/auth/login_request.dart';
 import 'package:traqtrace_app/data/models/auth/register_request.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
+import 'package:traqtrace_app/data/services/websocket_service.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthService _authService;
@@ -20,13 +21,13 @@ class AuthCubit extends Cubit<AuthState> {
   final Duration _verifyEmailTimeout;
   AuthService get authService => _authService;
 
-  
+  /// Serializes concurrent session-expiry notifications (many parallel 401s).
+  bool _sessionExpiryInFlight = false;
+
   static const Duration authCheckTimeout = Duration(seconds: 10);
 
-  
   static const Duration loginTimeout = Duration(seconds: 15);
 
-  
   static const Duration verifyEmailTimeout = Duration(seconds: 15);
 
   AuthCubit({
@@ -34,13 +35,11 @@ class AuthCubit extends Cubit<AuthState> {
     Duration? authCheckTimeout,
     Duration? loginTimeout,
     Duration? verifyEmailTimeout,
-  })  : _authService = authService,
-        _authCheckTimeout = authCheckTimeout ?? AuthCubit.authCheckTimeout,
-        _loginTimeout = loginTimeout ?? AuthCubit.loginTimeout,
-        _verifyEmailTimeout =
-            verifyEmailTimeout ?? AuthCubit.verifyEmailTimeout,
-        super(const AuthState(status: AuthStatus.initial));
-
+  }) : _authService = authService,
+       _authCheckTimeout = authCheckTimeout ?? AuthCubit.authCheckTimeout,
+       _loginTimeout = loginTimeout ?? AuthCubit.loginTimeout,
+       _verifyEmailTimeout = verifyEmailTimeout ?? AuthCubit.verifyEmailTimeout,
+       super(const AuthState(status: AuthStatus.initial));
 
   bool _requiresEmailVerification(String? message) {
     final normalized = message?.trim().toLowerCase();
@@ -80,21 +79,15 @@ class AuthCubit extends Cubit<AuthState> {
         .replaceFirst('ApiException: ', '');
   }
 
-  
-  
-  
-  
-  Future<void> checkAuth({
-    Duration minSplashDelay = Duration.zero,
-  }) async {
+  Future<void> checkAuth({Duration minSplashDelay = Duration.zero}) async {
     emit(
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     final startedAt = DateTime.now();
     try {
-      final user = await _authService
-          .getCurrentUser()
-          .timeout(_authCheckTimeout);
+      final user = await _authService.getCurrentUser().timeout(
+        _authCheckTimeout,
+      );
       await _awaitMinSplash(startedAt, minSplashDelay);
       emit(
         state.copyWith(
@@ -106,9 +99,8 @@ class AuthCubit extends Cubit<AuthState> {
           bootstrapCompleted: true,
         ),
       );
-      _preloadGlnPickerCatalog();
-      _startCbvVocabulary();
-      unawaited(OperationalGlnStore.backfillIfNeeded(user));
+      _onAuthenticatedSessionStarted();
+      _backfillOperationalGln(user);
     } on TimeoutException {
       await _awaitMinSplash(startedAt, minSplashDelay);
       await _forceUnauthenticated();
@@ -118,7 +110,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  
   Future<void> _awaitMinSplash(DateTime startedAt, Duration minDelay) async {
     if (minDelay <= Duration.zero) return;
     final remaining = minDelay - DateTime.now().difference(startedAt);
@@ -132,10 +123,8 @@ class AuthCubit extends Cubit<AuthState> {
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     try {
-      final response =
-          await _authService.login(request).timeout(_loginTimeout);
-      final user =
-          await _authService.getCurrentUser().timeout(_loginTimeout);
+      final response = await _authService.login(request).timeout(_loginTimeout);
+      final user = await _authService.getCurrentUser().timeout(_loginTimeout);
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -146,9 +135,8 @@ class AuthCubit extends Cubit<AuthState> {
           registeredEmail: null,
         ),
       );
-      _preloadGlnPickerCatalog();
-      _startCbvVocabulary();
-      unawaited(OperationalGlnStore.backfillIfNeeded(user));
+      _onAuthenticatedSessionStarted();
+      _backfillOperationalGln(user);
     } on TimeoutException {
       emit(
         state.copyWith(
@@ -202,29 +190,64 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
-    try {
-      await _authService.logout();
-    } catch (_) {
-      
-    }
-    await _forceUnauthenticated();
-  }
-
-  
-  Future<void> sessionExpired() async {
-    if (state.status == AuthStatus.unauthenticated) return;
+    _disconnectSharedWebSocket();
     try {
       await _authService.logout();
     } catch (_) {}
     await _forceUnauthenticated();
   }
 
+  /// Centralized path for HTTP 401 / STOMP auth failures.
+  ///
+  /// Emits unauthenticated immediately so GoRouter redirects to Login without a
+  /// browser refresh. Remote logout is best-effort and must not block navigation
+  /// (awaiting a hung logout POST previously left the UI on a protected screen).
+  Future<void> sessionExpired() async {
+    if (state.status == AuthStatus.unauthenticated) return;
+    if (_sessionExpiryInFlight) return;
+    _sessionExpiryInFlight = true;
+    try {
+      _disconnectSharedWebSocket();
+      await _forceUnauthenticated();
+      unawaited(_authService.logout().catchError((_) {}));
+    } finally {
+      _sessionExpiryInFlight = false;
+    }
+  }
+
   Future<void> _forceUnauthenticated() async {
+    _disconnectSharedWebSocket();
     _clearSessionCaches();
-    emit(const AuthState(
-      status: AuthStatus.unauthenticated,
-      bootstrapCompleted: true,
-    ));
+    emit(
+      const AuthState(
+        status: AuthStatus.unauthenticated,
+        bootstrapCompleted: true,
+      ),
+    );
+  }
+
+  void _onAuthenticatedSessionStarted() {
+    _preloadGlnPickerCatalog();
+    _startCbvVocabulary();
+    _ensureSharedWebSocketConnected();
+  }
+
+  void _backfillOperationalGln(User user) {
+    unawaited(
+      OperationalGlnStore.backfillIfNeeded(user).catchError((_) {
+        // Best-effort migration: storage failure must not destabilize auth.
+      }),
+    );
+  }
+
+  void _ensureSharedWebSocketConnected() {
+    if (!getIt.isRegistered<WebSocketService>()) return;
+    getIt<WebSocketService>().connect();
+  }
+
+  void _disconnectSharedWebSocket() {
+    if (!getIt.isRegistered<WebSocketService>()) return;
+    getIt<WebSocketService>().disconnect();
   }
 
   Future<void> getCurrentUser() async {
@@ -238,9 +261,8 @@ class AuthCubit extends Cubit<AuthState> {
           message: null,
         ),
       );
-      _preloadGlnPickerCatalog();
-      _startCbvVocabulary();
-      unawaited(OperationalGlnStore.backfillIfNeeded(user));
+      _onAuthenticatedSessionStarted();
+      _backfillOperationalGln(user);
     } catch (e) {
       await _forceUnauthenticated();
     }
@@ -457,7 +479,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   void _preloadGlnPickerCatalog() {
     if (!getIt.isRegistered<GlnPickerCatalog>()) return;
-    
+
     getIt<GlnPickerCatalog>().preload();
   }
 

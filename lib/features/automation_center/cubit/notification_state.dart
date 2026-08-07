@@ -2,10 +2,33 @@ import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart';
 
-enum NotificationStatus { initial, loading, success, error, subscriptionCreated, subscriptionUpdated, subscriptionDeleted, webSocketConnected, webSocketDisconnected }
+/// Subscription list / detail load operations (independent of socket + mutations).
+enum NotificationStatus {
+  initial,
+  loading,
+  success,
+  error,
+  subscriptionCreated,
+  subscriptionUpdated,
+  subscriptionDeleted,
+}
+
+/// Shared-socket connection progress for Delivery Activity UI.
+enum NotificationConnectionStatus {
+  disconnected,
+  connecting,
+  connected,
+  failed,
+}
 
 class NotificationState extends Equatable {
   final NotificationStatus status;
+  final NotificationConnectionStatus connectionStatus;
+
+  /// When true, Delivery Activity applies realtime notification payloads locally.
+  /// Does not own the shared WebSocket connection.
+  final bool notificationLiveEnabled;
+
   final List<NotificationSubscription> subscriptions;
   final String? error;
   final NotificationSubscription? lastCreatedSubscription;
@@ -22,6 +45,8 @@ class NotificationState extends Equatable {
 
   const NotificationState({
     this.status = NotificationStatus.initial,
+    this.connectionStatus = NotificationConnectionStatus.disconnected,
+    this.notificationLiveEnabled = true,
     this.subscriptions = const [],
     this.error,
     this.lastCreatedSubscription,
@@ -39,6 +64,8 @@ class NotificationState extends Equatable {
 
   NotificationState copyWith({
     NotificationStatus? status,
+    NotificationConnectionStatus? connectionStatus,
+    bool? notificationLiveEnabled,
     List<NotificationSubscription>? subscriptions,
     String? error,
     NotificationSubscription? lastCreatedSubscription,
@@ -55,25 +82,36 @@ class NotificationState extends Equatable {
   }) {
     return NotificationState(
       status: status ?? this.status,
+      connectionStatus: connectionStatus ?? this.connectionStatus,
+      notificationLiveEnabled:
+          notificationLiveEnabled ?? this.notificationLiveEnabled,
       subscriptions: subscriptions ?? this.subscriptions,
       error: error,
-      lastCreatedSubscription: lastCreatedSubscription ?? this.lastCreatedSubscription,
-      lastUpdatedSubscription: lastUpdatedSubscription ?? this.lastUpdatedSubscription,
-      lastDeletedSubscriptionId: lastDeletedSubscriptionId ?? this.lastDeletedSubscriptionId,
+      lastCreatedSubscription:
+          lastCreatedSubscription ?? this.lastCreatedSubscription,
+      lastUpdatedSubscription:
+          lastUpdatedSubscription ?? this.lastUpdatedSubscription,
+      lastDeletedSubscriptionId:
+          lastDeletedSubscriptionId ?? this.lastDeletedSubscriptionId,
       selectedSubscription: selectedSubscription ?? this.selectedSubscription,
       webhookTestResult: webhookTestResult ?? this.webhookTestResult,
       emailTestResult: emailTestResult ?? this.emailTestResult,
       webhookHistory: webhookHistory ?? this.webhookHistory,
-      lastLoadedHistorySubscriptionId: lastLoadedHistorySubscriptionId ?? this.lastLoadedHistorySubscriptionId,
+      lastLoadedHistorySubscriptionId: lastLoadedHistorySubscriptionId ??
+          this.lastLoadedHistorySubscriptionId,
       lastLoadedStats: lastLoadedStats ?? this.lastLoadedStats,
-      lastLoadedStatsSubscriptionId: lastLoadedStatsSubscriptionId ?? this.lastLoadedStatsSubscriptionId,
-      lastRealtimeNotification: lastRealtimeNotification ?? this.lastRealtimeNotification,
+      lastLoadedStatsSubscriptionId:
+          lastLoadedStatsSubscriptionId ?? this.lastLoadedStatsSubscriptionId,
+      lastRealtimeNotification:
+          lastRealtimeNotification ?? this.lastRealtimeNotification,
     );
   }
 
   @override
   List<Object?> get props => [
         status,
+        connectionStatus,
+        notificationLiveEnabled,
         subscriptions,
         error,
         lastCreatedSubscription,

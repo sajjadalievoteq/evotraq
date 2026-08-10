@@ -75,8 +75,10 @@ class _FilteredActivityCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filtered =
-        SubscriptionFilterUtils.filterCenter(subscriptions, selectedFilter);
+    final filtered = SubscriptionFilterUtils.filterCenter(
+      subscriptions,
+      selectedFilter,
+    );
 
     return SubscriptionListView(
       cards: [

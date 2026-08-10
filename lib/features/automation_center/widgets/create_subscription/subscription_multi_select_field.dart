@@ -31,8 +31,10 @@ class SubscriptionMultiSelectField extends StatelessWidget {
             helperText: helperText,
             helperMaxLines: 1,
             errorText: field.errorText,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
             helperStyle: const TextStyle(),
           ),
           child: Column(
@@ -46,8 +48,9 @@ class SubscriptionMultiSelectField extends StatelessWidget {
                     color: AppColorMapper.infoSoft(context),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: AppColorMapper.infoColor(context)
-                          .withValues(alpha: 0.35),
+                      color: AppColorMapper.infoColor(
+                        context,
+                      ).withValues(alpha: 0.35),
                     ),
                   ),
                   child: Wrap(
@@ -140,9 +143,7 @@ class SubscriptionMultiSelectField extends StatelessWidget {
                   subtitle: option['description'] != null
                       ? Text(
                           option['description']!,
-                          style: TextStyle(
-                            color: context.colors.textMuted,
-                          ),
+                          style: TextStyle(color: context.colors.textMuted),
                         )
                       : null,
                 );

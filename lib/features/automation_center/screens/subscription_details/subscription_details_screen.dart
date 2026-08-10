@@ -13,14 +13,12 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_details_body.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_not_found.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/confirm_delete_subscription_dialog.dart';
 
 class SubscriptionDetailsScreen extends StatefulWidget {
   final String subscriptionId;
 
-  const SubscriptionDetailsScreen({
-    super.key,
-    required this.subscriptionId,
-  });
+  const SubscriptionDetailsScreen({super.key, required this.subscriptionId});
 
   @override
   State<SubscriptionDetailsScreen> createState() =>
@@ -49,12 +47,12 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
             state.status == NotificationStatus.loading && subscription == null;
         final stats =
             state.lastLoadedStatsSubscriptionId == widget.subscriptionId
-                ? state.lastLoadedStats
-                : null;
+            ? state.lastLoadedStats
+            : null;
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Subscription Details'),
+            title: Text(subscription?.subscriptionName ?? 'Subscription'),
             actions: [
               if (subscription != null) ...[
                 IconButton(
@@ -72,7 +70,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                         _resumeSubscription();
                         break;
                       case 'delete':
-                        _deleteSubscription();
+                        _deleteSubscription(subscription);
                         break;
                     }
                   },
@@ -133,11 +131,11 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : subscription == null
-                    ? const SubscriptionNotFound()
-                    : SubscriptionDetailsBody(
-                        subscription: subscription,
-                        stats: stats,
-                      ),
+                ? const SubscriptionNotFound()
+                : SubscriptionDetailsBody(
+                    subscription: subscription,
+                    stats: stats,
+                  ),
           ),
         );
       },
@@ -150,9 +148,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       context: context,
       builder: (_) => BlocProvider.value(
         value: cubit,
-        child: CreateSubscriptionDialog(
-          subscription: subscription,
-        ),
+        child: CreateSubscriptionDialog(subscription: subscription),
       ),
     ).then((changed) {
       if (changed == true) {
@@ -171,34 +167,17 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
     context.showInfo('Subscription resumed');
   }
 
-  void _deleteSubscription() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Subscription'),
-        content: const Text(
-          'Are you sure you want to delete this subscription? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context
-                  .read<NotificationCubit>()
-                  .deleteSubscription(widget.subscriptionId);
-              context.go(AutomationCenterSections.alertSubscriptionsLocation);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: AppColorMapper.errorColor(context),
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+  Future<void> _deleteSubscription(
+    NotificationSubscription subscription,
+  ) async {
+    final cubit = context.read<NotificationCubit>();
+    final confirmed = await showDeleteSubscriptionDialog(
+      context,
+      subscriptionName: subscription.subscriptionName,
     );
+    if (!confirmed || !mounted) return;
+    await cubit.deleteSubscription(widget.subscriptionId);
+    if (!mounted) return;
+    context.go(AutomationCenterSections.alertSubscriptionsLocation);
   }
 }

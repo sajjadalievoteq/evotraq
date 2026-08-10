@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class HelpItem extends StatelessWidget {
-  const HelpItem({
-    super.key,
-    required this.title,
-    required this.description,
-  });
+  const HelpItem({super.key, required this.title, required this.description});
 
   final String title;
   final String description;
@@ -24,19 +20,11 @@ class HelpItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(
             description,
-            style: TextStyle(
-              color: context.colors.textSecondary,
-              height: 1.4,
-            ),
+            style: TextStyle(color: context.colors.textSecondary, height: 1.4),
           ),
         ],
       ),

@@ -33,21 +33,12 @@ class HelpExampleCard extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: info,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, color: info),
               ),
             ],
           ),
           const SizedBox(height: 6),
-          Text(
-            description,
-            style: TextStyle(
-              color: info,
-              height: 1.3,
-            ),
-          ),
+          Text(description, style: TextStyle(color: info, height: 1.3)),
         ],
       ),
     );

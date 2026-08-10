@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class JobQueueScheduleSubmitRequest {
@@ -32,21 +31,19 @@ class JobQueueScheduleJobDialog extends StatefulWidget {
 class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
   // TODO(scheduling): real deferred/cron execution requires a backend
   // scheduled-submit endpoint + quartz/scheduler; out of scope here.
-  var _selectedJobType = 'NOTIFICATION_BATCH';
+  static const _jobType = 'NOTIFICATION_BATCH';
   var _selectedPriority = 'MEDIUM';
   var _jobName = '';
   var _description = '';
   final _parameters = <Map<String, String>>[];
 
   void _submit() {
-    if (_jobName.trim().isEmpty) {
-      context.showError('Job name is required');
-      return;
-    }
     Navigator.of(context).pop(
       JobQueueScheduleSubmitRequest(
-        jobName: _jobName.trim(),
-        jobType: _selectedJobType,
+        jobName: _jobName.trim().isEmpty
+            ? 'Notification batch'
+            : _jobName.trim(),
+        jobType: _jobType,
         description: _description.trim(),
         priorityLabel: _selectedPriority,
         parameters: List<Map<String, String>>.from(_parameters),
@@ -64,7 +61,7 @@ class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
             color: AppColorMapper.successColor(context),
           ),
           const SizedBox(width: TraqSpacing.sm),
-          const Text('Submit Job'),
+          const Text('Run Notification Batch'),
         ],
       ),
       content: SizedBox(
@@ -74,44 +71,34 @@ class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Submits a job to the queue immediately '
-                '(POST /jobs/submit).',
+                'Processes alert batches that are currently due. The job starts '
+                'as soon as queue capacity is available.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: context.colors.textMuted,
-                    ),
+                  color: context.colors.textMuted,
+                ),
               ),
               const SizedBox(height: TraqSpacing.lg),
               TextField(
                 decoration: const InputDecoration(
-                  labelText: 'Job Name *',
+                  labelText: 'Job name (optional)',
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (value) => _jobName = value,
               ),
               const SizedBox(height: TraqSpacing.md),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Job Type *',
+              const InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Job type',
                   border: OutlineInputBorder(),
                 ),
-                value: _selectedJobType,
-                items: const [
-                  DropdownMenuItem(
-                    value: 'NOTIFICATION_BATCH',
-                    child: Text('NOTIFICATION_BATCH'),
-                  ),
-                ],
-                onChanged: (value) => setState(
-                  () => _selectedJobType = value!,
-                ),
+                child: Text('Notification batch'),
               ),
               const SizedBox(height: TraqSpacing.sm),
               Text(
-                'Runs processScheduledBatchNotifications — delivers '
-                'due BATCH/SCHEDULED notification batches.',
+                'Only batches that are due will be processed.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: context.colors.textMuted,
-                    ),
+                  color: context.colors.textMuted,
+                ),
               ),
               const SizedBox(height: TraqSpacing.md),
               TextField(
@@ -130,20 +117,16 @@ class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
                 ),
                 value: _selectedPriority,
                 items: const [
-                  DropdownMenuItem(value: 'HIGH', child: Text('HIGH')),
-                  DropdownMenuItem(
-                    value: 'MEDIUM',
-                    child: Text('MEDIUM'),
-                  ),
-                  DropdownMenuItem(value: 'LOW', child: Text('LOW')),
+                  DropdownMenuItem(value: 'HIGH', child: Text('High')),
+                  DropdownMenuItem(value: 'MEDIUM', child: Text('Medium')),
+                  DropdownMenuItem(value: 'LOW', child: Text('Low')),
                 ],
-                onChanged: (value) => setState(
-                  () => _selectedPriority = value!,
-                ),
+                onChanged: (value) =>
+                    setState(() => _selectedPriority = value!),
               ),
               const SizedBox(height: TraqSpacing.xl),
               Text(
-                'Additional parameters (optional)',
+                'Advanced parameters (optional)',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: TraqSpacing.sm),
@@ -179,20 +162,18 @@ class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
                           AppAssets.iconRemoveCircle,
                           color: AppColorMapper.errorColor(context),
                         ),
-                        onPressed: () => setState(
-                          () => _parameters.removeAt(index),
-                        ),
+                        onPressed: () =>
+                            setState(() => _parameters.removeAt(index)),
                       ),
                     ],
                   ),
                 );
               }),
               OutlinedButton.icon(
-                onPressed: () => setState(
-                  () => _parameters.add({'key': '', 'value': ''}),
-                ),
+                onPressed: () =>
+                    setState(() => _parameters.add({'key': '', 'value': ''})),
                 icon: TraqIcon(AppAssets.iconPlus),
-                label: const Text('Add Parameter'),
+                label: const Text('Add advanced parameter'),
               ),
             ],
           ),
@@ -203,10 +184,7 @@ class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        FilledButton(
-          onPressed: _submit,
-          child: const Text('Submit Job'),
-        ),
+        FilledButton(onPressed: _submit, child: const Text('Run Now')),
       ],
     );
   }

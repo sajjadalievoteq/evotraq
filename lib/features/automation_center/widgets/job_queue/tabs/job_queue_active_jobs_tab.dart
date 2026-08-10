@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/cards/job_queue_active_job_card.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/activity_and_health.dart';
 
 class JobQueueActiveJobsTab extends StatelessWidget {
   final List<Map<String, dynamic>> activeJobs;
@@ -22,16 +23,16 @@ class JobQueueActiveJobsTab extends StatelessWidget {
         Text(
           'Active Jobs',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: c.textPrimary,
-              ),
+            fontWeight: FontWeight.w700,
+            color: c.textPrimary,
+          ),
         ),
         const Spacer(),
         Text(
           '${activeJobs.length} jobs running',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: c.textMuted,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: c.textMuted),
         ),
       ],
     );
@@ -42,14 +43,16 @@ class JobQueueActiveJobsTab extends StatelessWidget {
             child: Center(
               child: Text(
                 'No active jobs',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: c.textMuted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
               ),
             ),
           )
         : Column(
             children: [
+              JobQueueTimelineCard(activeJobs: activeJobs),
+              const SizedBox(height: TraqSpacing.lg),
               for (final job in activeJobs)
                 JobQueueActiveJobCard(job: job, onCancel: onCancel),
             ],
@@ -72,14 +75,16 @@ class JobQueueActiveJobsTab extends StatelessWidget {
         children: [
           header,
           const SizedBox(height: TraqSpacing.lg),
+          JobQueueTimelineCard(activeJobs: activeJobs),
+          const SizedBox(height: TraqSpacing.lg),
           Expanded(
             child: activeJobs.isEmpty
                 ? Center(
                     child: Text(
                       'No active jobs',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: c.textMuted,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
                     ),
                   )
                 : ListView.builder(

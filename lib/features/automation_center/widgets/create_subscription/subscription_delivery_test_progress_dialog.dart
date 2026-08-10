@@ -11,11 +11,20 @@ class SubscriptionDeliveryTestProgressDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      title: const Text('Testing Delivery'),
       content: Row(
         children: [
-          const CircularProgressIndicator(),
+          const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
           const SizedBox(width: 16),
-          Text('Testing ${deliveryMethod.toLowerCase()}...'),
+          Expanded(
+            child: Text(
+              'Checking the ${deliveryMethod.toLowerCase()} destination…',
+            ),
+          ),
         ],
       ),
     );

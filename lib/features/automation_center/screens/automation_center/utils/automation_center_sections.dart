@@ -7,11 +7,7 @@ abstract final class AutomationCenterSections {
   static const notificationActivity = 'notification-activity';
   static const backgroundJobs = 'background-jobs';
 
-  static const ordered = [
-    alertSubscriptions,
-    notificationActivity,
-    backgroundJobs,
-  ];
+  static const ordered = [alertSubscriptions, backgroundJobs];
 
   static const adminOnly = {backgroundJobs};
 
@@ -22,28 +18,24 @@ abstract final class AutomationCenterSections {
         WorkbenchRailItem(
           id: alertSubscriptions,
           iconAsset: NavIcons.manageSubscriptions,
-          label: 'Alert Subscriptions',
-        ),
-        WorkbenchRailItem(
-          id: notificationActivity,
-          iconAsset: NavIcons.notificationCenter,
-          label: 'Delivery Activity',
+          label: 'Subscriptions',
         ),
       ],
     ),
     WorkbenchRailGroup(
-      title: 'Data Operations',
+      title: 'Operations',
       items: [
         WorkbenchRailItem(
           id: backgroundJobs,
           iconAsset: NavIcons.jobQueueManagement,
-          label: 'Background Jobs',
+          label: 'Job Operations',
         ),
       ],
     ),
   ];
 
   static String normalize(String? section) {
+    if (section == notificationActivity) return alertSubscriptions;
     return ordered.contains(section) ? section! : alertSubscriptions;
   }
 
@@ -66,19 +58,20 @@ abstract final class AutomationCenterSections {
   }
 
   /// Deep link back to Alert Subscriptions (and subscription details return).
-  static String get alertSubscriptionsLocation =>
-      location(alertSubscriptions);
+  static String get alertSubscriptionsLocation => location(alertSubscriptions);
 
   static List<WorkbenchRailGroup> groupsFor({required bool isAdmin}) {
     if (isAdmin) return groups;
-    return [
-      groups.first,
-      WorkbenchRailGroup(
-        title: groups.last.title,
-        items: groups.last.items
-            .where((item) => !adminOnly.contains(item.id))
-            .toList(growable: false),
-      ),
-    ];
+    return groups
+        .map(
+          (group) => WorkbenchRailGroup(
+            title: group.title,
+            items: group.items
+                .where((item) => !adminOnly.contains(item.id))
+                .toList(growable: false),
+          ),
+        )
+        .where((group) => group.items.isNotEmpty)
+        .toList(growable: false);
   }
 }

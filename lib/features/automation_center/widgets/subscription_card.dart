@@ -47,9 +47,9 @@ class SubscriptionCard extends StatelessWidget {
                     child: Text(
                       subscription.subscriptionName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: c.textPrimary,
-                          ),
+                        fontWeight: FontWeight.w700,
+                        color: c.textPrimary,
+                      ),
                     ),
                   ),
                   SubscriptionStatusChip(status: subscription.status),
@@ -85,18 +85,18 @@ class SubscriptionCard extends StatelessWidget {
               const SizedBox(height: TraqSpacing.sm),
               Text(
                 'Endpoint: ${subscription.webhookUrl}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: c.textMuted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: c.textMuted),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: TraqSpacing.xs),
               Text(
                 'Created: ${DisplayDateUtils.dmy(subscription.createdAt)}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: c.textMuted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: c.textMuted),
               ),
               if (subscription.stats != null) ...[
                 const SizedBox(height: TraqSpacing.md),

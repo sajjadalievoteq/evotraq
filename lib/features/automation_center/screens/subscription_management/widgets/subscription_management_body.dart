@@ -13,7 +13,8 @@ import 'package:traqtrace_app/features/automation_center/widgets/subscription_sc
 class SubscriptionManagementBody extends StatelessWidget {
   const SubscriptionManagementBody({
     super.key,
-    required this.selectedFilter,
+    required this.selectedDeliveryFilter,
+    required this.selectedStatusFilter,
     required this.shrinkWrap,
     required this.onRefresh,
     required this.onEdit,
@@ -25,7 +26,8 @@ class SubscriptionManagementBody extends StatelessWidget {
     required this.onCreate,
   });
 
-  final String selectedFilter;
+  final String selectedDeliveryFilter;
+  final String selectedStatusFilter;
   final bool shrinkWrap;
   final VoidCallback onRefresh;
   final void Function(NotificationSubscription) onEdit;
@@ -59,7 +61,8 @@ class SubscriptionManagementBody extends StatelessWidget {
         }
         return _FilteredManagementCards(
           subscriptions: state.subscriptions,
-          selectedFilter: selectedFilter,
+          selectedDeliveryFilter: selectedDeliveryFilter,
+          selectedStatusFilter: selectedStatusFilter,
           shrinkWrap: shrinkWrap,
           onRefresh: () async => onRefresh(),
           onEdit: onEdit,
@@ -78,7 +81,8 @@ class SubscriptionManagementBody extends StatelessWidget {
 class _FilteredManagementCards extends StatelessWidget {
   const _FilteredManagementCards({
     required this.subscriptions,
-    required this.selectedFilter,
+    required this.selectedDeliveryFilter,
+    required this.selectedStatusFilter,
     required this.shrinkWrap,
     required this.onRefresh,
     required this.onEdit,
@@ -91,7 +95,8 @@ class _FilteredManagementCards extends StatelessWidget {
   });
 
   final List<NotificationSubscription> subscriptions;
-  final String selectedFilter;
+  final String selectedDeliveryFilter;
+  final String selectedStatusFilter;
   final bool shrinkWrap;
   final Future<void> Function() onRefresh;
   final void Function(NotificationSubscription) onEdit;
@@ -106,7 +111,8 @@ class _FilteredManagementCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final filtered = SubscriptionFilterUtils.filterManagement(
       subscriptions,
-      selectedFilter,
+      selectedDeliveryFilter,
+      statusFilter: selectedStatusFilter,
     );
 
     return SubscriptionListView(
@@ -123,7 +129,10 @@ class _FilteredManagementCards extends StatelessWidget {
       ],
       emptyState: SubscriptionEmptyState(
         totalSubscriptions: subscriptions.length,
-        selectedFilter: selectedFilter,
+        selectedFilter:
+            selectedDeliveryFilter == 'all' && selectedStatusFilter == 'all'
+            ? 'all'
+            : 'filtered',
         title: 'No subscriptions yet',
         subtitle:
             'Create your first webhook or email subscription to get notified about EPCIS events.',

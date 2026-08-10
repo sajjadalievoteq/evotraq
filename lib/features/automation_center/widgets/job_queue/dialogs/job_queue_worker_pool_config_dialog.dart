@@ -4,11 +4,12 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-typedef JobQueueWorkerPoolSave = Future<Map<String, dynamic>> Function({
-  required int corePoolSize,
-  required int maxPoolSize,
-  required int queueCapacity,
-});
+typedef JobQueueWorkerPoolSave =
+    Future<Map<String, dynamic>> Function({
+      required int corePoolSize,
+      required int maxPoolSize,
+      required int queueCapacity,
+    });
 
 class JobQueueWorkerPoolConfigDialog extends StatefulWidget {
   const JobQueueWorkerPoolConfigDialog({
@@ -45,15 +46,18 @@ class _JobQueueWorkerPoolConfigDialogState
     _coreCtrl = TextEditingController(text: widget.initialCorePoolSize);
     _maxCtrl = TextEditingController(text: widget.initialMaxPoolSize);
     _queueCtrl = TextEditingController(text: widget.initialQueueCapacity);
-    widget.onPrefill().then((config) {
-      if (!mounted) return;
-      final qc = config['queueCapacity'];
-      if (qc != null) _queueCtrl.text = '$qc';
-      final core = config['corePoolSize'];
-      if (core != null) _coreCtrl.text = '$core';
-      final max = config['maxPoolSize'];
-      if (max != null) _maxCtrl.text = '$max';
-    }).catchError((_) {});
+    widget
+        .onPrefill()
+        .then((config) {
+          if (!mounted) return;
+          final qc = config['queueCapacity'];
+          if (qc != null) _queueCtrl.text = '$qc';
+          final core = config['corePoolSize'];
+          if (core != null) _coreCtrl.text = '$core';
+          final max = config['maxPoolSize'];
+          if (max != null) _maxCtrl.text = '$max';
+        })
+        .catchError((_) {});
   }
 
   @override
@@ -129,6 +133,7 @@ class _JobQueueWorkerPoolConfigDialogState
               decoration: const InputDecoration(
                 labelText: 'Core pool size',
                 border: OutlineInputBorder(),
+                helperText: 'Workers kept ready for normal demand',
               ),
             ),
             const SizedBox(height: TraqSpacing.md),
@@ -138,6 +143,7 @@ class _JobQueueWorkerPoolConfigDialogState
               decoration: const InputDecoration(
                 labelText: 'Max pool size',
                 border: OutlineInputBorder(),
+                helperText: 'Upper limit during peak demand',
               ),
             ),
             const SizedBox(height: TraqSpacing.md),
@@ -147,15 +153,14 @@ class _JobQueueWorkerPoolConfigDialogState
               decoration: const InputDecoration(
                 labelText: 'Queue capacity',
                 border: OutlineInputBorder(),
+                helperText: 'Maximum number of waiting jobs',
               ),
             ),
             if (_formError != null) ...[
               const SizedBox(height: TraqSpacing.md),
               Text(
                 _formError!,
-                style: TextStyle(
-                  color: AppColorMapper.errorColor(context),
-                ),
+                style: TextStyle(color: AppColorMapper.errorColor(context)),
               ),
             ],
           ],
@@ -174,7 +179,7 @@ class _JobQueueWorkerPoolConfigDialogState
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Save'),
+              : const Text('Apply Configuration'),
         ),
       ],
     );

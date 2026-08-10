@@ -2,23 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/create_subscription_form_fields.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_delivery_test_progress_dialog.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_delivery_test_result_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/notification_subscription_help.dart';
+import 'package:traqtrace_app/features/automation_center/utils/subscription_delivery_utils.dart';
 
 class CreateSubscriptionDialog extends StatefulWidget {
   final NotificationSubscription? subscription;
 
-  const CreateSubscriptionDialog({
-    super.key,
-    this.subscription,
-  });
+  const CreateSubscriptionDialog({super.key, this.subscription});
 
   @override
   State<CreateSubscriptionDialog> createState() =>
@@ -28,9 +26,61 @@ class CreateSubscriptionDialog extends StatefulWidget {
 class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
-  String _selectedDeliveryMethod = 'WEBHOOK';
+  bool _isTesting = false;
+  bool? _testSucceeded;
+  String? _testMessage;
+  late String _selectedDeliveryMethod;
 
   bool get _isEditing => widget.subscription != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final endpoint = widget.subscription?.webhookUrl ?? '';
+    _selectedDeliveryMethod =
+        SubscriptionDeliveryUtils.isEmailEndpoint(endpoint)
+        ? 'EMAIL'
+        : 'WEBHOOK';
+  }
+
+  Map<String, dynamic> get _initialValue {
+    final subscription = widget.subscription;
+    if (subscription == null) {
+      return const {
+        'subscriptionType': 'REALTIME',
+        'deliveryMethod': 'WEBHOOK',
+        'notificationFormat': 'SUMMARY',
+      };
+    }
+
+    final query = subscription.queryParameters ?? const <String, dynamic>{};
+    String? firstString(String key) {
+      final value = query[key];
+      if (value is List && value.isNotEmpty) return '${value.first}';
+      if (value is String && value.isNotEmpty) return value;
+      return null;
+    }
+
+    final eventTypes = query['eventTypes'];
+    return {
+      'subscriptionName': subscription.subscriptionName,
+      'deliveryMethod': _selectedDeliveryMethod,
+      if (_selectedDeliveryMethod == 'EMAIL')
+        'emailAddress': subscription.webhookUrl
+      else
+        'webhookUrl': subscription.webhookUrl,
+      'subscriptionType': subscription.subscriptionType,
+      'notificationFormat':
+          subscription.notificationFormat ??
+          (_selectedDeliveryMethod == 'EMAIL' ? 'EMAIL_HTML' : 'SUMMARY'),
+      if (eventTypes is List)
+        'eventTypes': eventTypes.map((value) => '$value').toList(),
+      'bizStep': firstString('businessSteps'),
+      'disposition': firstString('dispositions'),
+      'readPoint': firstString('readPoints'),
+      'epcPattern': firstString('epcs'),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,17 +89,38 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         if (state.status == NotificationStatus.subscriptionCreated ||
             state.status == NotificationStatus.subscriptionUpdated) {
           Navigator.of(context).pop(true);
+        } else if (_isTesting &&
+            (_selectedDeliveryMethod == 'EMAIL'
+                ? state.emailTestResult != null
+                : state.webhookTestResult != null)) {
+          final result = _selectedDeliveryMethod == 'EMAIL'
+              ? state.emailTestResult!
+              : state.webhookTestResult!;
+          setState(() {
+            _isTesting = false;
+            _testSucceeded = result['success'] == true;
+            _testMessage = '${result['message'] ?? 'Delivery test completed'}';
+          });
         } else if (state.status == NotificationStatus.error) {
           setState(() {
             _isLoading = false;
+            if (_isTesting) {
+              _isTesting = false;
+              _testSucceeded = false;
+              _testMessage = state.error ?? 'Delivery test failed';
+            }
           });
         }
       },
       child: AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         title: Row(
           children: [
-            Text(_isEditing ? 'Edit Subscription' : 'Create Subscription'),
-            const Spacer(),
+            Expanded(
+              child: Text(
+                _isEditing ? 'Edit Subscription' : 'New Subscription',
+              ),
+            ),
             IconButton(
               icon: TraqIcon(AppAssets.iconInfo),
               onPressed: () => _showHelpDialog(context),
@@ -58,23 +129,15 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           ],
         ),
         content: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          height: MediaQuery.of(context).size.height * 0.7,
+          width: (MediaQuery.sizeOf(context).width - 64)
+              .clamp(280.0, 720.0)
+              .toDouble(),
+          height: (MediaQuery.sizeOf(context).height * 0.7)
+              .clamp(360.0, 720.0)
+              .toDouble(),
           child: FormBuilder(
             key: _formKey,
-            initialValue: _isEditing
-                ? {
-                    'subscriptionName': widget.subscription!.subscriptionName,
-                    'webhookUrl': widget.subscription!.webhookUrl,
-                    'subscriptionType': widget.subscription!.subscriptionType,
-                    'notificationFormat':
-                        widget.subscription!.notificationFormat,
-                    'deliveryMethod': 'WEBHOOK',
-                  }
-                : {
-                    'subscriptionType': 'REALTIME',
-                    'deliveryMethod': 'WEBHOOK',
-                  },
+            initialValue: _initialValue,
             onChanged: () {
               final formData = _formKey.currentState?.value;
               if (formData != null && formData['deliveryMethod'] != null) {
@@ -88,46 +151,69 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
             },
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 16),
-              child: CreateSubscriptionFormFields(
-                selectedDeliveryMethod: _selectedDeliveryMethod,
-                onDeliveryMethodChanged: (value) {
-                  setState(() => _selectedDeliveryMethod = value);
-                },
+              child: Column(
+                children: [
+                  CreateSubscriptionFormFields(
+                    selectedDeliveryMethod: _selectedDeliveryMethod,
+                    onDeliveryMethodChanged: (value) {
+                      setState(() {
+                        _selectedDeliveryMethod = value;
+                        _testSucceeded = null;
+                        _testMessage = null;
+                      });
+                    },
+                  ),
+                  if (_isTesting || _testMessage != null) ...[
+                    const SizedBox(height: TraqSpacing.md),
+                    _DeliveryTestFeedback(
+                      testing: _isTesting,
+                      success: _testSucceeded,
+                      message: _testMessage,
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
         ),
         actions: [
           TextButton(
-            onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
+            onPressed: _isLoading
+                ? null
+                : () => Navigator.of(context).pop(false),
             child: const Text('Cancel'),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
             children: [
               if (!_isEditing) ...[
                 TextButton.icon(
-                  onPressed: _isLoading ? null : _testDelivery,
-                  icon: TraqIcon(AppAssets.iconFlask),
+                  onPressed: _isLoading || _isTesting ? null : _testDelivery,
+                  icon: _isTesting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : TraqIcon(AppAssets.iconFlask),
                   label: Text(
                     _selectedDeliveryMethod == 'EMAIL'
                         ? 'Test Email'
                         : 'Test Webhook',
                   ),
                 ),
-                const SizedBox(width: 8),
               ],
-              ElevatedButton(
+              FilledButton(
                 onPressed: _isLoading ? null : _submitForm,
                 child: _isLoading
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(_isEditing ? 'Update' : 'Create'),
+                    : Text(_isEditing ? 'Save Changes' : 'Create Subscription'),
               ),
             ],
           ),
@@ -147,12 +233,18 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final formData = _formKey.currentState!.value;
       final deliveryMethod = formData['deliveryMethod'] as String? ?? 'WEBHOOK';
+      setState(() {
+        _isTesting = true;
+        _testSucceeded = null;
+        _testMessage = null;
+      });
 
       if (deliveryMethod == 'WEBHOOK') {
         final webhookUrl = formData['webhookUrl'] as String?;
         if (webhookUrl != null && webhookUrl.isNotEmpty) {
           context.read<NotificationCubit>().testWebhook(webhookUrl);
         } else {
+          setState(() => _isTesting = false);
           context.showError('Please enter a valid webhook URL');
           return;
         }
@@ -161,45 +253,12 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         if (emailAddress != null && emailAddress.isNotEmpty) {
           context.read<NotificationCubit>().testEmail(emailAddress);
         } else {
+          setState(() => _isTesting = false);
           context.showError('Please enter a valid email address');
           return;
         }
       }
-
-      showDialog(
-        context: context,
-        builder: (context) => BlocListener<NotificationCubit, NotificationState>(
-          listener: (context, state) {
-            if (state.webhookTestResult != null ||
-                state.emailTestResult != null) {
-              Navigator.of(context).pop();
-              final Map<String, dynamic> result =
-                  state.webhookTestResult ?? state.emailTestResult!;
-              _showTestResult(context, result);
-            } else if (state.status == NotificationStatus.error) {
-              Navigator.of(context).pop();
-              context.showError('Test failed: ${state.error}');
-            }
-          },
-          child: SubscriptionDeliveryTestProgressDialog(
-            deliveryMethod: deliveryMethod,
-          ),
-        ),
-      );
     }
-  }
-
-  void _showTestResult(BuildContext context, Map<String, dynamic> result) {
-    final success = result['success'] ?? false;
-    final message = result['message'] ?? 'Unknown result';
-
-    showDialog(
-      context: context,
-      builder: (context) => SubscriptionDeliveryTestResultDialog(
-        success: success,
-        message: message,
-      ),
-    );
   }
 
   void _submitForm() {
@@ -248,26 +307,82 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
 
       if (_isEditing) {
         context.read<NotificationCubit>().updateSubscription(
-              id: widget.subscription!.id,
-              subscriptionName: formData['subscriptionName'],
-              webhookUrl: endpointOrEmail,
-              subscriptionType: formData['subscriptionType'],
-              deliveryMethod: deliveryMethod,
-              notificationFormat: notificationFormat,
-              queryParameters:
-                  queryParameters.isNotEmpty ? queryParameters : null,
-            );
+          id: widget.subscription!.id,
+          subscriptionName: formData['subscriptionName'],
+          webhookUrl: endpointOrEmail,
+          subscriptionType: formData['subscriptionType'],
+          deliveryMethod: deliveryMethod,
+          notificationFormat: notificationFormat,
+          queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+        );
       } else {
         context.read<NotificationCubit>().createSubscription(
-              subscriptionName: formData['subscriptionName'],
-              webhookUrl: endpointOrEmail,
-              subscriptionType: formData['subscriptionType'],
-              deliveryMethod: deliveryMethod,
-              notificationFormat: notificationFormat,
-              queryParameters:
-                  queryParameters.isNotEmpty ? queryParameters : null,
-            );
+          subscriptionName: formData['subscriptionName'],
+          webhookUrl: endpointOrEmail,
+          subscriptionType: formData['subscriptionType'],
+          deliveryMethod: deliveryMethod,
+          notificationFormat: notificationFormat,
+          queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+        );
       }
     }
+  }
+}
+
+class _DeliveryTestFeedback extends StatelessWidget {
+  const _DeliveryTestFeedback({
+    required this.testing,
+    required this.success,
+    required this.message,
+  });
+
+  final bool testing;
+  final bool? success;
+  final String? message;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = testing
+        ? context.colors.secondary
+        : success == true
+        ? AppColorMapper.successColor(context)
+        : AppColorMapper.errorColor(context);
+
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(TraqSpacing.md),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          border: Border.all(color: color.withValues(alpha: 0.35)),
+          borderRadius: TraqRadius.card,
+        ),
+        child: Row(
+          children: [
+            if (testing)
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2, color: color),
+              )
+            else
+              TraqIcon(
+                success == true
+                    ? AppAssets.iconCheckCircle
+                    : AppAssets.iconXCircle,
+                color: color,
+              ),
+            const SizedBox(width: TraqSpacing.sm),
+            Expanded(
+              child: Text(
+                testing ? 'Testing delivery connection…' : message ?? '',
+                style: context.text.bodySm.copyWith(color: color),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

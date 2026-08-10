@@ -38,15 +38,15 @@ class SubscriptionStatTile extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: c.textMuted,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: c.textMuted),
           ),
         ],
       ),

@@ -10,10 +10,7 @@ import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_q
 import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
 
 class JobQueueSystemHealthPanel extends StatelessWidget {
-  const JobQueueSystemHealthPanel({
-    super.key,
-    required this.snapshot,
-  });
+  const JobQueueSystemHealthPanel({super.key, required this.snapshot});
 
   final JobQueueDashboardSnapshot snapshot;
 
@@ -28,8 +25,8 @@ class JobQueueSystemHealthPanel extends StatelessWidget {
         tone: snapshot.processingPaused
             ? JobQueueStatusTone.warn
             : (snapshot.healthy
-                ? JobQueueStatusTone.ok
-                : JobQueueStatusTone.err),
+                  ? JobQueueStatusTone.ok
+                  : JobQueueStatusTone.err),
       ),
       child: Column(
         children: [
@@ -77,9 +74,9 @@ class JobQueueSystemHealthPanel extends StatelessWidget {
                     Expanded(
                       child: Text(
                         issue,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: c.textSecondary,
-                            ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: c.textSecondary),
                       ),
                     ),
                   ],
@@ -114,9 +111,9 @@ class _MiniGauge extends StatelessWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: c.textMuted,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: c.textMuted),
           ),
           const SizedBox(height: TraqSpacing.xs),
           ClipRRect(
@@ -132,9 +129,9 @@ class _MiniGauge extends StatelessWidget {
           Text(
             '${(value * 100).clamp(0, 100).toStringAsFixed(0)}%',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
         ],
       ),
@@ -176,15 +173,15 @@ class _StatPill extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: c.textMuted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: c.textMuted),
               ),
               Text(
                 value,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -256,17 +253,13 @@ class JobQueueRecentActivityCard extends StatelessWidget {
                             children: [
                               Text(
                                 item.title,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
+                                style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                               if (item.subtitle.isNotEmpty)
                                 Text(
                                   item.subtitle,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
+                                  style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         color: context.colors.textMuted,
                                       ),
@@ -298,10 +291,7 @@ class _ActivityItem {
 }
 
 class JobQueueTimelineCard extends StatelessWidget {
-  const JobQueueTimelineCard({
-    super.key,
-    required this.activeJobs,
-  });
+  const JobQueueTimelineCard({super.key, required this.activeJobs});
 
   final List<Map<String, dynamic>> activeJobs;
 
@@ -346,17 +336,17 @@ class _TimelineRow extends StatelessWidget {
             Expanded(
               child: Text(
                 '${job['jobType'] ?? 'Job'}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             Text(
               '${job['elapsedTime'] ?? ''}',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: c.textMuted,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: c.textMuted),
             ),
           ],
         ),

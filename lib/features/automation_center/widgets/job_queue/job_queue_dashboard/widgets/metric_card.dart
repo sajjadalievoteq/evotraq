@@ -49,9 +49,7 @@ class _JobQueueMetricCardState extends State<JobQueueMetricCard> {
           color: soft,
           borderRadius: TraqRadius.card,
           border: Border.all(
-            color: _hovered
-                ? widget.accent.withValues(alpha: 0.45)
-                : c.border,
+            color: _hovered ? widget.accent.withValues(alpha: 0.45) : c.border,
           ),
           boxShadow: _hovered
               ? TraqShadows.sm(brightness: Theme.of(context).brightness)

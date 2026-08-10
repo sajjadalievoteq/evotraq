@@ -27,9 +27,7 @@ class _JobQueuePurgeDialogState extends State<JobQueuePurgeDialog> {
   Future<void> _confirm() async {
     final days = int.tryParse(_daysCtrl.text.trim());
     if (days == null || days < 1) {
-      setState(
-        () => _formError = 'Enter a positive number of retention days',
-      );
+      setState(() => _formError = 'Enter a positive number of retention days');
       return;
     }
     setState(() {
@@ -58,7 +56,7 @@ class _JobQueuePurgeDialogState extends State<JobQueuePurgeDialog> {
             color: AppColorMapper.errorColor(context),
           ),
           const SizedBox(width: TraqSpacing.sm),
-          const Text('Purge Old Jobs'),
+          const Text('Delete Old Job History'),
         ],
       ),
       content: SizedBox(
@@ -68,8 +66,8 @@ class _JobQueuePurgeDialogState extends State<JobQueuePurgeDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Permanently remove completed job history older than the '
-              'retention period. This cannot be undone.',
+              'Permanently delete completed job records older than the '
+              'retention period. Running and waiting jobs are not affected.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: TraqSpacing.lg),
@@ -77,7 +75,7 @@ class _JobQueuePurgeDialogState extends State<JobQueuePurgeDialog> {
               controller: _daysCtrl,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Retain jobs from the last N days',
+                labelText: 'Keep history from the last N days',
                 border: OutlineInputBorder(),
                 helperText: 'Jobs ending before this window are purged',
               ),
@@ -86,9 +84,7 @@ class _JobQueuePurgeDialogState extends State<JobQueuePurgeDialog> {
               const SizedBox(height: TraqSpacing.md),
               Text(
                 _formError!,
-                style: TextStyle(
-                  color: AppColorMapper.errorColor(context),
-                ),
+                style: TextStyle(color: AppColorMapper.errorColor(context)),
               ),
             ],
           ],
@@ -110,7 +106,7 @@ class _JobQueuePurgeDialogState extends State<JobQueuePurgeDialog> {
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Purge'),
+              : const Text('Delete History'),
         ),
       ],
     );

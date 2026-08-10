@@ -7,10 +7,7 @@ import 'package:traqtrace_app/data/models/automation_center/notification_subscri
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_stat_item.dart';
 
 class SubscriptionStatsRow extends StatelessWidget {
-  const SubscriptionStatsRow({
-    super.key,
-    required this.stats,
-  });
+  const SubscriptionStatsRow({super.key, required this.stats});
 
   final NotificationStats stats;
 
@@ -36,7 +33,7 @@ class SubscriptionStatsRow extends StatelessWidget {
           ),
           Expanded(
             child: SubscriptionStatItem(
-              label: 'Total',
+              label: 'Matched',
               value: stats.totalNotifications.toString(),
               iconAsset: NavIcons.notifications,
               color: AppColorMapper.infoColor(context),

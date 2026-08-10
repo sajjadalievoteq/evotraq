@@ -26,7 +26,10 @@ class JobQueueHistoryJobCard extends StatelessWidget {
     final executionTime = '${job['executionTime'] ?? ''}';
     final endTime = '${job['endTime'] ?? ''}';
     final typeColor = StatusVisualMappers.jobTypeColor(context, jobType);
-    final statusColor = StatusVisualMappers.queueJobStatusColor(context, status);
+    final statusColor = StatusVisualMappers.queueJobStatusColor(
+      context,
+      status,
+    );
     final c = context.colors;
     final canRetry = status.toUpperCase() == 'FAILED';
 
@@ -62,8 +65,9 @@ class JobQueueHistoryJobCard extends StatelessWidget {
                 children: [
                   Text(
                     '${job['jobId'] ?? ''}',
-                    style:
-                        context.text.body.copyWith(fontWeight: FontWeight.w600),
+                    style: context.text.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: TraqSpacing.xs),
                   Wrap(

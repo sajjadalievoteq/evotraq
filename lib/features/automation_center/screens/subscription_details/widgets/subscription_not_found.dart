@@ -23,16 +23,16 @@ class SubscriptionNotFound extends StatelessWidget {
           Text(
             'Subscription Not Found',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: context.colors.textMuted,
-                ),
+              color: context.colors.textMuted,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'The requested subscription could not be found or may have been deleted.',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: context.colors.textMuted,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: context.colors.textMuted),
           ),
           const SizedBox(height: 24),
           ElevatedButton(

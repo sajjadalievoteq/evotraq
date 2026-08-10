@@ -51,15 +51,15 @@ class SubscriptionStatusChip extends StatelessWidget {
 
     return switch (style) {
       SubscriptionStatusChipStyle.tonal => _TonalChip(
-          status: status,
-          color: color,
-          iconAsset: iconAsset,
-        ),
+        status: status,
+        color: color,
+        iconAsset: iconAsset,
+      ),
       SubscriptionStatusChipStyle.solid => _SolidChip(
-          status: status,
-          color: color,
-          iconAsset: iconAsset,
-        ),
+        status: status,
+        color: color,
+        iconAsset: iconAsset,
+      ),
     };
   }
 }
@@ -90,9 +90,9 @@ class _TonalChip extends StatelessWidget {
             Text(
               status,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
@@ -119,17 +119,13 @@ class _SolidChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final onInverse = context.colors.textOnInverse;
     return Chip(
-      avatar: TraqIcon(
-        iconAsset,
-        color: onInverse,
-        size: 16,
-      ),
+      avatar: TraqIcon(iconAsset, color: onInverse, size: 16),
       label: Text(
         status,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: onInverse,
-              fontWeight: FontWeight.w600,
-            ),
+          color: onInverse,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       backgroundColor: color,
     );

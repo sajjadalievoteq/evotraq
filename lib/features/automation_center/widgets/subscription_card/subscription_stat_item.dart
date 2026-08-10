@@ -29,18 +29,18 @@ class SubscriptionStatItem extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: color,
-                  ),
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
             ),
           ],
         ),
         const SizedBox(height: TraqSpacing.xs),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: c.textMuted,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: c.textMuted),
         ),
       ],
     );

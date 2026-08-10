@@ -30,10 +30,7 @@ class JobQueuePanel extends StatefulWidget {
   /// (Automation Center). Admin full-page use keeps [embedded] false.
   final bool embedded;
 
-  const JobQueuePanel({
-    Key? key,
-    this.embedded = false,
-  }) : super(key: key);
+  const JobQueuePanel({Key? key, this.embedded = false}) : super(key: key);
 
   @override
   JobQueuePanelState createState() => JobQueuePanelState();
@@ -152,15 +149,22 @@ class JobQueuePanelState extends State<JobQueuePanel>
     );
   }
 
-  Widget _buildContent(BuildContext context, JobQueueDashboardSnapshot snapshot) {
+  Widget _buildContent(
+    BuildContext context,
+    JobQueueDashboardSnapshot snapshot,
+  ) {
     final c = context.colors;
     final embedded = widget.embedded;
 
     final activeJobs = snapshot.activeJobsList;
-    final queuedJobs =
-        JobQueueFilters.byStatus(snapshot.queuedJobsList, _selectedStatus);
-    final jobHistory =
-        JobQueueFilters.byJobType(snapshot.recentHistory, _selectedJobType);
+    final queuedJobs = JobQueueFilters.byStatus(
+      snapshot.queuedJobsList,
+      _selectedStatus,
+    );
+    final jobHistory = JobQueueFilters.byJobType(
+      snapshot.recentHistory,
+      _selectedJobType,
+    );
     final workerPoolStats = snapshot.workerPoolStats;
 
     final tabBar = Material(
@@ -176,26 +180,11 @@ class JobQueuePanelState extends State<JobQueuePanel>
         labelStyle: context.text.bodySm.copyWith(fontWeight: FontWeight.w600),
         unselectedLabelStyle: context.text.bodySm,
         tabs: const [
-          Tab(
-            icon: TraqIcon(NavIcons.dashboard),
-            text: 'Dashboard',
-          ),
-          Tab(
-            icon: TraqIcon(AppAssets.iconPlay),
-            text: 'Active Jobs',
-          ),
-          Tab(
-            icon: TraqIcon(AppAssets.iconList),
-            text: 'Queue',
-          ),
-          Tab(
-            icon: TraqIcon(AppAssets.iconClock),
-            text: 'History',
-          ),
-          Tab(
-            icon: TraqIcon(AppAssets.iconUsers),
-            text: 'Workers',
-          ),
+          Tab(icon: TraqIcon(NavIcons.dashboard), text: 'Overview'),
+          Tab(icon: TraqIcon(AppAssets.iconPlay), text: 'Running'),
+          Tab(icon: TraqIcon(AppAssets.iconList), text: 'Waiting'),
+          Tab(icon: TraqIcon(AppAssets.iconClock), text: 'History'),
+          Tab(icon: TraqIcon(AppAssets.iconUsers), text: 'Worker Pool'),
         ],
         onTap: (_) => setState(() {}),
       ),
@@ -269,6 +258,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
                         ),
                         JobQueueQueueTab(
                           queuedJobs: queuedJobs,
+                          priorityDistribution: snapshot.priorityDistribution,
                           fill: true,
                           selectedStatus: _selectedStatus,
                           statuses: _jobStatuses,
@@ -278,6 +268,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
                         ),
                         JobQueueHistoryTab(
                           jobHistory: jobHistory,
+                          jobTypeDistribution: snapshot.jobTypeDistribution,
                           fill: true,
                           selectedJobType: _selectedJobType,
                           jobTypes: _jobTypes,
@@ -287,6 +278,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
                         ),
                         JobQueueWorkerPoolTab(
                           workerPoolStats: workerPoolStats,
+                          snapshot: snapshot,
                           fill: true,
                           onConfigure: _showWorkerPoolConfig,
                         ),
@@ -335,6 +327,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
     showDialog(
       context: context,
       builder: (context) => JobQueueControlPanelDialog(
+        processingPaused: _cubit.state.snapshot?.processingPaused ?? false,
         onPause: _pauseProcessing,
         onResume: _resumeProcessing,
         onConfigureWorkers: _showWorkerPoolConfig,
@@ -352,17 +345,18 @@ class JobQueuePanelState extends State<JobQueuePanel>
         initialMaxPoolSize: '${stats['maximumPoolSize'] ?? 8}',
         initialQueueCapacity: '100',
         onPrefill: _cubit.getWorkerPoolConfig,
-        onSave: ({
-          required int corePoolSize,
-          required int maxPoolSize,
-          required int queueCapacity,
-        }) {
-          return _cubit.configureWorkerPool(
-            corePoolSize: corePoolSize,
-            maxPoolSize: maxPoolSize,
-            queueCapacity: queueCapacity,
-          );
-        },
+        onSave:
+            ({
+              required int corePoolSize,
+              required int maxPoolSize,
+              required int queueCapacity,
+            }) {
+              return _cubit.configureWorkerPool(
+                corePoolSize: corePoolSize,
+                maxPoolSize: maxPoolSize,
+                queueCapacity: queueCapacity,
+              );
+            },
       ),
     );
     if (result == null || !mounted) return;

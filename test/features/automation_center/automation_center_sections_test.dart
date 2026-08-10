@@ -9,7 +9,6 @@ void main() {
     expect(Constants.automationCenterRoute, '/automation');
     expect(AutomationCenterSections.ordered, const [
       'alert-subscriptions',
-      'notification-activity',
       'background-jobs',
     ]);
     expect(
@@ -22,7 +21,7 @@ void main() {
       AutomationCenterSections.location(
         AutomationCenterSections.notificationActivity,
       ),
-      '/automation?section=notification-activity',
+      '/automation?section=alert-subscriptions',
     );
   });
 
@@ -36,16 +35,16 @@ void main() {
     final nonAdminIds = WorkbenchRail.flatten(
       AutomationCenterSections.groupsFor(isAdmin: false),
     ).map((item) => item.id);
-    expect(
-      nonAdminIds,
-      containsAll([
-        AutomationCenterSections.alertSubscriptions,
-        AutomationCenterSections.notificationActivity,
-      ]),
-    );
+    expect(nonAdminIds, contains(AutomationCenterSections.alertSubscriptions));
     expect(
       nonAdminIds,
       isNot(contains(AutomationCenterSections.backgroundJobs)),
+    );
+    expect(
+      AutomationCenterSections.groupsFor(
+        isAdmin: false,
+      ).every((group) => group.items.isNotEmpty),
+      isTrue,
     );
   });
 

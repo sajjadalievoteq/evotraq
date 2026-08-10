@@ -4,16 +4,15 @@ import 'package:traqtrace_app/features/automation_center/widgets/job_queue/cards
 class JobQueueWorkerPoolDetails extends StatelessWidget {
   final Map<String, dynamic> workerPoolStats;
 
-  const JobQueueWorkerPoolDetails({
-    super.key,
-    required this.workerPoolStats,
-  });
+  const JobQueueWorkerPoolDetails({super.key, required this.workerPoolStats});
 
   @override
   Widget build(BuildContext context) {
     return GridView.count(
       crossAxisCount: 2,
       childAspectRatio: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       children: [
         JobQueueWorkerPoolStatCard(
           title: 'Active Count',

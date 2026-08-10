@@ -35,9 +35,7 @@ class AutomationWorkbenchPanel extends StatelessWidget {
       Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            child: Text(title, style: context.text.h2),
-          ),
+          Expanded(child: Text(title, style: context.text.h2)),
           if (actions.isNotEmpty) ...[
             const SizedBox(width: TraqSpacing.sm),
             Wrap(
@@ -64,10 +62,7 @@ class AutomationWorkbenchPanel extends StatelessWidget {
         side: BorderSide(color: colors.border),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: TraqSpacing.surfacePad,
-        child: child,
-      ),
+      child: Padding(padding: TraqSpacing.surfacePad, child: child),
     );
 
     if (fillBody) {
@@ -91,10 +86,7 @@ class AutomationWorkbenchPanel extends StatelessWidget {
     return SelectionArea(
       child: ListView(
         padding: EdgeInsets.all(pad),
-        children: [
-          ...header,
-          card,
-        ],
+        children: [...header, card],
       ),
     );
   }

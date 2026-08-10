@@ -34,12 +34,8 @@ class SubscriptionDetailsBody extends StatelessWidget {
                       Expanded(
                         child: Text(
                           subscription.subscriptionName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       SubscriptionStatusChip(
@@ -58,8 +54,8 @@ class SubscriptionDetailsBody extends StatelessWidget {
                     Text(
                       'Format: ${subscription.notificationFormat}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: context.colors.textMuted,
-                          ),
+                        color: context.colors.textMuted,
+                      ),
                     ),
                   ],
                 ],
@@ -89,7 +85,8 @@ class SubscriptionDetailsBody extends StatelessWidget {
             children: [
               SubscriptionDetailRow(
                 label: 'Query Parameters',
-                value: subscription.queryParameters?.entries
+                value:
+                    subscription.queryParameters?.entries
                         .map((e) => '${e.key}: ${e.value}')
                         .join(', ') ??
                     'None',

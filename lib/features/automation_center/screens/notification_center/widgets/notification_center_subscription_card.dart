@@ -22,7 +22,8 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final stats = subscription.stats;
-    final hasActivity = stats != null &&
+    final hasActivity =
+        stats != null &&
         (stats.successfulNotifications > 0 ||
             stats.failedNotifications > 0 ||
             stats.totalNotifications > 0);
@@ -55,9 +56,7 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
                       children: [
                         Text(
                           subscription.subscriptionName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: c.textPrimary,
@@ -65,10 +64,9 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
                         ),
                         Text(
                           'Type: ${subscription.subscriptionType}',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: c.textMuted,
-                                  ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: c.textMuted),
                         ),
                       ],
                     ),
@@ -117,7 +115,8 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
                         children: [
                           for (final tile in tiles)
                             SizedBox(
-                              width: (constraints.maxWidth - TraqSpacing.sm) / 2,
+                              width:
+                                  (constraints.maxWidth - TraqSpacing.sm) / 2,
                               child: tile,
                             ),
                         ],
@@ -143,9 +142,9 @@ class NotificationCenterSubscriptionCard extends StatelessWidget {
                   Flexible(
                     child: Text(
                       'Created: ${RelativeTimeUtils.recentWithYesterdayOrDate(subscription.createdAt)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: c.textMuted,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: c.textMuted),
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
                     ),

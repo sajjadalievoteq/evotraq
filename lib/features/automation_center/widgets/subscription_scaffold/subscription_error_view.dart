@@ -40,24 +40,21 @@ class SubscriptionErrorView extends StatelessWidget {
             const SizedBox(height: TraqSpacing.lg),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: c.textPrimary,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(color: c.textPrimary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: TraqSpacing.sm),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: c.textMuted,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
             ),
             const SizedBox(height: TraqSpacing.xl),
-            FilledButton(
-              onPressed: onRetry,
-              child: const Text('Retry'),
-            ),
+            FilledButton(onPressed: onRetry, child: const Text('Retry')),
           ],
         ),
       ),

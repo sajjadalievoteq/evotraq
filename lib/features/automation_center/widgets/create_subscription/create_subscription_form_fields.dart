@@ -97,20 +97,22 @@ class CreateSubscriptionFormFields extends StatelessWidget {
           ),
           validator: FormBuilderValidators.required(),
           isDense: true,
-          initialValue:
-              selectedDeliveryMethod == 'EMAIL' ? 'EMAIL_HTML' : 'SUMMARY',
-          items: SubscriptionFormatUtils.availableFormats(selectedDeliveryMethod)
-              .map(
-                (option) => DropdownMenuItem<String>(
-                  value: option['value'],
-                  child: Text(
-                    option['label']!,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              )
-              .toList(),
+          initialValue: selectedDeliveryMethod == 'EMAIL'
+              ? 'EMAIL_HTML'
+              : 'SUMMARY',
+          items:
+              SubscriptionFormatUtils.availableFormats(selectedDeliveryMethod)
+                  .map(
+                    (option) => DropdownMenuItem<String>(
+                      value: option['value'],
+                      child: Text(
+                        option['label']!,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  )
+                  .toList(),
         ),
         const SizedBox(height: 12),
         const SubscriptionAdvancedSection(),

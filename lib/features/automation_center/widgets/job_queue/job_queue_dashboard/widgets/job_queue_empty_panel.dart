@@ -29,18 +29,18 @@ class JobQueueEmptyPanel extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: c.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: c.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
             textAlign: TextAlign.center,
           ),
           if (subtitle != null) ...[
             const SizedBox(height: TraqSpacing.xs),
             Text(
               subtitle!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: c.textMuted,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: c.textMuted),
               textAlign: TextAlign.center,
             ),
           ],

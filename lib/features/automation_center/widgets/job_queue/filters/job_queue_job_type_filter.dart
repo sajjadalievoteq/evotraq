@@ -17,10 +17,7 @@ class JobQueueJobTypeFilter extends StatelessWidget {
     return DropdownButton<String>(
       value: selectedJobType,
       items: jobTypes.map((type) {
-        return DropdownMenuItem(
-          value: type,
-          child: Text(type),
-        );
+        return DropdownMenuItem(value: type, child: Text(type));
       }).toList(),
       onChanged: (value) {
         if (value != null) onChanged(value);

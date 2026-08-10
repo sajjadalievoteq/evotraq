@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gtin_selector.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart'
+    as gtin_model;
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
@@ -43,8 +44,9 @@ class SgtinSerialItemIdentityCard extends StatelessWidget {
           GtinSelector(
             label: 'GTIN',
             initialValue: selectedGtin,
-            initialGtinCode:
-                gtinController.text.isNotEmpty ? gtinController.text : null,
+            initialGtinCode: gtinController.text.isNotEmpty
+                ? gtinController.text
+                : null,
             onChanged: onGtinChanged,
             isRequired: true,
             readOnly: !(isEditing && isCreating),
@@ -62,7 +64,7 @@ class SgtinSerialItemIdentityCard extends StatelessWidget {
           Gs1ValidatedField(
             controller: batchLotNumberController,
             fieldName: 'batchLotNumber',
-            label: 'Batch / Lot Number',
+            label: 'Batch / Lot Number *',
             readOnly: !isCreating,
             validator: sgtin_validators.validateBatchLotNumber,
             setFieldError: setFieldError,

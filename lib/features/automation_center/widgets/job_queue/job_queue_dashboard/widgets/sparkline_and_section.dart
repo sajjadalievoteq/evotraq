@@ -74,10 +74,7 @@ class _SparkPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            color.withValues(alpha: 0.22),
-            color.withValues(alpha: 0.0),
-          ],
+          colors: [color.withValues(alpha: 0.22), color.withValues(alpha: 0.0)],
         ).createShader(Offset.zero & size),
     );
   }

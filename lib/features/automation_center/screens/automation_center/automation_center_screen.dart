@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_background_jobs_panel.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_alert_subscriptions_panel.dart';
-import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_notification_activity_panel.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/lazy_indexed_stack.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/notifications_shell.dart';
@@ -66,11 +65,6 @@ class _AutomationCenterViewState extends State<_AutomationCenterView> {
           key: ValueKey(AutomationCenterSections.alertSubscriptions),
           child: AutomationAlertSubscriptionsPanel(),
         );
-      case AutomationCenterSections.notificationActivity:
-        return const KeyedSubtree(
-          key: ValueKey(AutomationCenterSections.notificationActivity),
-          child: AutomationNotificationActivityPanel(),
-        );
       case AutomationCenterSections.backgroundJobs:
         return const KeyedSubtree(
           key: ValueKey(AutomationCenterSections.backgroundJobs),
@@ -86,17 +80,15 @@ class _AutomationCenterViewState extends State<_AutomationCenterView> {
     final isAdmin = context.select<AuthCubit, bool>(
       (cubit) => cubit.state.isAdmin,
     );
-    final visibleSections =
-        AutomationCenterSections.orderedFor(isAdmin: isAdmin);
+    final visibleSections = AutomationCenterSections.orderedFor(
+      isAdmin: isAdmin,
+    );
     // Non-admins deep-linked to Background Jobs are redirected by the router;
     // fall back to the first visible section if needed.
     final selected = visibleSections.contains(_selectedSection)
         ? _selectedSection
         : visibleSections.first;
-    final index = AutomationCenterSections.indexOf(
-      selected,
-      isAdmin: isAdmin,
-    );
+    final index = AutomationCenterSections.indexOf(selected, isAdmin: isAdmin);
 
     return Title(
       title: 'Automation Center',

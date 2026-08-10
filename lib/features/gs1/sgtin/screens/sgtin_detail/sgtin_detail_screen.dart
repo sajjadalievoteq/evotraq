@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +15,8 @@ import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_detail_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart'
+    as gtin_model;
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 
@@ -178,8 +178,9 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
     _regulatoryMarketController.text = sgtin.regulatoryMarket ?? '';
     _regulatoryStatusController.text = sgtin.regulatoryStatus ?? '';
     if (sgtin.expiryDate != null) {
-      _expiryDateController.text =
-          DateFormat('yyyy-MM-dd').format(sgtin.expiryDate!);
+      _expiryDateController.text = DateFormat(
+        'yyyy-MM-dd',
+      ).format(sgtin.expiryDate!);
     } else {
       _expiryDateController.clear();
     }
@@ -220,13 +221,12 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
       id: _loadedSgtinId,
       serialNumber: _serialNumberController.text,
       gtinCode: _selectedGtin?.gtinCode ?? _gtinController.text,
-      batchLotNumber: _batchLotNumberController.text.isNotEmpty
-          ? _batchLotNumberController.text
-          : null,
+      batchLotNumber: _batchLotNumberController.text.trim(),
       expiryDate: _expiryDate,
       productionDate: _productionDate,
       bestBeforeDate: _bestBeforeDate,
-      status: _selectedStatus ??
+      status:
+          _selectedStatus ??
           (widget.isCreating ? ItemStatus.ALLOCATED : ItemStatus.COMMISSIONED),
       currentLocation: widget.isCreating ? null : _selectedLocation,
       regulatoryMarket: _regulatoryMarketController.text.isNotEmpty
@@ -290,7 +290,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ValidationCubit>.value(
@@ -303,7 +302,8 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
     if (widget.awaitingListSelection) {
       return BlocBuilder<SGTINCubit, SGTINState>(
         builder: (context, state) {
-          final listLoading = state.status == SGTINStatus.loading ||
+          final listLoading =
+              state.status == SGTINStatus.loading ||
               state.status == SGTINStatus.initial;
           final body = listLoading
               ? SingleChildScrollView(
@@ -353,7 +353,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
           } else if (widget.epcUri != null &&
               state.sgtin!.canonicalIdentifier == widget.epcUri &&
               state.sgtin!.id != _loadedSgtinId) {
-            
             _populateForm(state.sgtin!);
           }
 
@@ -435,5 +434,4 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
     if (_isEditing) return SgtinUiConstants.detailTitleEdit;
     return SgtinUiConstants.detailTitleView;
   }
-
 }

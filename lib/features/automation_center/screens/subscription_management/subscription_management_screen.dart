@@ -3,19 +3,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_management_body.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/notification_subscription_help.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_embedded_body.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_filter_chips.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
+import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/notification_connection_status.dart';
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/confirm_delete_subscription_dialog.dart';
 
 /// Subscription-management filter options (UI labels only; filter logic stays
 /// in [SubscriptionFilterUtils.filterManagement]).
 const List<SubscriptionFilterOption> kSubscriptionManagementFilterOptions = [
   SubscriptionFilterOption(label: 'All', value: 'all'),
-  SubscriptionFilterOption(label: 'Email Only', value: 'email'),
+  SubscriptionFilterOption(label: 'Webhook', value: 'webhook'),
+  SubscriptionFilterOption(label: 'Email', value: 'email'),
+];
+
+const List<SubscriptionFilterOption> kSubscriptionStatusFilterOptions = [
+  SubscriptionFilterOption(label: 'All', value: 'all'),
   SubscriptionFilterOption(label: 'Active', value: 'active'),
   SubscriptionFilterOption(label: 'Paused', value: 'paused'),
 ];
@@ -31,7 +39,8 @@ class SubscriptionManagementScreen extends StatefulWidget {
 
 class SubscriptionManagementScreenState
     extends State<SubscriptionManagementScreen> {
-  String _selectedFilter = 'all';
+  String _selectedDeliveryFilter = 'all';
+  String _selectedStatusFilter = 'all';
 
   @override
   void initState() {
@@ -51,27 +60,63 @@ class SubscriptionManagementScreenState
   Widget build(BuildContext context) {
     final c = context.colors;
     return SubscriptionEmbeddedBody(
-      description: Text(
-        'Filter by delivery method or status. Supports webhook and email delivery.',
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
+      description: BlocBuilder<NotificationCubit, NotificationState>(
+        buildWhen: (previous, current) =>
+            previous.connectionStatus != current.connectionStatus ||
+            previous.notificationLiveEnabled != current.notificationLiveEnabled,
+        builder: (context, state) => Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Manage delivery destinations, event filters, and delivery health.',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
+              ),
+            ),
+            const SizedBox(width: TraqSpacing.sm),
+            NotificationConnectionIndicator(
+              liveEnabled: state.notificationLiveEnabled,
+              connectionStatus: state.connectionStatus,
+            ),
+          ],
+        ),
       ),
-      filterChips: SubscriptionFilterChips(
-        options: kSubscriptionManagementFilterOptions,
-        selectedFilter: _selectedFilter,
-        onFilterSelected: (filter) => setState(() => _selectedFilter = filter),
+      filterChips: Wrap(
+        spacing: TraqSpacing.xl,
+        runSpacing: TraqSpacing.md,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          _LabeledFilter(
+            label: 'Delivery',
+            options: kSubscriptionManagementFilterOptions,
+            selected: _selectedDeliveryFilter,
+            onSelected: (filter) =>
+                setState(() => _selectedDeliveryFilter = filter),
+          ),
+          _LabeledFilter(
+            label: 'Status',
+            options: kSubscriptionStatusFilterOptions,
+            selected: _selectedStatusFilter,
+            onSelected: (filter) =>
+                setState(() => _selectedStatusFilter = filter),
+          ),
+        ],
       ),
       body: SubscriptionManagementBody(
-        selectedFilter: _selectedFilter,
+        selectedDeliveryFilter: _selectedDeliveryFilter,
+        selectedStatusFilter: _selectedStatusFilter,
         shrinkWrap: true,
         onRefresh: refresh,
         onEdit: (sub) => _editSubscription(sub.id),
-        onDelete: (sub) => _deleteSubscription(sub.id),
+        onDelete: _deleteSubscription,
         onPause: (sub) => _pauseSubscription(sub.id),
         onResume: (sub) => _resumeSubscription(sub.id),
         onViewDetails: (sub) => _viewSubscriptionDetails(sub.id),
-        onClearFilters: () => setState(() => _selectedFilter = 'all'),
+        onClearFilters: () => setState(() {
+          _selectedDeliveryFilter = 'all';
+          _selectedStatusFilter = 'all';
+        }),
         onCreate: () => _showCreateSubscriptionDialog(context),
       ),
     );
@@ -114,33 +159,15 @@ class SubscriptionManagementScreenState
     _editSubscription(subscriptionId);
   }
 
-  void _deleteSubscription(String subscriptionId) {
+  Future<void> _deleteSubscription(
+    NotificationSubscription subscription,
+  ) async {
     final cubit = context.read<NotificationCubit>();
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Subscription'),
-        content: const Text(
-          'Are you sure you want to delete this subscription? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              cubit.deleteSubscription(subscriptionId);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: AppColorMapper.errorColor(context),
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await showDeleteSubscriptionDialog(
+      context,
+      subscriptionName: subscription.subscriptionName,
     );
+    if (confirmed) cubit.deleteSubscription(subscription.id);
   }
 
   void _pauseSubscription(String subscriptionId) {
@@ -149,5 +176,42 @@ class SubscriptionManagementScreenState
 
   void _resumeSubscription(String subscriptionId) {
     context.read<NotificationCubit>().resumeSubscription(subscriptionId);
+  }
+}
+
+class _LabeledFilter extends StatelessWidget {
+  const _LabeledFilter({
+    required this.label,
+    required this.options,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final List<SubscriptionFilterOption> options;
+  final String selected;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: TraqSpacing.sm,
+      runSpacing: TraqSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          label,
+          style: context.text.bodySm.copyWith(
+            color: context.colors.textMuted,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        SubscriptionFilterChips(
+          options: options,
+          selectedFilter: selected,
+          onFilterSelected: onSelected,
+        ),
+      ],
+    );
   }
 }

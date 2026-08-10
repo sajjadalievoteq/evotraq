@@ -33,9 +33,9 @@ class SubscriptionMetaChip extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: c.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: c.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

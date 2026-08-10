@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class SubscriptionFilterOption {
-  const SubscriptionFilterOption({
-    required this.label,
-    required this.value,
-  });
+  const SubscriptionFilterOption({required this.label, required this.value});
 
   final String label;
   final String value;

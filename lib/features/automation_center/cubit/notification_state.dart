@@ -97,7 +97,8 @@ class NotificationState extends Equatable {
       webhookTestResult: webhookTestResult ?? this.webhookTestResult,
       emailTestResult: emailTestResult ?? this.emailTestResult,
       webhookHistory: webhookHistory ?? this.webhookHistory,
-      lastLoadedHistorySubscriptionId: lastLoadedHistorySubscriptionId ??
+      lastLoadedHistorySubscriptionId:
+          lastLoadedHistorySubscriptionId ??
           this.lastLoadedHistorySubscriptionId,
       lastLoadedStats: lastLoadedStats ?? this.lastLoadedStats,
       lastLoadedStatsSubscriptionId:
@@ -109,21 +110,21 @@ class NotificationState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        connectionStatus,
-        notificationLiveEnabled,
-        subscriptions,
-        error,
-        lastCreatedSubscription,
-        lastUpdatedSubscription,
-        lastDeletedSubscriptionId,
-        selectedSubscription,
-        webhookTestResult,
-        emailTestResult,
-        webhookHistory,
-        lastLoadedHistorySubscriptionId,
-        lastLoadedStats,
-        lastLoadedStatsSubscriptionId,
-        lastRealtimeNotification,
-      ];
+    status,
+    connectionStatus,
+    notificationLiveEnabled,
+    subscriptions,
+    error,
+    lastCreatedSubscription,
+    lastUpdatedSubscription,
+    lastDeletedSubscriptionId,
+    selectedSubscription,
+    webhookTestResult,
+    emailTestResult,
+    webhookHistory,
+    lastLoadedHistorySubscriptionId,
+    lastLoadedStats,
+    lastLoadedStatsSubscriptionId,
+    lastRealtimeNotification,
+  ];
 }

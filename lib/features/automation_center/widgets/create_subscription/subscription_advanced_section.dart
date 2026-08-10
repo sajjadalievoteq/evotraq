@@ -18,7 +18,8 @@ class SubscriptionAdvancedSection extends StatefulWidget {
       _SubscriptionAdvancedSectionState();
 }
 
-class _SubscriptionAdvancedSectionState extends State<SubscriptionAdvancedSection> {
+class _SubscriptionAdvancedSectionState
+    extends State<SubscriptionAdvancedSection> {
   @override
   void initState() {
     super.initState();
@@ -82,9 +83,7 @@ class _SubscriptionAdvancedSectionState extends State<SubscriptionAdvancedSectio
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           children: [
-            const Expanded(
-              child: Text('Failed to load CBV vocabulary.'),
-            ),
+            const Expanded(child: Text('Failed to load CBV vocabulary.')),
             TextButton(
               onPressed: () => context.read<CbvVocabularyCubit>().refresh(),
               child: const Text('Retry'),
@@ -111,8 +110,8 @@ class _SubscriptionAdvancedSectionState extends State<SubscriptionAdvancedSectio
           );
 
           return ExpansionTile(
-            title: const Text('Event Filtering (Advanced)'),
-            subtitle: const Text('Configure which events trigger notifications'),
+            title: const Text('Event filters'),
+            subtitle: const Text('Choose which EPCIS events trigger delivery'),
             children: [
               const SizedBox(height: 8),
               const SubscriptionMultiSelectField(
@@ -160,7 +159,8 @@ class _SubscriptionAdvancedSectionState extends State<SubscriptionAdvancedSectio
                   labelText: 'EPC Pattern',
                   hintText: 'https://id.gs1.org/01/*',
                   border: OutlineInputBorder(),
-                  helperText: 'Filter by EPC patterns using wildcards (optional)',
+                  helperText:
+                      'Filter by EPC patterns using wildcards (optional)',
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,

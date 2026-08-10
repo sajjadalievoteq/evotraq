@@ -59,14 +59,14 @@ class JobQueueQueuedJobCard extends StatelessWidget {
                 children: [
                   Text(
                     '${job['jobId'] ?? ''}',
-                    style:
-                        context.text.body.copyWith(fontWeight: FontWeight.w600),
+                    style: context.text.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: TraqSpacing.xs),
                   Text(
                     'Priority: $priority · Position: $queuePosition',
-                    style:
-                        context.text.bodySm.copyWith(color: c.textSecondary),
+                    style: context.text.bodySm.copyWith(color: c.textSecondary),
                   ),
                   if (submittedTime.isNotEmpty)
                     Text(

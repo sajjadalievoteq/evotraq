@@ -14,9 +14,7 @@ class JobQueueFilters {
     String status,
   ) {
     if (status == 'ALL') return jobs;
-    return jobs
-        .where((j) => '${j['status']}'.toUpperCase() == status)
-        .toList();
+    return jobs.where((j) => '${j['status']}'.toUpperCase() == status).toList();
   }
 
   /// Filter the history list by job type.

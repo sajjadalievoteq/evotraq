@@ -35,11 +35,7 @@ class JobQueuePriorityDistributionCard extends StatelessWidget {
           : Column(
               children: [
                 for (final e in nonZero)
-                  _PriorityBar(
-                    priority: e.key,
-                    count: e.value,
-                    total: total,
-                  ),
+                  _PriorityBar(priority: e.key, count: e.value, total: total),
               ],
             ),
     );
@@ -87,9 +83,9 @@ class _PriorityBar extends StatelessWidget {
                 'P$priority',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
@@ -105,8 +101,9 @@ class _PriorityBar extends StatelessWidget {
                     ColoredBox(color: c.surfaceMuted),
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0, end: pct),
-                      duration:
-                          reduceMotion ? Duration.zero : TraqDuration.slow,
+                      duration: reduceMotion
+                          ? Duration.zero
+                          : TraqDuration.slow,
                       curve: TraqDuration.ease,
                       builder: (context, value, _) => Align(
                         alignment: Alignment.centerLeft,
@@ -127,14 +124,13 @@ class _PriorityBar extends StatelessWidget {
             child: Text(
               '${(pct * 100).toStringAsFixed(0)}% · $count',
               textAlign: TextAlign.end,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: c.textMuted,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: c.textMuted),
             ),
           ),
         ],
       ),
     );
   }
-
 }

@@ -37,15 +37,9 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
     final cards = List.generate(itemCount, (_) {
       switch (shape) {
         case SubscriptionSkeletonShape.activityCard:
-          return _TitleAndBlockCard(
-            colors: c,
-            contentHeight: 56,
-          );
+          return _TitleAndBlockCard(colors: c, contentHeight: 56);
         case SubscriptionSkeletonShape.jobQueueCard:
-          return _TitleAndBlockCard(
-            colors: c,
-            contentHeight: 48,
-          );
+          return _TitleAndBlockCard(colors: c, contentHeight: 48);
         case SubscriptionSkeletonShape.managementCard:
           return TraqCard(
             padding: TraqSpacing.surfacePad,
@@ -114,10 +108,7 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
 }
 
 class _TitleAndBlockCard extends StatelessWidget {
-  const _TitleAndBlockCard({
-    required this.colors,
-    required this.contentHeight,
-  });
+  const _TitleAndBlockCard({required this.colors, required this.contentHeight});
 
   final TraqColors colors;
   final double contentHeight;

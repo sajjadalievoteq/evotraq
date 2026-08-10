@@ -4,17 +4,17 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart'
     as status_rules;
 
-final RegExp _serialRegex = RegExp(
-    r'''^[A-Za-z0-9 !"%-?_]{1,20}$''');
+final RegExp _serialRegex = RegExp(r'''^[A-Za-z0-9 !"%-?_]{1,20}$''');
 
-final RegExp _batchLotRegex = RegExp(
-    r'''^[A-Za-z0-9 !"%-?_]{1,20}$''');
+final RegExp _batchLotRegex = RegExp(r'''^[A-Za-z0-9 !"%-?_]{1,20}$''');
 
 final RegExp _epcUrnRegex = RegExp(
-    r'''^urn:epc:id:sgtin:([0-9]{1,12})\.([0-9]{1,13})\.([A-Za-z0-9 !"%-?_]{1,20})$''');
+  r'''^urn:epc:id:sgtin:([0-9]{1,12})\.([0-9]{1,13})\.([A-Za-z0-9 !"%-?_]{1,20})$''',
+);
 
 final RegExp _gs1DlRegex = RegExp(
-    r'''^https://id\.gs1\.org/01/(\d{14})/21/([A-Za-z0-9!"%&'()*+,\-./:;<=>?_]{1,20})$''');
+  r'''^https://id\.gs1\.org/01/(\d{14})/21/([A-Za-z0-9!"%&'()*+,\-./:;<=>?_]{1,20})$''',
+);
 
 String? validateSerialNumber(String? value) {
   if (value == null || value.isEmpty) return 'Serial number is required';
@@ -26,8 +26,9 @@ String? validateSerialNumber(String? value) {
 }
 
 String? validateBatchLotNumber(String? value) {
-  if (value == null || value.isEmpty) return null;
-  if (!_batchLotRegex.hasMatch(value)) {
+  final normalized = value?.trim() ?? '';
+  if (normalized.isEmpty) return 'Batch/lot number is required';
+  if (!_batchLotRegex.hasMatch(normalized)) {
     return 'Batch/lot number must be 1–20 characters using GS1 file-7 charset '
         r'(A-Za-z0-9 space !"%-?_)';
   }
@@ -69,7 +70,10 @@ String? validateExpiryDate(DateTime? value) {
   return null;
 }
 
-String? validateExpiryAfterCommissioning(DateTime? expiryDate, DateTime? commissionedAt) {
+String? validateExpiryAfterCommissioning(
+  DateTime? expiryDate,
+  DateTime? commissionedAt,
+) {
   if (expiryDate == null || commissionedAt == null) return null;
   if (!expiryDate.isAfter(commissionedAt)) {
     return 'Expiry date must be after the commissioning date';
@@ -136,7 +140,8 @@ const Set<String> knownSubmissionStatuses = {
 final RegExp _hexHashRegex = RegExp(r'^[0-9a-fA-F]{8,128}$');
 
 final RegExp _sgtinRefRegex = RegExp(
-    r'''^(\d{8}|\d{12}|\d{13}|\d{14})/([A-Za-z0-9 !"%-?_]{1,20})$''');
+  r'''^(\d{8}|\d{12}|\d{13}|\d{14})/([A-Za-z0-9 !"%-?_]{1,20})$''',
+);
 
 String? validateReportingRegimes(List<String> regimes) {
   for (final regime in regimes) {
@@ -148,8 +153,10 @@ String? validateReportingRegimes(List<String> regimes) {
   return null;
 }
 
-String? validateSubmissionStatus(String? value,
-    {String fieldName = 'Submission status'}) {
+String? validateSubmissionStatus(
+  String? value, {
+  String fieldName = 'Submission status',
+}) {
   if (value == null || value.isEmpty) return null;
   if (!knownSubmissionStatuses.contains(value.toUpperCase())) {
     return '$fieldName must be one of: ${knownSubmissionStatuses.join(', ')}';

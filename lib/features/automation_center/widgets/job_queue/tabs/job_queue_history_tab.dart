@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/cards/job_queue_history_job_card.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/filters/job_queue_job_type_filter.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/ops_cards.dart';
 
 class JobQueueHistoryTab extends StatelessWidget {
   final List<Map<String, dynamic>> jobHistory;
@@ -11,6 +12,7 @@ class JobQueueHistoryTab extends StatelessWidget {
   final ValueChanged<String> onJobTypeChanged;
   final ValueChanged<Map<String, dynamic>> onShowDetails;
   final ValueChanged<String> onRetry;
+  final Map<String, int> jobTypeDistribution;
 
   const JobQueueHistoryTab({
     super.key,
@@ -21,6 +23,7 @@ class JobQueueHistoryTab extends StatelessWidget {
     required this.onJobTypeChanged,
     required this.onShowDetails,
     required this.onRetry,
+    required this.jobTypeDistribution,
   });
 
   @override
@@ -31,9 +34,9 @@ class JobQueueHistoryTab extends StatelessWidget {
         Text(
           'Job History',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: c.textPrimary,
-              ),
+            fontWeight: FontWeight.w700,
+            color: c.textPrimary,
+          ),
         ),
         const Spacer(),
         JobQueueJobTypeFilter(
@@ -50,14 +53,16 @@ class JobQueueHistoryTab extends StatelessWidget {
             child: Center(
               child: Text(
                 'No job history',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: c.textMuted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
               ),
             ),
           )
         : Column(
             children: [
+              JobQueueJobTypeChart(distribution: jobTypeDistribution),
+              const SizedBox(height: TraqSpacing.lg),
               for (final job in jobHistory)
                 JobQueueHistoryJobCard(
                   job: job,
@@ -84,14 +89,16 @@ class JobQueueHistoryTab extends StatelessWidget {
         children: [
           header,
           const SizedBox(height: TraqSpacing.lg),
+          JobQueueJobTypeChart(distribution: jobTypeDistribution),
+          const SizedBox(height: TraqSpacing.lg),
           Expanded(
             child: jobHistory.isEmpty
                 ? Center(
                     child: Text(
                       'No job history',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: c.textMuted,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
                     ),
                   )
                 : ListView.builder(

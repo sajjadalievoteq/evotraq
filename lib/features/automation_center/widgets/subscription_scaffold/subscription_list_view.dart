@@ -33,18 +33,12 @@ class SubscriptionListView extends StatelessWidget {
     if (shrinkWrap) {
       // Embedded in a bounded panel body: scroll within the available height
       // (padding comes from the surrounding card).
-      return ListView(
-        padding: EdgeInsets.zero,
-        children: paddedCards,
-      );
+      return ListView(padding: EdgeInsets.zero, children: paddedCards);
     }
 
     return RefreshIndicator(
       onRefresh: onRefresh,
-      child: ListView(
-        padding: TraqSpacing.surfacePad,
-        children: paddedCards,
-      ),
+      child: ListView(padding: TraqSpacing.surfacePad, children: paddedCards),
     );
   }
 }

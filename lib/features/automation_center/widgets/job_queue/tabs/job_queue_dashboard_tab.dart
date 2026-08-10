@@ -41,9 +41,6 @@ class JobQueueDashboardTab extends StatelessWidget {
       return body;
     }
 
-    return SingleChildScrollView(
-      padding: TraqSpacing.surfacePad,
-      child: body,
-    );
+    return SingleChildScrollView(padding: TraqSpacing.surfacePad, child: body);
   }
 }

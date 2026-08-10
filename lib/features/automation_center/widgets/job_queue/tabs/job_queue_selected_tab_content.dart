@@ -80,6 +80,7 @@ class JobQueueSelectedTabContent extends StatelessWidget {
       case 2:
         return JobQueueQueueTab(
           queuedJobs: queuedJobs,
+          priorityDistribution: dashboardSnapshot.priorityDistribution,
           fill: false,
           selectedStatus: selectedStatus,
           statuses: statuses,
@@ -90,6 +91,7 @@ class JobQueueSelectedTabContent extends StatelessWidget {
       case 3:
         return JobQueueHistoryTab(
           jobHistory: jobHistory,
+          jobTypeDistribution: dashboardSnapshot.jobTypeDistribution,
           fill: false,
           selectedJobType: selectedJobType,
           jobTypes: jobTypes,
@@ -100,6 +102,7 @@ class JobQueueSelectedTabContent extends StatelessWidget {
       case 4:
         return JobQueueWorkerPoolTab(
           workerPoolStats: workerPoolStats,
+          snapshot: dashboardSnapshot,
           fill: false,
           onConfigure: onConfigureWorkers,
         );

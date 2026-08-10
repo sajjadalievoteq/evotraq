@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class HelpSection extends StatelessWidget {
-  const HelpSection({
-    super.key,
-    required this.title,
-    required this.children,
-  });
+  const HelpSection({super.key, required this.title, required this.children});
 
   final String title;
   final List<Widget> children;

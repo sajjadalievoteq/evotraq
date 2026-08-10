@@ -5,10 +5,7 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class HelpTip extends StatelessWidget {
-  const HelpTip({
-    super.key,
-    required this.tip,
-  });
+  const HelpTip({super.key, required this.tip});
 
   final String tip;
 

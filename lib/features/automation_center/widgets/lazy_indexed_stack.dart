@@ -56,10 +56,7 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
   Widget build(BuildContext context) {
     final children = <Widget>[
       for (var i = 0; i < widget.children.length; i++)
-        if (_activated[i])
-          widget.children[i]
-        else
-          const SizedBox.shrink(),
+        if (_activated[i]) widget.children[i] else const SizedBox.shrink(),
     ];
 
     return IndexedStack(

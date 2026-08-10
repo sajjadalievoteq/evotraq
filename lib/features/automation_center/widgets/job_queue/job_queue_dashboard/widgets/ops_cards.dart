@@ -9,10 +9,7 @@ import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_q
 import 'package:traqtrace_app/core/utils/status_visual_mappers.dart';
 
 class JobQueueJobTypeChart extends StatelessWidget {
-  const JobQueueJobTypeChart({
-    super.key,
-    required this.distribution,
-  });
+  const JobQueueJobTypeChart({super.key, required this.distribution});
 
   final Map<String, int> distribution;
 
@@ -61,16 +58,12 @@ class JobQueueJobTypeChart extends StatelessWidget {
                         children: [
                           Text(
                             '$total',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
+                            style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                           Text(
                             'Total',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
+                            style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(color: context.colors.textMuted),
                           ),
                         ],
@@ -108,9 +101,7 @@ class JobQueueJobTypeChart extends StatelessWidget {
                             ),
                             Text(
                               '${e.value}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
+                              style: Theme.of(context).textTheme.labelMedium
                                   ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                           ],
@@ -164,8 +155,8 @@ class JobQueueWorkerPoolCard extends StatelessWidget {
     final color = util > 0.9
         ? AppColorMapper.errorColor(context)
         : util > 0.7
-            ? AppColorMapper.warningColor(context)
-            : AppColorMapper.infoColor(context);
+        ? AppColorMapper.warningColor(context)
+        : AppColorMapper.infoColor(context);
 
     return JobQueueDashboardSection(
       title: 'Worker pool',
@@ -173,7 +164,9 @@ class JobQueueWorkerPoolCard extends StatelessWidget {
         label: util > 0.9 ? 'Hot' : (active == 0 ? 'Idle' : 'Active'),
         tone: util > 0.9
             ? JobQueueStatusTone.err
-            : (active == 0 ? JobQueueStatusTone.muted : JobQueueStatusTone.info),
+            : (active == 0
+                  ? JobQueueStatusTone.muted
+                  : JobQueueStatusTone.info),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -198,8 +191,8 @@ class JobQueueWorkerPoolCard extends StatelessWidget {
                       child: Text(
                         '${(util * 100).toStringAsFixed(0)}%',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),
@@ -213,15 +206,15 @@ class JobQueueWorkerPoolCard extends StatelessWidget {
                     Text(
                       '$active / $max workers',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: TraqSpacing.xs),
                     Text(
                       'Pool size $poolSize · max $max',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: c.textMuted,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: c.textMuted),
                     ),
                     const SizedBox(height: TraqSpacing.md),
                     ClipRRect(
@@ -248,9 +241,7 @@ class JobQueueWorkerPoolCard extends StatelessWidget {
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: i < active
-                        ? color
-                        : c.border.withValues(alpha: 0.6),
+                    color: i < active ? color : c.border.withValues(alpha: 0.6),
                     borderRadius: TraqRadius.chip,
                   ),
                 ),
@@ -318,8 +309,9 @@ class JobQueueCapacityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final usage =
-        queueCapacity > 0 ? (queueSize / queueCapacity).clamp(0.0, 1.0) : 0.0;
+    final usage = queueCapacity > 0
+        ? (queueSize / queueCapacity).clamp(0.0, 1.0)
+        : 0.0;
     final color = usage > 0.8
         ? AppColorMapper.errorColor(context)
         : AppColorMapper.successColor(context);
@@ -338,21 +330,21 @@ class JobQueueCapacityCard extends StatelessWidget {
               Text(
                 '$queueSize',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               Text(
                 ' / $queueCapacity',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: c.textMuted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: c.textMuted),
               ),
               const Spacer(),
               Text(
                 'Wait $estimatedWaitLabel',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: c.textMuted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(color: c.textMuted),
               ),
             ],
           ),
@@ -375,9 +367,9 @@ class JobQueueCapacityCard extends StatelessWidget {
           const SizedBox(height: TraqSpacing.sm),
           Text(
             '${(usage * 100).toStringAsFixed(0)}% utilized',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: c.textMuted,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: c.textMuted),
           ),
         ],
       ),

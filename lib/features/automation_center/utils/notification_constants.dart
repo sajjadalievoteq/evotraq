@@ -3,22 +3,22 @@ class NotificationConstants {
     {
       'value': 'ObjectEvent',
       'label': 'Object Event',
-      'description': 'Basic item tracking events (most common)'
+      'description': 'Basic item tracking events (most common)',
     },
     {
       'value': 'AggregationEvent',
       'label': 'Aggregation Event',
-      'description': 'Container/pallet grouping and ungrouping'
+      'description': 'Container/pallet grouping and ungrouping',
     },
     {
       'value': 'TransactionEvent',
       'label': 'Transaction Event',
-      'description': 'Business transactions and ownership transfers'
+      'description': 'Business transactions and ownership transfers',
     },
     {
       'value': 'TransformationEvent',
       'label': 'Transformation Event',
-      'description': 'Item transformations and manufacturing'
+      'description': 'Item transformations and manufacturing',
     },
   ];
 
@@ -26,17 +26,17 @@ class NotificationConstants {
     {
       'value': 'REALTIME',
       'label': 'Real-time Notifications',
-      'description': 'Immediate notifications when events occur'
+      'description': 'Immediate notifications when events occur',
     },
     {
       'value': 'BATCH',
       'label': 'Batch Notifications',
-      'description': 'Grouped notifications sent at intervals'
+      'description': 'Grouped notifications sent at intervals',
     },
     {
       'value': 'SCHEDULED',
       'label': 'Scheduled Notifications',
-      'description': 'Notifications sent at specific times'
+      'description': 'Notifications sent at specific times',
     },
   ];
 
@@ -44,12 +44,12 @@ class NotificationConstants {
     {
       'value': 'WEBHOOK',
       'label': 'Webhook',
-      'description': 'Send to HTTP endpoint (for developers)'
+      'description': 'Send to HTTP endpoint (for developers)',
     },
     {
       'value': 'EMAIL',
       'label': 'Email',
-      'description': 'Send to email address (user-friendly)'
+      'description': 'Send to email address (user-friendly)',
     },
   ];
 
@@ -57,22 +57,18 @@ class NotificationConstants {
     {
       'value': 'JSON',
       'label': 'JSON',
-      'description': 'Standard JSON format (recommended)'
+      'description': 'Standard JSON format (recommended)',
     },
-    {
-      'value': 'XML',
-      'label': 'XML',
-      'description': 'EPCIS XML format'
-    },
+    {'value': 'XML', 'label': 'XML', 'description': 'EPCIS XML format'},
     {
       'value': 'SUMMARY',
       'label': 'Summary',
-      'description': 'Simplified text summary'
+      'description': 'Simplified text summary',
     },
     {
       'value': 'EMAIL_HTML',
       'label': 'Email HTML',
-      'description': 'Rich HTML email format (email only)'
+      'description': 'Rich HTML email format (email only)',
     },
   ];
 }

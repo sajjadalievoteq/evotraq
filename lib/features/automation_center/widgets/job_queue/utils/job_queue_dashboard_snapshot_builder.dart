@@ -12,8 +12,7 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
   required List<double> queuedSparkline,
   required DateTime? lastUpdated,
 }) {
-  final workerPool =
-      dashboardData['workerPool'] as Map<String, dynamic>? ?? {};
+  final workerPool = dashboardData['workerPool'] as Map<String, dynamic>? ?? {};
   final priorityRaw = dashboardData['priorityDistribution'] as Map? ?? {};
   final typeRaw = dashboardData['jobTypeDistribution'] as Map? ?? {};
 
@@ -26,26 +25,27 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
       '${e.key}': (e.value as num?)?.toInt() ?? 0,
   };
 
-  final workerActive = (workerPool['activeThreads'] as num?)?.toInt() ??
+  final workerActive =
+      (workerPool['activeThreads'] as num?)?.toInt() ??
       (workerPoolStats['active'] as num?)?.toInt() ??
       (workerPoolStats['activeCount'] as num?)?.toInt() ??
       0;
-  final workerMax = (workerPool['maxPoolSize'] as num?)?.toInt() ??
+  final workerMax =
+      (workerPool['maxPoolSize'] as num?)?.toInt() ??
       (workerPoolStats['maximumPoolSize'] as num?)?.toInt() ??
       (workerPoolStats['total'] as num?)?.toInt() ??
       0;
-  final workerPoolSize = (workerPool['poolSize'] as num?)?.toInt() ??
+  final workerPoolSize =
+      (workerPool['poolSize'] as num?)?.toInt() ??
       (workerPoolStats['poolSize'] as num?)?.toInt() ??
       0;
 
   final utilRaw = queueHealth['workerUtilization'];
   double utilization = workerMax > 0 ? workerActive / workerMax : 0.0;
   if (utilRaw is String) {
-    utilization =
-        (double.tryParse(utilRaw.replaceAll('%', '')) ?? 0) / 100.0;
+    utilization = (double.tryParse(utilRaw.replaceAll('%', '')) ?? 0) / 100.0;
   } else if (utilRaw is num) {
-    utilization =
-        utilRaw.toDouble() > 1 ? utilRaw / 100.0 : utilRaw.toDouble();
+    utilization = utilRaw.toDouble() > 1 ? utilRaw / 100.0 : utilRaw.toDouble();
   }
 
   final failed = jobHistory
@@ -57,14 +57,14 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
   final completed =
       (dashboardData['completedJobs'] as num?)?.toInt() ?? completedFromHistory;
 
-  final issues = (queueHealth['issues'] as List?)
-          ?.map((e) => '$e')
-          .toList() ??
+  final issues =
+      (queueHealth['issues'] as List?)?.map((e) => '$e').toList() ??
       const <String>[];
 
   return JobQueueDashboardSnapshot(
     healthy: queueHealth['healthy'] as bool? ?? true,
-    processingPaused: dashboardData['processingPaused'] as bool? ??
+    processingPaused:
+        dashboardData['processingPaused'] as bool? ??
         queueHealth['processingPaused'] as bool? ??
         false,
     queuedJobs:
@@ -76,7 +76,8 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
     workerActive: workerActive,
     workerPoolSize: workerPoolSize,
     workerMax: workerMax <= 0 ? 20 : workerMax,
-    queueSize: (queueHealth['queueSize'] as num?)?.toInt() ??
+    queueSize:
+        (queueHealth['queueSize'] as num?)?.toInt() ??
         (dashboardData['queuedJobs'] as num?)?.toInt() ??
         0,
     queueCapacity: (queueHealth['queueCapacity'] as num?)?.toInt() ?? 1000,

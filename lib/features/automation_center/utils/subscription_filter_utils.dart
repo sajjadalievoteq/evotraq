@@ -26,23 +26,30 @@ abstract final class SubscriptionFilterUtils {
 
   static List<NotificationSubscription> filterManagement(
     List<NotificationSubscription> subscriptions,
-    String selectedFilter,
-  ) {
-    switch (selectedFilter) {
-      case 'email':
-        return subscriptions
-            .where(
-              (sub) =>
-                  sub.subscriptionType.toLowerCase().contains('email') ||
-                  sub.webhookUrl.contains('@'),
-            )
-            .toList();
-      case 'active':
-        return subscriptions.where((sub) => sub.status == 'ACTIVE').toList();
-      case 'paused':
-        return subscriptions.where((sub) => sub.status == 'PAUSED').toList();
-      default:
-        return subscriptions;
-    }
+    String deliveryFilter, {
+    String statusFilter = 'all',
+  }) {
+    // Preserve compatibility with older callers that supplied status as the
+    // single positional filter while the UI migrates to two filter dimensions.
+    final legacyStatus =
+        deliveryFilter == 'active' || deliveryFilter == 'paused';
+    final effectiveDelivery = legacyStatus ? 'all' : deliveryFilter;
+    final effectiveStatus = legacyStatus && statusFilter == 'all'
+        ? deliveryFilter
+        : statusFilter;
+    return subscriptions.where((sub) {
+      final isEmail =
+          sub.webhookUrl.contains('@') &&
+          !sub.webhookUrl.toLowerCase().startsWith('http');
+      final deliveryMatches = switch (effectiveDelivery) {
+        'email' => isEmail,
+        'webhook' => !isEmail,
+        _ => true,
+      };
+      final statusMatches =
+          effectiveStatus == 'all' ||
+          sub.status.toUpperCase() == effectiveStatus.toUpperCase();
+      return deliveryMatches && statusMatches;
+    }).toList();
   }
 }

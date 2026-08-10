@@ -89,9 +89,7 @@ class JobQueueStatusStrip extends StatelessWidget {
           const SizedBox(height: TraqSpacing.md),
           Align(
             alignment: Alignment.centerRight,
-            child: _Toolbar(
-              lastUpdated: snapshot.lastUpdated,
-            ),
+            child: _Toolbar(lastUpdated: snapshot.lastUpdated),
           ),
         ],
       ),
@@ -147,9 +145,7 @@ class _StripMetricTile extends StatelessWidget {
 }
 
 class _Toolbar extends StatelessWidget {
-  const _Toolbar({
-    required this.lastUpdated,
-  });
+  const _Toolbar({required this.lastUpdated});
 
   final DateTime? lastUpdated;
 

@@ -24,8 +24,12 @@ class NotificationSubscriptionHelp extends StatelessWidget {
         ],
       ),
       content: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.7,
+        width: (MediaQuery.sizeOf(context).width - 64)
+            .clamp(280.0, 720.0)
+            .toDouble(),
+        height: (MediaQuery.sizeOf(context).height * 0.7)
+            .clamp(360.0, 720.0)
+            .toDouble(),
         child: const SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +122,8 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                 children: [
                   HelpExampleCard(
                     title: 'Warehouse Receiving Alerts',
-                    description: '''Monitor all items being received at warehouse:
+                    description:
+                        '''Monitor all items being received at warehouse:
 • Event Types: Object Event
 • Business Step: Receiving
 • Read Point: Your warehouse GLN

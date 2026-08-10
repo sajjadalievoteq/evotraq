@@ -24,7 +24,10 @@ class JobQueueActiveJobCard extends StatelessWidget {
     final status = '${job['status'] ?? ''}';
     final startTime = '${job['startTime'] ?? ''}';
     final elapsedTime = '${job['elapsedTime'] ?? ''}';
-    final statusColor = StatusVisualMappers.queueJobStatusColor(context, status);
+    final statusColor = StatusVisualMappers.queueJobStatusColor(
+      context,
+      status,
+    );
     final c = context.colors;
 
     return TraqCard(
@@ -45,8 +48,10 @@ class JobQueueActiveJobCard extends StatelessWidget {
                   ),
                   borderRadius: TraqRadius.chip,
                   border: Border.all(
-                    color: StatusVisualMappers.jobTypeColor(context, jobType)
-                        .withValues(alpha: 0.35),
+                    color: StatusVisualMappers.jobTypeColor(
+                      context,
+                      jobType,
+                    ).withValues(alpha: 0.35),
                   ),
                 ),
                 child: Text(

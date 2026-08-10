@@ -45,9 +45,11 @@ class _AutomationNotificationActivityPanelState
           prev.notificationLiveEnabled != next.notificationLiveEnabled ||
           prev.subscriptions != next.subscriptions,
       builder: (context, state) {
-        final live = state.notificationLiveEnabled &&
+        final live =
+            state.notificationLiveEnabled &&
             state.connectionStatus == NotificationConnectionStatus.connected;
-        final connecting = state.notificationLiveEnabled &&
+        final connecting =
+            state.notificationLiveEnabled &&
             state.connectionStatus == NotificationConnectionStatus.connecting;
         return AutomationWorkbenchPanel(
           title: 'Delivery Activity',
@@ -58,20 +60,18 @@ class _AutomationNotificationActivityPanelState
               tooltip: !state.notificationLiveEnabled
                   ? 'Resume Delivery Activity live updates'
                   : connecting
-                      ? 'Connecting…'
-                      : live
-                          ? 'Pause Delivery Activity live updates'
-                          : 'Retry Delivery Activity live updates',
+                  ? 'Connecting…'
+                  : live
+                  ? 'Pause Delivery Activity live updates'
+                  : 'Retry Delivery Activity live updates',
               onPressed: () => _screenKey.currentState?.toggleLive(),
               icon: TraqIcon(
-                live || connecting
-                    ? AppAssets.iconWifi
-                    : AppAssets.iconWifiOff,
+                live || connecting ? AppAssets.iconWifi : AppAssets.iconWifiOff,
                 color: live
                     ? AppColorMapper.successColor(context)
                     : connecting
-                        ? AppColorMapper.warningColor(context)
-                        : AppColorMapper.errorColor(context),
+                    ? AppColorMapper.warningColor(context)
+                    : AppColorMapper.errorColor(context),
               ),
             ),
             IconButton(
@@ -80,15 +80,12 @@ class _AutomationNotificationActivityPanelState
               icon: TraqIcon(AppAssets.iconRefresh),
             ),
             FilledButton.icon(
-              onPressed: () =>
-                  _screenKey.currentState?.goManageSubscriptions(),
+              onPressed: () => _screenKey.currentState?.goManageSubscriptions(),
               icon: TraqIcon(AppAssets.iconPlus, size: 14),
               label: const Text('Add Subscription'),
             ),
           ],
-          child: NotificationCenterScreen(
-            key: _screenKey,
-          ),
+          child: NotificationCenterScreen(key: _screenKey),
         );
       },
     );

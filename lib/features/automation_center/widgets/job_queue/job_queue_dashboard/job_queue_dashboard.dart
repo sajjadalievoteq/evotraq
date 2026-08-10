@@ -6,8 +6,6 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/job_queue_dashboard_snapshot.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/activity_and_health.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/metric_card.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/ops_cards.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/priority_distribution_card.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/queue_status_strip.dart';
 
 /// Production operations console for the Job Queue dashboard tab.
@@ -33,12 +31,6 @@ class JobQueueDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estimatedWait = snapshot.queuedJobs == 0
-        ? '0 sec'
-        : snapshot.workerActive == 0
-            ? '—'
-            : '~${(snapshot.queuedJobs * 5 / snapshot.workerActive.clamp(1, 999)).ceil()}s';
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -58,64 +50,9 @@ class JobQueueDashboard extends StatelessWidget {
         const SizedBox(height: TraqSpacing.lg),
         JobQueueSystemHealthPanel(snapshot: snapshot),
         const SizedBox(height: TraqSpacing.lg),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final wide = constraints.maxWidth >= 980;
-            final left = Column(
-              children: [
-                JobQueuePriorityDistributionCard(
-                  distribution: snapshot.priorityDistribution,
-                ),
-                const SizedBox(height: TraqSpacing.lg),
-                JobQueueWorkerPoolCard(
-                  active: snapshot.workerActive,
-                  poolSize: snapshot.workerPoolSize,
-                  max: snapshot.workerMax,
-                  utilization: snapshot.workerUtilization,
-                ),
-                const SizedBox(height: TraqSpacing.lg),
-                JobQueueTimelineCard(activeJobs: snapshot.activeJobsList),
-              ],
-            );
-            final right = Column(
-              children: [
-                JobQueueCapacityCard(
-                  queueSize: snapshot.queueSize,
-                  queueCapacity: snapshot.queueCapacity,
-                  healthy: snapshot.healthy,
-                  estimatedWaitLabel: estimatedWait,
-                ),
-                const SizedBox(height: TraqSpacing.lg),
-                JobQueueJobTypeChart(
-                  distribution: snapshot.jobTypeDistribution,
-                ),
-                const SizedBox(height: TraqSpacing.lg),
-                JobQueueRecentActivityCard(
-                  activeJobs: snapshot.activeJobsList,
-                  history: snapshot.recentHistory,
-                ),
-              ],
-            );
-
-            if (!wide) {
-              return Column(
-                children: [
-                  left,
-                  const SizedBox(height: TraqSpacing.lg),
-                  right,
-                ],
-              );
-            }
-
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(flex: 2, child: left),
-                const SizedBox(width: TraqSpacing.lg),
-                Expanded(flex: 1, child: right),
-              ],
-            );
-          },
+        JobQueueRecentActivityCard(
+          activeJobs: snapshot.activeJobsList,
+          history: snapshot.recentHistory,
         ),
       ],
     );
@@ -194,8 +131,8 @@ class _MetricsGrid extends StatelessWidget {
         final crossAxisCount = width >= 1100
             ? 3
             : width >= 720
-                ? 2
-                : 1;
+            ? 2
+            : 1;
         return GridView.count(
           crossAxisCount: crossAxisCount,
           shrinkWrap: true,

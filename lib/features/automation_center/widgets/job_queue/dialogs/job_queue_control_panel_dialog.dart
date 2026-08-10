@@ -9,39 +9,43 @@ class JobQueueControlPanelDialog extends StatelessWidget {
     required this.onResume,
     required this.onConfigureWorkers,
     required this.onPurge,
+    required this.processingPaused,
   });
 
   final VoidCallback onPause;
   final VoidCallback onResume;
   final VoidCallback onConfigureWorkers;
   final VoidCallback onPurge;
+  final bool processingPaused;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Job Queue Control Panel'),
+      title: const Text('Queue Controls'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            leading: TraqIcon(AppAssets.iconMinus),
-            title: const Text('Pause Processing'),
+            leading: TraqIcon(
+              processingPaused ? AppAssets.iconArrowR : AppAssets.iconMinus,
+            ),
+            title: Text(
+              processingPaused ? 'Resume Processing' : 'Pause Processing',
+            ),
+            subtitle: Text(
+              processingPaused
+                  ? 'Allow waiting jobs to start again.'
+                  : 'Running jobs continue; waiting jobs will not start.',
+            ),
             onTap: () {
               Navigator.of(context).pop();
-              onPause();
-            },
-          ),
-          ListTile(
-            leading: TraqIcon(AppAssets.iconArrowR),
-            title: const Text('Resume Processing'),
-            onTap: () {
-              Navigator.of(context).pop();
-              onResume();
+              processingPaused ? onResume() : onPause();
             },
           ),
           ListTile(
             leading: TraqIcon(AppAssets.iconTune),
             title: const Text('Configure Worker Pool'),
+            subtitle: const Text('Set worker and queue capacity limits.'),
             onTap: () {
               Navigator.of(context).pop();
               onConfigureWorkers();
@@ -49,7 +53,8 @@ class JobQueueControlPanelDialog extends StatelessWidget {
           ),
           ListTile(
             leading: TraqIcon(AppAssets.iconTrash),
-            title: const Text('Purge Old Jobs'),
+            title: const Text('Delete Old Job History'),
+            subtitle: const Text('Remove completed records by retention age.'),
             onTap: () {
               Navigator.of(context).pop();
               onPurge();

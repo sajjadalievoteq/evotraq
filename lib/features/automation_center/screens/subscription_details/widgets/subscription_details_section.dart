@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class SubscriptionDetailsSection extends StatelessWidget {
   const SubscriptionDetailsSection({
@@ -12,23 +13,31 @@ class SubscriptionDetailsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: context.text.body.copyWith(fontWeight: FontWeight.w700),
         ),
-        const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(children: children),
+        const SizedBox(height: TraqSpacing.sm),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: TraqRadius.card,
+            border: Border.all(color: c.border),
+          ),
+          child: Column(
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                children[i],
+                if (i != children.length - 1)
+                  Divider(height: 1, color: c.border),
+              ],
+            ],
           ),
         ),
-        const SizedBox(height: 16),
       ],
     );
   }

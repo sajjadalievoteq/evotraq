@@ -31,17 +31,37 @@ class JobQueueScheduleJobDialog extends StatefulWidget {
 class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
   // TODO(scheduling): real deferred/cron execution requires a backend
   // scheduled-submit endpoint + quartz/scheduler; out of scope here.
-  static const _jobType = 'NOTIFICATION_BATCH';
+  static const _jobTypeOptions = [
+    {
+      'value': 'NOTIFICATION_BATCH',
+      'label': 'Batch Notifications',
+      'defaultName': 'Batch notification run',
+      'description':
+          'Processes due notifications for Batch-type subscriptions only.',
+    },
+    {
+      'value': 'NOTIFICATION_SCHEDULED',
+      'label': 'Scheduled Notifications',
+      'defaultName': 'Scheduled notification run',
+      'description':
+          'Processes due notifications for Scheduled-type subscriptions only.',
+    },
+  ];
+
+  var _jobType = 'NOTIFICATION_BATCH';
   var _selectedPriority = 'MEDIUM';
   var _jobName = '';
   var _description = '';
   final _parameters = <Map<String, String>>[];
 
+  Map<String, String> get _selectedTypeOption => _jobTypeOptions
+      .firstWhere((option) => option['value'] == _jobType);
+
   void _submit() {
     Navigator.of(context).pop(
       JobQueueScheduleSubmitRequest(
         jobName: _jobName.trim().isEmpty
-            ? 'Notification batch'
+            ? _selectedTypeOption['defaultName']!
             : _jobName.trim(),
         jobType: _jobType,
         description: _description.trim(),
@@ -61,7 +81,7 @@ class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
             color: AppColorMapper.successColor(context),
           ),
           const SizedBox(width: TraqSpacing.sm),
-          const Text('Run Notification Batch'),
+          const Text('Run Notification Job'),
         ],
       ),
       content: SizedBox(
@@ -71,8 +91,7 @@ class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Processes alert batches that are currently due. The job starts '
-                'as soon as queue capacity is available.',
+                _selectedTypeOption['description']!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: context.colors.textMuted,
                 ),
@@ -86,16 +105,27 @@ class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
                 onChanged: (value) => _jobName = value,
               ),
               const SizedBox(height: TraqSpacing.md),
-              const InputDecorator(
-                decoration: InputDecoration(
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
                   labelText: 'Job type',
                   border: OutlineInputBorder(),
                 ),
-                child: Text('Notification batch'),
+                value: _jobType,
+                items: _jobTypeOptions
+                    .map(
+                      (option) => DropdownMenuItem(
+                        value: option['value'],
+                        child: Text(option['label']!),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) =>
+                    setState(() => _jobType = value ?? _jobType),
               ),
               const SizedBox(height: TraqSpacing.sm),
               Text(
-                'Only batches that are due will be processed.',
+                'Only notifications that are due for the selected type will '
+                'be processed.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: context.colors.textMuted,
                 ),

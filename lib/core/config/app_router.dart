@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/config/router_not_found_screen.dart';
@@ -105,13 +106,34 @@ import 'package:traqtrace_app/features/auth/widgets/auth_shell.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
-    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
+    _subscription = stream.asBroadcastStream().listen((_) => _refresh());
   }
 
   late final StreamSubscription<dynamic> _subscription;
+  bool _refreshScheduled = false;
+  bool _disposed = false;
+
+  void _refresh() {
+    if (_disposed || _refreshScheduled) return;
+
+    // Authentication can change while a protected route is building (for
+    // example, when an initState API request returns 401). Mutating the
+    // Navigator synchronously at that point can unmount a route-scoped
+    // BlocProvider before Flutter has detached all of its dependents, which
+    // triggers framework.dart's `_dependents.isEmpty` assertion. Always apply
+    // stream-driven redirects at the next frame boundary and coalesce parallel
+    // 401s into one router refresh.
+    _refreshScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _refreshScheduled = false;
+      if (!_disposed) notifyListeners();
+    });
+    SchedulerBinding.instance.ensureVisualUpdate();
+  }
 
   @override
   void dispose() {
+    _disposed = true;
     _subscription.cancel();
     super.dispose();
   }
@@ -590,12 +612,25 @@ class AppRouter {
         ),
         redirect: (context, state) {
           if (!authCubit.state.isAuthenticated) return null;
-          final section = AutomationCenterSections.normalize(
+          final tab = AutomationCenterSections.normalizeTab(
             state.uri.queryParameters['section'],
+            isAdmin: authCubit.state.isAdmin,
           );
-          if (AutomationCenterSections.adminOnly.contains(section) &&
+          final requested = state.uri.queryParameters['section'];
+          // Non-admins deep-linked to Job Operations land on Subscriptions.
+          if (requested != null &&
+              AutomationCenterSections.adminOnlyTabs.contains(
+                AutomationCenterSections.normalizeTab(requested),
+              ) &&
               !authCubit.state.isAdmin) {
-            return Constants.homeRoute;
+            return AutomationCenterSections.location(
+              AutomationCenterSections.alertSubscriptions,
+            );
+          }
+          // Normalize unknown / legacy aliases onto a canonical tab query.
+          if (requested != tab &&
+              requested != AutomationCenterSections.notifications) {
+            return AutomationCenterSections.location(tab);
           }
           return null;
         },

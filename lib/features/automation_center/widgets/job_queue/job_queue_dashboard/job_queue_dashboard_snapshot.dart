@@ -65,6 +65,13 @@ class JobQueueDashboardSnapshot {
     return (completedJobs / done).clamp(0.0, 1.0);
   }
 
+  /// Null when there is no completed/failed sample yet.
+  double? get successRateOrNull {
+    final done = completedJobs + failedJobs;
+    if (done <= 0) return null;
+    return (completedJobs / done).clamp(0.0, 1.0);
+  }
+
   String get statusLabel {
     if (processingPaused) return 'Paused';
     return healthy ? 'Healthy' : 'Attention';

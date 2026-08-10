@@ -14,9 +14,13 @@ class AuthService {
 
   AuthService({required DioService dioService}) : _dioService = dioService;
 
+  /// Current Bearer token from Dio's cache/storage (same source used by API calls).
+  Future<String?> getAuthToken() => _dioService.getAuthToken();
+
   String? _extractMessageFromDecodedBody(dynamic decoded) {
     if (decoded is Map<String, dynamic>) {
-      final message = decoded['message'] ?? decoded['error'] ?? decoded['detail'];
+      final message =
+          decoded['message'] ?? decoded['error'] ?? decoded['detail'];
       if (message is String && message.trim().isNotEmpty) {
         return message.trim();
       }
@@ -119,7 +123,10 @@ class AuthService {
     }
 
     if (normalized.contains('email:')) {
-      return message.replaceFirst(RegExp(r'^email:\s*', caseSensitive: false), '');
+      return message.replaceFirst(
+        RegExp(r'^email:\s*', caseSensitive: false),
+        '',
+      );
     }
 
     if (normalized.contains('username:')) {
@@ -175,7 +182,6 @@ class AuthService {
 
   Future<AuthResponse> login(LoginRequest request) async {
     try {
-      
       await _dioService.removeAuthToken();
 
       final response = await _dioService.post(
@@ -412,9 +418,10 @@ class AuthService {
           throw ApiException(message: 'Unexpected sessions response format');
         }
         return decoded
-            .map((item) => UserSession.fromJson(
-                  Map<String, dynamic>.from(item as Map),
-                ))
+            .map(
+              (item) =>
+                  UserSession.fromJson(Map<String, dynamic>.from(item as Map)),
+            )
             .toList();
       }
 
@@ -457,7 +464,8 @@ class AuthService {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message:
-            _parseErrorMessage(e.response?.data) ?? 'Failed to sign out session',
+            _parseErrorMessage(e.response?.data) ??
+            'Failed to sign out session',
         responseBody: _stringifyResponseData(e.response?.data),
         originalException: e,
       );
@@ -479,14 +487,16 @@ class AuthService {
 
       throw ApiException(
         statusCode: response.statusCode,
-        message: _parseErrorMessage(response.data) ??
+        message:
+            _parseErrorMessage(response.data) ??
             'Failed to sign out other sessions',
         responseBody: _stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
-        message: _parseErrorMessage(e.response?.data) ??
+        message:
+            _parseErrorMessage(e.response?.data) ??
             'Failed to sign out other sessions',
         responseBody: _stringifyResponseData(e.response?.data),
         originalException: e,

@@ -11,17 +11,19 @@ import 'package:traqtrace_app/features/automation_center/screens/notification_ce
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_embedded_body.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_filter_chips.dart';
 
-/// Notification-center filter options (UI labels only; filter logic stays in
-/// [SubscriptionFilterUtils.filterCenter]).
-const List<SubscriptionFilterOption> kNotificationCenterFilterOptions = [
-  SubscriptionFilterOption(label: 'All subscriptions', value: 'all'),
-  SubscriptionFilterOption(label: 'With deliveries', value: 'activity'),
-  SubscriptionFilterOption(label: 'Active only', value: 'active'),
+const List<SubscriptionFilterOption> kDeliveryActivityFilterOptions = [
+  SubscriptionFilterOption(label: 'All events', value: 'all'),
+  SubscriptionFilterOption(label: 'Delivered', value: 'delivered'),
+  SubscriptionFilterOption(label: 'Failed', value: 'failed'),
+  SubscriptionFilterOption(label: 'Pending', value: 'pending'),
 ];
 
-/// Aggregate delivery activity for subscriptions (Automation Center panel).
+/// Per-event delivery inbox for notification webhooks / emails.
 class NotificationCenterScreen extends StatefulWidget {
-  const NotificationCenterScreen({super.key});
+  const NotificationCenterScreen({super.key, this.onManageSubscriptions});
+
+  /// Switches the parent Notifications workspace to the Subscriptions tab.
+  final VoidCallback? onManageSubscriptions;
 
   @override
   NotificationCenterScreenState createState() =>
@@ -34,7 +36,7 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<NotificationCubit>().loadSubscriptions();
+    context.read<NotificationCubit>().loadDeliveryActivity();
   }
 
   bool _isLive(NotificationState state) {
@@ -43,7 +45,9 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
   }
 
   void refresh() {
-    context.read<NotificationCubit>().loadSubscriptions(force: true);
+    context.read<NotificationCubit>().loadDeliveryActivity(
+      forceSubscriptions: true,
+    );
   }
 
   void toggleLive() {
@@ -63,6 +67,10 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
   }
 
   void goManageSubscriptions() {
+    if (widget.onManageSubscriptions != null) {
+      widget.onManageSubscriptions!();
+      return;
+    }
     context.go(AutomationCenterSections.alertSubscriptionsLocation);
   }
 
@@ -73,11 +81,11 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
     return BlocConsumer<NotificationCubit, NotificationState>(
       listenWhen: (prev, next) =>
           prev.connectionStatus != next.connectionStatus ||
-          (prev.status != next.status &&
-              next.status == NotificationStatus.error),
+          (prev.deliveryActivityError != next.deliveryActivityError &&
+              next.deliveryActivityError != null),
       listener: (context, state) {
-        if (state.status == NotificationStatus.error && state.error != null) {
-          context.showError(state.error!);
+        if (state.deliveryActivityError != null) {
+          context.showError(state.deliveryActivityError!);
         }
       },
       builder: (context, state) {
@@ -88,8 +96,8 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'Aggregate Delivered / Failed counters per subscription. '
-                  'This is not a per-event notification inbox.',
+                  'Per-event delivery timeline (email & webhook attempts). '
+                  'Subscription totals live under Subscriptions.',
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
@@ -103,7 +111,7 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
             ],
           ),
           filterChips: SubscriptionFilterChips(
-            options: kNotificationCenterFilterOptions,
+            options: kDeliveryActivityFilterOptions,
             selectedFilter: _selectedFilter,
             onFilterSelected: (filter) =>
                 setState(() => _selectedFilter = filter),

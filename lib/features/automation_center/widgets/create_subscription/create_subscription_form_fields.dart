@@ -11,10 +11,35 @@ class CreateSubscriptionFormFields extends StatelessWidget {
     super.key,
     required this.selectedDeliveryMethod,
     required this.onDeliveryMethodChanged,
+    required this.selectedSubscriptionType,
+    required this.onSubscriptionTypeChanged,
+    required this.selectedNotificationFrequency,
+    required this.onNotificationFrequencyChanged,
   });
 
   final String selectedDeliveryMethod;
   final ValueChanged<String> onDeliveryMethodChanged;
+
+  /// Tracked so the batch-cadence dropdown can be shown/hidden and given a
+  /// sensible type-based default without needing a separate form rebuild.
+  final String selectedSubscriptionType;
+  final ValueChanged<String> onSubscriptionTypeChanged;
+
+  /// Tracked so the time-of-day picker only shows for cadences where a
+  /// specific time actually means something (DAILY/WEEKLY/MONTHLY — not
+  /// IMMEDIATE/HOURLY, which repeat too often for a "time of day" to apply).
+  final String? selectedNotificationFrequency;
+  final ValueChanged<String> onNotificationFrequencyChanged;
+
+  bool get _showsCadence =>
+      selectedSubscriptionType == 'BATCH' ||
+      selectedSubscriptionType == 'SCHEDULED';
+
+  bool get _showsPreferredTime =>
+      _showsCadence &&
+      (selectedNotificationFrequency == 'DAILY' ||
+          selectedNotificationFrequency == 'WEEKLY' ||
+          selectedNotificationFrequency == 'MONTHLY');
 
   @override
   Widget build(BuildContext context) {
@@ -85,8 +110,28 @@ class CreateSubscriptionFormFields extends StatelessWidget {
           label: 'Subscription Type',
           options: NotificationConstants.subscriptionTypes,
           validator: FormBuilderValidators.required(),
+          onChanged: (value) {
+            if (value != null) onSubscriptionTypeChanged(value);
+          },
         ),
         const SizedBox(height: 12),
+        if (_showsCadence) ...[
+          SubscriptionDropdownSection<String>(
+            key: ValueKey('notificationFrequency_$selectedSubscriptionType'),
+            name: 'notificationFrequency',
+            label: 'Delivery Cadence',
+            options: NotificationConstants.notificationFrequencies,
+            validator: FormBuilderValidators.required(),
+            onChanged: (value) {
+              if (value != null) onNotificationFrequencyChanged(value);
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (_showsPreferredTime) ...[
+          const _PreferredTimeField(),
+          const SizedBox(height: 12),
+        ],
         FormBuilderDropdown<String>(
           key: ValueKey('notificationFormat_$selectedDeliveryMethod'),
           name: 'notificationFormat',
@@ -117,6 +162,46 @@ class CreateSubscriptionFormFields extends StatelessWidget {
         const SizedBox(height: 12),
         const SubscriptionAdvancedSection(),
       ],
+    );
+  }
+}
+
+/// Time-of-day picker for DAILY/WEEKLY/MONTHLY cadences, so users can pick e.g.
+/// "9:00 AM" instead of getting whatever moment happens to be 24h/1w/1mo after the
+/// subscription was created. Stores a [TimeOfDay] under the 'preferredTime' form field;
+/// the dialog reads `.hour`/`.minute` off it when building the submit request.
+class _PreferredTimeField extends StatelessWidget {
+  const _PreferredTimeField();
+
+  @override
+  Widget build(BuildContext context) {
+    return FormBuilderField<TimeOfDay>(
+      name: 'preferredTime',
+      builder: (field) {
+        final selected = field.value;
+        return InkWell(
+          borderRadius: BorderRadius.circular(4),
+          onTap: () async {
+            final picked = await showTimePicker(
+              context: context,
+              initialTime: selected ?? const TimeOfDay(hour: 9, minute: 0),
+            );
+            if (picked != null) {
+              field.didChange(picked);
+            }
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'Preferred Delivery Time',
+              helperText: 'The time of day deliveries should go out',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              suffixIcon: Icon(Icons.access_time),
+            ),
+            child: Text(selected?.format(context) ?? 'Not set (uses default)'),
+          ),
+        );
+      },
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/cards/job_queue_active_job_card.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/activity_and_health.dart';
 
 class JobQueueActiveJobsTab extends StatelessWidget {
   final List<Map<String, dynamic>> activeJobs;
@@ -37,34 +36,27 @@ class JobQueueActiveJobsTab extends StatelessWidget {
       ],
     );
 
-    final list = activeJobs.isEmpty
-        ? Padding(
-            padding: const EdgeInsets.symmetric(vertical: TraqSpacing.xl),
-            child: Center(
-              child: Text(
-                'No active jobs',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
-              ),
-            ),
-          )
-        : Column(
-            children: [
-              JobQueueTimelineCard(activeJobs: activeJobs),
-              const SizedBox(height: TraqSpacing.lg),
-              for (final job in activeJobs)
-                JobQueueActiveJobCard(job: job, onCancel: onCancel),
-            ],
-          );
-
     if (!fill) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           header,
           const SizedBox(height: TraqSpacing.lg),
-          list,
+          if (activeJobs.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: TraqSpacing.xl),
+              child: Center(
+                child: Text(
+                  'No active jobs',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
+                ),
+              ),
+            )
+          else
+            for (final job in activeJobs)
+              JobQueueActiveJobCard(job: job, onCancel: onCancel),
         ],
       );
     }
@@ -74,8 +66,6 @@ class JobQueueActiveJobsTab extends StatelessWidget {
       child: Column(
         children: [
           header,
-          const SizedBox(height: TraqSpacing.lg),
-          JobQueueTimelineCard(activeJobs: activeJobs),
           const SizedBox(height: TraqSpacing.lg),
           Expanded(
             child: activeJobs.isEmpty

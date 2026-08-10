@@ -353,7 +353,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerSingleton<AuthCubit>(
-    AuthCubit(authService: getIt<AuthService>()),
+    AuthCubit(
+      authService: getIt<AuthService>(),
+      tokenManager: getIt<TokenManager>(),
+    ),
   );
 
   getIt<DioService>().onUnauthorized = () {

@@ -3,16 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_management_body.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/confirm_delete_subscription_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/notification_subscription_help.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_embedded_body.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_filter_chips.dart';
-import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
-import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/notification_connection_status.dart';
-import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/confirm_delete_subscription_dialog.dart';
 
 /// Subscription-management filter options (UI labels only; filter logic stays
 /// in [SubscriptionFilterUtils.filterManagement]).
@@ -30,7 +28,10 @@ const List<SubscriptionFilterOption> kSubscriptionStatusFilterOptions = [
 
 /// Alert Subscriptions panel content for Automation Center.
 class SubscriptionManagementScreen extends StatefulWidget {
-  const SubscriptionManagementScreen({super.key});
+  const SubscriptionManagementScreen({super.key, this.onViewAllActivity});
+
+  /// Switches the parent Notifications workspace to the Activity tab.
+  final VoidCallback? onViewAllActivity;
 
   @override
   SubscriptionManagementScreenState createState() =>
@@ -41,11 +42,19 @@ class SubscriptionManagementScreenState
     extends State<SubscriptionManagementScreen> {
   String _selectedDeliveryFilter = 'all';
   String _selectedStatusFilter = 'all';
+  String _searchQuery = '';
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     context.read<NotificationCubit>().loadSubscriptions();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void refresh() {
@@ -58,28 +67,18 @@ class SubscriptionManagementScreenState
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     return SubscriptionEmbeddedBody(
-      description: BlocBuilder<NotificationCubit, NotificationState>(
-        buildWhen: (previous, current) =>
-            previous.connectionStatus != current.connectionStatus ||
-            previous.notificationLiveEnabled != current.notificationLiveEnabled,
-        builder: (context, state) => Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Manage delivery destinations, event filters, and delivery health.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: c.textMuted),
-              ),
-            ),
-            const SizedBox(width: TraqSpacing.sm),
-            NotificationConnectionIndicator(
-              liveEnabled: state.notificationLiveEnabled,
-              connectionStatus: state.connectionStatus,
-            ),
-          ],
+      description: TextField(
+        controller: _searchController,
+        onChanged: (value) => setState(() => _searchQuery = value),
+        decoration: InputDecoration(
+          hintText: 'Search subscriptions...',
+          isDense: true,
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 40,
+            minHeight: 40,
+          ),
+          border: OutlineInputBorder(borderRadius: TraqRadius.input),
         ),
       ),
       filterChips: Wrap(
@@ -106,16 +105,20 @@ class SubscriptionManagementScreenState
       body: SubscriptionManagementBody(
         selectedDeliveryFilter: _selectedDeliveryFilter,
         selectedStatusFilter: _selectedStatusFilter,
-        shrinkWrap: true,
+        searchQuery: _searchQuery,
+        shrinkWrap: false,
         onRefresh: refresh,
         onEdit: (sub) => _editSubscription(sub.id),
         onDelete: _deleteSubscription,
         onPause: (sub) => _pauseSubscription(sub.id),
         onResume: (sub) => _resumeSubscription(sub.id),
         onViewDetails: (sub) => _viewSubscriptionDetails(sub.id),
+        onViewAllActivity: widget.onViewAllActivity,
         onClearFilters: () => setState(() {
           _selectedDeliveryFilter = 'all';
           _selectedStatusFilter = 'all';
+          _searchQuery = '';
+          _searchController.clear();
         }),
         onCreate: () => _showCreateSubscriptionDialog(context),
       ),
@@ -123,11 +126,6 @@ class SubscriptionManagementScreenState
   }
 
   Future<void> _showCreateSubscriptionDialog(BuildContext context) async {
-    // showDialog builds on the root overlay, outside this screen's provider
-    // scope, so re-provide the SAME NotificationCubit instance into the dialog
-    // subtree via BlocProvider.value (not create:, which would spin up a
-    // second cubit). Without this the dialog's BlocListener throws
-    // ProviderNotFoundException.
     final cubit = context.read<NotificationCubit>();
     await showDialog<bool>(
       context: context,
@@ -136,7 +134,6 @@ class SubscriptionManagementScreenState
         child: const CreateSubscriptionDialog(),
       ),
     );
-    // Create/update already refresh via NotificationCubit; cancel must not.
   }
 
   void _showHelpDialog(BuildContext context) {

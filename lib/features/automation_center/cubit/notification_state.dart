@@ -37,8 +37,12 @@ class NotificationState extends Equatable {
   final NotificationSubscription? selectedSubscription;
   final Map<String, dynamic>? webhookTestResult;
   final Map<String, dynamic>? emailTestResult;
-  final List<WebhookNotification> webhookHistory;
-  final String? lastLoadedHistorySubscriptionId;
+
+  /// Cross-subscription delivery event feed for the Activity tab.
+  final List<WebhookNotification> deliveryActivity;
+  final bool deliveryActivityLoading;
+  final String? deliveryActivityError;
+
   final NotificationStats? lastLoadedStats;
   final String? lastLoadedStatsSubscriptionId;
   final RealtimeNotification? lastRealtimeNotification;
@@ -55,8 +59,9 @@ class NotificationState extends Equatable {
     this.selectedSubscription,
     this.webhookTestResult,
     this.emailTestResult,
-    this.webhookHistory = const [],
-    this.lastLoadedHistorySubscriptionId,
+    this.deliveryActivity = const [],
+    this.deliveryActivityLoading = false,
+    this.deliveryActivityError,
     this.lastLoadedStats,
     this.lastLoadedStatsSubscriptionId,
     this.lastRealtimeNotification,
@@ -74,8 +79,9 @@ class NotificationState extends Equatable {
     NotificationSubscription? selectedSubscription,
     Map<String, dynamic>? webhookTestResult,
     Map<String, dynamic>? emailTestResult,
-    List<WebhookNotification>? webhookHistory,
-    String? lastLoadedHistorySubscriptionId,
+    List<WebhookNotification>? deliveryActivity,
+    bool? deliveryActivityLoading,
+    String? deliveryActivityError,
     NotificationStats? lastLoadedStats,
     String? lastLoadedStatsSubscriptionId,
     RealtimeNotification? lastRealtimeNotification,
@@ -96,10 +102,10 @@ class NotificationState extends Equatable {
       selectedSubscription: selectedSubscription ?? this.selectedSubscription,
       webhookTestResult: webhookTestResult ?? this.webhookTestResult,
       emailTestResult: emailTestResult ?? this.emailTestResult,
-      webhookHistory: webhookHistory ?? this.webhookHistory,
-      lastLoadedHistorySubscriptionId:
-          lastLoadedHistorySubscriptionId ??
-          this.lastLoadedHistorySubscriptionId,
+      deliveryActivity: deliveryActivity ?? this.deliveryActivity,
+      deliveryActivityLoading:
+          deliveryActivityLoading ?? this.deliveryActivityLoading,
+      deliveryActivityError: deliveryActivityError,
       lastLoadedStats: lastLoadedStats ?? this.lastLoadedStats,
       lastLoadedStatsSubscriptionId:
           lastLoadedStatsSubscriptionId ?? this.lastLoadedStatsSubscriptionId,
@@ -121,8 +127,9 @@ class NotificationState extends Equatable {
     selectedSubscription,
     webhookTestResult,
     emailTestResult,
-    webhookHistory,
-    lastLoadedHistorySubscriptionId,
+    deliveryActivity,
+    deliveryActivityLoading,
+    deliveryActivityError,
     lastLoadedStats,
     lastLoadedStatsSubscriptionId,
     lastRealtimeNotification,

@@ -5,12 +5,9 @@ import 'package:traqtrace_app/features/automation_center/screens/automation_cent
 import 'package:traqtrace_app/features/shared/workbench/workbench_rail.dart';
 
 void main() {
-  test('uses the canonical route and section ids', () {
+  test('uses the canonical route and single Notifications rail item', () {
     expect(Constants.automationCenterRoute, '/automation');
-    expect(AutomationCenterSections.ordered, const [
-      'alert-subscriptions',
-      'background-jobs',
-    ]);
+    expect(AutomationCenterSections.ordered, const ['notifications']);
     expect(
       WorkbenchRail.flatten(
         AutomationCenterSections.groups,
@@ -21,25 +18,40 @@ void main() {
       AutomationCenterSections.location(
         AutomationCenterSections.notificationActivity,
       ),
-      '/automation?section=alert-subscriptions',
+      '/automation?section=notification-activity',
+    );
+    expect(
+      AutomationCenterSections.location(
+        AutomationCenterSections.backgroundJobs,
+      ),
+      '/automation?section=background-jobs',
     );
   });
 
-  test('normalizes unknown sections and keeps admin sections gated', () {
+  test('uses one rail destination and normalizes internal workspace tabs', () {
     expect(
       AutomationCenterSections.normalize('unknown'),
+      AutomationCenterSections.notifications,
+    );
+    expect(
+      AutomationCenterSections.normalizeTab('unknown'),
       AutomationCenterSections.alertSubscriptions,
     );
-    expect(AutomationCenterSections.adminOnly, const {'background-jobs'});
+    expect(
+      AutomationCenterSections.normalizeTab('background-jobs', isAdmin: false),
+      AutomationCenterSections.alertSubscriptions,
+    );
+    expect(
+      AutomationCenterSections.normalizeTab('background-jobs', isAdmin: true),
+      AutomationCenterSections.backgroundJobs,
+    );
+    expect(AutomationCenterSections.adminOnly, isEmpty);
+    expect(AutomationCenterSections.adminOnlyTabs, const {'background-jobs'});
 
     final nonAdminIds = WorkbenchRail.flatten(
       AutomationCenterSections.groupsFor(isAdmin: false),
     ).map((item) => item.id);
-    expect(nonAdminIds, contains(AutomationCenterSections.alertSubscriptions));
-    expect(
-      nonAdminIds,
-      isNot(contains(AutomationCenterSections.backgroundJobs)),
-    );
+    expect(nonAdminIds, [AutomationCenterSections.notifications]);
     expect(
       AutomationCenterSections.groupsFor(
         isAdmin: false,

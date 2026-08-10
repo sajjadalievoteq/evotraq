@@ -30,7 +30,15 @@ class JobQueuePanel extends StatefulWidget {
   /// (Automation Center). Admin full-page use keeps [embedded] false.
   final bool embedded;
 
-  const JobQueuePanel({Key? key, this.embedded = false}) : super(key: key);
+  /// Optional shared cubit (Notifications workspace). When null the panel
+  /// creates and owns a DI factory instance.
+  final JobQueueCubit? cubit;
+
+  const JobQueuePanel({
+    Key? key,
+    this.embedded = false,
+    this.cubit,
+  }) : super(key: key);
 
   @override
   JobQueuePanelState createState() => JobQueuePanelState();
@@ -38,17 +46,22 @@ class JobQueuePanel extends StatefulWidget {
 
 class JobQueuePanelState extends State<JobQueuePanel>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  /// Owns the cubit lifecycle for this panel: created from the DI factory, provided down to the
-  /// tabs via [BlocProvider.value], and closed in [dispose]. Live updates arrive over the shared
-  /// WebSocket; there is no periodic refresh timer anymore.
-  late final JobQueueCubit _cubit = getIt<JobQueueCubit>();
+  /// Owns the cubit lifecycle when [JobQueuePanel.cubit] is null: created from
+  /// the DI factory, provided down to the tabs via [BlocProvider.value], and
+  /// closed in [dispose]. Live updates arrive over the shared WebSocket.
+  late final JobQueueCubit _cubit;
+  late final bool _ownsCubit;
 
   late TabController _tabController;
 
   String _selectedJobType = 'ALL';
   String _selectedStatus = 'ALL';
 
-  final List<String> _jobTypes = ['ALL', 'NOTIFICATION_BATCH'];
+  final List<String> _jobTypes = [
+    'ALL',
+    'NOTIFICATION_BATCH',
+    'NOTIFICATION_SCHEDULED',
+  ];
   final List<String> _jobStatuses = [
     'ALL',
     'QUEUED',
@@ -61,18 +74,24 @@ class JobQueuePanelState extends State<JobQueuePanel>
   @override
   void initState() {
     super.initState();
+    final external = widget.cubit;
+    if (external != null) {
+      _cubit = external;
+      _ownsCubit = false;
+    } else {
+      _cubit = getIt<JobQueueCubit>();
+      _ownsCubit = true;
+      _cubit.connectWebSocket();
+    }
     _tabController = TabController(length: 5, vsync: this);
     WidgetsBinding.instance.addObserver(this);
-    // Initial REST load happens in the cubit constructor; connect the socket for live push.
-    _cubit.connectWebSocket();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
-    // Only closes this cubit's own subscriptions; the shared WebSocketService keeps running.
-    _cubit.close();
+    if (_ownsCubit) _cubit.close();
     super.dispose();
   }
 
@@ -222,6 +241,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
             onJobTypeChanged: _onJobTypeFilterChanged,
             onConfigureWorkers: _showWorkerPoolConfig,
           ),
+
         ],
       );
     }
@@ -431,7 +451,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
         },
       };
 
-      if (jobType == 'NOTIFICATION_BATCH') {
+      if (jobType == 'NOTIFICATION_BATCH' || jobType == 'NOTIFICATION_SCHEDULED') {
         jobPayload['operation'] = 'processScheduledBatchNotifications';
       }
 

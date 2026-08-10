@@ -63,4 +63,15 @@ void main() {
 
     expect(paused.map((item) => item.id), ['paused-email']);
   });
+
+  test('searches name and endpoint', () {
+    final byName = SubscriptionFilterUtils.search(subscriptions, 'paused');
+    expect(byName.map((item) => item.id), ['paused-email']);
+
+    final byEndpoint = SubscriptionFilterUtils.search(
+      subscriptions,
+      'example.test/events',
+    );
+    expect(byEndpoint.map((item) => item.id), ['active-webhook']);
+  });
 }

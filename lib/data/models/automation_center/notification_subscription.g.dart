@@ -15,6 +15,10 @@ NotificationSubscription _$NotificationSubscriptionFromJson(
   status: json['status'] as String,
   subscriptionType: json['subscriptionType'] as String,
   notificationFormat: json['notificationFormat'] as String?,
+  notificationFrequency: json['notificationFrequency'] as String?,
+  maxEventsPerNotification: (json['maxEventsPerNotification'] as num?)?.toInt(),
+  preferredHour: (json['preferredHour'] as num?)?.toInt(),
+  preferredMinute: (json['preferredMinute'] as num?)?.toInt(),
   createdAt: DateTime.parse(json['createdTime'] as String),
   updatedAt: json['lastModifiedTime'] == null
       ? null
@@ -34,6 +38,10 @@ Map<String, dynamic> _$NotificationSubscriptionToJson(
   'status': instance.status,
   'subscriptionType': instance.subscriptionType,
   'notificationFormat': instance.notificationFormat,
+  'notificationFrequency': instance.notificationFrequency,
+  'maxEventsPerNotification': instance.maxEventsPerNotification,
+  'preferredHour': instance.preferredHour,
+  'preferredMinute': instance.preferredMinute,
   'createdTime': instance.createdAt.toIso8601String(),
   'lastModifiedTime': instance.updatedAt?.toIso8601String(),
   'queryParameters': instance.queryParameters,
@@ -70,6 +78,10 @@ CreateSubscriptionRequest _$CreateSubscriptionRequestFromJson(
   subscriptionType: json['subscriptionType'] as String,
   deliveryMethod: json['deliveryMethod'] as String?,
   notificationFormat: json['notificationFormat'] as String?,
+  notificationFrequency: json['notificationFrequency'] as String?,
+  maxEventsPerNotification: (json['maxEventsPerNotification'] as num?)?.toInt(),
+  preferredHour: (json['preferredHour'] as num?)?.toInt(),
+  preferredMinute: (json['preferredMinute'] as num?)?.toInt(),
   queryParameters: json['queryParameters'] as Map<String, dynamic>?,
 );
 
@@ -81,24 +93,15 @@ Map<String, dynamic> _$CreateSubscriptionRequestToJson(
   'subscriptionType': instance.subscriptionType,
   'deliveryMethod': ?instance.deliveryMethod,
   'notificationFormat': ?instance.notificationFormat,
+  'notificationFrequency': ?instance.notificationFrequency,
+  'maxEventsPerNotification': ?instance.maxEventsPerNotification,
+  'preferredHour': ?instance.preferredHour,
+  'preferredMinute': ?instance.preferredMinute,
   'queryParameters': ?instance.queryParameters,
 };
 
 WebhookNotification _$WebhookNotificationFromJson(Map<String, dynamic> json) =>
-    WebhookNotification(
-      id: json['id'] as String,
-      subscriptionId: json['subscriptionId'] as String,
-      eventId: json['eventId'] as String,
-      status: json['status'] as String,
-      webhookUrl: json['webhookUrl'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      deliveredAt: json['deliveredAt'] == null
-          ? null
-          : DateTime.parse(json['deliveredAt'] as String),
-      retryCount: (json['retryCount'] as num).toInt(),
-      errorMessage: json['errorMessage'] as String?,
-      response: json['response'] as Map<String, dynamic>?,
-    );
+    WebhookNotification.fromJson(json);
 
 Map<String, dynamic> _$WebhookNotificationToJson(
   WebhookNotification instance,

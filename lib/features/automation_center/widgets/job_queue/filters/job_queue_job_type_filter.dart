@@ -12,12 +12,18 @@ class JobQueueJobTypeFilter extends StatelessWidget {
     required this.onChanged,
   });
 
+  static const _labels = {
+    'ALL': 'All',
+    'NOTIFICATION_BATCH': 'Batch Notifications',
+    'NOTIFICATION_SCHEDULED': 'Scheduled Notifications',
+  };
+
   @override
   Widget build(BuildContext context) {
     return DropdownButton<String>(
       value: selectedJobType,
       items: jobTypes.map((type) {
-        return DropdownMenuItem(value: type, child: Text(type));
+        return DropdownMenuItem(value: type, child: Text(_labels[type] ?? type));
       }).toList(),
       onChanged: (value) {
         if (value != null) onChanged(value);

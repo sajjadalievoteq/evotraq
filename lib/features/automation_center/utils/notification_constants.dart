@@ -53,6 +53,34 @@ class NotificationConstants {
     },
   ];
 
+  static const List<Map<String, String>> notificationFrequencies = [
+    {
+      'value': 'IMMEDIATE',
+      'label': 'Immediate',
+      'description': 'Send as soon as the batch job next runs (~15 min poll)',
+    },
+    {
+      'value': 'HOURLY',
+      'label': 'Hourly',
+      'description': 'Group events and deliver about once an hour',
+    },
+    {
+      'value': 'DAILY',
+      'label': 'Daily',
+      'description': 'Group events and deliver about once a day',
+    },
+    {
+      'value': 'WEEKLY',
+      'label': 'Weekly',
+      'description': 'Group events and deliver about once a week',
+    },
+    {
+      'value': 'MONTHLY',
+      'label': 'Monthly',
+      'description': 'Group events and deliver about once a month',
+    },
+  ];
+
   static const List<Map<String, String>> notificationFormats = [
     {
       'value': 'JSON',

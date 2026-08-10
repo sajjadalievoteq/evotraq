@@ -48,6 +48,14 @@ class MockAuthService extends _i1.Mock implements _i4.AuthService {
   }
 
   @override
+  _i5.Future<String?> getAuthToken() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAuthToken, []),
+            returnValue: _i5.Future<String?>.value(),
+          )
+          as _i5.Future<String?>);
+
+  @override
   _i5.Future<_i2.AuthResponse> login(_i6.LoginRequest? request) =>
       (super.noSuchMethod(
             Invocation.method(#login, [request]),

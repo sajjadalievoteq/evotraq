@@ -1,59 +1,215 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
+import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_detail_row.dart';
+import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_details_header_card.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_details_section.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_status_chip.dart';
+import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_details_stat_tile.dart';
+import 'package:traqtrace_app/features/automation_center/utils/subscription_format_utils.dart';
+import 'package:traqtrace_app/features/automation_center/utils/subscription_query_filter_utils.dart';
 
 class SubscriptionDetailsBody extends StatelessWidget {
   const SubscriptionDetailsBody({
     super.key,
     required this.subscription,
     this.stats,
+    this.embedded = false,
   });
 
   final NotificationSubscription subscription;
   final NotificationStats? stats;
 
+  /// When true, omit outer scroll padding (host provides panel chrome).
+  final bool embedded;
+
+  static const Map<String, String> _frequencyLabels = {
+    'IMMEDIATE': 'as soon as the batch job next runs (~15 min poll)',
+    'HOURLY': 'about once an hour',
+    'DAILY': 'about once a day',
+    'WEEKLY': 'about once a week',
+    'MONTHLY': 'about once a month',
+  };
+
+  static String _cadenceLabel(
+    String subscriptionType,
+    String? notificationFrequency,
+  ) {
+    switch (subscriptionType) {
+      case 'REALTIME':
+        return 'Fires immediately when a matching event is captured';
+      case 'BATCH':
+      case 'SCHEDULED':
+        final freqLabel = notificationFrequency != null
+            ? _frequencyLabels[notificationFrequency]
+            : null;
+        return freqLabel != null
+            ? 'Events are queued and delivered $freqLabel'
+            : 'Delivered by the scheduled batch job when it next runs';
+      default:
+        return subscriptionType;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+    final queryParameters = subscription.queryParameters;
+    final eventTypeLabels =
+        SubscriptionQueryFilterUtils.eventTypeLabels(queryParameters);
+    final bizStep = SubscriptionQueryFilterUtils.businessStep(queryParameters);
+    final disposition =
+        SubscriptionQueryFilterUtils.disposition(queryParameters);
+    final readPoint = SubscriptionQueryFilterUtils.readPoint(queryParameters);
+    final epcPattern =
+        SubscriptionQueryFilterUtils.epcPattern(queryParameters);
+    final hasFilters =
+        SubscriptionQueryFilterUtils.hasAnyFilter(queryParameters);
+    final isEmailDelivery = subscription.webhookUrl.contains('@');
+
+    final totalValue = stats?.totalNotifications.toString() ?? '—';
+    final deliveredValue = stats?.successfulNotifications.toString() ?? '—';
+    final failedValue = stats?.failedNotifications.toString() ?? '—';
+    final successRateValue = stats != null
+        ? SubscriptionFormatUtils.successRatePercent(
+            stats!.successRate,
+            fractionDigits: 1,
+            delivered: stats!.successfulNotifications,
+            failed: stats!.failedNotifications,
+          )
+        : '—';
+    final avgDeliveryValue = stats != null
+        ? SubscriptionFormatUtils.averageDeliveryLabel(stats!.avgDeliveryTime)
+        : '—';
+    final lastNotificationValue = stats?.lastNotificationSent != null
+        ? DisplayDateUtils.dmyHm(stats!.lastNotificationSent!)
+        : 'None';
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SubscriptionDetailsHeaderCard(subscription: subscription),
+        const SizedBox(height: TraqSpacing.lg),
+
+        SubscriptionDetailsSection(
+          title: 'Delivery',
+          children: [
+            SubscriptionDetailRow(
+              label: isEmailDelivery ? 'Email' : 'Webhook URL',
+              value: subscription.webhookUrl.isNotEmpty
+                  ? subscription.webhookUrl
+                  : 'Not configured',
+              monospace: !isEmailDelivery,
+              copyable: subscription.webhookUrl.isNotEmpty,
+            ),
+            SubscriptionDetailRow(
+              label: 'Notification Format',
+              value: subscription.notificationFormat ?? 'Default',
+            ),
+          ],
+        ),
+        const SizedBox(height: TraqSpacing.lg),
+
+        SubscriptionDetailsSection(
+          title: 'Event Filtering',
+          children: hasFilters
+              ? [
+                  if (eventTypeLabels.isNotEmpty)
+                    SubscriptionDetailRow(
+                      label: 'Event Types',
+                      value: eventTypeLabels.join(', '),
+                    ),
+                  SubscriptionDetailRow(
+                    label: 'Business Step',
+                    value: bizStep ?? 'Any',
+                  ),
+                  SubscriptionDetailRow(
+                    label: 'Disposition',
+                    value: disposition ?? 'Any',
+                  ),
+                  SubscriptionDetailRow(
+                    label: 'Read Point (GLN)',
+                    value: readPoint ?? 'Any',
+                    monospace: readPoint != null,
+                  ),
+                  SubscriptionDetailRow(
+                    label: 'EPC Pattern',
+                    value: epcPattern ?? 'Any',
+                    monospace: epcPattern != null,
+                  ),
+                ]
+              : [
+                  Padding(
+                    padding: const EdgeInsets.all(TraqSpacing.md),
+                    child: Text(
+                      'No filters configured — this subscription matches '
+                      'every EPCIS event.',
+                      style: context.text.bodySm.copyWith(
+                        color: context.colors.textMuted,
+                      ),
+                    ),
+                  ),
+                ],
+        ),
+        const SizedBox(height: TraqSpacing.lg),
+
+        SubscriptionDetailsSection(
+          title: 'Delivery Statistics',
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(TraqSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          subscription.subscriptionName,
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
+                  _StatsGrid(
+                    tiles: [
+                      SubscriptionDetailsStatTile(
+                        label: 'Total Matched',
+                        value: totalValue,
+                        iconAsset: AppAssets.iconList,
                       ),
-                      SubscriptionStatusChip(
-                        status: subscription.status,
-                        style: SubscriptionStatusChipStyle.solid,
+                      SubscriptionDetailsStatTile(
+                        label: 'Delivered',
+                        value: deliveredValue,
+                        iconAsset: AppAssets.iconCheckCircle,
+                        tone: SubscriptionStatTone.success,
+                      ),
+                      SubscriptionDetailsStatTile(
+                        label: 'Failed',
+                        value: failedValue,
+                        iconAsset: AppAssets.iconXCircle,
+                        tone: SubscriptionStatTone.error,
+                      ),
+                      SubscriptionDetailsStatTile(
+                        label: 'Success Rate',
+                        value: successRateValue,
+                        iconAsset: AppAssets.iconBarChart,
+                        tone: SubscriptionStatTone.info,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Type: ${subscription.subscriptionType}',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                  const SizedBox(height: TraqSpacing.md),
+                  SubscriptionDetailRow(
+                    label: 'Last Notification',
+                    value: lastNotificationValue,
                   ),
-                  if (subscription.notificationFormat?.isNotEmpty == true) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      'Format: ${subscription.notificationFormat}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  SubscriptionDetailRow(
+                    label: 'Avg Delivery Time',
+                    value: avgDeliveryValue,
+                  ),
+                  if ((subscription.subscriptionType == 'BATCH' ||
+                          subscription.subscriptionType == 'SCHEDULED') &&
+                      (stats?.totalNotifications ?? 0) > 0 &&
+                      (stats?.successfulNotifications ?? 0) == 0 &&
+                      (stats?.failedNotifications ?? 0) == 0) ...[
+                    const SizedBox(height: TraqSpacing.sm),
+                    Text("Matched events are queued for this subscription's"
+                      'cadence and have not been delivered yet — Delivered/'
+                      'Failed will update once the batch is processed.',
+                      style: context.text.bodySm.copyWith(
                         color: context.colors.textMuted,
                       ),
                     ),
@@ -61,84 +217,70 @@ class SubscriptionDetailsBody extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          SubscriptionDetailsSection(
-            title: 'Contact Information',
-            children: [
-              SubscriptionDetailRow(
-                label: 'Email',
-                value: subscription.webhookUrl.contains('@')
-                    ? subscription.webhookUrl
-                    : 'Not configured',
+          ],
+        ),
+        const SizedBox(height: TraqSpacing.lg),
+
+        SubscriptionDetailsSection(
+          title: 'Timing',
+          children: [
+            SubscriptionDetailRow(
+              label: 'Created',
+              value: DisplayDateUtils.dmyHm(subscription.createdAt),
+            ),
+            SubscriptionDetailRow(
+              label: 'Last Modified',
+              value: subscription.updatedAt != null
+                  ? DisplayDateUtils.dmyHm(subscription.updatedAt!)
+                  : 'Never',
+            ),
+            SubscriptionDetailRow(
+              label: 'Delivery Cadence',
+              value: _cadenceLabel(
+                subscription.subscriptionType,
+                subscription.notificationFrequency,
               ),
-              if (subscription.webhookUrl.isNotEmpty &&
-                  !subscription.webhookUrl.contains('@'))
-                SubscriptionDetailRow(
-                  label: 'Webhook URL',
-                  value: subscription.webhookUrl,
-                ),
-            ],
-          ),
-          SubscriptionDetailsSection(
-            title: 'Subscription Configuration',
-            children: [
-              SubscriptionDetailRow(
-                label: 'Query Parameters',
-                value:
-                    subscription.queryParameters?.entries
-                        .map((e) => '${e.key}: ${e.value}')
-                        .join(', ') ??
-                    'None',
-              ),
-              SubscriptionDetailRow(
-                label: 'Notification Format',
-                value: subscription.notificationFormat ?? 'Default',
-              ),
-            ],
-          ),
-          SubscriptionDetailsSection(
-            title: 'Timing & Delivery',
-            children: [
-              SubscriptionDetailRow(
-                label: 'Created',
-                value: DisplayDateUtils.dmyHm(subscription.createdAt),
-              ),
-              SubscriptionDetailRow(
-                label: 'Last Modified',
-                value: subscription.updatedAt != null
-                    ? DisplayDateUtils.dmyHm(subscription.updatedAt!)
-                    : 'Never',
-              ),
-              SubscriptionDetailRow(
-                label: 'Next Scheduled',
-                value: subscription.status == 'ACTIVE' ? 'Real-time' : 'Paused',
-              ),
-            ],
-          ),
-          SubscriptionDetailsSection(
-            title: 'Statistics',
-            children: [
-              SubscriptionDetailRow(
-                label: 'Total Notifications',
-                value: stats?.totalNotifications.toString() ?? 'Loading...',
-              ),
-              SubscriptionDetailRow(
-                label: 'Success Rate',
-                value: stats != null
-                    ? '${(stats!.successRate * 100).toStringAsFixed(1)}%'
-                    : 'Loading...',
-              ),
-              SubscriptionDetailRow(
-                label: 'Last Notification',
-                value: stats?.lastNotificationSent != null
-                    ? DisplayDateUtils.dmyHm(stats!.lastNotificationSent!)
-                    : 'None',
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    if (embedded) {
+      return SingleChildScrollView(child: content);
+    }
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: content,
+    );
+  }
+}
+
+/// Lays out stat tiles in a responsive grid: 4 columns when there's room
+/// (full-page details view), 2 columns when narrower (embedded inline panel
+/// inside Subscription Management), so tiles never get squeezed unreadable.
+class _StatsGrid extends StatelessWidget {
+  const _StatsGrid({required this.tiles});
+
+  final List<Widget> tiles;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 480 ? tiles.length : 2;
+        const spacing = TraqSpacing.md;
+        final tileWidth =
+            (constraints.maxWidth - spacing * (columns - 1)) / columns;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final tile in tiles)
+              SizedBox(width: tileWidth, child: tile),
+          ],
+        );
+      },
     );
   }
 }

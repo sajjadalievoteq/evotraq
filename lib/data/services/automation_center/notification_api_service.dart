@@ -218,9 +218,20 @@ class NotificationApiService {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.data);
         if (responseData is List) {
-          return responseData
-              .map((json) => domain.WebhookNotification.fromJson(json))
-              .toList();
+          final history = <domain.WebhookNotification>[];
+          for (final item in responseData) {
+            if (item is! Map) continue;
+            try {
+              history.add(
+                domain.WebhookNotification.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              );
+            } catch (_) {
+              // Skip malformed rows rather than failing the whole panel.
+            }
+          }
+          return history;
         }
         return [];
       } else {

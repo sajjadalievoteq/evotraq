@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
@@ -16,6 +18,7 @@ import 'package:traqtrace_app/data/services/websocket_service.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthService _authService;
+  final TokenManager _tokenManager;
   final Duration _authCheckTimeout;
   final Duration _loginTimeout;
   final Duration _verifyEmailTimeout;
@@ -23,6 +26,12 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Serializes concurrent session-expiry notifications (many parallel 401s).
   bool _sessionExpiryInFlight = false;
+
+  /// One-shot JWT `exp` timer for the current authenticated session.
+  Timer? _tokenExpiryTimer;
+
+  /// Token identity associated with [_tokenExpiryTimer] (stale-timer guard).
+  String? _scheduledExpiryToken;
 
   static const Duration authCheckTimeout = Duration(seconds: 10);
 
@@ -32,14 +41,22 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit({
     required AuthService authService,
+    TokenManager? tokenManager,
     Duration? authCheckTimeout,
     Duration? loginTimeout,
     Duration? verifyEmailTimeout,
   }) : _authService = authService,
+       _tokenManager = tokenManager ?? TokenManager(),
        _authCheckTimeout = authCheckTimeout ?? AuthCubit.authCheckTimeout,
        _loginTimeout = loginTimeout ?? AuthCubit.loginTimeout,
        _verifyEmailTimeout = verifyEmailTimeout ?? AuthCubit.verifyEmailTimeout,
        super(const AuthState(status: AuthStatus.initial));
+
+  @visibleForTesting
+  bool get hasTokenExpiryTimerForTest => _tokenExpiryTimer != null;
+
+  @visibleForTesting
+  String? get scheduledExpiryTokenForTest => _scheduledExpiryToken;
 
   bool _requiresEmailVerification(String? message) {
     final normalized = message?.trim().toLowerCase();
@@ -85,6 +102,19 @@ class AuthCubit extends Cubit<AuthState> {
     );
     final startedAt = DateTime.now();
     try {
+      final token = await _authService.getAuthToken();
+      if (token == null || token.isEmpty) {
+        await _awaitMinSplash(startedAt, minSplashDelay);
+        await _forceUnauthenticated();
+        return;
+      }
+
+      if (_tokenManager.isExpired(token)) {
+        await _awaitMinSplash(startedAt, minSplashDelay);
+        await sessionExpired();
+        return;
+      }
+
       final user = await _authService.getCurrentUser().timeout(
         _authCheckTimeout,
       );
@@ -93,12 +123,14 @@ class AuthCubit extends Cubit<AuthState> {
         state.copyWith(
           status: AuthStatus.authenticated,
           user: user,
+          token: token,
           error: null,
           message: null,
           registeredEmail: null,
           bootstrapCompleted: true,
         ),
       );
+      _scheduleTokenExpiration(token);
       _onAuthenticatedSessionStarted();
       _backfillOperationalGln(user);
     } on TimeoutException {
@@ -135,6 +167,7 @@ class AuthCubit extends Cubit<AuthState> {
           registeredEmail: null,
         ),
       );
+      _scheduleTokenExpiration(response.token);
       _onAuthenticatedSessionStarted();
       _backfillOperationalGln(user);
     } on TimeoutException {
@@ -190,6 +223,7 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
+    _cancelTokenExpiration();
     _disconnectSharedWebSocket();
     try {
       await _authService.logout();
@@ -197,7 +231,7 @@ class AuthCubit extends Cubit<AuthState> {
     await _forceUnauthenticated();
   }
 
-  /// Centralized path for HTTP 401 / STOMP auth failures.
+  /// Centralized path for JWT timer expiry, HTTP 401, and STOMP auth failures.
   ///
   /// Emits unauthenticated immediately so GoRouter redirects to Login without a
   /// browser refresh. Remote logout is best-effort and must not block navigation
@@ -207,6 +241,7 @@ class AuthCubit extends Cubit<AuthState> {
     if (_sessionExpiryInFlight) return;
     _sessionExpiryInFlight = true;
     try {
+      _cancelTokenExpiration();
       _disconnectSharedWebSocket();
       await _forceUnauthenticated();
       unawaited(_authService.logout().catchError((_) {}));
@@ -216,6 +251,7 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> _forceUnauthenticated() async {
+    _cancelTokenExpiration();
     _disconnectSharedWebSocket();
     _clearSessionCaches();
     emit(
@@ -224,6 +260,34 @@ class AuthCubit extends Cubit<AuthState> {
         bootstrapCompleted: true,
       ),
     );
+  }
+
+  void _cancelTokenExpiration() {
+    _tokenExpiryTimer?.cancel();
+    _tokenExpiryTimer = null;
+    _scheduledExpiryToken = null;
+  }
+
+  /// Schedules a single one-shot logout at JWT `exp` (minus safety margin).
+  void _scheduleTokenExpiration(String token) {
+    _cancelTokenExpiration();
+
+    final remaining = _tokenManager.remainingLifetime(token);
+    if (remaining == null) {
+      // Undecodable token: no client timer; Dio/WS remain authoritative.
+      return;
+    }
+    if (remaining <= Duration.zero) {
+      unawaited(sessionExpired());
+      return;
+    }
+
+    _scheduledExpiryToken = token;
+    _tokenExpiryTimer = Timer(remaining, () {
+      if (_scheduledExpiryToken != token) return;
+      if (state.status != AuthStatus.authenticated) return;
+      unawaited(sessionExpired());
+    });
   }
 
   void _onAuthenticatedSessionStarted() {
@@ -252,20 +316,31 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> getCurrentUser() async {
     try {
+      final token = await _authService.getAuthToken();
       final user = await _authService.getCurrentUser();
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
           user: user,
+          token: token,
           error: null,
           message: null,
         ),
       );
+      if (token != null && token.isNotEmpty) {
+        _scheduleTokenExpiration(token);
+      }
       _onAuthenticatedSessionStarted();
       _backfillOperationalGln(user);
     } catch (e) {
       await _forceUnauthenticated();
     }
+  }
+
+  @override
+  Future<void> close() {
+    _cancelTokenExpiration();
+    return super.close();
   }
 
   /// Replaces the cached authenticated user without changing auth status.

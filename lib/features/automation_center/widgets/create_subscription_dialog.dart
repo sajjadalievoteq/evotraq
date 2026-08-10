@@ -30,8 +30,15 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
   bool? _testSucceeded;
   String? _testMessage;
   late String _selectedDeliveryMethod;
+  late String _selectedSubscriptionType;
+  String? _selectedNotificationFrequency;
 
   bool get _isEditing => widget.subscription != null;
+
+  static const _typeDefaultFrequency = {
+    'BATCH': 'HOURLY',
+    'SCHEDULED': 'DAILY',
+  };
 
   @override
   void initState() {
@@ -41,6 +48,10 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         SubscriptionDeliveryUtils.isEmailEndpoint(endpoint)
         ? 'EMAIL'
         : 'WEBHOOK';
+    _selectedSubscriptionType = widget.subscription?.subscriptionType ??
+        'REALTIME';
+    _selectedNotificationFrequency = widget.subscription?.notificationFrequency ??
+        _typeDefaultFrequency[_selectedSubscriptionType];
   }
 
   Map<String, dynamic> get _initialValue {
@@ -73,6 +84,13 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       'notificationFormat':
           subscription.notificationFormat ??
           (_selectedDeliveryMethod == 'EMAIL' ? 'EMAIL_HTML' : 'SUMMARY'),
+      'notificationFrequency': subscription.notificationFrequency ??
+          _typeDefaultFrequency[subscription.subscriptionType],
+      if (subscription.preferredHour != null && subscription.preferredMinute != null)
+        'preferredTime': TimeOfDay(
+          hour: subscription.preferredHour!,
+          minute: subscription.preferredMinute!,
+        ),
       if (eventTypes is List)
         'eventTypes': eventTypes.map((value) => '$value').toList(),
       'bizStep': firstString('businessSteps'),
@@ -161,6 +179,23 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                         _testSucceeded = null;
                         _testMessage = null;
                       });
+                    },
+                    selectedSubscriptionType: _selectedSubscriptionType,
+                    onSubscriptionTypeChanged: (value) {
+                      setState(() {
+                        _selectedSubscriptionType = value;
+                      });
+                      final defaultFrequency = _typeDefaultFrequency[value];
+                      if (defaultFrequency != null) {
+                        setState(() => _selectedNotificationFrequency = defaultFrequency);
+                        _formKey.currentState?.patchValue(
+                          {'notificationFrequency': defaultFrequency},
+                        );
+                      }
+                    },
+                    selectedNotificationFrequency: _selectedNotificationFrequency,
+                    onNotificationFrequencyChanged: (value) {
+                      setState(() => _selectedNotificationFrequency = value);
                     },
                   ),
                   if (_isTesting || _testMessage != null) ...[
@@ -305,23 +340,42 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           ? null
           : formData['notificationFormat'];
 
+      final String subscriptionType = formData['subscriptionType'];
+      final bool usesCadence =
+          subscriptionType == 'BATCH' || subscriptionType == 'SCHEDULED';
+      final String? notificationFrequency =
+          usesCadence ? formData['notificationFrequency'] as String? : null;
+
+      final bool usesPreferredTime = usesCadence &&
+          (notificationFrequency == 'DAILY' ||
+              notificationFrequency == 'WEEKLY' ||
+              notificationFrequency == 'MONTHLY');
+      final TimeOfDay? preferredTime =
+          usesPreferredTime ? formData['preferredTime'] as TimeOfDay? : null;
+
       if (_isEditing) {
         context.read<NotificationCubit>().updateSubscription(
           id: widget.subscription!.id,
           subscriptionName: formData['subscriptionName'],
           webhookUrl: endpointOrEmail,
-          subscriptionType: formData['subscriptionType'],
+          subscriptionType: subscriptionType,
           deliveryMethod: deliveryMethod,
           notificationFormat: notificationFormat,
+          notificationFrequency: notificationFrequency,
+          preferredHour: preferredTime?.hour,
+          preferredMinute: preferredTime?.minute,
           queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
         );
       } else {
         context.read<NotificationCubit>().createSubscription(
           subscriptionName: formData['subscriptionName'],
           webhookUrl: endpointOrEmail,
-          subscriptionType: formData['subscriptionType'],
+          subscriptionType: subscriptionType,
           deliveryMethod: deliveryMethod,
           notificationFormat: notificationFormat,
+          notificationFrequency: notificationFrequency,
+          preferredHour: preferredTime?.hour,
+          preferredMinute: preferredTime?.minute,
           queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
         );
       }

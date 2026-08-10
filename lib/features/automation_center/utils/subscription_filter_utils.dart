@@ -52,4 +52,18 @@ abstract final class SubscriptionFilterUtils {
       return deliveryMatches && statusMatches;
     }).toList();
   }
+
+  /// Client-side search over name, endpoint, and subscription type.
+  static List<NotificationSubscription> search(
+    List<NotificationSubscription> subscriptions,
+    String query,
+  ) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return subscriptions;
+    return subscriptions.where((sub) {
+      return sub.subscriptionName.toLowerCase().contains(q) ||
+          sub.webhookUrl.toLowerCase().contains(q) ||
+          sub.subscriptionType.toLowerCase().contains(q);
+    }).toList();
+  }
 }

@@ -154,6 +154,10 @@ class NotificationCubit extends Cubit<NotificationState> {
     required String subscriptionType,
     String? deliveryMethod,
     String? notificationFormat,
+    String? notificationFrequency,
+    int? maxEventsPerNotification,
+    int? preferredHour,
+    int? preferredMinute,
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
@@ -166,6 +170,10 @@ class NotificationCubit extends Cubit<NotificationState> {
         subscriptionType: subscriptionType,
         deliveryMethod: deliveryMethod,
         notificationFormat: notificationFormat,
+        notificationFrequency: notificationFrequency,
+        maxEventsPerNotification: maxEventsPerNotification,
+        preferredHour: preferredHour,
+        preferredMinute: preferredMinute,
         queryParameters: queryParameters,
       );
 
@@ -198,6 +206,10 @@ class NotificationCubit extends Cubit<NotificationState> {
     required String subscriptionType,
     String? deliveryMethod,
     String? notificationFormat,
+    String? notificationFrequency,
+    int? maxEventsPerNotification,
+    int? preferredHour,
+    int? preferredMinute,
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
@@ -210,6 +222,10 @@ class NotificationCubit extends Cubit<NotificationState> {
         subscriptionType: subscriptionType,
         deliveryMethod: deliveryMethod,
         notificationFormat: notificationFormat,
+        notificationFrequency: notificationFrequency,
+        maxEventsPerNotification: maxEventsPerNotification,
+        preferredHour: preferredHour,
+        preferredMinute: preferredMinute,
         queryParameters: queryParameters,
       );
 
@@ -333,33 +349,70 @@ class NotificationCubit extends Cubit<NotificationState> {
     }
   }
 
-  Future<void> loadWebhookHistory(
-    String subscriptionId, {
-    int page = 0,
-    int size = 20,
+  /// Loads per-event delivery history across all subscriptions for Activity.
+  Future<void> loadDeliveryActivity({
+    int perSubscription = 50,
+    bool forceSubscriptions = false,
   }) async {
+    emit(
+      state.copyWith(
+        deliveryActivityLoading: true,
+        deliveryActivityError: null,
+      ),
+    );
+
     try {
-      final webhookHistory = await _apiService.getWebhookHistory(
-        subscriptionId,
-        page: page,
-        size: size,
+      await loadSubscriptions(force: forceSubscriptions);
+      // If a concurrent load was in flight, wait briefly for it to settle.
+      var spins = 0;
+      while (_loadInFlight && !isClosed && spins < 40) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        spins++;
+      }
+      if (isClosed) return;
+
+      final subscriptions = state.subscriptions;
+      if (subscriptions.isEmpty) {
+        emit(
+          state.copyWith(
+            deliveryActivity: const [],
+            deliveryActivityLoading: false,
+            deliveryActivityError: null,
+          ),
+        );
+        return;
+      }
+
+      final chunks = await Future.wait(
+        subscriptions.map(
+          (sub) => _apiService.getWebhookHistory(
+            sub.id,
+            size: perSubscription,
+          ),
+        ),
       );
+
+      final merged = chunks.expand((e) => e).toList()
+        ..sort((a, b) {
+          final aTime = a.deliveredAt ?? a.createdAt;
+          final bTime = b.deliveredAt ?? b.createdAt;
+          return bTime.compareTo(aTime);
+        });
 
       if (isClosed) return;
       emit(
         state.copyWith(
-          status: NotificationStatus.success,
-          webhookHistory: webhookHistory,
-          lastLoadedHistorySubscriptionId: subscriptionId,
-          error: null,
+          deliveryActivity: merged,
+          deliveryActivityLoading: false,
+          deliveryActivityError: null,
         ),
       );
     } catch (e) {
       if (isClosed) return;
       emit(
         state.copyWith(
-          status: NotificationStatus.error,
-          error: 'Failed to load webhook history: $e',
+          deliveryActivityLoading: false,
+          deliveryActivityError: 'Failed to load delivery events: $e',
         ),
       );
     }

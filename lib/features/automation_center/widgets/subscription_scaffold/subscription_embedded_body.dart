@@ -28,6 +28,7 @@ class SubscriptionEmbeddedBody extends StatelessWidget {
         Divider(height: 1, color: c.border),
         const SizedBox(height: TraqSpacing.lg),
         Expanded(child: body),
+
       ],
     );
   }

@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/job_queue_dashboard_snapshot.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/activity_and_health.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/metric_card.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/queue_status_strip.dart';
 
@@ -45,14 +44,6 @@ class JobQueueDashboard extends StatelessWidget {
           onOpenActive: onOpenActive,
           onOpenQueue: onOpenQueue,
           onOpenHistory: onOpenHistory,
-          onOpenWorkers: onOpenWorkers,
-        ),
-        const SizedBox(height: TraqSpacing.lg),
-        JobQueueSystemHealthPanel(snapshot: snapshot),
-        const SizedBox(height: TraqSpacing.lg),
-        JobQueueRecentActivityCard(
-          activeJobs: snapshot.activeJobsList,
-          history: snapshot.recentHistory,
         ),
       ],
     );
@@ -65,21 +56,19 @@ class _MetricsGrid extends StatelessWidget {
     this.onOpenActive,
     this.onOpenQueue,
     this.onOpenHistory,
-    this.onOpenWorkers,
   });
 
   final JobQueueDashboardSnapshot snapshot;
   final VoidCallback? onOpenActive;
   final VoidCallback? onOpenQueue;
   final VoidCallback? onOpenHistory;
-  final VoidCallback? onOpenWorkers;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final cards = [
       JobQueueMetricCard(
-        title: 'Active jobs',
+        title: 'Active Jobs',
         value: '${snapshot.activeJobs}',
         subtitle: snapshot.activeJobs == 0 ? 'No jobs running' : 'In flight',
         iconAsset: AppAssets.iconPlay,
@@ -88,7 +77,7 @@ class _MetricsGrid extends StatelessWidget {
         onTap: onOpenActive,
       ),
       JobQueueMetricCard(
-        title: 'Queued jobs',
+        title: 'Queued Jobs',
         value: '${snapshot.queuedJobs}',
         subtitle: snapshot.queuedJobs == 0 ? 'Queue clear' : 'Waiting',
         iconAsset: NavIcons.jobQueueManagement,
@@ -99,7 +88,7 @@ class _MetricsGrid extends StatelessWidget {
       JobQueueMetricCard(
         title: 'Completed',
         value: '${snapshot.completedJobs}',
-        subtitle: 'History total',
+        subtitle: 'History',
         iconAsset: AppAssets.iconCheckCircle,
         accent: AppColorMapper.infoColor(context),
         sparkline: snapshot.activeSparkline,
@@ -113,24 +102,14 @@ class _MetricsGrid extends StatelessWidget {
         accent: AppColorMapper.errorColor(context),
         onTap: onOpenHistory,
       ),
-      JobQueueMetricCard(
-        title: 'Workers',
-        value: '${snapshot.workerActive}/${snapshot.workerMax}',
-        subtitle:
-            'Utilization ${(snapshot.workerUtilization * 100).toStringAsFixed(0)}%',
-        iconAsset: AppAssets.iconUsers,
-        accent: AppColorMapper.successColor(context),
-        sparkline: snapshot.queuedSparkline,
-        onTap: onOpenWorkers,
-      ),
     ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final crossAxisCount = width >= 1100
-            ? 3
-            : width >= 720
+        final crossAxisCount = width >= 900
+            ? 4
+            : width >= 560
             ? 2
             : 1;
         return GridView.count(
@@ -139,7 +118,11 @@ class _MetricsGrid extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: TraqSpacing.md,
           crossAxisSpacing: TraqSpacing.md,
-          childAspectRatio: crossAxisCount == 1 ? 2.6 : 1.55,
+          childAspectRatio: crossAxisCount == 1
+              ? 3.2
+              : crossAxisCount == 2
+              ? 2.4
+              : 2.1,
           children: cards,
         );
       },

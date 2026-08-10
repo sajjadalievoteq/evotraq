@@ -44,12 +44,14 @@ class JobQueueStatusStrip extends StatelessWidget {
       _StripMetric(
         icon: AppAssets.iconUsers,
         value: '${snapshot.workerActive} / ${snapshot.workerMax}',
-        label: 'Workers',
+        label: 'Busy / capacity',
         color: AppColorMapper.successColor(context),
       ),
       _StripMetric(
         icon: AppAssets.iconCheckCircle,
-        value: '${(snapshot.successRate * 100).toStringAsFixed(0)}%',
+        value: snapshot.successRateOrNull == null
+            ? '—'
+            : '${(snapshot.successRateOrNull! * 100).toStringAsFixed(0)}%',
         label: 'Success',
         color: AppColorMapper.successColor(context),
       ),
@@ -72,7 +74,7 @@ class JobQueueStatusStrip extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Queue status',
+                    'Queue Health',
                     style: context.text.cap.copyWith(color: c.textMuted),
                   ),
                   const SizedBox(height: TraqSpacing.xs),

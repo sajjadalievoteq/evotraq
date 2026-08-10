@@ -11,6 +11,10 @@ class NotificationSubscription extends Equatable {
   final String status;
   final String subscriptionType;
   final String? notificationFormat;
+  final String? notificationFrequency;
+  final int? maxEventsPerNotification;
+  final int? preferredHour;
+  final int? preferredMinute;
   @JsonKey(name: 'createdTime')
   final DateTime createdAt;
   @JsonKey(name: 'lastModifiedTime')
@@ -26,6 +30,10 @@ class NotificationSubscription extends Equatable {
     required this.status,
     required this.subscriptionType,
     this.notificationFormat,
+    this.notificationFrequency,
+    this.maxEventsPerNotification,
+    this.preferredHour,
+    this.preferredMinute,
     required this.createdAt,
     this.updatedAt,
     this.queryParameters,
@@ -45,6 +53,10 @@ class NotificationSubscription extends Equatable {
         status,
         subscriptionType,
         notificationFormat,
+        notificationFrequency,
+        maxEventsPerNotification,
+        preferredHour,
+        preferredMinute,
         createdAt,
         updatedAt,
         queryParameters,
@@ -58,6 +70,10 @@ class NotificationSubscription extends Equatable {
     String? status,
     String? subscriptionType,
     String? notificationFormat,
+    String? notificationFrequency,
+    int? maxEventsPerNotification,
+    int? preferredHour,
+    int? preferredMinute,
     DateTime? createdAt,
     DateTime? updatedAt,
     Map<String, dynamic>? queryParameters,
@@ -70,6 +86,11 @@ class NotificationSubscription extends Equatable {
       status: status ?? this.status,
       subscriptionType: subscriptionType ?? this.subscriptionType,
       notificationFormat: notificationFormat ?? this.notificationFormat,
+      notificationFrequency: notificationFrequency ?? this.notificationFrequency,
+      maxEventsPerNotification:
+          maxEventsPerNotification ?? this.maxEventsPerNotification,
+      preferredHour: preferredHour ?? this.preferredHour,
+      preferredMinute: preferredMinute ?? this.preferredMinute,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       queryParameters: queryParameters ?? this.queryParameters,
@@ -124,6 +145,14 @@ class CreateSubscriptionRequest extends Equatable {
   final String? deliveryMethod;
   @JsonKey(includeIfNull: false)
   final String? notificationFormat;
+  @JsonKey(includeIfNull: false)
+  final String? notificationFrequency;
+  @JsonKey(includeIfNull: false)
+  final int? maxEventsPerNotification;
+  @JsonKey(includeIfNull: false)
+  final int? preferredHour;
+  @JsonKey(includeIfNull: false)
+  final int? preferredMinute;
   final Map<String, dynamic>? queryParameters;
 
   const CreateSubscriptionRequest({
@@ -132,6 +161,10 @@ class CreateSubscriptionRequest extends Equatable {
     required this.subscriptionType,
     this.deliveryMethod,
     this.notificationFormat,
+    this.notificationFrequency,
+    this.maxEventsPerNotification,
+    this.preferredHour,
+    this.preferredMinute,
     this.queryParameters,
   });
 
@@ -147,11 +180,15 @@ class CreateSubscriptionRequest extends Equatable {
         subscriptionType,
         deliveryMethod,
         notificationFormat,
+        notificationFrequency,
+        maxEventsPerNotification,
+        preferredHour,
+        preferredMinute,
         queryParameters,
       ];
 }
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class WebhookNotification extends Equatable {
   final String id;
   final String subscriptionId;
@@ -177,8 +214,45 @@ class WebhookNotification extends Equatable {
     this.response,
   });
 
-  factory WebhookNotification.fromJson(Map<String, dynamic> json) =>
-      _$WebhookNotificationFromJson(json);
+  /// Maps backend [WebhookNotificationDTO] field names (`eventIds`,
+  /// `attemptCount`, `deliveryTime`, `responseBody`) plus legacy aliases.
+  factory WebhookNotification.fromJson(Map<String, dynamic> json) {
+    final eventIds = json['eventIds'];
+    String eventId = json['eventId']?.toString() ?? '';
+    if (eventId.isEmpty && eventIds is List && eventIds.isNotEmpty) {
+      eventId = eventIds.first.toString();
+    }
+
+    DateTime? parseTime(Object? value) {
+      if (value == null) return null;
+      return DateTime.tryParse(value.toString());
+    }
+
+    final responseBody = json['responseBody'];
+    Map<String, dynamic>? response;
+    if (json['response'] is Map<String, dynamic>) {
+      response = Map<String, dynamic>.from(json['response'] as Map);
+    } else if (responseBody != null) {
+      response = {'body': responseBody};
+    }
+
+    return WebhookNotification(
+      id: json['id']?.toString() ?? '',
+      subscriptionId: json['subscriptionId']?.toString() ?? '',
+      eventId: eventId,
+      status: json['status']?.toString() ?? '',
+      webhookUrl: json['webhookUrl']?.toString() ?? '',
+      createdAt:
+          parseTime(json['createdAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
+      deliveredAt: parseTime(json['deliveryTime'] ?? json['deliveredAt']),
+      retryCount:
+          (json['attemptCount'] as num?)?.toInt() ??
+          (json['retryCount'] as num?)?.toInt() ??
+          0,
+      errorMessage: json['errorMessage'] as String?,
+      response: response,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$WebhookNotificationToJson(this);
 

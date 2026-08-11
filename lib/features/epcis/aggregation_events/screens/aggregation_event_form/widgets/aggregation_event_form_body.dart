@@ -82,20 +82,20 @@ class AggregationEventFormBody extends StatelessWidget {
   final List<AggregationEventFormQuantityRowControllers> quantityRows;
   final VoidCallback onAddQuantityRow;
   final void Function(int index, AggregationEventFormQuantityRowControllers row)
-      onRemoveQuantityRow;
+  onRemoveQuantityRow;
   final GLN? locationGLN;
   final String? locationGlnError;
   final ValueChanged<GLN?> onLocationChanged;
   final List<MapEntry<TextEditingController, TextEditingController>>
-      sourceListControllers;
+  sourceListControllers;
   final VoidCallback onAddSourceEntry;
   final ValueChanged<int> onRemoveSourceEntry;
   final List<MapEntry<TextEditingController, TextEditingController>>
-      destinationListControllers;
+  destinationListControllers;
   final VoidCallback onAddDestinationEntry;
   final ValueChanged<int> onRemoveDestinationEntry;
   final List<MapEntry<TextEditingController, TextEditingController>>
-      bizDataControllers;
+  bizDataControllers;
   final VoidCallback onAddBizDataField;
   final ValueChanged<int> onRemoveBizDataField;
   final VoidCallback onSave;

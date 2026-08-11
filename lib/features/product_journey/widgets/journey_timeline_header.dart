@@ -19,8 +19,10 @@ class JourneyTimelineHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final theme = Theme.of(context);
-    final typeColor =
-        JourneyStepStyle.typeColor(context, journey.identifierType);
+    final typeColor = JourneyStepStyle.typeColor(
+      context,
+      journey.identifierType,
+    );
     final status = CbvDisplayUtils.displayDisposition(
       journey.currentDisposition,
       fallback: 'Active',

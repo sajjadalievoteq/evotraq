@@ -7,6 +7,7 @@ import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/features/admin/widgets/storage_partition_chart.dart';
 
 class StorageStatisticsCard extends StatelessWidget {
   final StorageStatistics storage;
@@ -33,7 +34,7 @@ class StorageStatisticsCard extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            
+
             Row(
               children: [
                 Expanded(
@@ -73,20 +74,20 @@ class StorageStatisticsCard extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             const Text(
               'Event Type Distribution',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-            ...storage.eventTypeDistribution.entries.map((entry) => 
-              StorageEventTypeRow(entry.key, entry.value)
-            ).toList(),
-            
+            ...storage.eventTypeDistribution.entries
+                .map((entry) => StorageEventTypeRow(entry.key, entry.value))
+                .toList(),
+
             const SizedBox(height: 24),
-            
+
             const Text(
               'Partition Distribution',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -94,11 +95,11 @@ class StorageStatisticsCard extends StatelessWidget {
             const SizedBox(height: 12),
             SizedBox(
               height: 200,
-              child: _StoragePartitionChart(storage: storage),
+              child: StoragePartitionChart(storage: storage),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -116,17 +117,23 @@ class StorageStatisticsCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Archived Events: ${_formatNumber(storage.archivedEventsCount)}'),
-                      Text('Last Archive: ${_formatDate(storage.lastArchiveDate)}'),
+                      Text(
+                        'Archived Events: ${_formatNumber(storage.archivedEventsCount)}',
+                      ),
+                      Text(
+                        'Last Archive: ${_formatDate(storage.lastArchiveDate)}',
+                      ),
                     ],
                   ),
-                  Text('Average Partition Size: ${storage.averagePartitionSize.toStringAsFixed(1)} MB'),
+                  Text(
+                    'Average Partition Size: ${storage.averagePartitionSize.toStringAsFixed(1)} MB',
+                  ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             Row(
               children: [
                 ElevatedButton.icon(
@@ -174,21 +181,27 @@ class StorageStatisticsCard extends StatelessWidget {
               title: const Text('6 months ago'),
               onTap: () {
                 Navigator.pop(context);
-                onArchiveEvents(DateTime.now().subtract(const Duration(days: 180)));
+                onArchiveEvents(
+                  DateTime.now().subtract(const Duration(days: 180)),
+                );
               },
             ),
             ListTile(
               title: const Text('1 year ago'),
               onTap: () {
                 Navigator.pop(context);
-                onArchiveEvents(DateTime.now().subtract(const Duration(days: 365)));
+                onArchiveEvents(
+                  DateTime.now().subtract(const Duration(days: 365)),
+                );
               },
             ),
             ListTile(
               title: const Text('2 years ago'),
               onTap: () {
                 Navigator.pop(context);
-                onArchiveEvents(DateTime.now().subtract(const Duration(days: 730)));
+                onArchiveEvents(
+                  DateTime.now().subtract(const Duration(days: 730)),
+                );
               },
             ),
           ],
@@ -208,7 +221,9 @@ class StorageStatisticsCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Compress Events'),
-        content: const Text('Compress all uncompressed events to save storage space?'),
+        content: const Text(
+          'Compress all uncompressed events to save storage space?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -222,58 +237,6 @@ class StorageStatisticsCard extends StatelessWidget {
             child: const Text('Compress'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StoragePartitionChart extends StatelessWidget {
-  const _StoragePartitionChart({required this.storage});
-  final StorageStatistics storage;
-
-  @override
-  Widget build(BuildContext context) {
-    final maxCount = storage.partitionDistribution.values.isNotEmpty
-        ? storage.partitionDistribution.values.reduce((a, b) => a > b ? a : b)
-        : 1;
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: storage.partitionDistribution.entries.map((entry) {
-          final height = (entry.value / maxCount) * 160;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  NumberFormatUtils.compactKilo(entry.value),
-                  style: const TextStyle(fontSize: 10),
-                ),
-                Container(
-                  width: 40,
-                  height: height,
-                  decoration: BoxDecoration(
-                    color: AppColorMapper.infoColor(context),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    entry.key,
-                    style: const TextStyle(fontSize: 9),
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
       ),
     );
   }

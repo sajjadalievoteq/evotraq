@@ -26,7 +26,9 @@ class JourneyMetricRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: isLast
             ? null
-            : Border(bottom: BorderSide(color: c.border.withValues(alpha: 0.6))),
+            : Border(
+                bottom: BorderSide(color: c.border.withValues(alpha: 0.6)),
+              ),
       ),
       child: Row(
         children: [

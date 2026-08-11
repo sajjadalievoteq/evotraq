@@ -13,7 +13,7 @@ class AggregationEventFormDestinationListSection extends StatelessWidget {
   });
 
   final List<MapEntry<TextEditingController, TextEditingController>>
-      destinationListControllers;
+  destinationListControllers;
   final VoidCallback onAddDestinationEntry;
   final ValueChanged<int> onRemoveDestinationEntry;
 
@@ -29,10 +29,9 @@ class AggregationEventFormDestinationListSection extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 'No destinations added. Tap "Add Destination" to specify where products are going.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(fontStyle: FontStyle.italic),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
               ),
             ),
           ...destinationListControllers.asMap().entries.map((entry) {
@@ -55,7 +54,8 @@ class AggregationEventFormDestinationListSection extends StatelessWidget {
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: TraqIcon(AppAssets.iconTrash,
+                          icon: TraqIcon(
+                            AppAssets.iconTrash,
                             color: AppColorMapper.errorColor(context),
                             size: 20,
                           ),

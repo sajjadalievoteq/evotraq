@@ -131,7 +131,12 @@ class _SerializeExportToolState extends State<SerializeExportTool> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (final format in const ['CSV', 'HTML', 'PDF', 'EXCEL']) ...[
+                  for (final format in const [
+                    'CSV',
+                    'HTML',
+                    'PDF',
+                    'EXCEL',
+                  ]) ...[
                     CustomElevatedButton(
                       label: 'Export $format',
                       isLoading: slice.isLoading,

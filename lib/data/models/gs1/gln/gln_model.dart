@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 
+part 'gln_copy_with.dart';
+
 enum LocationType {
   manufacturing_site,
   warehouse,
@@ -11,7 +13,7 @@ enum LocationType {
   wholesaler,
   clinic,
   regulatory_body,
-  other
+  other,
 }
 
 class GLN extends Equatable {
@@ -153,108 +155,6 @@ class GLN extends Equatable {
     );
   }
 
-  GLN copyWith({
-    String? glnCode,
-    String? locationName,
-    String? addressLine1,
-    String? addressLine2,
-    String? city,
-    String? stateProvince,
-    String? postalCode,
-    String? country,
-    String? contactName,
-    String? contactEmail,
-    String? contactPhone,
-    LocationType? locationType,
-    GLN? parentGln,
-    String? licenseNumber,
-    String? licenseType,
-    DateTime? licenseValidFrom,
-    DateTime? licenseExpiry,
-    bool? active,
-    GeospatialCoordinates? coordinates,
-    String? operatingStatus,
-    DateTime? effectiveFrom,
-    DateTime? effectiveTo,
-    DateTime? nonReuseUntil,
-    String? gs1CompanyPrefix,
-    String? locationReferenceDigits,
-    String? checkDigit,
-    int? gs1CompanyPrefixLength,
-    String? registeredLegalName,
-    String? tradingName,
-    String? leiCode,
-    String? taxRegistrationNumber,
-    String? countryOfIncorporationNumeric,
-    String? website,
-    String? digitalAddressType,
-    String? digitalAddressValue,
-    String? glnExtensionComponent,
-    String? industryClassification,
-    String? glnSource,
-    String? mobility,
-    String? mobileLocationIdentifier,
-    List<String>? glnTypes,
-    List<String>? supplyChainRoles,
-    List<String>? locationRoles,
-    GLNPharmaceuticalExtension? pharmaceuticalExtension,
-  }) {
-    return GLN(
-      glnCode: glnCode ?? this.glnCode,
-      locationName: locationName ?? this.locationName,
-      addressLine1: addressLine1 ?? this.addressLine1,
-      addressLine2: addressLine2 ?? this.addressLine2,
-      city: city ?? this.city,
-      stateProvince: stateProvince ?? this.stateProvince,
-      postalCode: postalCode ?? this.postalCode,
-      country: country ?? this.country,
-      contactName: contactName ?? this.contactName,
-      contactEmail: contactEmail ?? this.contactEmail,
-      contactPhone: contactPhone ?? this.contactPhone,
-      locationType: locationType ?? this.locationType,
-      parentGln: parentGln ?? this.parentGln,
-      licenseNumber: licenseNumber ?? this.licenseNumber,
-      licenseType: licenseType ?? this.licenseType,
-      licenseValidFrom: licenseValidFrom ?? this.licenseValidFrom,
-      licenseExpiry: licenseExpiry ?? this.licenseExpiry,
-      active: active ?? this.active,
-      coordinates: coordinates ?? this.coordinates,
-      operatingStatus: operatingStatus ?? this.operatingStatus,
-      effectiveFrom: effectiveFrom ?? this.effectiveFrom,
-      effectiveTo: effectiveTo ?? this.effectiveTo,
-      nonReuseUntil: nonReuseUntil ?? this.nonReuseUntil,
-      gs1CompanyPrefix: gs1CompanyPrefix ?? this.gs1CompanyPrefix,
-      locationReferenceDigits:
-          locationReferenceDigits ?? this.locationReferenceDigits,
-      checkDigit: checkDigit ?? this.checkDigit,
-      gs1CompanyPrefixLength:
-          gs1CompanyPrefixLength ?? this.gs1CompanyPrefixLength,
-      registeredLegalName: registeredLegalName ?? this.registeredLegalName,
-      tradingName: tradingName ?? this.tradingName,
-      leiCode: leiCode ?? this.leiCode,
-      taxRegistrationNumber:
-          taxRegistrationNumber ?? this.taxRegistrationNumber,
-      countryOfIncorporationNumeric:
-          countryOfIncorporationNumeric ?? this.countryOfIncorporationNumeric,
-      website: website ?? this.website,
-      digitalAddressType: digitalAddressType ?? this.digitalAddressType,
-      digitalAddressValue: digitalAddressValue ?? this.digitalAddressValue,
-      glnExtensionComponent:
-          glnExtensionComponent ?? this.glnExtensionComponent,
-      industryClassification:
-          industryClassification ?? this.industryClassification,
-      glnSource: glnSource ?? this.glnSource,
-      mobility: mobility ?? this.mobility,
-      mobileLocationIdentifier:
-          mobileLocationIdentifier ?? this.mobileLocationIdentifier,
-      glnTypes: glnTypes ?? this.glnTypes,
-      supplyChainRoles: supplyChainRoles ?? this.supplyChainRoles,
-      locationRoles: locationRoles ?? this.locationRoles,
-      pharmaceuticalExtension:
-          pharmaceuticalExtension ?? this.pharmaceuticalExtension,
-    );
-  }
-
   factory GLN.fromJson(Map<String, dynamic> json) {
     if (json.containsKey('id') && json.length == 1) {
       return GLN.fromCode(json['id'].toString());
@@ -264,7 +164,9 @@ class GLN extends Equatable {
       return GLN.fromCode(json['code'].toString());
     }
 
-    if (json.containsKey('glnCode') && json['glnCode'] is String && json.length == 1) {
+    if (json.containsKey('glnCode') &&
+        json['glnCode'] is String &&
+        json.length == 1) {
       return GLN.fromCode(json['glnCode'] as String);
     }
 
@@ -296,18 +198,19 @@ class GLN extends Equatable {
     if (json['licenseValidFrom'] != null &&
         json['licenseValidFrom'].toString().isNotEmpty) {
       try {
-        licenseValidFrom =
-            DateTime.parse(json['licenseValidFrom'].toString());
+        licenseValidFrom = DateTime.parse(json['licenseValidFrom'].toString());
       } catch (_) {}
     }
 
     GeospatialCoordinates? coordinates;
     if (json['coordinates'] != null) {
-      coordinates =
-          GeospatialCoordinates.fromJson(json['coordinates'] as Map<String, dynamic>);
+      coordinates = GeospatialCoordinates.fromJson(
+        json['coordinates'] as Map<String, dynamic>,
+      );
     } else if (json['geospatialCoordinates'] != null) {
       coordinates = GeospatialCoordinates.fromJson(
-          json['geospatialCoordinates'] as Map<String, dynamic>);
+        json['geospatialCoordinates'] as Map<String, dynamic>,
+      );
     } else if (json['latitude'] != null && json['longitude'] != null) {
       coordinates = GeospatialCoordinates(
         latitude: double.parse(json['latitude'].toString()),
@@ -324,8 +227,7 @@ class GLN extends Equatable {
     GLNPharmaceuticalExtension? pharmaceuticalExtension;
     final pharmaRaw = json['pharmaceuticalExtension'];
     if (pharmaRaw is Map<String, dynamic>) {
-      pharmaceuticalExtension =
-          GLNPharmaceuticalExtension.fromJson(pharmaRaw);
+      pharmaceuticalExtension = GLNPharmaceuticalExtension.fromJson(pharmaRaw);
     }
 
     return GLN(
@@ -353,7 +255,8 @@ class GLN extends Equatable {
       effectiveTo: _parseDate(json['effectiveTo']),
       nonReuseUntil: _parseDate(json['nonReuseUntil']),
       gs1CompanyPrefix: json['gs1CompanyPrefix']?.toString(),
-      locationReferenceDigits: json['locationReference']?.toString() ??
+      locationReferenceDigits:
+          json['locationReference']?.toString() ??
           json['locationReferenceDigits']?.toString(),
       checkDigit: json['checkDigit']?.toString(),
       gs1CompanyPrefixLength: (json['gs1CompanyPrefixLength'] as num?)?.toInt(),
@@ -363,18 +266,17 @@ class GLN extends Equatable {
       taxRegistrationNumber: json['taxRegistrationNumber']?.toString(),
       countryOfIncorporationNumeric:
           json['countryOfIncorporation']?.toString() ??
-              json['countryOfIncorporationNumeric']?.toString(),
+          json['countryOfIncorporationNumeric']?.toString(),
       website: json['website']?.toString(),
       digitalAddressType: json['digitalAddressType']?.toString(),
       digitalAddressValue: json['digitalAddressValue']?.toString(),
       glnExtensionComponent:
           json['glnExtensionComponent']?.toString() ??
-              json['extensionComponent']?.toString(),
+          json['extensionComponent']?.toString(),
       industryClassification: json['industryClassification']?.toString(),
       glnSource: json['glnSource']?.toString(),
       mobility: json['mobility']?.toString(),
-      mobileLocationIdentifier:
-          json['mobileLocationIdentifier']?.toString(),
+      mobileLocationIdentifier: json['mobileLocationIdentifier']?.toString(),
       glnTypes: _stringListFromJson(json['glnTypes']),
       supplyChainRoles: _stringListFromJson(json['supplyChainRoles']),
       locationRoles: _stringListFromJson(json['locationRoles']),
@@ -402,8 +304,9 @@ class GLN extends Equatable {
       'parentGLN': parentGln?.glnCode,
       'licenseNumber': licenseNumber ?? '',
       'licenseType': licenseType ?? '',
-      'licenseValidUntil':
-          licenseExpiry != null ? _formatDateWithTimezone(licenseExpiry!) : null,
+      'licenseValidUntil': licenseExpiry != null
+          ? _formatDateWithTimezone(licenseExpiry!)
+          : null,
       'locationStatus': locationStatus,
       'operatingStatus': status,
     };
@@ -479,7 +382,10 @@ class GLN extends Equatable {
   static List<String> _stringListFromJson(dynamic v) {
     if (v == null) return [];
     if (v is List) {
-      return v.map((e) => e.toString().trim()).where((s) => s.isNotEmpty).toList();
+      return v
+          .map((e) => e.toString().trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
     }
     if (v is String && v.trim().isNotEmpty) {
       return v
@@ -526,29 +432,29 @@ class GLN extends Equatable {
 
   @override
   List<Object?> get props => [
-        glnCode,
-        locationName,
-        addressLine1,
-        addressLine2,
-        city,
-        stateProvince,
-        postalCode,
-        country,
-        contactName,
-        contactEmail,
-        contactPhone,
-        locationType,
-        parentGln,
-        licenseNumber,
-        licenseType,
-        licenseValidFrom,
-        licenseExpiry,
-        active,
-        coordinates,
-        operatingStatus,
-        effectiveFrom,
-        effectiveTo,
-        glnTypes,
-        pharmaceuticalExtension,
-      ];
+    glnCode,
+    locationName,
+    addressLine1,
+    addressLine2,
+    city,
+    stateProvince,
+    postalCode,
+    country,
+    contactName,
+    contactEmail,
+    contactPhone,
+    locationType,
+    parentGln,
+    licenseNumber,
+    licenseType,
+    licenseValidFrom,
+    licenseExpiry,
+    active,
+    coordinates,
+    operatingStatus,
+    effectiveFrom,
+    effectiveTo,
+    glnTypes,
+    pharmaceuticalExtension,
+  ];
 }

@@ -2,21 +2,20 @@ import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/features/epcis/widgets/geospatial/geospatial_coordinates_info.dart';
+import 'package:traqtrace_app/features/epcis/widgets/geospatial/geospatial_coordinates_map.dart';
+import 'package:traqtrace_app/features/epcis/widgets/geospatial/geospatial_coordinates_dialog.dart';
 
 class GeospatialCoordinatesWidget extends StatefulWidget {
   final GeospatialCoordinates? coordinates;
-  
+
   final void Function(GeospatialCoordinates? coordinates)? onCoordinatesChanged;
-  
+
   final bool isViewOnly;
-  
+
   final bool showMap;
 
   const GeospatialCoordinatesWidget({
@@ -28,10 +27,12 @@ class GeospatialCoordinatesWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<GeospatialCoordinatesWidget> createState() => _GeospatialCoordinatesWidgetState();
+  State<GeospatialCoordinatesWidget> createState() =>
+      _GeospatialCoordinatesWidgetState();
 }
 
-class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidget> {
+class _GeospatialCoordinatesWidgetState
+    extends State<GeospatialCoordinatesWidget> {
   GeospatialCoordinates? _coordinates;
 
   @override
@@ -62,10 +63,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
               children: [
                 const Text(
                   'Geospatial Coordinates',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 if (!widget.isViewOnly && _coordinates != null)
                   IconButton(
@@ -76,10 +74,13 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
             ),
             const SizedBox(height: 8),
             if (_coordinates != null) ...[
-              _buildCoordinatesInfo(),
+              GeospatialCoordinatesInfo(coordinates: _coordinates!),
               if (widget.showMap) ...[
                 const SizedBox(height: 16),
-                _buildMapPlaceholder(),
+                GeospatialCoordinatesMap(
+                  coordinates: _coordinates!,
+                  onOpenExternalMap: _openInExternalMap,
+                ),
               ],
             ],
             if (!widget.isViewOnly && _coordinates == null)
@@ -94,250 +95,10 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
     );
   }
 
-  Widget _buildCoordinatesInfo() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (_coordinates!.name != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text(
-                _coordinates!.name!,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ),
-            
-          Row(
-            children: [
-              TraqIcon(NavIcons.gln, size: 16, color: AppColorMapper.errorColor(context)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${_coordinates!.latitude.toStringAsFixed(6)}°, ${_coordinates!.longitude.toStringAsFixed(6)}°',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 4),
-          
-          if (_coordinates!.altitude != null || _coordinates!.coordinateSystem != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: Row(
-                children: [
-                  if (_coordinates!.altitude != null)
-                    Expanded(
-                      child: Row(
-                        children: [
-                          TraqIcon(AppAssets.iconSwapVert, color: AppColorMapper.infoColor(context), size: 16),
-                          const SizedBox(width: 4),
-                          Text('${_coordinates!.altitude!.toStringAsFixed(1)} m'),
-                        ],
-                      ),
-                    ),
-                  if (_coordinates!.coordinateSystem != null)
-                    Expanded(
-                      child: Text('System: ${_coordinates!.coordinateSystem}'),
-                    ),
-                ],
-              ),
-            ),
-          
-          if (_coordinates!.horizontalAccuracy != null || _coordinates!.verticalAccuracy != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: Row(
-                children: [
-                  TraqIcon(AppAssets.iconInfo, size: 16, color: AppColorMapper.warningColor(context)),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      'Accuracy: ${_coordinates!.horizontalAccuracy != null ? '±${_coordinates!.horizontalAccuracy!.toStringAsFixed(1)}m horiz.' : ''}${_coordinates!.verticalAccuracy != null ? ' ±${_coordinates!.verticalAccuracy!.toStringAsFixed(1)}m vert.' : ''}'
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMapPlaceholder() {
-    if (_coordinates != null) {
-      final LatLng position = LatLng(
-        _coordinates!.latitude,
-        _coordinates!.longitude,
-      );
-      
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Stack(
-            children: [
-              FlutterMap(
-                options: MapOptions(
-                  initialCenter: position,
-                  initialZoom: 13.0,
-                  interactionOptions: const InteractionOptions(
-                    enableMultiFingerGestureRace: true,
-                  ),
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-                    subdomains: const ['a', 'b', 'c', 'd'],
-                    tileProvider: NetworkTileProvider(),
-                    userAgentPackageName: 'com.traqtrace.app',
-                  ),
-                  if (_coordinates!.horizontalAccuracy != null)
-                    CircleLayer(
-                      circles: [
-                        CircleMarker(
-                          point: position,
-                          radius: _coordinates!.horizontalAccuracy!.toDouble(),
-                          color: AppColorMapper.infoColor(context).withValues(alpha: 0.2),
-                          borderColor: AppColorMapper.infoColor(context).withValues(alpha: 0.7),
-                          borderStrokeWidth: 2,
-                          useRadiusInMeter: true,
-                        ),
-                      ],
-                    ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        width: 40.0,
-                        height: 40.0,
-                        point: position,
-                        alignment: Alignment.bottomCenter,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (_coordinates!.name != null)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(4),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 2,
-                                      offset: const Offset(0, 1),
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  _coordinates!.name!,
-                                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            TraqIcon(
-                              NavIcons.gln,
-                              color: AppColorMapper.errorColor(context),
-                              size: 40.0,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Positioned(
-                bottom: 8,
-                left: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_coordinates!.name != null)
-                        Text(
-                          _coordinates!.name!,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      Text(
-                        'Lat: ${_coordinates!.latitude.toStringAsFixed(6)}°, Long: ${_coordinates!.longitude.toStringAsFixed(6)}°',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      if (_coordinates!.altitude != null)
-                        Text(
-                          'Alt: ${_coordinates!.altitude!.toStringAsFixed(1)} m',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: ElevatedButton.icon(
-                  icon: const TraqIcon(AppAssets.iconOpenNew, size: 16),
-                  label: const Text('Open in Maps', style: TextStyle(fontSize: 12)),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColorMapper.infoColor(context),
-                  ),
-                  onPressed: _openInExternalMap,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!),
-          color: Colors.grey[200],
-        ),
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TraqIcon(AppAssets.iconMap, color: Colors.grey, size: 48),
-              SizedBox(height: 16),
-              Text(
-                'No coordinates available',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-  }
-
   void _addCoordinates() {
     showDialog(
       context: context,
-      builder: (context) => _CoordinatesDialog(
+      builder: (context) => GeospatialCoordinatesDialog(
         onSave: (coordinates) {
           setState(() {
             _coordinates = coordinates;
@@ -349,21 +110,22 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
       ),
     );
   }
-  
+
   void _openInExternalMap() async {
     if (_coordinates == null) return;
-    
+
     final lat = _coordinates!.latitude;
     final lng = _coordinates!.longitude;
     final name = Uri.encodeComponent(_coordinates!.name ?? 'Location');
-    
+
     String url = 'https://www.openstreetmap.org/?mlat=$lat&mlon=$lng&zoom=15';
-    
+
     try {
       if (!kIsWeb) {
         try {
           if (Platform.isAndroid) {
-            final googleUrl = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+            final googleUrl =
+                'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
             final Uri googleUri = Uri.parse(googleUrl);
             if (await canLaunchUrl(googleUri)) {
               await launchUrl(googleUri);
@@ -377,20 +139,17 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
               return;
             }
           }
-        } catch (_) {
-        }
+        } catch (_) {}
       }
-      
+
       final Uri osUri = Uri.parse(url);
-      await launchUrl(
-        osUri,
-        mode: LaunchMode.platformDefault,
-      );
+      await launchUrl(osUri, mode: LaunchMode.platformDefault);
     } catch (e) {
       debugPrint('Error opening map: $e');
-      
+
       try {
-        final hereUrl = 'https://wego.here.com/directions/mix/mylocation/${lat},${lng}';
+        final hereUrl =
+            'https://wego.here.com/directions/mix/mylocation/${lat},${lng}';
         final Uri hereUri = Uri.parse(hereUrl);
         await launchUrl(hereUri);
       } catch (e) {
@@ -402,7 +161,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
   void _editCoordinates() {
     showDialog(
       context: context,
-      builder: (context) => _CoordinatesDialog(
+      builder: (context) => GeospatialCoordinatesDialog(
         coordinates: _coordinates,
         onSave: (coordinates) {
           setState(() {
@@ -416,232 +175,3 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
     );
   }
 }
-
-class _CoordinatesDialog extends StatefulWidget {
-  final GeospatialCoordinates? coordinates;
-  
-  final void Function(GeospatialCoordinates coordinates) onSave;
-
-  const _CoordinatesDialog({
-    Key? key,
-    this.coordinates,
-    required this.onSave,
-  }) : super(key: key);
-
-  @override
-  _CoordinatesDialogState createState() => _CoordinatesDialogState();
-}
-
-class _CoordinatesDialogState extends State<_CoordinatesDialog> {
-  final _formKey = GlobalKey<FormState>();
-  
-  final _latitudeController = TextEditingController();
-  final _longitudeController = TextEditingController();
-  final _altitudeController = TextEditingController();
-  final _coordinateSystemController = TextEditingController(text: 'WGS84');
-  final _horizontalAccuracyController = TextEditingController();
-  final _verticalAccuracyController = TextEditingController();
-  final _nameController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    
-    if (widget.coordinates != null) {
-      _latitudeController.text = widget.coordinates!.latitude.toString();
-      _longitudeController.text = widget.coordinates!.longitude.toString();
-      if (widget.coordinates!.altitude != null) {
-        _altitudeController.text = widget.coordinates!.altitude.toString();
-      }
-      if (widget.coordinates!.coordinateSystem != null) {
-        _coordinateSystemController.text = widget.coordinates!.coordinateSystem!;
-      }
-      if (widget.coordinates!.horizontalAccuracy != null) {
-        _horizontalAccuracyController.text = widget.coordinates!.horizontalAccuracy.toString();
-      }
-      if (widget.coordinates!.verticalAccuracy != null) {
-        _verticalAccuracyController.text = widget.coordinates!.verticalAccuracy.toString();
-      }
-      if (widget.coordinates!.name != null) {
-        _nameController.text = widget.coordinates!.name!;
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _latitudeController.dispose();
-    _longitudeController.dispose();
-    _altitudeController.dispose();
-    _coordinateSystemController.dispose();
-    _horizontalAccuracyController.dispose();
-    _verticalAccuracyController.dispose();
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.coordinates == null ? 'Add Coordinates' : 'Edit Coordinates'),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _latitudeController,
-                decoration: const InputDecoration(
-                  labelText: 'Latitude',
-                  hintText: 'e.g. 51.507351',
-                ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter latitude';
-                  }
-                  double? latitude = double.tryParse(value);
-                  if (latitude == null) {
-                    return 'Please enter a valid number';
-                  }
-                  if (latitude < -90 || latitude > 90) {
-                    return 'Latitude must be between -90 and 90';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _longitudeController,
-                decoration: const InputDecoration(
-                  labelText: 'Longitude',
-                  hintText: 'e.g. -0.127758',
-                ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter longitude';
-                  }
-                  double? longitude = double.tryParse(value);
-                  if (longitude == null) {
-                    return 'Please enter a valid number';
-                  }
-                  if (longitude < -180 || longitude > 180) {
-                    return 'Longitude must be between -180 and 180';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _altitudeController,
-                decoration: const InputDecoration(
-                  labelText: 'Altitude (meters, optional)',
-                  hintText: 'e.g. 100.5',
-                ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value != null && value.isNotEmpty) {
-                    double? altitude = double.tryParse(value);
-                    if (altitude == null) {
-                      return 'Please enter a valid number';
-                    }
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _coordinateSystemController,
-                decoration: const InputDecoration(
-                  labelText: 'Coordinate System',
-                  hintText: 'e.g. WGS84',
-                ),
-              ),
-              TextFormField(
-                controller: _horizontalAccuracyController,
-                decoration: const InputDecoration(
-                  labelText: 'Horizontal Accuracy (meters, optional)',
-                  hintText: 'e.g. 10',
-                ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value != null && value.isNotEmpty) {
-                    double? accuracy = double.tryParse(value);
-                    if (accuracy == null) {
-                      return 'Please enter a valid number';
-                    }
-                    if (accuracy < 0) {
-                      return 'Accuracy must be positive';
-                    }
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _verticalAccuracyController,
-                decoration: const InputDecoration(
-                  labelText: 'Vertical Accuracy (meters, optional)',
-                  hintText: 'e.g. 5',
-                ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value != null && value.isNotEmpty) {
-                    double? accuracy = double.tryParse(value);
-                    if (accuracy == null) {
-                      return 'Please enter a valid number';
-                    }
-                    if (accuracy < 0) {
-                      return 'Accuracy must be positive';
-                    }
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Location Name (optional)',
-                  hintText: 'e.g. Main Warehouse',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _saveCoordinates,
-          child: const Text('Save'),
-        ),
-      ],
-    );
-  }
-
-  void _saveCoordinates() {
-    if (_formKey.currentState!.validate()) {
-      final coordinates = GeospatialCoordinates(
-        latitude: double.parse(_latitudeController.text),
-        longitude: double.parse(_longitudeController.text),
-        altitude: _altitudeController.text.isNotEmpty
-            ? double.parse(_altitudeController.text)
-            : null,
-        coordinateSystem: _coordinateSystemController.text.isNotEmpty
-            ? _coordinateSystemController.text
-            : 'WGS84',
-        horizontalAccuracy: _horizontalAccuracyController.text.isNotEmpty
-            ? double.parse(_horizontalAccuracyController.text)
-            : null,
-        verticalAccuracy: _verticalAccuracyController.text.isNotEmpty
-            ? double.parse(_verticalAccuracyController.text)
-            : null,
-        name: _nameController.text.isNotEmpty ? _nameController.text : null,
-      );
-      widget.onSave(coordinates);
-      Navigator.of(context).pop();
-    }
-  }
-}
-    

@@ -8,7 +8,6 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_search_bar_suffix_actions.dart';
 
-
 class ProductHierarchySearchHeader extends StatelessWidget {
   const ProductHierarchySearchHeader({
     super.key,
@@ -64,10 +63,10 @@ class ProductHierarchySearchHeader extends StatelessWidget {
                   Text(
                     'Product Hierarchy',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.6,
-                        ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
+                    ),
                   ),
                   const SizedBox(height: TraqSpacing.sm),
                   TextField(

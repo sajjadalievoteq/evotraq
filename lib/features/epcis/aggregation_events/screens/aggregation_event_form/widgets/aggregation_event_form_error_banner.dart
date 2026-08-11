@@ -20,7 +20,8 @@ class AggregationEventFormErrorBanner extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            TraqIcon(AppAssets.iconAlert,
+            TraqIcon(
+              AppAssets.iconAlert,
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(width: 8),

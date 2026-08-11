@@ -33,10 +33,8 @@ Future<CbvVocabularyFormResult?> showCbvVocabularyFormDialog({
   return showDialog<CbvVocabularyFormResult>(
     context: context,
     barrierDismissible: false,
-    builder: (_) => _CbvVocabularyFormDialog(
-      type: type,
-      existingCodes: existingCodes,
-    ),
+    builder: (_) =>
+        _CbvVocabularyFormDialog(type: type, existingCodes: existingCodes),
   );
 }
 
@@ -126,8 +124,12 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
           Text('Add $_typeName'),
         ],
       ),
-      contentPadding:
-          const EdgeInsets.fromLTRB(TraqSpacing.xl, TraqSpacing.md, TraqSpacing.xl, 0),
+      contentPadding: const EdgeInsets.fromLTRB(
+        TraqSpacing.xl,
+        TraqSpacing.md,
+        TraqSpacing.xl,
+        0,
+      ),
       content: SizedBox(
         width: 440,
         child: Form(
@@ -171,8 +173,9 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                             onPressed: () {
                               setState(() {
                                 _autoGenerateCode = true;
-                                _codeController.text =
-                                    labelToCbvCode(_labelController.text);
+                                _codeController.text = labelToCbvCode(
+                                  _labelController.text,
+                                );
                               });
                             },
                           )
@@ -204,14 +207,16 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                       children: [
                         Text(
                           'URN (auto-generated)',
-                          style:
-                              context.text.cap.copyWith(color: colors.textMuted),
+                          style: context.text.cap.copyWith(
+                            color: colors.textMuted,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           urnPreview,
-                          style: context.text.mono
-                              .copyWith(color: colors.textSecondary),
+                          style: context.text.mono.copyWith(
+                            color: colors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -224,10 +229,10 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                     prefixIcon: TraqIcon(AppAssets.iconLayers, size: 18),
                   ),
                   items: kCbvVersionOptions
-                      .map((v) => DropdownMenuItem(
-                            value: v,
-                            child: Text('CBV $v'),
-                          ))
+                      .map(
+                        (v) =>
+                            DropdownMenuItem(value: v, child: Text('CBV $v')),
+                      )
                       .toList(),
                   onChanged: (v) {
                     if (v != null) setState(() => _cbvVersion = v);
@@ -261,7 +266,10 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 )
               : const TraqIcon(AppAssets.iconSave),
           label: Text(_isSaving ? 'Saving…' : 'Save'),

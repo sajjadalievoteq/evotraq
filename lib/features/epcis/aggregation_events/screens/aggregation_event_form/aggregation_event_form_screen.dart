@@ -6,7 +6,8 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
-import 'package:traqtrace_app/data/models/epcis/epcis_event.dart' as epcis_models;
+import 'package:traqtrace_app/data/models/epcis/epcis_event.dart'
+    as epcis_models;
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
@@ -29,6 +30,8 @@ import 'package:traqtrace_app/core/extensions/validation_feedback_extension.dart
 
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
+part 'aggregation_event_form_fields.dart';
+
 class AggregationEventFormScreen extends StatefulWidget {
   const AggregationEventFormScreen({
     super.key,
@@ -44,7 +47,8 @@ class AggregationEventFormScreen extends StatefulWidget {
       _AggregationEventFormScreenState();
 }
 
-class _AggregationEventFormScreenState extends State<AggregationEventFormScreen> {
+class _AggregationEventFormScreenState
+    extends State<AggregationEventFormScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String? _errorMessage;
@@ -61,11 +65,11 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
   AggregationPharmaReadinessChecker? _pharmaReadinessChecker;
 
   final List<MapEntry<TextEditingController, TextEditingController>>
-      _sourceListControllers = [];
+  _sourceListControllers = [];
   final List<MapEntry<TextEditingController, TextEditingController>>
-      _destinationListControllers = [];
+  _destinationListControllers = [];
   final List<MapEntry<TextEditingController, TextEditingController>>
-      _bizDataControllers = [];
+  _bizDataControllers = [];
   final List<AggregationEventFormQuantityRowControllers> _quantityRows = [
     AggregationEventFormQuantityRowControllers(),
   ];
@@ -144,144 +148,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     super.dispose();
   }
 
-  void _addChildEpc([String value = '']) {
-    setState(
-      () => _childEpcControllers.add(TextEditingController(text: value)),
-    );
-  }
-
-  void _removeChildEpc(int index) {
-    setState(() {
-      _childEpcControllers.removeAt(index).dispose();
-    });
-  }
-
-  Future<void> _scanAndAddChildEpc() async {
-    final value =
-        await Gs1FieldBarcodeScan.scan(context, Gs1FieldScanKind.sgtin);
-    if (value != null && value.isNotEmpty && mounted) {
-      _addChildEpc(value);
-    }
-  }
-
-  void _addQuantityRow() {
-    setState(
-      () => _quantityRows.add(AggregationEventFormQuantityRowControllers()),
-    );
-  }
-
-  void _removeQuantityRow(
-    int index,
-    AggregationEventFormQuantityRowControllers row,
-  ) {
-    setState(() {
-      row.dispose();
-      _quantityRows.removeAt(index);
-    });
-  }
-
-  void _addBizDataField() {
-    setState(() {
-      _bizDataControllers.add(
-        MapEntry(TextEditingController(), TextEditingController()),
-      );
-    });
-  }
-
-  void _removeBizDataField(int index) {
-    setState(() {
-      final entry = _bizDataControllers.removeAt(index);
-      entry.key.dispose();
-      entry.value.dispose();
-    });
-  }
-
-  void _addSourceEntry() {
-    setState(() {
-      _sourceListControllers.add(
-        MapEntry(TextEditingController(), TextEditingController()),
-      );
-    });
-  }
-
-  void _removeSourceEntry(int index) {
-    setState(() {
-      final entry = _sourceListControllers.removeAt(index);
-      entry.key.dispose();
-      entry.value.dispose();
-    });
-  }
-
-  void _addDestinationEntry() {
-    setState(() {
-      _destinationListControllers.add(
-        MapEntry(TextEditingController(), TextEditingController()),
-      );
-    });
-  }
-
-  void _removeDestinationEntry(int index) {
-    setState(() {
-      final entry = _destinationListControllers.removeAt(index);
-      entry.key.dispose();
-      entry.value.dispose();
-    });
-  }
-
-  List<Map<String, dynamic>> _getSourceList() {
-    final sourceList = <Map<String, dynamic>>[];
-    for (final entry in _sourceListControllers) {
-      final type = entry.key.text.trim();
-      final value = entry.value.text.trim();
-      if (type.isNotEmpty && value.isNotEmpty) {
-        sourceList.add({'type': type, 'source': value});
-      }
-    }
-    return sourceList;
-  }
-
-  List<Map<String, dynamic>> _getDestinationList() {
-    final destinationList = <Map<String, dynamic>>[];
-    for (final entry in _destinationListControllers) {
-      final type = entry.key.text.trim();
-      final value = entry.value.text.trim();
-      if (type.isNotEmpty && value.isNotEmpty) {
-        destinationList.add({'type': type, 'destination': value});
-      }
-    }
-    return destinationList;
-  }
-
-  Future<void> _selectEventTime() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _eventTime,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now().add(const Duration(days: 1)),
-    );
-
-    if (picked != null && mounted) {
-      final timePicked = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(_eventTime),
-      );
-
-      if (timePicked != null) {
-        setState(() {
-          _isManualTime = true;
-          _timer?.cancel();
-          _eventTime = DateTime(
-            picked.year,
-            picked.month,
-            picked.day,
-            timePicked.hour,
-            timePicked.minute,
-          );
-        });
-      }
-    }
-  }
-
   Future<void> _saveAggregationEvent() async {
     if (_locationGLN == null) {
       setState(() => _locationGlnError = 'Please select a location GLN');
@@ -316,10 +182,7 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
             continue;
           }
           final qty = double.parse(qtyText);
-          final entry = <String, Object>{
-            'epcClass': epcClass,
-            'quantity': qty,
-          };
+          final entry = <String, Object>{'epcClass': epcClass, 'quantity': qty};
           final uom = row.uom.text.trim();
           if (uom.isNotEmpty) {
             entry['uom'] = uom;
@@ -411,8 +274,9 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
         destinationList: destinationList.isNotEmpty ? destinationList : null,
       );
 
-      final isValid =
-          await validationProvider.validateAggregationEvent(eventToValidate);
+      final isValid = await validationProvider.validateAggregationEvent(
+        eventToValidate,
+      );
 
       if (!isValid) {
         final validationResult = validationProvider.state.lastValidationResult;
@@ -425,7 +289,8 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
           _isLoading = false;
           _validationErrors = extractedErrors;
           if (_validationErrors.isEmpty) {
-            _errorMessage = validationProvider.state.error ??
+            _errorMessage =
+                validationProvider.state.error ??
                 validationResult?['error']?.toString() ??
                 'Aggregation event validation failed. Check business step, '
                     'disposition, parent/item EPCs, and location GLN.';
@@ -475,8 +340,8 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
       final successLabel = _selectedAction == 'ADD'
           ? 'Packing operation created'
           : _selectedAction == 'DELETE'
-              ? 'Unpacking operation created'
-              : 'Aggregation event created';
+          ? 'Unpacking operation created'
+          : 'Aggregation event created';
       context.showSuccess(successLabel);
       if (widget.embedded) {
         widget.onEmbeddedActionSuccess?.call();

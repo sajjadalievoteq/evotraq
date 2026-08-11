@@ -29,7 +29,8 @@ class AggregationParentPackSection extends StatefulWidget {
       AggregationParentPackSectionState();
 }
 
-class AggregationParentPackSectionState extends State<AggregationParentPackSection> {
+class AggregationParentPackSectionState
+    extends State<AggregationParentPackSection> {
   final _ssccController = TextEditingController();
   final _gtinController = TextEditingController();
   final _serialController = TextEditingController();
@@ -140,8 +141,9 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final parentLabel =
-        _parentRequired ? 'Parent pack *' : 'Parent pack (optional)';
+    final parentLabel = _parentRequired
+        ? 'Parent pack *'
+        : 'Parent pack (optional)';
 
     return FormField<String>(
       key: _formFieldKey,
@@ -191,14 +193,15 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
               SsccEntryField(
                 controller: _ssccController,
                 label: 'SSCC',
-                hintText: '18-digit code, (00)… barcode, or https://id.gs1.org/00/…',
+                hintText:
+                    '18-digit code, (00)… barcode, or https://id.gs1.org/00/…',
                 helperText: 'GS1 SSCC with valid check digit',
                 optional: !_parentRequired,
                 validator: (value) =>
                     AggregationEventFormValidators.validateSsccInput(
-                  value,
-                  required: _parentRequired,
-                ),
+                      value,
+                      required: _parentRequired,
+                    ),
                 onChanged: (_) => _syncResolvedParent(),
               )
             else ...[
@@ -208,9 +211,9 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
                 hintText: '8, 12, 13, or 14 digits (check digit validated)',
                 validator: (value) =>
                     AggregationEventFormValidators.validateGtin14(
-                  value,
-                  required: _parentRequired,
-                ),
+                      value,
+                      required: _parentRequired,
+                    ),
                 onChanged: (_) => _syncResolvedParent(),
               ),
               const SizedBox(height: 12),
@@ -220,13 +223,14 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
                 hintText: 'GS1 serial (1–20 chars, file-7 charset)',
                 validator: (value) =>
                     AggregationEventFormValidators.validateSerialNumber(
-                  value,
-                  required: _parentRequired,
-                ),
+                      value,
+                      required: _parentRequired,
+                    ),
                 onChanged: (_) => _syncResolvedParent(),
               ),
             ],
-            if (_resolvedParentEpc != null && _resolvedParentEpc!.isNotEmpty) ...[
+            if (_resolvedParentEpc != null &&
+                _resolvedParentEpc!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,
@@ -257,10 +261,7 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
               const SizedBox(height: 8),
               Text(
                 field.errorText!,
-                style: TextStyle(
-                  color: theme.colorScheme.error,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: theme.colorScheme.error, fontSize: 12),
               ),
             ],
           ],
@@ -269,4 +270,3 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
     );
   }
 }
-  

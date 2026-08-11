@@ -1,8 +1,6 @@
 String computeCbvUrn({required bool isBizStep, required String code}) {
   if (code.isEmpty) return '';
-  final ns = isBizStep
-      ? 'urn:epcglobal:cbv:bizstep'
-      : 'urn:epcglobal:cbv:disp';
+  final ns = isBizStep ? 'urn:epcglobal:cbv:bizstep' : 'urn:epcglobal:cbv:disp';
   return '$ns:$code';
 }
 

@@ -21,8 +21,9 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
     BuildContext context, {
     required String errorMessage,
   }) {
-    final isValidationError =
-        AggregationEventFormErrorParser.isValidationError(errorMessage);
+    final isValidationError = AggregationEventFormErrorParser.isValidationError(
+      errorMessage,
+    );
     final commissioningError =
         AggregationEventFormErrorParser.parseCommissioningError(errorMessage);
 
@@ -56,10 +57,7 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             isValidationError ? 'Validation Error' : 'Error',
-            style: TextStyle(
-              color: titleColor,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: titleColor, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -199,10 +197,7 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
                 style: TextStyle(fontStyle: FontStyle.italic),
               ),
             ] else ...[
-              Text(
-                errorMessage,
-                style: const TextStyle(height: 1.5),
-              ),
+              Text(errorMessage, style: const TextStyle(height: 1.5)),
             ],
           ],
         ),
@@ -214,10 +209,7 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
             label: const Text('Go to Commissioning Form'),
             onPressed: () async {
               Navigator.of(context).pop();
-              final params = {
-                'bizStep': 'commissioning',
-                'action': 'ADD',
-              };
+              final params = {'bizStep': 'commissioning', 'action': 'ADD'};
               final allEPCs = [...parentEPCs, ...childEPCs];
               if (allEPCs.isNotEmpty) {
                 params['epcs'] = allEPCs.join(',');

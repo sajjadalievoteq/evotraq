@@ -6,6 +6,10 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_toolbar_icon_button.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sort_menu.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_batch_menu.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_toolbar_constants.dart';
 
 class Gs1ListSearchBar extends StatelessWidget {
   const Gs1ListSearchBar({
@@ -47,9 +51,6 @@ class Gs1ListSearchBar extends StatelessWidget {
   final List<int> pageSizeOptions;
   final ValueChanged<int>? onPageSizeChanged;
 
-  static const double _fieldIconSize = 18;
-  static const Color _toolbarIconColor = Colors.white;
-
   @override
   Widget build(BuildContext context) {
     return AppLayoutBuilder(
@@ -72,9 +73,7 @@ class Gs1ListSearchBar extends StatelessWidget {
               children: [
                 Positioned.fill(
                   child: IgnorePointer(
-                    child: Container(
-                      color: Colors.black.withOpacity(0.1),
-                    ),
+                    child: Container(color: Colors.black.withOpacity(0.1)),
                   ),
                 ),
                 Padding(
@@ -92,26 +91,26 @@ class Gs1ListSearchBar extends StatelessWidget {
                           children: [
                             const Spacer(),
                             if (onRefresh != null)
-                              _Gs1ListToolbarIconButton(
+                              Gs1ListToolbarIconButton(
                                 onPressed: onRefresh!,
                                 iconAsset: AppAssets.iconRefresh,
                                 tooltip: 'Refresh',
                               ),
                             if (_hasSortControl)
-                              _Gs1ListSortMenu(
+                              Gs1ListSortMenu(
                                 sortTooltip: sortTooltip,
                                 isAscending: _isAscending,
                                 onSortOrderSelected: _applySortOrder,
                                 onOpenOptions: onToggleAdvancedFilters,
                               ),
                             if (onPageSizeChanged != null)
-                              _Gs1ListBatchMenu(
+                              Gs1ListBatchMenu(
                                 pageSize: pageSize,
                                 pageSizeOptions: pageSizeOptions,
                                 onPageSizeChanged: onPageSizeChanged!,
                               ),
                             if (onQuickFilters != null)
-                              _Gs1ListToolbarIconButton(
+                              Gs1ListToolbarIconButton(
                                 onPressed: onQuickFilters!,
                                 iconAsset: AppAssets.iconFilter,
                                 tooltip: 'Quick Filters',
@@ -125,7 +124,7 @@ class Gs1ListSearchBar extends StatelessWidget {
                           hintText: hintText,
                           prefixIcon: TraqIcon(
                             AppAssets.iconSearch,
-                            size: _fieldIconSize,
+                            size: kGs1ListFieldIconSize,
                             color: fieldIconColor,
                           ),
                           suffixIcon: Row(
@@ -134,10 +133,10 @@ class Gs1ListSearchBar extends StatelessWidget {
                               if (controller.text.isNotEmpty)
                                 IconButton(
                                   onPressed: onClear,
-                                  iconSize: _fieldIconSize,
+                                  iconSize: kGs1ListFieldIconSize,
                                   icon: TraqIcon(
                                     AppAssets.iconX,
-                                    size: _fieldIconSize,
+                                    size: kGs1ListFieldIconSize,
                                   ),
                                   color: fieldIconColor,
                                   tooltip: 'Clear',
@@ -145,10 +144,10 @@ class Gs1ListSearchBar extends StatelessWidget {
                               if (showAdvancedFilterIcon)
                                 IconButton(
                                   onPressed: onToggleAdvancedFilters,
-                                  iconSize: _fieldIconSize,
+                                  iconSize: kGs1ListFieldIconSize,
                                   icon: TraqIcon(
                                     NavIcons.advancedQuery,
-                                    size: _fieldIconSize,
+                                    size: kGs1ListFieldIconSize,
                                   ),
                                   color: fieldIconColor,
                                   tooltip: showAdvancedFilters
@@ -206,152 +205,5 @@ class Gs1ListSearchBar extends StatelessWidget {
       return;
     }
     onToggleSortOrder?.call();
-  }
-}
-
-class _Gs1ListToolbarIconButton extends StatelessWidget {
-  const _Gs1ListToolbarIconButton({
-    required this.onPressed,
-    required this.iconAsset,
-    required this.tooltip,
-  });
-
-  final VoidCallback onPressed;
-  final String iconAsset;
-  final String tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed,
-      iconSize: Gs1ListSearchBar._fieldIconSize,
-      icon: TraqIcon(iconAsset, size: Gs1ListSearchBar._fieldIconSize),
-      color: Gs1ListSearchBar._toolbarIconColor,
-      tooltip: tooltip,
-    );
-  }
-}
-
-class _Gs1ListSortMenu extends StatelessWidget {
-  const _Gs1ListSortMenu({
-    required this.sortTooltip,
-    required this.isAscending,
-    required this.onSortOrderSelected,
-    required this.onOpenOptions,
-  });
-
-  final String? sortTooltip;
-  final bool isAscending;
-  final ValueChanged<String> onSortOrderSelected;
-  final VoidCallback onOpenOptions;
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      tooltip: sortTooltip ?? 'Sort',
-      padding: EdgeInsets.zero,
-      icon: TraqIcon(
-        isAscending ? AppAssets.iconArrowUpR : AppAssets.iconArrowD,
-        size: Gs1ListSearchBar._fieldIconSize,
-      ),
-      iconColor: Gs1ListSearchBar._toolbarIconColor,
-      iconSize: Gs1ListSearchBar._fieldIconSize,
-      onSelected: (value) {
-        switch (value) {
-          case 'asc':
-          case 'desc':
-            onSortOrderSelected(value);
-          case 'options':
-            onOpenOptions();
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'asc',
-          child: _Gs1ListSortMenuRow(
-            label: 'Ascending',
-            selected: isAscending,
-          ),
-        ),
-        PopupMenuItem(
-          value: 'desc',
-          child: _Gs1ListSortMenuRow(
-            label: 'Descending',
-            selected: !isAscending,
-          ),
-        ),
-        const PopupMenuDivider(),
-        const PopupMenuItem(
-          value: 'options',
-          child: Text('Sort field & filters…'),
-        ),
-      ],
-    );
-  }
-}
-
-class _Gs1ListSortMenuRow extends StatelessWidget {
-  const _Gs1ListSortMenuRow({
-    required this.label,
-    required this.selected,
-  });
-
-  final String label;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 24,
-          child: selected
-              ? Icon(
-                  Icons.check,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.primary,
-                )
-              : null,
-        ),
-        Expanded(child: Text(label)),
-      ],
-    );
-  }
-}
-
-class _Gs1ListBatchMenu extends StatelessWidget {
-  const _Gs1ListBatchMenu({
-    required this.pageSize,
-    required this.pageSizeOptions,
-    required this.onPageSizeChanged,
-  });
-
-  final int? pageSize;
-  final List<int> pageSizeOptions;
-  final ValueChanged<int> onPageSizeChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final selectedSize = pageSize ?? pageSizeOptions.first;
-    return PopupMenuButton<int>(
-      tooltip: 'Batch size ($selectedSize)',
-      padding: EdgeInsets.zero,
-      icon: TraqIcon(
-        AppAssets.iconLayers,
-        size: Gs1ListSearchBar._fieldIconSize,
-      ),
-      iconColor: Gs1ListSearchBar._toolbarIconColor,
-      iconSize: Gs1ListSearchBar._fieldIconSize,
-      initialValue: selectedSize,
-      onSelected: onPageSizeChanged,
-      itemBuilder: (context) => pageSizeOptions
-          .map(
-            (size) => PopupMenuItem<int>(
-              value: size,
-              child: Text('$size/batch'),
-            ),
-          )
-          .toList(),
-    );
   }
 }

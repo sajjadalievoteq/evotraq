@@ -50,8 +50,9 @@ class JourneyKpiTile extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style:
-                      theme.textTheme.bodySmall?.copyWith(color: c.textMuted),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: c.textMuted,
+                  ),
                 ),
               ],
             ),

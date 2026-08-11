@@ -81,7 +81,8 @@ class CacheOverviewTab extends StatelessWidget {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
-                  if (statistics.totalHits > 0 || statistics.totalMisses > 0) ...[
+                  if (statistics.totalHits > 0 ||
+                      statistics.totalMisses > 0) ...[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -133,8 +134,9 @@ class CacheOverviewTab extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color:
-                            AppColorMapper.infoColor(context).withOpacity(0.1),
+                        color: AppColorMapper.infoColor(
+                          context,
+                        ).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -148,9 +150,7 @@ class CacheOverviewTab extends StatelessWidget {
                           Expanded(
                             child: Text(
                               'Cache is active with ${statistics.totalCacheEntries} entries. Hit/Miss tracking available for manual cache operations only.',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     color: AppColorMapper.infoColor(context),
                                   ),
@@ -176,7 +176,8 @@ class CacheOverviewTab extends StatelessWidget {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
-                  if (statistics.totalHits > 0 || statistics.totalMisses > 0) ...[
+                  if (statistics.totalHits > 0 ||
+                      statistics.totalMisses > 0) ...[
                     CacheTypeRow(
                       'Query Results',
                       statistics.queryResultsHitRatio,

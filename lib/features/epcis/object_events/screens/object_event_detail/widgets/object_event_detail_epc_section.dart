@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_detail/widgets/object_event_detail_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_detail/widgets/object_event_detail_quantity_fields.dart';
 
 class ObjectEventDetailEpcSection extends StatelessWidget {
   const ObjectEventDetailEpcSection({super.key, required this.event});
@@ -42,8 +43,8 @@ class ObjectEventDetailEpcSection extends StatelessWidget {
                   Text(
                     '${ObjectEventDetailUiConstants.labelEpcClassesCount} (${epcClassList.length})',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   ...epcClassList.map(
@@ -52,8 +53,8 @@ class ObjectEventDetailEpcSection extends StatelessWidget {
                       child: Text(
                         epcClass,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontFamily: 'monospace',
-                            ),
+                          fontFamily: 'monospace',
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -62,7 +63,8 @@ class ObjectEventDetailEpcSection extends StatelessWidget {
                 if (quantityList.isNotEmpty) ...[
                   if (epcClassList.isNotEmpty) const SizedBox(height: 12),
                   ...quantityList.map(
-                    (q) => _QuantityFields(quantity: q),
+                    (quantity) =>
+                        ObjectEventDetailQuantityFields(quantity: quantity),
                   ),
                 ],
               ],
@@ -70,37 +72,6 @@ class ObjectEventDetailEpcSection extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-class _QuantityFields extends StatelessWidget {
-  const _QuantityFields({required this.quantity});
-
-  final types.QuantityElement quantity;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ObjectEventDetailField(
-            label: ObjectEventDetailUiConstants.labelEpcClass,
-            value: quantity.epcClass,
-            monospace: true,
-          ),
-          ObjectEventDetailField(
-            label: ObjectEventDetailUiConstants.labelQuantity,
-            value: quantity.quantity.toString(),
-          ),
-          ObjectEventDetailField(
-            label: ObjectEventDetailUiConstants.labelUnitOfMeasure,
-            value: quantity.uom,
-          ),
-        ],
-      ),
     );
   }
 }

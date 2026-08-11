@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
@@ -8,6 +7,8 @@ import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/widgets/aggregation_cbv_dropdown_field.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/widgets/aggregation_cbv_field_skeleton.dart';
 
 class AggregationCbvPicker extends StatefulWidget {
   final String? action;
@@ -35,16 +36,13 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
   String? _selectedBizStep;
   String? _selectedDisposition;
 
-
-  String _version() =>
-      widget.epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
+  String _version() => widget.epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
 
   String _fmtBizStep(String urn) =>
       CbvVocabularyFormatter.formatBizStep(_version(), urn);
 
   String _fmtDisposition(String urn) =>
       CbvVocabularyFormatter.formatDisposition(_version(), urn);
-
 
   @override
   void initState() {
@@ -73,13 +71,13 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
     }
   }
 
-
   void _applyDefaults(CbvVocabularyState state) {
     final bizSteps = _bizStepsFor(widget.action, state);
     if (bizSteps.isEmpty) return;
 
     final selectable = bizSteps.map((i) => _fmtBizStep(i.urn)).toList();
-    String? bizVal = _selectedBizStep != null && selectable.contains(_selectedBizStep)
+    String? bizVal =
+        _selectedBizStep != null && selectable.contains(_selectedBizStep)
         ? _selectedBizStep
         : null;
 
@@ -94,11 +92,14 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
     );
     final dispositions = _dispositionsFor(bizCode, state);
 
-    final dispSelectable = dispositions.map((d) => _fmtDisposition(d.urn)).toList();
+    final dispSelectable = dispositions
+        .map((d) => _fmtDisposition(d.urn))
+        .toList();
     String? dispVal =
-        _selectedDisposition != null && dispSelectable.contains(_selectedDisposition)
-            ? _selectedDisposition
-            : null;
+        _selectedDisposition != null &&
+            dispSelectable.contains(_selectedDisposition)
+        ? _selectedDisposition
+        : null;
 
     if (dispVal == null && dispSelectable.isNotEmpty) {
       dispVal = dispSelectable.first;
@@ -107,7 +108,10 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
     }
   }
 
-  List<CbvVocabularyItem> _bizStepsFor(String? action, CbvVocabularyState state) {
+  List<CbvVocabularyItem> _bizStepsFor(
+    String? action,
+    CbvVocabularyState state,
+  ) {
     if (action == null) return state.bizSteps;
     final codes = state.actionBizStepCodes[action];
     if (codes == null || codes.isEmpty) return state.bizSteps;
@@ -115,9 +119,10 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
     return codes.map((c) => byCode[c]).whereType<CbvVocabularyItem>().toList();
   }
 
-
   List<CbvVocabularyItem> _dispositionsFor(
-      String? bizCode, CbvVocabularyState state) {
+    String? bizCode,
+    CbvVocabularyState state,
+  ) {
     if (bizCode == null) return [];
 
     final liveCodes = state.bizStepValidDispositions[bizCode];
@@ -132,34 +137,6 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
     return state.dispositions;
   }
 
-
-  Widget _skeleton() => AppShimmer(
-        child: Container(
-          height: 56,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.white24),
-          ),
-        ),
-      );
-
-
-  List<DropdownMenuItem<String>> _menuItems({
-    required List<CbvVocabularyItem> items,
-    required String Function(String urn) formatter,
-  }) =>
-      items
-          .map(
-            (item) => DropdownMenuItem<String>(
-              value: formatter(item.urn),
-              child: Tooltip(message: item.urn, child: Text(item.label)),
-            ),
-          )
-          .toList();
-
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CbvVocabularyCubit, CbvVocabularyState>(
@@ -170,9 +147,9 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _skeleton(),
+              const AggregationCbvFieldSkeleton(),
               const SizedBox(height: 16),
-              _skeleton(),
+              const AggregationCbvFieldSkeleton(),
             ],
           );
         }
@@ -194,132 +171,78 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
           );
         }
 
+        final bizSteps = _bizStepsFor(widget.action, state);
+        final bizCode = _selectedBizStep == null
+            ? null
+            : CbvVocabularyFormatter.shortName(
+                CbvVocabularyFormatter.canonicalBizStepUrn(_selectedBizStep!),
+              );
+        final dispositions = _dispositionsFor(bizCode, state);
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildBizStepDropdown(state),
+            AggregationCbvDropdownField(
+              items: bizSteps,
+              selectedValue: _selectedBizStep,
+              epcisVersion: widget.epcisVersion,
+              isBusinessStep: true,
+              label: 'Business Step *',
+              hint: 'Select a business step',
+              helperText:
+                  'The business process step associated with this event',
+              tooltip:
+                  'Standard GS1 business steps from Core Business Vocabulary',
+              emptyMessage: 'No business steps available.',
+              disabled: false,
+              onDefaultSelected: (selected) {
+                if (!mounted) return;
+                setState(() => _selectedBizStep = selected);
+                widget.onBizStepChanged(selected);
+                _applyDefaults(context.read<CbvVocabularyCubit>().state);
+              },
+              onChanged: (selected) {
+                setState(() {
+                  _selectedBizStep = selected;
+                  _selectedDisposition = null;
+                  widget.onBizStepChanged(selected);
+                  widget.onDispositionChanged(null);
+                });
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  _applyDefaults(context.read<CbvVocabularyCubit>().state);
+                });
+              },
+            ),
             const SizedBox(height: 16),
-            _buildDispositionDropdown(state),
+            AggregationCbvDropdownField(
+              items: dispositions,
+              selectedValue: _selectedDisposition,
+              epcisVersion: widget.epcisVersion,
+              isBusinessStep: false,
+              label: 'Disposition *',
+              hint: 'Select a disposition',
+              helperText: 'The business condition of the objects',
+              tooltip:
+                  'Standard GS1 dispositions from Core Business Vocabulary',
+              emptyMessage:
+                  'No disposition options for the selected business step.',
+              disabled: _selectedBizStep == null,
+              onDefaultSelected: (selected) {
+                if (!mounted) return;
+                setState(() => _selectedDisposition = selected);
+                widget.onDispositionChanged(selected);
+              },
+              onChanged: (selected) {
+                setState(() {
+                  _selectedDisposition = selected;
+                  widget.onDispositionChanged(selected);
+                });
+              },
+            ),
           ],
         );
       },
-    );
-  }
-
-  Widget _buildBizStepDropdown(CbvVocabularyState state) {
-    final bizSteps = _bizStepsFor(widget.action, state);
-    if (bizSteps.isEmpty) {
-      return const Text(
-        'No business steps available.',
-        style: TextStyle(color: Colors.grey),
-      );
-    }
-
-    final selectable = bizSteps.map((i) => _fmtBizStep(i.urn)).toList();
-    String? value = _selectedBizStep != null && selectable.contains(_selectedBizStep)
-        ? _selectedBizStep
-        : null;
-
-    if (value == null && selectable.isNotEmpty) {
-      value = selectable.first;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() => _selectedBizStep = value);
-        widget.onBizStepChanged(value);
-        _applyDefaults(context.read<CbvVocabularyCubit>().state);
-      });
-    }
-
-    return DropdownButtonFormField<String>(
-      value: value,
-      decoration: const InputDecoration(
-        labelText: 'Business Step *',
-        border: OutlineInputBorder(),
-        hintText: 'Select a business step',
-        helperText: 'The business process step associated with this event',
-        suffixIcon: Tooltip(
-          message: 'Standard GS1 business steps from Core Business Vocabulary',
-          child: TraqIcon(AppAssets.iconInfo, size: 16),
-        ),
-      ),
-      items: _menuItems(items: bizSteps, formatter: _fmtBizStep),
-      validator: (v) {
-        if (v == null || v.isEmpty) return 'Please select a business step';
-        return null;
-      },
-      onChanged: (selected) {
-        if (selected == null) return;
-        setState(() {
-          _selectedBizStep = selected;
-          _selectedDisposition = null;
-          widget.onBizStepChanged(selected);
-          widget.onDispositionChanged(null);
-        });
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          _applyDefaults(context.read<CbvVocabularyCubit>().state);
-        });
-      },
-    );
-  }
-
-  Widget _buildDispositionDropdown(CbvVocabularyState state) {
-    final bizCode = _selectedBizStep == null
-        ? null
-        : CbvVocabularyFormatter.shortName(
-            CbvVocabularyFormatter.canonicalBizStepUrn(_selectedBizStep!),
-          );
-    final dispositions = _dispositionsFor(bizCode, state);
-    final disabled = _selectedBizStep == null;
-
-    if (!disabled && dispositions.isEmpty) {
-      return const Text(
-        'No disposition options for the selected business step.',
-        style: TextStyle(color: Colors.grey),
-      );
-    }
-
-    final selectable = dispositions.map((d) => _fmtDisposition(d.urn)).toList();
-    String? value =
-        _selectedDisposition != null && selectable.contains(_selectedDisposition)
-            ? _selectedDisposition
-            : null;
-
-    if (value == null && selectable.isNotEmpty) {
-      value = selectable.first;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() => _selectedDisposition = value);
-        widget.onDispositionChanged(value);
-      });
-    }
-
-    return DropdownButtonFormField<String>(
-      value: value,
-      decoration: const InputDecoration(
-        labelText: 'Disposition *',
-        border: OutlineInputBorder(),
-        hintText: 'Select a disposition',
-        helperText: 'The business condition of the objects',
-        suffixIcon: Tooltip(
-          message: 'Standard GS1 dispositions from Core Business Vocabulary',
-          child: TraqIcon(AppAssets.iconInfo, size: 16),
-        ),
-      ),
-      items: _menuItems(items: dispositions, formatter: _fmtDisposition),
-      validator: (v) {
-        if (v == null || v.isEmpty) return 'Please select a disposition';
-        return null;
-      },
-      onChanged: disabled
-          ? null
-          : (selected) {
-              if (selected == null) return;
-              setState(() {
-                _selectedDisposition = selected;
-                widget.onDispositionChanged(selected);
-              });
-            },
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/constrained_section_content.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
@@ -35,16 +36,6 @@ class GtinResultsList extends StatelessWidget {
   final ValueChanged<String> onTapGtin;
   final VoidCallback onLoadMore;
 
-  Widget _constrainedCenter(Widget child) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: Constants.sectionMaxWidth),
-        child: child,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GTINCubit, GTINState>(
@@ -77,8 +68,8 @@ class GtinResultsList extends StatelessWidget {
 
         final gtins = state.gtins;
         if (gtins == null || gtins.isEmpty) {
-          return _constrainedCenter(
-            AppEmptyState(
+          return ConstrainedSectionContent(
+            child: AppEmptyState(
               iconAsset: NavIcons.gtin,
               title: GtinUiConstants.emptyListTitle,
               subtitle: GtinUiConstants.emptyListSubtitle,
@@ -87,10 +78,12 @@ class GtinResultsList extends StatelessWidget {
               hasItems: hasActiveFilters,
               hasActiveFilters: hasActiveFilters,
               onClearFilters: onClearFilters,
-              primaryActionLabel:
-                  hasActiveFilters ? null : GtinUiConstants.emptyAddAction,
-              primaryActionIconAsset:
-                  hasActiveFilters ? null : AppAssets.iconPlus,
+              primaryActionLabel: hasActiveFilters
+                  ? null
+                  : GtinUiConstants.emptyAddAction,
+              primaryActionIconAsset: hasActiveFilters
+                  ? null
+                  : AppAssets.iconPlus,
               onPrimaryAction: hasActiveFilters ? null : onCreate,
             ),
           );
@@ -117,7 +110,9 @@ class GtinResultsList extends StatelessWidget {
               onRefresh: onRefresh,
               child: ListView.separated(
                 controller: scrollController,
-                physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                ),
                 padding: EdgeInsets.only(
                   right: context.padding.left,
                   left: context.padding.left,
@@ -129,8 +124,8 @@ class GtinResultsList extends StatelessWidget {
                 itemBuilder: (context, index) {
                   if (index < gtins.length) {
                     final gtin = gtins[index];
-                    return _constrainedCenter(
-                      RepaintBoundary(
+                    return ConstrainedSectionContent(
+                      child: RepaintBoundary(
                         child: GtinListItemCard(
                           gtin: gtin,
                           isSelected: gtin.gtinCode == selectedGtinCode,
@@ -148,7 +143,9 @@ class GtinResultsList extends StatelessWidget {
                   if (index == loaderIndex &&
                       state.hasMoreData &&
                       state.isFetchingMore) {
-                    return _constrainedCenter(const Gs1ListLoadMoreIndicator());
+                    return ConstrainedSectionContent(
+                      child: const Gs1ListLoadMoreIndicator(),
+                    );
                   }
 
                   if (index == spacerIndex) {

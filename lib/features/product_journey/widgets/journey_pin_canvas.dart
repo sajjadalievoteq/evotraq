@@ -3,6 +3,7 @@ import 'dart:ui' show PathMetric;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/product_journey/widgets/journey_scrollable_canvas.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
@@ -11,6 +12,8 @@ import 'package:traqtrace_app/features/product_journey/utils/journey_event_filte
 import 'package:traqtrace_app/features/product_journey/utils/journey_formatters.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_pin_layout.dart';
 import 'package:traqtrace_app/features/product_journey/widgets/journey_canvas_painter.dart';
+import 'package:traqtrace_app/features/product_journey/widgets/journey_animated_pin.dart';
+import 'package:traqtrace_app/features/product_journey/widgets/journey_duration_chip.dart';
 import 'package:traqtrace_app/features/product_journey/widgets/journey_pin_marker.dart';
 
 class JourneyPinsCanvas extends StatefulWidget {
@@ -28,7 +31,6 @@ class JourneyPinsCanvas extends StatefulWidget {
   final ValueChanged<JourneyStep> onStepTapped;
   final JourneyEventFilter eventFilter;
 
-  
   final double topInset;
 
   @override
@@ -126,160 +128,134 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
     final steps = widget.journey.steps;
     if (steps.isEmpty) return const SizedBox.shrink();
 
-    return LayoutBuilder(builder: (context, constraints) {
-      final viewportW = constraints.maxWidth;
-      final viewportH = constraints.maxHeight;
-      final axis = context.isDesktop
-          ? SerpentineAxis.horizontal
-          : SerpentineAxis.vertical;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportW = constraints.maxWidth;
+        final viewportH = constraints.maxHeight;
+        final axis = context.isDesktop
+            ? SerpentineAxis.horizontal
+            : SerpentineAxis.vertical;
 
-      final layout = JourneyPinLayout.serpentineLayout(
-        count: steps.length,
-        viewportW: viewportW,
-        viewportH: viewportH,
-        axis: axis,
-        topInset: widget.topInset,
-      );
-      final canvasW = layout.width;
-      final canvasH = layout.height;
-      final centres = layout.centres;
+        final layout = JourneyPinLayout.serpentineLayout(
+          count: steps.length,
+          viewportW: viewportW,
+          viewportH: viewportH,
+          axis: axis,
+          topInset: widget.topInset,
+        );
+        final canvasW = layout.width;
+        final canvasH = layout.height;
+        final centres = layout.centres;
 
-      _ensureLineGeometry(centres);
+        _ensureLineGeometry(centres);
 
-      final lineColor = Theme.of(context).brightness == Brightness.light
-          ? Colors.black
-          : Colors.white;
+        final lineColor = Theme.of(context).brightness == Brightness.light
+            ? Colors.black
+            : Colors.white;
 
-      final canvas = SizedBox(
-        width: canvasW,
-        height: canvasH,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fill(
-              child: RepaintBoundary(
-                child: CustomPaint(
-                  painter: JourneyCanvasPainter(
-                    positions: centres,
-                    color: lineColor,
-                    progress: _lineProgress,
-                    fullPath: _linePath!,
-                    metrics: _lineMetrics!,
-                    totalLength: _lineTotalLength,
+        final canvas = SizedBox(
+          width: canvasW,
+          height: canvasH,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: JourneyCanvasPainter(
+                      positions: centres,
+                      color: lineColor,
+                      progress: _lineProgress,
+                      fullPath: _linePath!,
+                      metrics: _lineMetrics!,
+                      totalLength: _lineTotalLength,
+                    ),
                   ),
                 ),
               ),
-            ),
-            for (int i = 0; i < steps.length - 1; i++) ...[
-              if (_durationBetween(steps, i).inSeconds > 0)
-                if (JourneyPinLayout.durationLabelAnchor(
-                      centres[i],
-                      centres[i + 1],
-                      axis: axis,
-                    )
-                    case final anchor?)
-                  Positioned(
-                    left: anchor.dx - _chipHalfW + 50,
-                    top: anchor.dy - _chipHalfH + 50,
-                    child: _AnimatedPin(
-                      index: i,
-                      totalCount: steps.length,
-                      entranceCtrl: _entranceCtrl,
-                      startOffset: JourneyAnimationConstants
-                          .durationChipStaggerStartOffset,
-                      dimmed: false,
-                      child: _DurationChip(
-                        label: JourneyFormatters.humanDuration(
-                          _durationBetween(steps, i),
+              for (int i = 0; i < steps.length - 1; i++) ...[
+                if (_durationBetween(steps, i).inSeconds > 0)
+                  if (JourneyPinLayout.durationLabelAnchor(
+                        centres[i],
+                        centres[i + 1],
+                        axis: axis,
+                      )
+                      case final anchor?)
+                    Positioned(
+                      left: anchor.dx - _chipHalfW + 50,
+                      top: anchor.dy - _chipHalfH + 50,
+                      child: JourneyAnimatedPin(
+                        index: i,
+                        totalCount: steps.length,
+                        entranceCtrl: _entranceCtrl,
+                        startOffset: JourneyAnimationConstants
+                            .durationChipStaggerStartOffset,
+                        dimmed: false,
+                        child: JourneyDurationChip(
+                          label: JourneyFormatters.humanDuration(
+                            _durationBetween(steps, i),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-            ],
-            for (int i = 0; i < steps.length; i++)
-              Positioned(
-                left: centres[i].dx - _pinW / 2,
-                top: centres[i].dy - _pinR,
-                width: _pinW,
-                child: _AnimatedPin(
-                  index: i,
-                  totalCount: steps.length,
-                  entranceCtrl: _entranceCtrl,
-                  dimmed: widget.eventFilter != JourneyEventFilter.all &&
-                      !widget.eventFilter.matches(steps[i]),
-                  child: JourneyPinMarker(
-                    step: steps[i],
-                    stepIndex: i + 1,
-                    isSelected:
-                        widget.selectedStep?.eventId == steps[i].eventId,
-                    isFirst: i == 0,
-                    isLast: i == steps.length - 1,
-                    onTap: () => widget.onStepTapped(steps[i]),
-                    pinRadius: _pinR,
+              ],
+              for (int i = 0; i < steps.length; i++)
+                Positioned(
+                  left: centres[i].dx - _pinW / 2,
+                  top: centres[i].dy - _pinR,
+                  width: _pinW,
+                  child: JourneyAnimatedPin(
+                    index: i,
+                    totalCount: steps.length,
+                    entranceCtrl: _entranceCtrl,
+                    dimmed:
+                        widget.eventFilter != JourneyEventFilter.all &&
+                        !widget.eventFilter.matches(steps[i]),
+                    child: JourneyPinMarker(
+                      step: steps[i],
+                      stepIndex: i + 1,
+                      isSelected:
+                          widget.selectedStep?.eventId == steps[i].eventId,
+                      isFirst: i == 0,
+                      isLast: i == steps.length - 1,
+                      onTap: () => widget.onStepTapped(steps[i]),
+                      pinRadius: _pinR,
+                    ),
                   ),
                 ),
-              ),
-          ],
-        ),
-      );
-
-      // Horizontal (desktop): the cross-axis is vertical and cannot scroll, so
-      // if the natural canvas is taller than the viewport (short screen) scale
-      // the whole serpentine to fit — never trim top or bottom. (Vertical/mobile
-      // handles overflow via the vertical scroll view below.)
-      if (axis == SerpentineAxis.horizontal && canvasH > viewportH + 0.5) {
-        return Center(
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: canvas,
+            ],
           ),
         );
-      }
 
-      final scrollAxis =
-          axis == SerpentineAxis.horizontal ? Axis.horizontal : Axis.vertical;
-      final canvasExtent =
-          axis == SerpentineAxis.horizontal ? canvasW : canvasH;
-      final viewportExtent =
-          axis == SerpentineAxis.horizontal ? viewportW : viewportH;
+        // Horizontal (desktop): the cross-axis is vertical and cannot scroll, so
+        // if the natural canvas is taller than the viewport (short screen) scale
+        // the whole serpentine to fit — never trim top or bottom. (Vertical/mobile
+        // handles overflow via the vertical scroll view below.)
+        if (axis == SerpentineAxis.horizontal && canvasH > viewportH + 0.5) {
+          return Center(
+            child: FittedBox(fit: BoxFit.contain, child: canvas),
+          );
+        }
 
-      return _scrollableCanvas(
-        canvas: canvas,
-        scrollAxis: scrollAxis,
-        canvasExtent: canvasExtent,
-        viewportExtent: viewportExtent,
-      );
-    });
-  }
+        final scrollAxis = axis == SerpentineAxis.horizontal
+            ? Axis.horizontal
+            : Axis.vertical;
+        final canvasExtent = axis == SerpentineAxis.horizontal
+            ? canvasW
+            : canvasH;
+        final viewportExtent = axis == SerpentineAxis.horizontal
+            ? viewportW
+            : viewportH;
 
-  Widget _scrollableCanvas({
-    required Widget canvas,
-    required Axis scrollAxis,
-    required double canvasExtent,
-    required double viewportExtent,
-  }) {
-    if (canvasExtent <= viewportExtent + 0.5) return canvas;
-
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(
-        dragDevices: _dragDevices,
-      ),
-      child: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: true,
-        interactive: true,
-        notificationPredicate: (notification) =>
-            notification.metrics.axis == scrollAxis,
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          scrollDirection: scrollAxis,
-          clipBehavior: Clip.hardEdge,
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          child: canvas,
-        ),
-      ),
+        return JourneyScrollableCanvas(
+          canvas: canvas,
+          scrollAxis: scrollAxis,
+          canvasExtent: canvasExtent,
+          viewportExtent: viewportExtent,
+          scrollController: _scrollController,
+          dragDevices: _dragDevices,
+        );
+      },
     );
   }
 
@@ -289,137 +265,4 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
 
   static const double _chipHalfW = 60.0;
   static const double _chipHalfH = 11.0;
-}
-
-class _AnimatedPin extends StatefulWidget {
-  const _AnimatedPin({
-    required this.index,
-    required this.totalCount,
-    required this.entranceCtrl,
-    required this.dimmed,
-    required this.child,
-    this.startOffset = JourneyAnimationConstants.pinStaggerStartOffset,
-  });
-
-  final int index;
-  final int totalCount;
-  final AnimationController entranceCtrl;
-  final bool dimmed;
-  final Widget child;
-  final double startOffset;
-
-  @override
-  State<_AnimatedPin> createState() => _AnimatedPinState();
-}
-
-class _AnimatedPinState extends State<_AnimatedPin>
-    with SingleTickerProviderStateMixin {
-  late CurvedAnimation _curve;
-
-  late final AnimationController _filterBounceCtrl;
-  late final Animation<double> _filterBounceScale;
-
-  @override
-  void initState() {
-    super.initState();
-    _curve = _buildCurve();
-
-    _filterBounceCtrl = AnimationController(
-      vsync: this,
-      duration: JourneyAnimationConstants.pinFilterBounce,
-    )..value = 1.0;
-
-    _filterBounceScale = CurvedAnimation(
-      parent: _filterBounceCtrl,
-      curve: Curves.easeOutBack,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_AnimatedPin old) {
-    super.didUpdateWidget(old);
-    if (old.index != widget.index ||
-        old.totalCount != widget.totalCount ||
-        old.startOffset != widget.startOffset ||
-        old.entranceCtrl != widget.entranceCtrl) {
-      _curve.dispose();
-      _curve = _buildCurve();
-    }
-    if (old.dimmed && !widget.dimmed) {
-      _filterBounceCtrl.forward(from: 0.0);
-    }
-  }
-
-  CurvedAnimation _buildCurve() {
-    final available = 1.0 - widget.startOffset;
-    final step =
-        widget.totalCount > 1 ? available / widget.totalCount : available;
-    final start = (widget.startOffset + widget.index * step)
-        .clamp(0.0, JourneyAnimationConstants.pinStaggerMaxStart);
-    final end = (start + JourneyAnimationConstants.pinStaggerWindow)
-        .clamp(start + 0.01, 1.0);
-
-    return CurvedAnimation(
-      parent: widget.entranceCtrl,
-      curve: Interval(start, end, curve: Curves.easeOutBack),
-    );
-  }
-
-  @override
-  void dispose() {
-    _filterBounceCtrl.dispose();
-    _curve.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _curve,
-      child: ScaleTransition(
-        scale: _curve,
-        alignment: Alignment.bottomCenter,
-        child: AnimatedOpacity(
-          opacity: widget.dimmed ? 0.22 : 1.0,
-          duration: JourneyAnimationConstants.pinFilterDim,
-          curve: Curves.easeInOut,
-          child: ScaleTransition(
-            scale: _filterBounceScale,
-            alignment: Alignment.bottomCenter,
-            child: widget.child,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DurationChip extends StatelessWidget {
-  const _DurationChip({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.18),
-          width: 0.8,
-        ),
-      ),
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 9.5,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.4,
-        ),
-      ),
-    );
-  }
 }

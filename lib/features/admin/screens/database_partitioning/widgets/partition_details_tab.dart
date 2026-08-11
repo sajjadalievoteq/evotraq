@@ -43,7 +43,9 @@ class PartitionDetailsTab<TOverview> extends StatelessWidget {
           LoadStateView<List<PartitionMetadata>>(
             state: metadataState,
             onRetry: onRetryMetadata,
-            emptyWidget: const Center(child: Text('No partition data available')),
+            emptyWidget: const Center(
+              child: Text('No partition data available'),
+            ),
             builder: (context, metadata) => ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),

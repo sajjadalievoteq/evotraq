@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
-import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_detail_row.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_details_header_card.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_details_section.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_details_stat_tile.dart';
+import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_stats_grid.dart';
 import 'package:traqtrace_app/features/automation_center/utils/subscription_format_utils.dart';
 import 'package:traqtrace_app/features/automation_center/utils/subscription_query_filter_utils.dart';
 
@@ -58,16 +56,18 @@ class SubscriptionDetailsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final queryParameters = subscription.queryParameters;
-    final eventTypeLabels =
-        SubscriptionQueryFilterUtils.eventTypeLabels(queryParameters);
+    final eventTypeLabels = SubscriptionQueryFilterUtils.eventTypeLabels(
+      queryParameters,
+    );
     final bizStep = SubscriptionQueryFilterUtils.businessStep(queryParameters);
-    final disposition =
-        SubscriptionQueryFilterUtils.disposition(queryParameters);
+    final disposition = SubscriptionQueryFilterUtils.disposition(
+      queryParameters,
+    );
     final readPoint = SubscriptionQueryFilterUtils.readPoint(queryParameters);
-    final epcPattern =
-        SubscriptionQueryFilterUtils.epcPattern(queryParameters);
-    final hasFilters =
-        SubscriptionQueryFilterUtils.hasAnyFilter(queryParameters);
+    final epcPattern = SubscriptionQueryFilterUtils.epcPattern(queryParameters);
+    final hasFilters = SubscriptionQueryFilterUtils.hasAnyFilter(
+      queryParameters,
+    );
     final isEmailDelivery = subscription.webhookUrl.contains('@');
 
     final totalValue = stats?.totalNotifications.toString() ?? '—';
@@ -164,7 +164,7 @@ class SubscriptionDetailsBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _StatsGrid(
+                  SubscriptionStatsGrid(
                     tiles: [
                       SubscriptionDetailsStatTile(
                         label: 'Total Matched',
@@ -206,7 +206,8 @@ class SubscriptionDetailsBody extends StatelessWidget {
                       (stats?.successfulNotifications ?? 0) == 0 &&
                       (stats?.failedNotifications ?? 0) == 0) ...[
                     const SizedBox(height: TraqSpacing.sm),
-                    Text("Matched events are queued for this subscription's"
+                    Text(
+                      "Matched events are queued for this subscription's"
                       'cadence and have not been delivered yet — Delivered/'
                       'Failed will update once the batch is processed.',
                       style: context.text.bodySm.copyWith(
@@ -252,35 +253,6 @@ class SubscriptionDetailsBody extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: content,
-    );
-  }
-}
-
-/// Lays out stat tiles in a responsive grid: 4 columns when there's room
-/// (full-page details view), 2 columns when narrower (embedded inline panel
-/// inside Subscription Management), so tiles never get squeezed unreadable.
-class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({required this.tiles});
-
-  final List<Widget> tiles;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 480 ? tiles.length : 2;
-        const spacing = TraqSpacing.md;
-        final tileWidth =
-            (constraints.maxWidth - spacing * (columns - 1)) / columns;
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: [
-            for (final tile in tiles)
-              SizedBox(width: tileWidth, child: tile),
-          ],
-        );
-      },
     );
   }
 }

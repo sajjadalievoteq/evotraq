@@ -28,7 +28,6 @@ class JourneySearchBar extends StatelessWidget {
   final VoidCallback onClear;
   final ValueChanged<ScanResult>? onScanResult;
 
-  
   final bool compactMargins;
 
   static const double _fieldIconSize = 18;
@@ -47,96 +46,92 @@ class JourneySearchBar extends StatelessWidget {
 
     return Card(
       margin: margin,
-        elevation: 2,
-        color: context.colors.surface,
-        clipBehavior: Clip.hardEdge,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: context.colors.primary,
-            image: DecorationImage(
-              image: AssetImage(AppAssets.traqBackgroundPng),
-              fit: BoxFit.cover,
-              opacity: 0.2,
-            ),
+      elevation: 2,
+      color: context.colors.surface,
+      clipBehavior: Clip.hardEdge,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.colors.primary,
+          image: DecorationImage(
+            image: AssetImage(AppAssets.traqBackgroundPng),
+            fit: BoxFit.cover,
+            opacity: 0.2,
           ),
-      child: Padding(
-          padding:  EdgeInsets.fromLTRB(
-            10,
-            20,
-           10,
-            20,
-          ),
-        child: AppLayoutBuilder(
-          builder: (context, layout) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Track Identifier',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.6,
-                      ),
-                ),
-                const SizedBox(height: TraqSpacing.sm),
-                TextField(
-                  controller: controller,
-                  onChanged: onChanged,
-                  onSubmitted: onSubmitted,
-                  decoration: InputDecoration(
-                    hintText: 'EPC URI, GS1 barcode, SGTIN, SSCC, or serial…',
-                    prefixIcon: TraqIcon(
-                      AppAssets.iconSearch,
-                      size: _fieldIconSize,
-                      color: c.textMuted,
-                    ),
-                    suffixIcon: ListenableBuilder(
-                      listenable: controller,
-                      builder: (context, _) => JourneySearchBarSuffixActions(
-                        controller: controller,
-                        onClear: onClear,
-                        onScanResult: onScanResult,
-                      ),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(TraqRadius.lg),
-                      borderSide: BorderSide(color: c.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(TraqRadius.lg),
-                      borderSide: BorderSide(color: c.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(TraqRadius.lg),
-                      borderSide: BorderSide(color: c.primary, width: 1.5),
-                    ),
-                    filled: true,
-                    fillColor: c.surface,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: layout.resolve(
-                        compact: TraqSpacing.md,
-                        medium: Constants.spacing.toDouble(),
-                      ),
-                      vertical: TraqSpacing.md,
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+          child: AppLayoutBuilder(
+            builder: (context, layout) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Track Identifier',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
                     ),
                   ),
-                ),
-                if (isSearching)
-                  Padding(
-                    padding: const EdgeInsets.only(top: TraqSpacing.sm),
-                    child: LinearProgressIndicator(
-                      minHeight: 2,
-                      color: c.primary,
-                      backgroundColor: c.primary.withValues(alpha: 0.15),
+                  const SizedBox(height: TraqSpacing.sm),
+                  TextField(
+                    controller: controller,
+                    onChanged: onChanged,
+                    onSubmitted: onSubmitted,
+                    decoration: InputDecoration(
+                      hintText: 'EPC URI, GS1 barcode, SGTIN, SSCC, or serial…',
+                      prefixIcon: TraqIcon(
+                        AppAssets.iconSearch,
+                        size: _fieldIconSize,
+                        color: c.textMuted,
+                      ),
+                      suffixIcon: ListenableBuilder(
+                        listenable: controller,
+                        builder: (context, _) => JourneySearchBarSuffixActions(
+                          controller: controller,
+                          onClear: onClear,
+                          onScanResult: onScanResult,
+                        ),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(TraqRadius.lg),
+                        borderSide: BorderSide(color: c.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(TraqRadius.lg),
+                        borderSide: BorderSide(color: c.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(TraqRadius.lg),
+                        borderSide: BorderSide(color: c.primary, width: 1.5),
+                      ),
+                      filled: true,
+                      fillColor: c.surface,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: layout.resolve(
+                          compact: TraqSpacing.md,
+                          medium: Constants.spacing.toDouble(),
+                        ),
+                        vertical: TraqSpacing.md,
+                      ),
                     ),
                   ),
-              ],
-            );
-          },
+                  if (isSearching)
+                    Padding(
+                      padding: const EdgeInsets.only(top: TraqSpacing.sm),
+                      child: LinearProgressIndicator(
+                        minHeight: 2,
+                        color: c.primary,
+                        backgroundColor: c.primary.withValues(alpha: 0.15),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
         ),
       ),
-    ));
+    );
   }
 }

@@ -8,7 +8,6 @@ import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
 import 'package:traqtrace_app/features/product_hierarchy/widgets/product_hierarchy_type_badge.dart';
 import 'package:traqtrace_app/features/product_hierarchy/utils/product_hierarchy_display_utils.dart';
 
-
 class ProductHierarchySelectedItemCard extends StatelessWidget {
   const ProductHierarchySelectedItemCard({
     super.key,

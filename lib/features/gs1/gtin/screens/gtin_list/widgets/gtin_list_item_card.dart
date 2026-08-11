@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_info_row.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
@@ -33,28 +34,6 @@ class GtinListItemCard extends StatelessWidget {
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
             : const EdgeInsets.all(16);
 
-        Widget infoRow(String iconAsset, String text) {
-          final rowColor =
-              Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                TraqIcon(iconAsset, size: 16, color: rowColor),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: rowColor),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
         return Card(
           elevation: 2,
           color: Gs1ListItemSelectionStyle.cardBackground(context, isSelected),
@@ -82,19 +61,30 @@ class GtinListItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
 
-                        infoRow(NavIcons.gtin, 'GTIN: ${gtin.gtinCode}'),
+                        Gs1ListItemInfoRow(
+                          NavIcons.gtin,
+                          'GTIN: ${gtin.gtinCode}',
+                          isSelected: isSelected,
+                          muted: muted,
+                        ),
 
                         if (gtin.manufacturer != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             AppAssets.iconFactory,
                             '${GtinUiConstants.listCardManufacturerPrefix}${gtin.manufacturer}',
+
+                            isSelected: isSelected,
+                            muted: muted,
                           ),
 
                         if (gtin.registrationDate != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             AppAssets.iconCalendar,
                             '${GtinUiConstants.listCardRegisteredPrefix}'
                             '${DateFormat('MMM dd, yyyy').format(gtin.registrationDate!)}',
+
+                            isSelected: isSelected,
+                            muted: muted,
                           ),
                       ],
                     ),

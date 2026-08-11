@@ -13,9 +13,9 @@ class AggregationPharmaReadinessChecker {
     required GLNService glnService,
     required SGTINService sgtinService,
     required SSCCService ssccService,
-  })  : _glnService = glnService,
-        _sgtinService = sgtinService,
-        _ssccService = ssccService;
+  }) : _glnService = glnService,
+       _sgtinService = sgtinService,
+       _ssccService = ssccService;
 
   final GLNService _glnService;
   final SGTINService _sgtinService;
@@ -46,8 +46,9 @@ class AggregationPharmaReadinessChecker {
   }) async {
     if (action != 'ADD' && action != 'DELETE') return [];
 
-    final packingGln =
-        AggregationEventFormValidators.parseGlnToCode(eventLocationGln.trim());
+    final packingGln = AggregationEventFormValidators.parseGlnToCode(
+      eventLocationGln.trim(),
+    );
     final issues = <String>[];
 
     await _checkOperatingGln(packingGln, issues);
@@ -84,13 +85,13 @@ class AggregationPharmaReadinessChecker {
     final parentCustodian = parentSscc != null
         ? _ssccCustodian(parentSscc)
         : parentSgtin != null
-            ? _sgtinCustodian(parentSgtin)
-            : packingGln;
+        ? _sgtinCustodian(parentSgtin)
+        : packingGln;
     final parentLocation = parentSscc != null
         ? _ssccLocation(parentSscc)
         : parentSgtin != null
-            ? _sgtinLocation(parentSgtin)
-            : packingGln;
+        ? _sgtinLocation(parentSgtin)
+        : packingGln;
 
     for (final rawChild in childEpcUris) {
       final childUri = _resolveEpcUri(rawChild);
@@ -113,7 +114,10 @@ class AggregationPharmaReadinessChecker {
     return issues;
   }
 
-  Future<void> _checkOperatingGln(String packingGln, List<String> issues) async {
+  Future<void> _checkOperatingGln(
+    String packingGln,
+    List<String> issues,
+  ) async {
     try {
       final gln = await _glnService.getGLNByCode(packingGln);
       if (!gln.active) {
@@ -257,8 +261,7 @@ class AggregationPharmaReadinessChecker {
     if (serial != null) {
       try {
         return await _sgtinService.getSGTINBySerialNumber(serial);
-      } catch (_) {
-      }
+      } catch (_) {}
     }
     if (gtin != null && serial != null) {
       try {

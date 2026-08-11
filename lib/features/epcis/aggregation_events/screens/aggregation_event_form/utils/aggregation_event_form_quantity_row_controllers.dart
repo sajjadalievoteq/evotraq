@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class AggregationEventFormQuantityRowControllers {
   AggregationEventFormQuantityRowControllers()
-      : epcClass = TextEditingController(),
-        quantity = TextEditingController(),
-        uom = TextEditingController();
+    : epcClass = TextEditingController(),
+      quantity = TextEditingController(),
+      uom = TextEditingController();
 
   final TextEditingController epcClass;
   final TextEditingController quantity;

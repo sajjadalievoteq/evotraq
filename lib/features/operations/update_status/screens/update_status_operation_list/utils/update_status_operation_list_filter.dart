@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/data/models/operations/update_status/update_status_response_model.dart';
+import 'package:traqtrace_app/data/models/operations/update_status/update_status_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 
@@ -22,18 +22,19 @@ class UpdateStatusOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.decommissioningReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.decommissioningReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.locationGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
           (operation.disposition?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.reason?.toLowerCase().contains(normalizedQuery) ?? false) ||
-          (operation.decommissioningOperationId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.reason?.toLowerCase().contains(normalizedQuery) ??
+              false) ||
+          (operation.decommissioningOperationId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false);
     }).toList();
 
@@ -62,15 +63,16 @@ class UpdateStatusOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.operationReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.operationReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.locationGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
           (operation.disposition?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.reason?.toLowerCase().contains(normalizedQuery) ?? false) ||
+          (operation.reason?.toLowerCase().contains(normalizedQuery) ??
+              false) ||
           (operation.operationId?.toLowerCase().contains(normalizedQuery) ??
               false);
     }).toList();
@@ -101,8 +103,9 @@ class UpdateStatusOperationListFilter {
       case 'status':
         return _compareStrings(a.status?.name, b.status?.name);
       case 'decommissionedEpcsCount':
-        return (a.decommissionedEpcsCount ?? 0)
-            .compareTo(b.decommissionedEpcsCount ?? 0);
+        return (a.decommissionedEpcsCount ?? 0).compareTo(
+          b.decommissionedEpcsCount ?? 0,
+        );
       case 'processedAt':
       default:
         final aDate = a.processedAt ?? DateTime.fromMillisecondsSinceEpoch(0);

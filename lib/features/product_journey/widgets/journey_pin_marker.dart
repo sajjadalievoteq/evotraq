@@ -93,11 +93,7 @@ class _JourneyPinMarkerState extends State<JourneyPinMarker>
                   animation: _pulseCtrl,
                   child: Align(
                     alignment: const Alignment(0, -0.35),
-                    child: TraqIcon(
-                      icon,
-                      size: r * 0.92,
-                      color: Colors.white,
-                    ),
+                    child: TraqIcon(icon, size: r * 0.92, color: Colors.white),
                   ),
                   builder: (context, child) => CustomPaint(
                     painter: _PinBodyPainter(
@@ -277,7 +273,6 @@ class _PinBodyPainter extends CustomPainter {
     final circleCenter = Offset(cx, cy);
 
     if (isSelected) {
-      
       final glowR = r + 4 + pulseValue * 10;
       canvas.drawCircle(
         circleCenter,

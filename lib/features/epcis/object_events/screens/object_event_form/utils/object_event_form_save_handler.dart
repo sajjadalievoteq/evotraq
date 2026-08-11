@@ -21,63 +21,8 @@ import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 
-class ObjectEventFormSaveData {
-  final DateTime eventTime;
-  final String eventTimeZone;
-  final String? action;
-  final String? businessStep;
-  final String? disposition;
-  final String? readPointGLN;
-  final String? businessLocationGLN;
-  final List<String> epcList;
-  final List<String> epcClassList;
-  final List<types.QuantityElement> quantityList;
-  final Map<String, String> bizData;
-  final List<types.SourceDestination> sourceList;
-  final List<types.SourceDestination> destinationList;
-  final String? persistentDisposition;
-  final List<SensorElement> sensorElementList;
-  final List<CertificationInfo> certificationInfoList;
-  final EPCISVersion epcisVersion;
-  final Map<String, Object> ilmd;
-
-  const ObjectEventFormSaveData({
-    required this.eventTime,
-    required this.eventTimeZone,
-    required this.action,
-    required this.businessStep,
-    required this.disposition,
-    required this.readPointGLN,
-    required this.businessLocationGLN,
-    required this.epcList,
-    required this.epcClassList,
-    required this.quantityList,
-    required this.bizData,
-    required this.sourceList,
-    required this.destinationList,
-    required this.persistentDisposition,
-    required this.sensorElementList,
-    required this.certificationInfoList,
-    required this.epcisVersion,
-    required this.ilmd,
-  });
-}
-
-class ObjectEventFormSaveResult {
-  final bool success;
-  final String? errorMessage;
-  final List<dynamic> validationErrors;
-  final bool isLoading;
-  final bool validating;
-
-  const ObjectEventFormSaveResult({
-    required this.success,
-    this.errorMessage,
-    this.validationErrors = const [],
-    this.isLoading = false,
-    this.validating = false,
-  });
-}
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_save_models.dart';
+export 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_save_models.dart';
 
 class ObjectEventFormSaveHandler {
   ObjectEventFormSaveHandler._();
@@ -181,15 +126,16 @@ class ObjectEventFormSaveHandler {
       if (e.responseBody != null && e.responseBody!.isNotEmpty) {
         final decoded = json.decode(e.responseBody!);
         if (decoded is Map) {
-          final messages = ObjectEventFormValidationResponseParser
-              .extractErrorMessages(Map<String, dynamic>.from(decoded));
+          final messages =
+              ObjectEventFormValidationResponseParser.extractErrorMessages(
+                Map<String, dynamic>.from(decoded),
+              );
           if (messages.isNotEmpty) {
             return messages.join('\n');
           }
         }
       }
-    } catch (_) {
-    }
+    } catch (_) {}
     return e.getUserFriendlyMessage();
   }
 
@@ -217,10 +163,7 @@ class ObjectEventFormSaveHandler {
       );
     }
 
-    final glnError = _validateGlns(
-      data.businessLocationGLN,
-      data.readPointGLN,
-    );
+    final glnError = _validateGlns(data.businessLocationGLN, data.readPointGLN);
     if (glnError != null) {
       return ObjectEventFormSaveResult(success: false, errorMessage: glnError);
     }
@@ -356,9 +299,10 @@ class ObjectEventFormSaveHandler {
         print('Validation error: ${validationProvider.state.error}');
         print('======================================\n');
 
-        var errors = ObjectEventFormValidationResponseParser.extractErrorMessages(
-          validationProvider.state.lastValidationResult,
-        );
+        var errors =
+            ObjectEventFormValidationResponseParser.extractErrorMessages(
+              validationProvider.state.lastValidationResult,
+            );
 
         if (errors.isEmpty && validationProvider.state.error != null) {
           errors = [validationProvider.state.error!];
@@ -452,10 +396,12 @@ class ObjectEventFormSaveHandler {
           readPoint: data.readPointGLN,
           bizLocation: data.businessLocationGLN,
           epcList: sanitized.epcList.isNotEmpty ? sanitized.epcList : null,
-          epcClassList:
-              sanitized.epcClassList.isNotEmpty ? sanitized.epcClassList : null,
-          quantityList:
-              sanitized.quantityList.isNotEmpty ? sanitized.quantityList : null,
+          epcClassList: sanitized.epcClassList.isNotEmpty
+              ? sanitized.epcClassList
+              : null,
+          quantityList: sanitized.quantityList.isNotEmpty
+              ? sanitized.quantityList
+              : null,
           bizData: data.bizData,
           sourceList: sanitized.sourceList,
           destinationList: sanitized.destinationList,
@@ -474,9 +420,7 @@ class ObjectEventFormSaveHandler {
       }
 
       context.showSuccess(
-        existingEvent != null
-            ? 'Object event updated'
-            : 'Object event created',
+        existingEvent != null ? 'Object event updated' : 'Object event created',
       );
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -501,10 +445,7 @@ class ObjectEventFormSaveHandler {
             '[ObjectEventFormSaveHandler] responseBody: ${e.responseBody}',
           );
         }
-        return ObjectEventFormSaveResult(
-          success: false,
-          errorMessage: parsed,
-        );
+        return ObjectEventFormSaveResult(success: false, errorMessage: parsed);
       }
       debugPrint('[ObjectEventFormSaveHandler] create error: $e');
       debugPrint('[ObjectEventFormSaveHandler] $st');

@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
+import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 
@@ -29,27 +29,25 @@ class PackingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.packingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.packingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.parentContainerId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.parentContainerId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.packingLocationGLN
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.packingLocationGLN?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.workOrderNumber
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.workOrderNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||
           (operation.batchNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.packingOperationId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.packingOperationId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false);
     }).toList();
 
@@ -85,19 +83,17 @@ class PackingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.operationReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.operationReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.parentContainerId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.parentContainerId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.primaryGln?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.workOrderNumber
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.workOrderNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||
           (operation.batchNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||

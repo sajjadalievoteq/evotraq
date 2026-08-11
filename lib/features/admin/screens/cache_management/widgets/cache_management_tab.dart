@@ -1,79 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_management_action.dart';
+import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_typed_clear_action.dart';
 
-class CacheManagementAction extends StatelessWidget {
-  const CacheManagementAction({
-    super.key,
-    required this.title,
-    required this.description,
-    required this.iconAsset,
-    required this.onExecute,
-    this.isDestructive = false,
-  });
-
-  final String title;
-  final String description;
-  final String iconAsset;
-  final VoidCallback onExecute;
-  final bool isDestructive;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: TraqIcon(
-        iconAsset,
-        color: isDestructive ? AppColorMapper.errorColor(context) : null,
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isDestructive ? AppColorMapper.errorColor(context) : null,
-        ),
-      ),
-      subtitle: Text(description),
-      trailing: ElevatedButton(
-        onPressed: onExecute,
-        style: isDestructive
-            ? ElevatedButton.styleFrom(
-                backgroundColor: AppColorMapper.errorColor(context),
-              )
-            : null,
-        child: Text(isDestructive ? 'Clear' : 'Execute'),
-      ),
-    );
-  }
-}
-
-class CacheTypedClearAction extends StatelessWidget {
-  const CacheTypedClearAction({
-    super.key,
-    required this.title,
-    required this.subtitle,
-    required this.iconAsset,
-    required this.onClear,
-  });
-
-  final String title;
-  final String subtitle;
-  final String iconAsset;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: TraqIcon(iconAsset),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: ElevatedButton(
-        onPressed: onClear,
-        child: const Text('Clear'),
-      ),
-    );
-  }
-}
+export 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_management_action.dart';
+export 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_typed_clear_action.dart';
 
 class CacheManagementTab extends StatelessWidget {
   const CacheManagementTab({

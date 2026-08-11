@@ -8,7 +8,6 @@ import 'package:traqtrace_app/features/product_hierarchy/widgets/product_hierarc
 import 'package:traqtrace_app/features/product_hierarchy/widgets/product_hierarchy_section_label.dart';
 import 'package:traqtrace_app/features/product_hierarchy/utils/product_hierarchy_display_utils.dart';
 
-
 class ProductHierarchyNodeDetailsCard extends StatelessWidget {
   const ProductHierarchyNodeDetailsCard({
     super.key,
@@ -50,7 +49,10 @@ class ProductHierarchyNodeDetailsCard extends StatelessWidget {
           info: info,
         ),
       ),
-      ProductHierarchyDetailRow(label: 'Packaging Type', value: info?.packagingType),
+      ProductHierarchyDetailRow(
+        label: 'Packaging Type',
+        value: info?.packagingType,
+      ),
       ProductHierarchyDetailRow(
         label: 'Aggregation Status',
         value: info?.status ?? node.status,
@@ -67,7 +69,10 @@ class ProductHierarchyNodeDetailsCard extends StatelessWidget {
         label: 'Current Location',
         value: info?.currentLocationName ?? journey.currentLocation,
       ),
-      ProductHierarchyDetailRow(label: 'Commission Date', value: commissionLabel),
+      ProductHierarchyDetailRow(
+        label: 'Commission Date',
+        value: commissionLabel,
+      ),
     ];
 
     return Column(

@@ -7,7 +7,6 @@ import 'package:traqtrace_app/features/product_hierarchy/widgets/product_hierarc
 import 'package:traqtrace_app/features/product_hierarchy/utils/product_hierarchy_display_utils.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 
-
 class ProductHierarchyParentCard extends StatelessWidget {
   const ProductHierarchyParentCard({
     super.key,

@@ -12,23 +12,9 @@ class ObjectEventDetailSkeleton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
     final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
-    final border = Theme.of(context).colorScheme.outlineVariant.withValues(
-          alpha: 0.45,
-        );
-
-    Widget group({
-      required double titleWidth,
-      required List<double> fieldHeights,
-      double fieldSpacing = 12,
-    }) {
-      return ObjectEventSkeletonGroupCard(
-        borderColor: border,
-        baseColor: baseColor,
-        titleWidth: titleWidth,
-        fieldHeights: fieldHeights,
-        fieldSpacing: fieldSpacing,
-      );
-    }
+    final border = Theme.of(
+      context,
+    ).colorScheme.outlineVariant.withValues(alpha: 0.45);
 
     return AppShimmer(
       baseColor: baseColor,
@@ -43,28 +29,38 @@ class ObjectEventDetailSkeleton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            group(
+            ObjectEventSkeletonGroupCard(
+              borderColor: border,
+              baseColor: baseColor,
               titleWidth: 180,
               fieldHeights: const [56, 40, 40, 40, 40, 40],
               fieldSpacing: 16,
             ),
             const SizedBox(height: 12),
-            group(
+            ObjectEventSkeletonGroupCard(
+              borderColor: border,
+              baseColor: baseColor,
               titleWidth: 160,
               fieldHeights: const [24, 24, 24, 24],
             ),
             const SizedBox(height: 12),
-            group(
+            ObjectEventSkeletonGroupCard(
+              borderColor: border,
+              baseColor: baseColor,
               titleWidth: 170,
               fieldHeights: const [56, 56],
             ),
             const SizedBox(height: 12),
-            group(
+            ObjectEventSkeletonGroupCard(
+              borderColor: border,
+              baseColor: baseColor,
               titleWidth: 150,
               fieldHeights: const [40, 40, 40, 56],
             ),
             const SizedBox(height: 12),
-            group(
+            ObjectEventSkeletonGroupCard(
+              borderColor: border,
+              baseColor: baseColor,
               titleWidth: 200,
               fieldHeights: const [24, 24, 24],
             ),

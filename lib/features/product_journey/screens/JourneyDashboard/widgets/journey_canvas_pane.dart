@@ -26,10 +26,8 @@ class JourneyCanvasPane extends StatelessWidget {
       return AnimatedSwitcher(
         duration: JourneyAnimationConstants.canvasPaneSwitch,
         switchInCurve: Curves.easeOut,
-        transitionBuilder: (child, animation) => FadeTransition(
-          opacity: animation,
-          child: child,
-        ),
+        transitionBuilder: (child, animation) =>
+            FadeTransition(opacity: animation, child: child),
         child: Column(
           key: ValueKey(state.journey!.identifier),
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -64,7 +62,6 @@ class JourneyCanvasPane extends StatelessWidget {
     }
 
     if (state.isLoading) {
-      
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

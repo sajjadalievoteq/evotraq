@@ -44,9 +44,9 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
             Text(
               allowProceed
                   ? 'The following GS1 compliance issues were detected. You may '
-                      'resolve them or proceed at your own risk:'
+                        'resolve them or proceed at your own risk:'
                   : 'The following issues must be resolved before this '
-                      'operation can be submitted:',
+                        'operation can be submitted:',
             ),
             const SizedBox(height: 12),
             ...issues.map(
@@ -55,7 +55,8 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TraqIcon(AppAssets.iconAlert,
+                    TraqIcon(
+                      AppAssets.iconAlert,
                       size: 18,
                       color: theme.colorScheme.error,
                     ),

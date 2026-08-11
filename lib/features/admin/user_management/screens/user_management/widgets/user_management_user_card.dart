@@ -25,17 +25,17 @@ class UserManagementUserCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (variant) {
       UserManagementUserCardVariant.listTile => UserManagementUserListCard(
-          user: user,
-          isToggleLoading: isToggleLoading,
-          onEdit: onEdit,
-          onToggleStatus: onToggleStatus,
-        ),
+        user: user,
+        isToggleLoading: isToggleLoading,
+        onEdit: onEdit,
+        onToggleStatus: onToggleStatus,
+      ),
       UserManagementUserCardVariant.gridSquare => UserManagementUserGridCard(
-          user: user,
-          isToggleLoading: isToggleLoading,
-          onEdit: onEdit,
-          onToggleStatus: onToggleStatus,
-        ),
+        user: user,
+        isToggleLoading: isToggleLoading,
+        onEdit: onEdit,
+        onToggleStatus: onToggleStatus,
+      ),
     };
   }
 }

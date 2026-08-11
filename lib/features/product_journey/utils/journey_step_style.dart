@@ -5,13 +5,10 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 
 abstract final class JourneyStepStyle {
-
   static Color colorFor(BuildContext context, String businessStep) {
     return AppColorMapper.bizStepColor(context, businessStep);
   }
 
-  
-  
   static String? bizStepToken(String businessStep) =>
       CbvDisplayUtils.shortName(businessStep)?.toLowerCase();
 
@@ -52,14 +49,13 @@ abstract final class JourneyStepStyle {
   static String iconFor(String businessStep) =>
       NavIcons.forBizStep(businessStep);
 
-
   static Color typeColor(BuildContext context, String type) {
     final c = context.colors;
     return switch (type.toUpperCase()) {
       'SGTIN' => c.identifierSgtin,
-      'SSCC'  => c.identifierSscc,
-      'GTIN'  => c.identifierGtin,
-      _       => c.textMuted,
+      'SSCC' => c.identifierSscc,
+      'GTIN' => c.identifierGtin,
+      _ => c.textMuted,
     };
   }
 }

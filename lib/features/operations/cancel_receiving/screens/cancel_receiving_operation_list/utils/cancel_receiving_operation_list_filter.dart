@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_response_model.dart';
+import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 
@@ -29,9 +29,9 @@ class CancelReceivingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.cancelReceivingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.cancelReceivingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
@@ -39,13 +39,13 @@ class CancelReceivingOperationListFilter {
               false) ||
           (operation.cancelReason?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.originalReceivingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.originalReceivingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.cancelReceivingOperationId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.cancelReceivingOperationId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false);
     }).toList();
 
@@ -81,9 +81,9 @@ class CancelReceivingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.operationReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.operationReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
@@ -91,9 +91,9 @@ class CancelReceivingOperationListFilter {
               false) ||
           (operation.cancelReason?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.originalReceivingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.originalReceivingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.operationId?.toLowerCase().contains(normalizedQuery) ??
               false);
@@ -114,7 +114,10 @@ class CancelReceivingOperationListFilter {
   ) {
     switch (sortBy) {
       case 'cancelReceivingReference':
-        return _compareStrings(a.cancelReceivingReference, b.cancelReceivingReference);
+        return _compareStrings(
+          a.cancelReceivingReference,
+          b.cancelReceivingReference,
+        );
       case 'sourceGLN':
         return _compareStrings(a.sourceGLN, b.sourceGLN);
       case 'receivingGLN':

@@ -12,9 +12,9 @@ class UserApprovalCardRegisteredDate extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       '${UserApprovalConstants.registeredOnLabel}: ${userApprovalRegisteredDate(user)}',
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey[700],
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
     );
   }
 }

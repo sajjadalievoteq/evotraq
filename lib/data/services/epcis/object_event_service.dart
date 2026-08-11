@@ -10,6 +10,9 @@ import 'package:traqtrace_app/data/models/epcis/epcis_types.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_api_constants.dart';
 
+part 'object_event_service_operations.dart';
+part 'object_event_service_convenience_operations.dart';
+
 class ObjectEventService {
   final DioService _dioService;
 
@@ -30,9 +33,9 @@ class ObjectEventService {
 
   Future<Map<String, dynamic>> getAllEventsPaginated(int page, int size) async {
     final raw = await _getObjectEventsPage(_baseUrl, page: page, size: size);
-    final content = PageResponseUtils.contentList(raw)
-        .map((e) => ObjectEvent.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final content = PageResponseUtils.contentList(
+      raw,
+    ).map((e) => ObjectEvent.fromJson(e as Map<String, dynamic>)).toList();
     return PageResponseUtils.toResultMap(content: content, raw: raw);
   }
 
@@ -46,8 +49,9 @@ class ObjectEventService {
     final params = <String, String>{
       ...?queryParameters,
       ObjectEventApiConstants.queryPage: page.toString(),
-      ObjectEventApiConstants.querySize:
-          PageResponseUtils.clampSize(size).toString(),
+      ObjectEventApiConstants.querySize: PageResponseUtils.clampSize(
+        size,
+      ).toString(),
     };
     final response = await _dioService.get(
       path,
@@ -143,18 +147,24 @@ class ObjectEventService {
       'status=$statusCode path=$path',
     );
     if (body == null) {
-      debugPrint('[ObjectEventService.getObjectEventDetail] responseBody: null');
+      debugPrint(
+        '[ObjectEventService.getObjectEventDetail] responseBody: null',
+      );
       return;
     }
     final bodyString = body is String ? body : body.toString();
     if (bodyString.isEmpty) {
-      debugPrint('[ObjectEventService.getObjectEventDetail] responseBody: (empty)');
+      debugPrint(
+        '[ObjectEventService.getObjectEventDetail] responseBody: (empty)',
+      );
       return;
     }
     try {
       final decoded = json.decode(bodyString);
       final pretty = const JsonEncoder.withIndent('  ').convert(decoded);
-      debugPrint('[ObjectEventService.getObjectEventDetail] responseBody:\n$pretty');
+      debugPrint(
+        '[ObjectEventService.getObjectEventDetail] responseBody:\n$pretty',
+      );
     } catch (_) {
       debugPrint(
         '[ObjectEventService.getObjectEventDetail] responseBody: $bodyString',
@@ -182,8 +192,7 @@ class ObjectEventService {
   }) async {
     final headers = await _getHeaders();
 
-    final versionString =
-        epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
+    final versionString = epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
 
     final now = DateTime.now();
     final eventData = <String, dynamic>{
@@ -200,8 +209,8 @@ class ObjectEventService {
       ObjectEventApiConstants.jsonKeyRecordTime: now.toIso8601String(),
       ObjectEventApiConstants.jsonKeyEpcisVersion:
           epcisVersion == EPCISVersion.v2_0
-              ? ObjectEventApiConstants.epcisVersion20
-              : ObjectEventApiConstants.epcisVersion13,
+          ? ObjectEventApiConstants.epcisVersion20
+          : ObjectEventApiConstants.epcisVersion13,
     };
 
     final offset = now.timeZoneOffset;
@@ -225,8 +234,9 @@ class ObjectEventService {
       eventData[ObjectEventApiConstants.jsonKeyEpcList] = epcs;
       eventData[ObjectEventApiConstants.jsonKeyQuantityList] = [];
     } else if (quantities != null && quantities.isNotEmpty) {
-      eventData[ObjectEventApiConstants.jsonKeyQuantityList] =
-          quantities.map((q) => q.toJson()).toList();
+      eventData[ObjectEventApiConstants.jsonKeyQuantityList] = quantities
+          .map((q) => q.toJson())
+          .toList();
     } else {
       eventData[ObjectEventApiConstants.jsonKeyEpcList] = [];
       eventData[ObjectEventApiConstants.jsonKeyQuantityList] = [];
@@ -289,7 +299,8 @@ class ObjectEventService {
 
       final apiException = ApiException(
         statusCode: response.statusCode,
-        message: _parseCreateObjectEventErrorMessage(response.data) ??
+        message:
+            _parseCreateObjectEventErrorMessage(response.data) ??
             'Failed to create object event',
         responseBody: response.data?.toString(),
       );
@@ -347,507 +358,7 @@ class ObjectEventService {
           return error.toString();
         }
       }
-    } catch (_) {
-    }
+    } catch (_) {}
     return data.toString();
-  }
-
-  Future<Map<String, dynamic>> validateObjectEvent(ObjectEvent event) async {
-    final headers = await _getHeaders();
-    try {
-      final response = await _dioService.post(
-        '$_baseUrl/${ObjectEventApiConstants.segmentValidate}',
-        headers: headers,
-        data: json.encode(event.toJson()),
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
-
-      final responseData = json.decode(response.data) as Map<String, dynamic>;
-
-      return responseData;
-    } catch (e) {
-      return {
-        'valid': false,
-        'error': 'Failed to validate object event: $e',
-        'validationErrors': [],
-      };
-    }
-  }
-
-  Future<List<ObjectEvent>> createObjectEventsBatch(
-    List<ObjectEvent> events,
-  ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.post(
-      '$_baseUrl/${ObjectEventApiConstants.segmentBatch}',
-      headers: headers,
-      data: json.encode(events.map((e) => e.toJson()).toList()),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.data);
-      final List<dynamic> eventsData = data['events'];
-      return eventsData.map((e) => ObjectEvent.fromJson(e)).toList();
-    } else {
-      throw Exception('Failed to create object events batch: ${response.data}');
-    }
-  }
-
-  Future<ObjectEvent> updateObjectEvent(String id, ObjectEvent event) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.put(
-      '$_baseUrl/$id',
-      headers: headers,
-      data: json.encode(event.toJson()),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      return ObjectEvent.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to update object event: ${response.statusCode}');
-    }
-  }
-
-  Future<void> deleteObjectEvent(String id) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.delete(
-      '$_baseUrl/$id',
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode != 204) {
-      throw Exception('Failed to delete object event: ${response.statusCode}');
-    }
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByAction(String action) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentAction}/$action',
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByEPC(String epc) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}',
-      queryParameters: {ObjectEventApiConstants.queryEpc: epc},
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByEPCs(List<String> epcs) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpcs}',
-      queryParameters: {ObjectEventApiConstants.queryEpcs: epcs.join(',')},
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByEPCClass(String epcClass) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpcClass}',
-      queryParameters: {ObjectEventApiConstants.queryEpcClass: epcClass},
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByILMD(
-    String property,
-    String value,
-  ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentIlmd}',
-      queryParameters: {
-        ObjectEventApiConstants.queryProperty: property,
-        ObjectEventApiConstants.queryValue: value,
-      },
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByQuantity(
-    String epcClass,
-    double minQuantity,
-    double maxQuantity,
-  ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentQuantity}',
-      queryParameters: {
-        ObjectEventApiConstants.queryEpcClass: epcClass,
-        ObjectEventApiConstants.queryMin: minQuantity.toString(),
-        ObjectEventApiConstants.queryMax: maxQuantity.toString(),
-      },
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByBusinessStep(
-    String businessStep,
-  ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep',
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByDisposition(
-    String disposition,
-  ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentDisposition}/$disposition',
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByLocation(
-    String locationGLN,
-  ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentLocation}',
-      queryParameters: {
-        ObjectEventApiConstants.queryLocationGln: locationGLN,
-      },
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByTimeWindow(
-    DateTime startTime,
-    DateTime endTime,
-  ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentTimeRange}',
-      queryParameters: {
-        ObjectEventApiConstants.queryStartTime:
-            startTime.toUtc().toIso8601String(),
-        ObjectEventApiConstants.queryEndTime:
-            endTime.toUtc().toIso8601String(),
-      },
-    );
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByLocationAndTimeWindow(
-    String locationGLN,
-    DateTime startTime,
-    DateTime endTime,
-  ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentLocation}/${ObjectEventApiConstants.segmentTimeRange}',
-      queryParameters: {
-        ObjectEventApiConstants.queryLocationGln: locationGLN,
-        ObjectEventApiConstants.queryStartTime:
-            startTime.toUtc().toIso8601String(),
-        ObjectEventApiConstants.queryEndTime:
-            endTime.toUtc().toIso8601String(),
-      },
-    );
-  }
-
-  Future<Map<String, dynamic>> getEventStatistics({
-    DateTime? startTime,
-    DateTime? endTime,
-  }) async {
-    final headers = await _getHeaders();
-
-    final queryParams = <String, String>{};
-    if (startTime != null) {
-      queryParams[ObjectEventApiConstants.queryStartTime] =
-          startTime.toIso8601String();
-    }
-    if (endTime != null) {
-      queryParams[ObjectEventApiConstants.queryEndTime] =
-          endTime.toIso8601String();
-    }
-
-    final uri = Uri.parse(
-      '$_baseUrl/${ObjectEventApiConstants.segmentStatistics}',
-    ).replace(queryParameters: queryParams);
-    final response = await _dioService.get(
-      uri.toString(),
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.data);
-
-      Map<String, dynamic> transformedData = {
-        'totalEvents': data['totalEvents'] ?? 0,
-        'recentEvents': data['recentEvents'] ?? 0,
-      };
-
-      if (data['eventsByAction'] != null) {
-        transformedData['actionCounts'] = data['eventsByAction'];
-      }
-
-      if (data['topBusinessSteps'] != null) {
-        transformedData['businessStepCounts'] = data['topBusinessSteps'];
-      }
-
-      if (data['topDispositions'] != null) {
-        transformedData['dispositionCounts'] = data['topDispositions'];
-      } else {
-        transformedData['dispositionCounts'] = <String, int>{};
-      }
-
-      return transformedData;
-    } else {
-      throw Exception('Failed to fetch event statistics: ${response.data}');
-    }
-  }
-
-  Future<List<ObjectEvent>> findEPCHistory(String epc) async {
-    return findObjectEventsByEPC(epc);
-  }
-
-  Future<ObjectEvent> getCurrentStatusOfEPC(String epc) async {
-    final history = await findEPCHistory(epc);
-    if (history.isEmpty) {
-      throw Exception('No events found for EPC: $epc');
-    }
-    return history.first;
-  }
-
-  Future<ObjectEvent> createAddEvent(
-    String epc,
-    String locationGLN,
-    String businessStep,
-    String disposition,
-    Map<String, dynamic> ilmd,
-    Map<String, String> bizData,
-  ) async {
-    final headers = await _getHeaders();
-
-    final eventData = {
-      ObjectEventApiConstants.jsonKeyAction: ObjectEventApiConstants.actionAdd,
-      ObjectEventApiConstants.jsonKeyEpcList: [epc],
-      ObjectEventApiConstants.jsonKeyBusinessLocation: locationGLN,
-      ObjectEventApiConstants.jsonKeyBusinessStep: businessStep,
-      ObjectEventApiConstants.jsonKeyDisposition: disposition,
-      ObjectEventApiConstants.jsonKeyIlmd: ilmd,
-      ObjectEventApiConstants.jsonKeyBizData: bizData,
-      ObjectEventApiConstants.jsonKeyEventTime:
-          DateTime.now().toIso8601String(),
-      ObjectEventApiConstants.jsonKeyEventTimeZoneOffset:
-          _localTimezoneOffset(),
-    };
-
-    final response = await _dioService.post(
-      '$_baseUrl/${ObjectEventApiConstants.segmentAdd}',
-      headers: headers,
-      data: json.encode(eventData),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 201) {
-      return ObjectEvent.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to create ADD event: ${response.data}');
-    }
-  }
-
-  Future<ObjectEvent> createObserveEvent(
-    String epc,
-    String locationGLN,
-    String businessStep,
-    String disposition,
-    Map<String, String> bizData,
-  ) async {
-    final headers = await _getHeaders();
-
-    final eventData = {
-      ObjectEventApiConstants.jsonKeyAction:
-          ObjectEventApiConstants.actionObserve,
-      ObjectEventApiConstants.jsonKeyEpcList: [epc],
-      ObjectEventApiConstants.jsonKeyBusinessLocation: locationGLN,
-      ObjectEventApiConstants.jsonKeyBusinessStep: businessStep,
-      ObjectEventApiConstants.jsonKeyDisposition: disposition,
-      ObjectEventApiConstants.jsonKeyBizData: bizData,
-      ObjectEventApiConstants.jsonKeyEventTime:
-          DateTime.now().toIso8601String(),
-      ObjectEventApiConstants.jsonKeyEventTimeZoneOffset:
-          _localTimezoneOffset(),
-    };
-
-    final response = await _dioService.post(
-      '$_baseUrl/${ObjectEventApiConstants.segmentObserve}',
-      headers: headers,
-      data: json.encode(eventData),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 201) {
-      return ObjectEvent.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to create OBSERVE event: ${response.data}');
-    }
-  }
-
-  Future<ObjectEvent> createDeleteEvent(
-    String epc,
-    String locationGLN,
-    String businessStep,
-    String disposition,
-    Map<String, String> bizData,
-  ) async {
-    final headers = await _getHeaders();
-
-    final eventData = {
-      ObjectEventApiConstants.jsonKeyAction:
-          ObjectEventApiConstants.actionDelete,
-      ObjectEventApiConstants.jsonKeyEpcList: [epc],
-      ObjectEventApiConstants.jsonKeyBusinessLocation: locationGLN,
-      ObjectEventApiConstants.jsonKeyBusinessStep: businessStep,
-      ObjectEventApiConstants.jsonKeyDisposition: disposition,
-      ObjectEventApiConstants.jsonKeyBizData: bizData,
-      ObjectEventApiConstants.jsonKeyEventTime:
-          DateTime.now().toIso8601String(),
-      ObjectEventApiConstants.jsonKeyEventTimeZoneOffset:
-          _localTimezoneOffset(),
-    };
-
-    final response = await _dioService.post(
-      '$_baseUrl/${ObjectEventApiConstants.segmentDelete}',
-      headers: headers,
-      data: json.encode(eventData),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 201) {
-      return ObjectEvent.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to create DELETE event: ${response.data}');
-    }
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsWithSensorData(
-    Map<String, dynamic> sensorCriteria,
-  ) async {
-    final all = await _fetchAllObjectEvents(_baseUrl);
-    return all
-        .where(
-          (event) =>
-              event.sensorElementList != null &&
-              event.sensorElementList!.isNotEmpty,
-        )
-        .toList();
-  }
-
-  Future<bool> validateEPC(String epc) async {
-    final normalized = Gs1Converter.normalizeForStorage(epc);
-    return normalized.startsWith('https://id.gs1.org/01/') ||
-        normalized.startsWith('https://id.gs1.org/00/') ||
-        normalized.startsWith('https://id.gs1.org/414/') ||
-        RegExp(r'^urn:epc:id:(sgtin|sscc|sgln):', caseSensitive: false)
-            .hasMatch(epc);
-  }
-
-  Future<String> convertGS1ElementStringToEPC(String gs1ElementString) async {
-    final converted = Gs1Converter.barcodeToEpc(gs1ElementString);
-    if (converted != null) return converted;
-
-    if (gs1ElementString.startsWith('01') && gs1ElementString.contains('21')) {
-      final gtin = gs1ElementString.substring(2, 16);
-      final serial = gs1ElementString.substring(
-        gs1ElementString.indexOf('21') + 2,
-      );
-      return Gs1Converter.gtinSerialToEpc(gtin, serial) ??
-          'https://id.gs1.org/01/${gtin.padLeft(14, '0')}/21/$serial';
-    }
-
-    if (gs1ElementString.startsWith('00')) {
-      final sscc = gs1ElementString.substring(2, 20);
-      return Gs1Converter.ssccToEpc(sscc) ?? 'https://id.gs1.org/00/$sscc';
-    }
-
-    throw Exception('Unsupported GS1 element string format');
-  }
-
-  Future<List<ObjectEvent>> findObjectEventsByBusinessStepAndEPC(
-    String businessStep,
-    String epc,
-  ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep/${ObjectEventApiConstants.segmentEpc}',
-      queryParameters: {ObjectEventApiConstants.queryEpc: epc},
-    );
-  }
-
-  Future<Map<String, dynamic>> searchObjectEvents({
-    String? action,
-    String? bizStep,
-    String? disposition,
-    String? locationGLN,
-    String? searchText,
-    DateTime? startTime,
-    DateTime? endTime,
-    int page = 0,
-    int size = 20,
-    String direction = 'DESC',
-  }) async {
-    final headers = await _getHeaders();
-    final params = <String, String>{
-      ObjectEventApiConstants.queryPage: page.toString(),
-      ObjectEventApiConstants.querySize: size.toString(),
-      ObjectEventApiConstants.queryDirection: direction,
-    };
-    if (action != null) {
-      params[ObjectEventApiConstants.queryAction] = action;
-    }
-    if (bizStep != null) {
-      params[ObjectEventApiConstants.queryBizStep] = bizStep;
-    }
-    if (disposition != null) {
-      params[ObjectEventApiConstants.queryDisposition] = disposition;
-    }
-    if (locationGLN != null) {
-      params[ObjectEventApiConstants.queryLocationGln] = locationGLN;
-    }
-    if (searchText != null) {
-      params[ObjectEventApiConstants.querySearchText] = searchText;
-    }
-    if (startTime != null) {
-      params[ObjectEventApiConstants.queryStartTime] =
-          startTime.toUtc().toIso8601String();
-    }
-    if (endTime != null) {
-      params[ObjectEventApiConstants.queryEndTime] =
-          endTime.toUtc().toIso8601String();
-    }
-
-    final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentSearch}',
-      queryParameters: params,
-      headers: headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final raw = PageResponseUtils.normalizeBody(json.decode(response.data));
-      final content = PageResponseUtils.contentList(raw)
-          .map((e) => ObjectEvent.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return PageResponseUtils.toResultMap(content: content, raw: raw);
-    } else {
-      throw Exception('Failed to search object events: ${response.statusCode}');
-    }
-  }
-
-  Future<List<ObjectEvent>> getEpcHistory(String epc) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}/${ObjectEventApiConstants.segmentHistory}',
-      queryParameters: {ObjectEventApiConstants.queryEpc: epc},
-    );
-  }
-
-  String _localTimezoneOffset() {
-    final offset = DateTime.now().timeZoneOffset;
-    final hours = offset.inHours.abs().toString().padLeft(2, '0');
-    final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
-    final sign = offset.isNegative ? '-' : '+';
-    return '$sign$hours:$minutes';
   }
 }

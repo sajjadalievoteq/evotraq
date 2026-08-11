@@ -3,10 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 
-enum SerpentineAxis {
-  horizontal,
-  vertical,
-}
+enum SerpentineAxis { horizontal, vertical }
 
 abstract final class JourneyPinLayout {
   static const double pinRadius = 30.0;
@@ -19,7 +16,6 @@ abstract final class JourneyPinLayout {
   static const double _bandGap = 16.0;
   static const double _bottomGap = 16.0;
 
-  
   static const double _minBandHeight = 220.0;
 
   static int seedForSteps(List<JourneyStep> steps) {
@@ -35,7 +31,8 @@ abstract final class JourneyPinLayout {
     double height,
     List<Offset> centres,
     SerpentineAxis axis,
-  }) serpentineLayout({
+  })
+  serpentineLayout({
     required int count,
     required double viewportW,
     required double viewportH,
@@ -52,10 +49,7 @@ abstract final class JourneyPinLayout {
     }
     if (count == 1) {
       final usableTop = topInset + _bandGap;
-      final cy = math.max(
-        usableTop + pinRadius,
-        (usableTop + viewportH) / 2,
-      );
+      final cy = math.max(usableTop + pinRadius, (usableTop + viewportH) / 2);
       return (
         width: viewportW,
         height: math.max(viewportH, usableTop + pinHeight),
@@ -66,17 +60,17 @@ abstract final class JourneyPinLayout {
 
     return switch (axis) {
       SerpentineAxis.horizontal => _horizontalSerpentine(
-          count: count,
-          viewportW: viewportW,
-          viewportH: viewportH,
-          topInset: topInset,
-        ),
+        count: count,
+        viewportW: viewportW,
+        viewportH: viewportH,
+        topInset: topInset,
+      ),
       SerpentineAxis.vertical => _verticalSerpentine(
-          count: count,
-          viewportW: viewportW,
-          viewportH: viewportH,
-          topInset: topInset,
-        ),
+        count: count,
+        viewportW: viewportW,
+        viewportH: viewportH,
+        topInset: topInset,
+      ),
     };
   }
 
@@ -85,7 +79,8 @@ abstract final class JourneyPinLayout {
     double height,
     List<Offset> centres,
     SerpentineAxis axis,
-  }) _horizontalSerpentine({
+  })
+  _horizontalSerpentine({
     required int count,
     required double viewportW,
     required double viewportH,
@@ -137,7 +132,8 @@ abstract final class JourneyPinLayout {
     double height,
     List<Offset> centres,
     SerpentineAxis axis,
-  }) _verticalSerpentine({
+  })
+  _verticalSerpentine({
     required int count,
     required double viewportW,
     required double viewportH,
@@ -186,16 +182,18 @@ abstract final class JourneyPinLayout {
     final isHorizontalSegment = (from.dy - to.dy).abs() < tolerance;
 
     return switch (axis) {
-      SerpentineAxis.horizontal => isHorizontalSegment
-          ? Offset((from.dx + to.dx) / 2, from.dy - 18)
-          : isVerticalSegment
-              ? Offset(from.dx + 18, (from.dy + to.dy) / 2)
-              : null,
-      SerpentineAxis.vertical => isVerticalSegment
-          ? Offset(from.dx + 18, (from.dy + to.dy) / 2)
-          : isHorizontalSegment
-              ? Offset((from.dx + to.dx) / 2, from.dy - 18)
-              : null,
+      SerpentineAxis.horizontal =>
+        isHorizontalSegment
+            ? Offset((from.dx + to.dx) / 2, from.dy - 18)
+            : isVerticalSegment
+            ? Offset(from.dx + 18, (from.dy + to.dy) / 2)
+            : null,
+      SerpentineAxis.vertical =>
+        isVerticalSegment
+            ? Offset(from.dx + 18, (from.dy + to.dy) / 2)
+            : isHorizontalSegment
+            ? Offset((from.dx + to.dx) / 2, from.dy - 18)
+            : null,
     };
   }
 }

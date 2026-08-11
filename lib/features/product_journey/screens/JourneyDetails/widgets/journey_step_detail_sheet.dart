@@ -12,7 +12,10 @@ import 'package:traqtrace_app/features/product_journey/utils/journey_step_style.
 
 abstract final class JourneyStepDetailSheet {
   static Future<void> show(BuildContext context, JourneyStep step) {
-    final operationColor = JourneyStepStyle.colorFor(context, step.businessStep);
+    final operationColor = JourneyStepStyle.colorFor(
+      context,
+      step.businessStep,
+    );
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -23,7 +26,10 @@ abstract final class JourneyStepDetailSheet {
             borderRadius: BorderRadius.circular(20),
           ),
           backgroundColor: c.surface,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 32,
+            vertical: 48,
+          ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: SingleChildScrollView(
@@ -53,9 +59,7 @@ abstract final class JourneyStepDetailSheet {
                           children: [
                             Text(
                               JourneyStepStyle.titleFor(step.businessStep),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
+                              style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             Text(
@@ -108,9 +112,15 @@ abstract final class JourneyStepDetailSheet {
                       copyable: true,
                     ),
                   if (step.locationName != null)
-                    JourneyDetailRow(label: 'Location Name', value: step.locationName!),
+                    JourneyDetailRow(
+                      label: 'Location Name',
+                      value: step.locationName!,
+                    ),
                   if (step.locationAddress != null)
-                    JourneyDetailRow(label: 'Address', value: step.locationAddress!),
+                    JourneyDetailRow(
+                      label: 'Address',
+                      value: step.locationAddress!,
+                    ),
                   if (step.parentId != null)
                     JourneyDetailRow(
                       label: 'Parent (SSCC)',
@@ -123,10 +133,10 @@ abstract final class JourneyStepDetailSheet {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        
-                        
-                        
-                        context.push(_eventDetailRoute(step.eventType, step.eventId));
+
+                        context.push(
+                          _eventDetailRoute(step.eventType, step.eventId),
+                        );
                       },
                       icon: const TraqIcon(AppAssets.iconOpenNew),
                       label: const Text('View Full Event Details'),

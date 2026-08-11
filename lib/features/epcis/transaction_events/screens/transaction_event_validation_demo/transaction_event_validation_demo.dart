@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/epcis/transaction_events/screens/transaction_event_validation_demo/widgets/transaction_event_validation_section_header.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -14,10 +15,12 @@ class TransactionEventValidationDemo extends StatefulWidget {
   const TransactionEventValidationDemo({Key? key}) : super(key: key);
 
   @override
-  State<TransactionEventValidationDemo> createState() => _TransactionEventValidationDemoState();
+  State<TransactionEventValidationDemo> createState() =>
+      _TransactionEventValidationDemoState();
 }
 
-class _TransactionEventValidationDemoState extends State<TransactionEventValidationDemo> {
+class _TransactionEventValidationDemoState
+    extends State<TransactionEventValidationDemo> {
   final _formKey = GlobalKey<FormState>();
   final _transactionIdController = TextEditingController();
   final _transactionTypeController = TextEditingController();
@@ -58,9 +61,7 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Transaction Event Validation Demo'),
-      ),
+      appBar: AppBar(title: const Text('Transaction Event Validation Demo')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -70,9 +71,11 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader('Transaction Information'),
+                    const TransactionEventValidationSectionHeader(
+                      title: 'Transaction Information',
+                    ),
                     const SizedBox(height: 16),
-                    
+
                     ValidatedTextField(
                       controller: _transactionTypeController,
                       decoration: InputDecoration(
@@ -87,31 +90,42 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                             });
                           },
                           itemBuilder: (context) => _standardTransactionTypes
-                              .map((type) => PopupMenuItem(
-                                    value: type,
-                                    child: Text(type.split(':').last),
-                                  ))
+                              .map(
+                                (type) => PopupMenuItem(
+                                  value: type,
+                                  child: Text(type.split(':').last),
+                                ),
+                              )
                               .toList(),
                         ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          _setFieldError('transactionType', 'Transaction type is required');
+                          _setFieldError(
+                            'transactionType',
+                            'Transaction type is required',
+                          );
                           return 'Transaction type is required';
                         }
-                        if (!value.startsWith('urn:epcglobal:cbv:bizTransType:')) {
-                          _setFieldError('transactionType', 'Should follow the GS1 CBV business-transaction-type URN format.');
+                        if (!value.startsWith(
+                          'urn:epcglobal:cbv:bizTransType:',
+                        )) {
+                          _setFieldError(
+                            'transactionType',
+                            'Should follow the GS1 CBV business-transaction-type URN format.',
+                          );
                           return 'Should follow the GS1 CBV business-transaction-type URN format.';
                         }
                         _setFieldError('transactionType', null);
                         return null;
                       },
-                      helpText: 'Example: GS1 CBV business transaction type URN (purchase order).',
+                      helpText:
+                          'Example: GS1 CBV business transaction type URN (purchase order).',
                       validateOnChange: true,
                       validateOnBlur: true,
                     ),
                     const SizedBox(height: 16),
-                    
+
                     ValidatedTextField(
                       controller: _transactionIdController,
                       decoration: const InputDecoration(
@@ -121,19 +135,25 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          _setFieldError('transactionId', 'Transaction ID is required');
+                          _setFieldError(
+                            'transactionId',
+                            'Transaction ID is required',
+                          );
                           return 'Transaction ID is required';
                         }
                         _setFieldError('transactionId', null);
                         return null;
                       },
-                      helpText: 'Example: urn:epcglobal:cbv:bt:0614141000005:PO12345',
+                      helpText:
+                          'Example: urn:epcglobal:cbv:bt:0614141000005:PO12345',
                       validateOnChange: false,
                       validateOnBlur: true,
                     ),
                     const SizedBox(height: 16),
-                    
-                    _buildHeader('Business Context'),
+
+                    const TransactionEventValidationSectionHeader(
+                      title: 'Business Context',
+                    ),
                     const SizedBox(height: 16),
                     BlocBuilder<CbvVocabularyCubit, CbvVocabularyState>(
                       builder: (context, cbvState) {
@@ -152,7 +172,9 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                                   child: Text('Failed to load CBV vocabulary.'),
                                 ),
                                 TextButton(
-                                  onPressed: () => context.read<CbvVocabularyCubit>().refresh(),
+                                  onPressed: () => context
+                                      .read<CbvVocabularyCubit>()
+                                      .refresh(),
                                   child: const Text('Retry'),
                                 ),
                               ],
@@ -162,21 +184,30 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                         return const SizedBox.shrink();
                       },
                     ),
-                    
+
                     ValidatedFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          _setFieldError('bizStep', 'Business step is required');
+                          _setFieldError(
+                            'bizStep',
+                            'Business step is required',
+                          );
                           return 'Business step is required';
                         }
-                        if (!value.startsWith(CbvVocabularyFormatter.bizStepUrnPrefix)) {
-                          _setFieldError('bizStep', 'Should follow GS1 CBV business-step URN format.');
+                        if (!value.startsWith(
+                          CbvVocabularyFormatter.bizStepUrnPrefix,
+                        )) {
+                          _setFieldError(
+                            'bizStep',
+                            'Should follow GS1 CBV business-step URN format.',
+                          );
                           return 'Should follow GS1 CBV business-step URN format.';
                         }
                         _setFieldError('bizStep', null);
                         return null;
                       },
-                      helpText: 'Select a standard business step or enter custom value',
+                      helpText:
+                          'Select a standard business step or enter custom value',
                       validateOnChange: true,
                       validateOnBlur: true,
                       formField: DropdownButtonFormField<String>(
@@ -194,10 +225,12 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                               .watch<CbvVocabularyCubit>()
                               .state
                               .bizSteps
-                              .map((step) => DropdownMenuItem<String>(
-                                    value: step.urn,
-                                    child: Text(step.label),
-                                  )),
+                              .map(
+                                (step) => DropdownMenuItem<String>(
+                                  value: step.urn,
+                                  child: Text(step.label),
+                                ),
+                              ),
                         ],
                         onChanged: (value) {
                           setState(() {
@@ -211,7 +244,8 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                                       controller: _bizStepController,
                                       decoration: const InputDecoration(
                                         hintText: 'Enter custom business step',
-                                        prefixText: CbvVocabularyFormatter.bizStepUrnPrefix,
+                                        prefixText: CbvVocabularyFormatter
+                                            .bizStepUrnPrefix,
                                       ),
                                     ),
                                     actions: [
@@ -244,7 +278,7 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                       ),
                     ),
                     const SizedBox(height: 24),
-                    
+
                     Row(
                       children: [
                         Expanded(
@@ -275,22 +309,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
     );
   }
 
-  Widget _buildHeader(String title) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const Divider(),
-      ],
-    );
-  }
-
   String? _validateBizStep(String? value) {
     if (value == null || value.isEmpty) {
       return 'Business step is required';
@@ -303,23 +321,19 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
 
   void _validateAndSubmit() {
     if (_formKey.currentState!.validate()) {
-      context.showSuccess(
-        'Validation successful! Transaction event is valid.',
-      );
-      
+      context.showSuccess('Validation successful! Transaction event is valid.');
+
       setState(() {
         _isLoading = true;
       });
-      
+
       Future.delayed(const Duration(seconds: 1), () {
         setState(() {
           _isLoading = false;
         });
       });
     } else {
-      context.showError(
-        'Validation failed. Please check the form for errors.',
-      );
+      context.showError('Validation failed. Please check the form for errors.');
     }
   }
 
@@ -331,9 +345,9 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
     setState(() {
       _selectedBizStep = null;
     });
-    
+
     _clearFieldErrors();
-    
+
     context.showInfo('Form has been reset.');
   }
 }

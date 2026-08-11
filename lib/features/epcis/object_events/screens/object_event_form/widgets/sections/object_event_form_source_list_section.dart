@@ -67,15 +67,16 @@ class _ObjectEventFormSourceListSectionState
           DropdownButtonFormField<String>(
             value: _type,
             decoration: InputDecoration(
-              label: objectEventFormFieldLabel(context, 'Source Type', true),
+              label: const ObjectEventFormFieldLabel(
+                label: 'Source Type',
+                isMandatory: true,
+              ),
               border: const OutlineInputBorder(),
             ),
             items: objectEventFormSourceDestinationTypes
                 .map(
-                  (entry) => DropdownMenuItem(
-                    value: entry.$1,
-                    child: Text(entry.$2),
-                  ),
+                  (entry) =>
+                      DropdownMenuItem(value: entry.$1, child: Text(entry.$2)),
                 )
                 .toList(),
             onChanged: (value) {
@@ -86,7 +87,10 @@ class _ObjectEventFormSourceListSectionState
           TextField(
             controller: _idController,
             decoration: InputDecoration(
-              label: objectEventFormFieldLabel(context, 'GLN or Identifier', true),
+              label: const ObjectEventFormFieldLabel(
+                label: 'GLN or Identifier',
+                isMandatory: true,
+              ),
               hintText: 'e.g., 0614141000005',
               border: const OutlineInputBorder(),
             ),

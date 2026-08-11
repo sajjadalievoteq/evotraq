@@ -15,7 +15,6 @@ class JourneySuggestionsDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 220),
         child: ListView.builder(

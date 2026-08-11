@@ -43,8 +43,9 @@ class CacheHealthTab extends StatelessWidget {
                     ),
                     CacheHealthRow(
                       'Last Check',
-                      DateFormat('yyyy-MM-dd HH:mm:ss')
-                          .format(health!.timestampDateTime),
+                      DateFormat(
+                        'yyyy-MM-dd HH:mm:ss',
+                      ).format(health!.timestampDateTime),
                       true,
                     ),
                     if (health!.error != null)

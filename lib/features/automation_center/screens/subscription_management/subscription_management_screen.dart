@@ -8,9 +8,10 @@ import 'package:traqtrace_app/features/automation_center/cubit/notification_cubi
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_management_body.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/confirm_delete_subscription_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription_dialog.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/notification_subscription_help.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/help_widgets/notification_subscription_help.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_embedded_body.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_filter_chips.dart';
+import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_labeled_filter.dart';
 
 /// Subscription-management filter options (UI labels only; filter logic stays
 /// in [SubscriptionFilterUtils.filterManagement]).
@@ -86,14 +87,14 @@ class SubscriptionManagementScreenState
         runSpacing: TraqSpacing.md,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          _LabeledFilter(
+          SubscriptionLabeledFilter(
             label: 'Delivery',
             options: kSubscriptionManagementFilterOptions,
             selected: _selectedDeliveryFilter,
             onSelected: (filter) =>
                 setState(() => _selectedDeliveryFilter = filter),
           ),
-          _LabeledFilter(
+          SubscriptionLabeledFilter(
             label: 'Status',
             options: kSubscriptionStatusFilterOptions,
             selected: _selectedStatusFilter,
@@ -173,42 +174,5 @@ class SubscriptionManagementScreenState
 
   void _resumeSubscription(String subscriptionId) {
     context.read<NotificationCubit>().resumeSubscription(subscriptionId);
-  }
-}
-
-class _LabeledFilter extends StatelessWidget {
-  const _LabeledFilter({
-    required this.label,
-    required this.options,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final String label;
-  final List<SubscriptionFilterOption> options;
-  final String selected;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: TraqSpacing.sm,
-      runSpacing: TraqSpacing.sm,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text(
-          label,
-          style: context.text.bodySm.copyWith(
-            color: context.colors.textMuted,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        SubscriptionFilterChips(
-          options: options,
-          selectedFilter: selected,
-          onFilterSelected: onSelected,
-        ),
-      ],
-    );
   }
 }

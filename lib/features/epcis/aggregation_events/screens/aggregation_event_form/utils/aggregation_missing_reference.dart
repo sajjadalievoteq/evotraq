@@ -14,23 +14,23 @@ class AggregationMissingReference {
   final String? contextLabel;
 
   String get kindLabel => switch (kind) {
-        AggregationReferenceKind.gln => 'GLN',
-        AggregationReferenceKind.gtin => 'GTIN',
-        AggregationReferenceKind.sgtin => 'SGTIN',
-        AggregationReferenceKind.sscc => 'SSCC',
-      };
+    AggregationReferenceKind.gln => 'GLN',
+    AggregationReferenceKind.gtin => 'GTIN',
+    AggregationReferenceKind.sgtin => 'SGTIN',
+    AggregationReferenceKind.sscc => 'SSCC',
+  };
 
   String get createActionLabel => switch (kind) {
-        AggregationReferenceKind.gln => 'Create GLN',
-        AggregationReferenceKind.gtin => 'Create GTIN',
-        AggregationReferenceKind.sgtin => 'Create SGTIN',
-        AggregationReferenceKind.sscc => 'Create SSCC',
-      };
+    AggregationReferenceKind.gln => 'Create GLN',
+    AggregationReferenceKind.gtin => 'Create GTIN',
+    AggregationReferenceKind.sgtin => 'Create SGTIN',
+    AggregationReferenceKind.sscc => 'Create SSCC',
+  };
 
   int get sortOrder => switch (kind) {
-        AggregationReferenceKind.gln => 0,
-        AggregationReferenceKind.gtin => 1,
-        AggregationReferenceKind.sscc => 2,
-        AggregationReferenceKind.sgtin => 3,
-      };
+    AggregationReferenceKind.gln => 0,
+    AggregationReferenceKind.gtin => 1,
+    AggregationReferenceKind.sscc => 2,
+    AggregationReferenceKind.sgtin => 3,
+  };
 }

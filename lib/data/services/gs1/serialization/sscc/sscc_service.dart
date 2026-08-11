@@ -10,13 +10,16 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1_utils.dart';
 
+part 'sscc_service_operations.dart';
+
 class SSCCService {
   final DioService _dioService;
 
   SSCCService({required DioService dioService}) : _dioService = dioService;
 
   static const _headers = {
-    SsccServiceConstants.headerContentType: SsccServiceConstants.contentTypeJson,
+    SsccServiceConstants.headerContentType:
+        SsccServiceConstants.contentTypeJson,
   };
 
   Future<SSCC> createSSCC(SSCC sscc) async {
@@ -54,8 +57,11 @@ class SSCCService {
       } else {
         throw ApiException(
           statusCode: response.statusCode,
-          message: 'Unexpected response format from server: ${responseData.runtimeType}',
-          responseBody: response.data is String ? response.data as String : null,
+          message:
+              'Unexpected response format from server: ${responseData.runtimeType}',
+          responseBody: response.data is String
+              ? response.data as String
+              : null,
         );
       }
     } else {
@@ -78,7 +84,7 @@ class SSCCService {
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);
       if (responseData is Map<String, dynamic>) {
-        _normalizeFields(responseData);
+        SsccServiceOperations._normalizeFields(responseData);
       }
       return SSCC.fromJson(responseData);
     } else {
@@ -102,7 +108,7 @@ class SSCCService {
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);
       if (responseData is Map<String, dynamic>) {
-        _normalizeFields(responseData);
+        SsccServiceOperations._normalizeFields(responseData);
       }
       return SSCC.fromJson(responseData);
     } else {
@@ -142,7 +148,9 @@ class SSCCService {
       if (decoded is! Map<String, dynamic>) {
         throw ApiException(
           message: 'Unexpected SSCC list response format',
-          responseBody: response.data is String ? response.data as String : null,
+          responseBody: response.data is String
+              ? response.data as String
+              : null,
         );
       }
       final List<dynamic> contentList = decoded['content'] is List
@@ -297,6 +305,7 @@ class SSCCService {
     }
     return all;
   }
+
   Future<List<SSCC>> findSSCCsByUnitType(UnitType unitType) async {
     return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathContainerType(unitType.name)}',
@@ -315,13 +324,18 @@ class SSCCService {
     );
   }
 
-  Future<List<SSCC>> findSSCCsByDestinationLocation(String destinationGlnCode) async {
+  Future<List<SSCC>> findSSCCsByDestinationLocation(
+    String destinationGlnCode,
+  ) async {
     return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathDestinationLocation(destinationGlnCode)}',
     );
   }
 
-  Future<List<SSCC>> findSSCCsPackedBetween(DateTime startDate, DateTime endDate) async {
+  Future<List<SSCC>> findSSCCsPackedBetween(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathPackedBetween}',
       queryParameters: {
@@ -331,7 +345,10 @@ class SSCCService {
     );
   }
 
-  Future<List<SSCC>> findSSCCsShippedBetween(DateTime startDate, DateTime endDate) async {
+  Future<List<SSCC>> findSSCCsShippedBetween(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathShippedBetween}',
       queryParameters: {
@@ -363,7 +380,9 @@ class SSCCService {
     }
   }
 
-  Future<List<SSCC>> findSSCCsByGs1CompanyPrefix(String gs1CompanyPrefix) async {
+  Future<List<SSCC>> findSSCCsByGs1CompanyPrefix(
+    String gs1CompanyPrefix,
+  ) async {
     return _fetchAllSsccListPages(
       '${_dioService.baseUrl}${SsccServiceConstants.pathCompanyPrefix(gs1CompanyPrefix)}',
     );
@@ -380,9 +399,8 @@ class SSCCService {
       queryParameters: {
         if (unitType != null) 'containerType': unitType.name,
         if (status != null) 'containerStatus': status.name,
-        if (sourceLocationId != null) 'sourceLocationId': sourceLocationId,
-        if (destinationLocationId != null)
-          'destinationLocationId': destinationLocationId,
+        'sourceLocationId': ?sourceLocationId,
+        'destinationLocationId': ?destinationLocationId,
       },
     );
   }
@@ -408,16 +426,26 @@ class SSCCService {
     final queryParams = <String, dynamic>{
       if (ssccCode?.isNotEmpty == true) 'ssccCode': ssccCode!,
       if (containerType?.isNotEmpty == true) 'containerType': containerType!,
-      if (containerStatus?.isNotEmpty == true) 'containerStatus': containerStatus!,
-      if (sourceLocationName?.isNotEmpty == true) 'sourceLocationName': sourceLocationName!,
-      if (destinationLocationName?.isNotEmpty == true) 'destinationLocationName': destinationLocationName!,
-      if (gs1CompanyPrefix?.isNotEmpty == true) 'gs1CompanyPrefix': gs1CompanyPrefix!,
-      if (packingDateFrom != null) 'packingDateFrom': packingDateFrom.toIso8601String(),
-      if (packingDateTo != null) 'packingDateTo': packingDateTo.toIso8601String(),
-      if (shippingDateFrom != null) 'shippingDateFrom': shippingDateFrom.toIso8601String(),
-      if (shippingDateTo != null) 'shippingDateTo': shippingDateTo.toIso8601String(),
-      if (receivingDateFrom != null) 'receivingDateFrom': receivingDateFrom.toIso8601String(),
-      if (receivingDateTo != null) 'receivingDateTo': receivingDateTo.toIso8601String(),
+      if (containerStatus?.isNotEmpty == true)
+        'containerStatus': containerStatus!,
+      if (sourceLocationName?.isNotEmpty == true)
+        'sourceLocationName': sourceLocationName!,
+      if (destinationLocationName?.isNotEmpty == true)
+        'destinationLocationName': destinationLocationName!,
+      if (gs1CompanyPrefix?.isNotEmpty == true)
+        'gs1CompanyPrefix': gs1CompanyPrefix!,
+      if (packingDateFrom != null)
+        'packingDateFrom': packingDateFrom.toIso8601String(),
+      if (packingDateTo != null)
+        'packingDateTo': packingDateTo.toIso8601String(),
+      if (shippingDateFrom != null)
+        'shippingDateFrom': shippingDateFrom.toIso8601String(),
+      if (shippingDateTo != null)
+        'shippingDateTo': shippingDateTo.toIso8601String(),
+      if (receivingDateFrom != null)
+        'receivingDateFrom': receivingDateFrom.toIso8601String(),
+      if (receivingDateTo != null)
+        'receivingDateTo': receivingDateTo.toIso8601String(),
       'page': page.toString(),
       'size': size.toString(),
       'sortBy': sortBy,
@@ -440,7 +468,9 @@ class SSCCService {
       if (decoded is! Map<String, dynamic>) {
         throw ApiException(
           message: 'Unexpected SSCC search response format',
-          responseBody: response.data is String ? response.data as String : null,
+          responseBody: response.data is String
+              ? response.data as String
+              : null,
         );
       }
       final List<dynamic> contentList = decoded['content'] is List
@@ -463,237 +493,6 @@ class SSCCService {
         message: 'Failed to search SSCCs: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String : null,
       );
-    }
-  }
-
-  Future<String> generateSSCCCode(String gs1CompanyPrefix, String extensionDigit) async {
-    final Map<String, String> requestBody = {
-      'companyPrefix': gs1CompanyPrefix,
-      'containerType': 'PALLET',
-    };
-    if (extensionDigit.isNotEmpty) {
-      requestBody['extensionDigit'] = extensionDigit;
-    }
-
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathGenerate}',
-      headers: _headers,
-      data: json.encode(requestBody),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.data);
-
-      String? ssccCode;
-      if (responseData.containsKey('sscc') && responseData['sscc'] != null) {
-        ssccCode = responseData['sscc'].toString();
-      } else if (responseData.containsKey('ssccCode') && responseData['ssccCode'] != null) {
-        ssccCode = responseData['ssccCode'].toString();
-      } else if (responseData.containsKey('id')) {
-        try {
-          ssccCode = SSCC.fromJson(responseData).ssccCode;
-        } catch (_) {}
-      }
-
-      if (ssccCode != null) {
-        final validatedSSCC = GS1Utils.validateAndFixSSCC(ssccCode);
-        if (validatedSSCC != null) {
-          return validatedSSCC;
-        }
-        try {
-          return GS1Utils.generateSSCC(gs1CompanyPrefix, extensionDigit);
-        } catch (e) {
-          throw ApiException(
-            message: 'Invalid SSCC format from API and local generation failed: $e',
-          );
-        }
-      }
-      throw ApiException(
-        message: 'Invalid response format: SSCC code not found in response: $responseData',
-      );
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to generate SSCC code: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
-    }
-  }
-
-  Future<bool> validateSSCCCode(String ssccCode) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathValidate}',
-      queryParameters: {'ssccCode': ssccCode},
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.data);
-      return data[SsccServiceConstants.rIsValid] as bool;
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to validate SSCC code: ${response.statusMessage}',
-        responseBody: response.data is String ? response.data as String : null,
-      );
-    }
-  }
-
-  Future<List<SsccAggregationLink>> getAggregationLinksByCode(String ssccCode) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathAggregationByCode}',
-      queryParameters: {SsccServiceConstants.qSsccCode: ssccCode},
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SsccServiceConstants.statusOk) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => SsccAggregationLink.fromJson(item as Map<String, dynamic>)).toList();
-    }
-
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: 'Failed to load aggregation links: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String : null,
-    );
-  }
-
-  Future<SsccAggregationLink> addAggregationLink(
-    String ssccId, {
-    required String childEpc,
-    required String childKind,
-    required String aggregationEventId,
-  }) async {
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathAggregation(ssccId)}',
-      headers: _headers,
-      data: json.encode({
-        'childEpc': childEpc,
-        'childKind': childKind,
-        'aggregationEventId': aggregationEventId,
-      }),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SsccServiceConstants.statusCreated ||
-        response.statusCode == SsccServiceConstants.statusOk) {
-      return SsccAggregationLink.fromJson(
-        json.decode(response.data) as Map<String, dynamic>,
-      );
-    }
-
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: 'Failed to add aggregation link: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String : null,
-    );
-  }
-
-  Future<SsccAggregationLink> disaggregateLink(
-    int linkId, {
-    required String disaggregationEventId,
-  }) async {
-    final response = await _dioService.patch(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathDisaggregate(linkId)}',
-      headers: _headers,
-      data: json.encode({'disaggregationEventId': disaggregationEventId}),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SsccServiceConstants.statusOk) {
-      return SsccAggregationLink.fromJson(
-        json.decode(response.data) as Map<String, dynamic>,
-      );
-    }
-
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: 'Failed to disaggregate link: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String : null,
-    );
-  }
-
-  Future<String> extractCompanyPrefixFromGLN(String glnInput) async {
-    if (glnInput.isEmpty) {
-      throw ApiException(message: 'GLN input cannot be empty');
-    }
-
-    final urnPrefixRegex = RegExp(r'urn:epc:id:sgln:(\d{7,10})\..*');
-    final urnPrefixMatch = urnPrefixRegex.firstMatch(glnInput);
-    if (urnPrefixMatch != null && urnPrefixMatch.group(1) != null) {
-      return urnPrefixMatch.group(1)!;
-    }
-
-    String? glnCode;
-    if (glnInput.length == 13 && RegExp(r'^\d{13}$').hasMatch(glnInput)) {
-      glnCode = glnInput;
-    } else {
-      try {
-        glnCode = await _parseGLNFromFormat(glnInput);
-      } catch (e) {
-        throw ApiException(message: 'Failed to parse GLN from input: ${e.toString()}');
-      }
-    }
-
-    if (glnCode == null || glnCode.isEmpty) {
-      throw ApiException(
-        message: 'Invalid GLN format. GLN must be in one of these formats: '
-            '13 digits, (414)nnnnnnnnnnnn, or urn:epc:id:sgln:prefix.reference.0',
-      );
-    }
-    if (glnCode.length != 13 || !RegExp(r'^\d{13}$').hasMatch(glnCode)) {
-      throw ApiException(message: 'Invalid GLN format. GLN must be 13 digits');
-    }
-
-    return glnCode.substring(0, 7);
-  }
-
-  Future<String?> _parseGLNFromFormat(String input) async {
-    try {
-      final result = GS1Utils.extractGLNCode(input);
-      if (result != null && result.isNotEmpty) return result;
-    } catch (_) {}
-
-    final barcodeMatch = RegExp(r'\(414\)(\d{13})').firstMatch(input);
-    if (barcodeMatch?.group(1) != null) {
-      return barcodeMatch!.group(1);
-    }
-
-    final urnMatch = RegExp(r'urn:epc:id:sgln:(\d{7,10})\.(\d{1,5})\.(\d)').firstMatch(input);
-    if (urnMatch != null) {
-      final companyPrefix = urnMatch.group(1);
-      final locationReference = urnMatch.group(2)?.padLeft(5, '0');
-      if (companyPrefix != null && locationReference != null) {
-        final glnWithoutCheck = companyPrefix + locationReference;
-        return glnWithoutCheck + _calculateGS1CheckDigit(glnWithoutCheck);
-      }
-    }
-
-    if (input.length == 13 && RegExp(r'^\d{13}$').hasMatch(input)) return input;
-    return null;
-  }
-
-  String _calculateGS1CheckDigit(String digits) {
-    return CheckDigitUtils.calculateMod10String(digits);
-  }
-
-  static void _normalizeFields(Map<String, dynamic> data) {
-    if (data.containsKey('sscc') && !data.containsKey('ssccCode')) {
-      data['ssccCode'] = data['sscc'];
-    }
-    if (!data.containsKey('createdAt') && data.containsKey('statusDate')) {
-      data['createdAt'] = data['statusDate'];
-    }
-    if (!data.containsKey('updatedAt') && data.containsKey('statusDate')) {
-      data['updatedAt'] = data['statusDate'];
     }
   }
 }

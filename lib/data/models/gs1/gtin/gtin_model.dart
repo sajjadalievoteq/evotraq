@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 
+part 'gtin_mutation_serialization.dart';
+
 class GTIN extends Equatable {
   final int? id;
   final String gtinCode;
@@ -154,310 +156,73 @@ class GTIN extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        gtinCode,
-        productName,
-        manufacturer,
-        gs1CompanyPrefixLength,
-        gs1CompanyPrefix,
-        itemReference,
-        functionalName,
-        tradeItemDescription,
-        packagingType,
-        unitOfMeasure,
-        unitDescriptor,
-        isBaseUnit,
-        isConsumerUnit,
-        isOrderableUnit,
-        isDespatchUnit,
-        isInvoiceUnit,
-        isVariableUnit,
-        quantityOfChildren,
-        totalQtyNextLower,
-        nextLowerLevelGtin,
-        nextLowerLevelQuantity,
-        netContentValue,
-        netContentUom,
-        grossWeightValue,
-        grossWeightUom,
-        heightValue,
-        widthValue,
-        depthValue,
-        dimUom,
-        gpcBrickCode,
-        targetMarketCountry,
-        countryOfOrigin,
-        informationProviderGln,
-        informationProviderName,
-        manufacturerGln,
-        tradeItemStatus,
-        effectiveDate,
-        startAvailDate,
-        endAvailDate,
-        publicationDate,
-        hasBatchNumberIndicator,
-        hasSerialNumberIndicator,
-        createdBy,
-        updatedBy,
-        launchDate,
-        quantityPerParent,
-        packagingLevel,
-        packSize,
-        status,
-        registrationNumber,
-        parentGTIN,
-        marketAuthorization,
-        authorizationCountry,
-        registrationDate,
-        expirationDate,
-        authorizationExpiry,
-        createdAt,
-        updatedAt,
-        isPharmaceuticalProduct,
-        pharmaceuticalExtension,
-        currentLocation,
-        currentLocationGln,
-        currentLocationName,
-        currentPackedInEpc,
-        childGtinCodes,
-      ];
-
-  GTIN copyWith({
-    int? id,
-    String? gtinCode,
-    String? productName,
-    String? manufacturer,
-    int? gs1CompanyPrefixLength,
-    String? gs1CompanyPrefix,
-    String? itemReference,
-    String? functionalName,
-    String? tradeItemDescription,
-    String? packagingType,
-    String? unitOfMeasure,
-    String? unitDescriptor,
-    bool? isBaseUnit,
-    bool? isConsumerUnit,
-    bool? isOrderableUnit,
-    bool? isDespatchUnit,
-    bool? isInvoiceUnit,
-    bool? isVariableUnit,
-    int? quantityOfChildren,
-    int? totalQtyNextLower,
-    String? nextLowerLevelGtin,
-    int? nextLowerLevelQuantity,
-    double? netContentValue,
-    String? netContentUom,
-    double? grossWeightValue,
-    String? grossWeightUom,
-    double? heightValue,
-    double? widthValue,
-    double? depthValue,
-    String? dimUom,
-    String? gpcBrickCode,
-    String? targetMarketCountry,
-    String? countryOfOrigin,
-    String? informationProviderGln,
-    String? informationProviderName,
-    String? manufacturerGln,
-    String? tradeItemStatus,
-    DateTime? effectiveDate,
-    DateTime? startAvailDate,
-    DateTime? endAvailDate,
-    DateTime? publicationDate,
-    String? hasBatchNumberIndicator,
-    String? hasSerialNumberIndicator,
-    String? createdBy,
-    String? updatedBy,
-    DateTime? launchDate,
-    int? quantityPerParent,
-    String? packagingLevel,
-    int? packSize,
-    String? status,
-    String? registrationNumber,
-    String? parentGTIN,
-    String? marketAuthorization,
-    String? authorizationCountry,
-    DateTime? registrationDate,
-    DateTime? expirationDate,
-    DateTime? authorizationExpiry,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    bool? isPharmaceuticalProduct,
-    GTINPharmaceuticalExtension? pharmaceuticalExtension,
-    GLN? currentLocation,
-    String? currentLocationGln,
-    String? currentLocationName,
-    String? currentPackedInEpc,
-    List<String>? childGtinCodes,
-  }) {
-    return GTIN(
-      id: id ?? this.id,
-      gtinCode: gtinCode ?? this.gtinCode,
-      productName: productName ?? this.productName,
-      manufacturer: manufacturer ?? this.manufacturer,
-      gs1CompanyPrefixLength:
-          gs1CompanyPrefixLength ?? this.gs1CompanyPrefixLength,
-      gs1CompanyPrefix: gs1CompanyPrefix ?? this.gs1CompanyPrefix,
-      itemReference: itemReference ?? this.itemReference,
-      functionalName: functionalName ?? this.functionalName,
-      tradeItemDescription: tradeItemDescription ?? this.tradeItemDescription,
-      packagingType: packagingType ?? this.packagingType,
-      unitOfMeasure: unitOfMeasure ?? this.unitOfMeasure,
-      unitDescriptor: unitDescriptor ?? this.unitDescriptor,
-      isBaseUnit: isBaseUnit ?? this.isBaseUnit,
-      isConsumerUnit: isConsumerUnit ?? this.isConsumerUnit,
-      isOrderableUnit: isOrderableUnit ?? this.isOrderableUnit,
-      isDespatchUnit: isDespatchUnit ?? this.isDespatchUnit,
-      isInvoiceUnit: isInvoiceUnit ?? this.isInvoiceUnit,
-      isVariableUnit: isVariableUnit ?? this.isVariableUnit,
-      quantityOfChildren: quantityOfChildren ?? this.quantityOfChildren,
-      totalQtyNextLower: totalQtyNextLower ?? this.totalQtyNextLower,
-      nextLowerLevelGtin: nextLowerLevelGtin ?? this.nextLowerLevelGtin,
-      nextLowerLevelQuantity:
-          nextLowerLevelQuantity ?? this.nextLowerLevelQuantity,
-      netContentValue: netContentValue ?? this.netContentValue,
-      netContentUom: netContentUom ?? this.netContentUom,
-      grossWeightValue: grossWeightValue ?? this.grossWeightValue,
-      grossWeightUom: grossWeightUom ?? this.grossWeightUom,
-      heightValue: heightValue ?? this.heightValue,
-      widthValue: widthValue ?? this.widthValue,
-      depthValue: depthValue ?? this.depthValue,
-      dimUom: dimUom ?? this.dimUom,
-      gpcBrickCode: gpcBrickCode ?? this.gpcBrickCode,
-      targetMarketCountry: targetMarketCountry ?? this.targetMarketCountry,
-      countryOfOrigin: countryOfOrigin ?? this.countryOfOrigin,
-      informationProviderGln:
-          informationProviderGln ?? this.informationProviderGln,
-      informationProviderName:
-          informationProviderName ?? this.informationProviderName,
-      manufacturerGln: manufacturerGln ?? this.manufacturerGln,
-      tradeItemStatus: tradeItemStatus ?? this.tradeItemStatus,
-      effectiveDate: effectiveDate ?? this.effectiveDate,
-      startAvailDate: startAvailDate ?? this.startAvailDate,
-      endAvailDate: endAvailDate ?? this.endAvailDate,
-      publicationDate: publicationDate ?? this.publicationDate,
-      hasBatchNumberIndicator:
-          hasBatchNumberIndicator ?? this.hasBatchNumberIndicator,
-      hasSerialNumberIndicator:
-          hasSerialNumberIndicator ?? this.hasSerialNumberIndicator,
-      createdBy: createdBy ?? this.createdBy,
-      updatedBy: updatedBy ?? this.updatedBy,
-      launchDate: launchDate ?? this.launchDate,
-      quantityPerParent: quantityPerParent ?? this.quantityPerParent,
-      packagingLevel: packagingLevel ?? this.packagingLevel,
-      packSize: packSize ?? this.packSize,
-      status: status ?? this.status,
-      registrationNumber: registrationNumber ?? this.registrationNumber,
-      parentGTIN: parentGTIN ?? this.parentGTIN,
-      marketAuthorization: marketAuthorization ?? this.marketAuthorization,
-      authorizationCountry: authorizationCountry ?? this.authorizationCountry,
-      registrationDate: registrationDate ?? this.registrationDate,
-      expirationDate: expirationDate ?? this.expirationDate,
-      authorizationExpiry: authorizationExpiry ?? this.authorizationExpiry,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      isPharmaceuticalProduct:
-          isPharmaceuticalProduct ?? this.isPharmaceuticalProduct,
-      pharmaceuticalExtension:
-          pharmaceuticalExtension ?? this.pharmaceuticalExtension,
-      currentLocation: currentLocation ?? this.currentLocation,
-      currentLocationGln: currentLocationGln ?? this.currentLocationGln,
-      currentLocationName: currentLocationName ?? this.currentLocationName,
-      currentPackedInEpc: currentPackedInEpc ?? this.currentPackedInEpc,
-      childGtinCodes: childGtinCodes ?? this.childGtinCodes,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      if (id != null) 'id': id,
-      'gtin': gtinCode,
-      'productName': productName,
-      'manufacturer': manufacturer ?? '',
-      if (gs1CompanyPrefixLength != null)
-        'gs1CompanyPrefixLength': gs1CompanyPrefixLength,
-      if (gs1CompanyPrefix != null) 'gs1CompanyPrefix': gs1CompanyPrefix,
-      if (itemReference != null) 'itemReference': itemReference,
-      if (functionalName != null) 'functionalName': functionalName,
-      if (tradeItemDescription != null)
-        'tradeItemDescription': tradeItemDescription,
-      if (packagingType != null) 'packagingType': packagingType,
-      if (unitOfMeasure != null) 'unitOfMeasure': unitOfMeasure,
-      if (unitDescriptor != null) 'unitDescriptor': unitDescriptor,
-      if (isBaseUnit != null) 'isBaseUnit': isBaseUnit,
-      if (isConsumerUnit != null) 'isConsumerUnit': isConsumerUnit,
-      if (isOrderableUnit != null) 'isOrderableUnit': isOrderableUnit,
-      if (isDespatchUnit != null) 'isDespatchUnit': isDespatchUnit,
-      if (isInvoiceUnit != null) 'isInvoiceUnit': isInvoiceUnit,
-      if (isVariableUnit != null) 'isVariableUnit': isVariableUnit,
-      if (quantityOfChildren != null) 'quantityOfChildren': quantityOfChildren,
-      if (totalQtyNextLower != null) 'totalQtyNextLower': totalQtyNextLower,
-      if (nextLowerLevelGtin != null)
-        'nextLowerLevelGtin': nextLowerLevelGtin,
-      if (nextLowerLevelQuantity != null)
-        'nextLowerLevelQuantity': nextLowerLevelQuantity,
-      if (netContentValue != null) 'netContentValue': netContentValue,
-      if (netContentUom != null) 'netContentUom': netContentUom,
-      if (grossWeightValue != null) 'grossWeightValue': grossWeightValue,
-      if (grossWeightUom != null) 'grossWeightUom': grossWeightUom,
-      if (heightValue != null) 'heightValue': heightValue,
-      if (widthValue != null) 'widthValue': widthValue,
-      if (depthValue != null) 'depthValue': depthValue,
-      if (dimUom != null) 'dimUom': dimUom,
-      if (gpcBrickCode != null) 'gpcBrickCode': gpcBrickCode,
-      if (targetMarketCountry != null)
-        'targetMarketCountry': targetMarketCountry,
-      if (countryOfOrigin != null) 'countryOfOrigin': countryOfOrigin,
-      if (informationProviderGln != null)
-        'informationProviderGln': informationProviderGln,
-      if (informationProviderName != null)
-        'informationProviderName': informationProviderName,
-      if (manufacturerGln != null) 'manufacturerGln': manufacturerGln,
-      if (tradeItemStatus != null) 'tradeItemStatus': tradeItemStatus,
-      if (effectiveDate != null)
-        'effectiveDate': _formatDateWithTimezone(effectiveDate!),
-      if (startAvailDate != null)
-        'startAvailDate': _formatDateWithTimezone(startAvailDate!),
-      if (endAvailDate != null)
-        'endAvailDate': _formatDateWithTimezone(endAvailDate!),
-      if (publicationDate != null)
-        'publicationDate': publicationDate!.toIso8601String().split('T').first,
-      if (hasBatchNumberIndicator != null)
-        'hasBatchNumberIndicator': hasBatchNumberIndicator,
-      if (hasSerialNumberIndicator != null)
-        'hasSerialNumberIndicator': hasSerialNumberIndicator,
-      if (createdBy != null) 'createdBy': createdBy,
-      if (updatedBy != null) 'updatedBy': updatedBy,
-      if (launchDate != null)
-        'launchDate': _formatDateWithTimezone(launchDate!),
-      if (quantityPerParent != null) 'quantityPerParent': quantityPerParent,
-      if (packagingLevel != null) 'packagingLevel': packagingLevel,
-      if (packSize != null) 'packSize': packSize,
-      if (status != null)
-        'productStatus': status,
-      if (registrationNumber != null)
-        'marketingAuthorizationNumber':
-            registrationNumber,
-      if (parentGTIN != null) 'parentGTIN': parentGTIN,
-      if (marketAuthorization != null)
-        'marketAuthorizations': {
-          'DEFAULT': marketAuthorization
-        },
-      if (registrationDate != null)
-        'marketingAuthorizationDate':
-            _formatDateWithTimezone(registrationDate!),
-      if (expirationDate != null)
-        'discontinuationDate': _formatDateWithTimezone(expirationDate!),
-      if (authorizationExpiry != null && registrationDate == null)
-        'marketingAuthorizationDate':
-            _formatDateWithTimezone(authorizationExpiry!),
-      if (currentLocation != null) 'currentLocationGLN': currentLocation!.glnCode,
-      if (currentLocationGln != null) 'currentLocationGln': currentLocationGln,
-      if (currentLocationName != null) 'currentLocationName': currentLocationName,
-      if (currentPackedInEpc != null) 'currentPackedInEpc': currentPackedInEpc,
-      if (childGtinCodes.isNotEmpty) 'childGtinCodes': childGtinCodes,
-    };
-  }
+    id,
+    gtinCode,
+    productName,
+    manufacturer,
+    gs1CompanyPrefixLength,
+    gs1CompanyPrefix,
+    itemReference,
+    functionalName,
+    tradeItemDescription,
+    packagingType,
+    unitOfMeasure,
+    unitDescriptor,
+    isBaseUnit,
+    isConsumerUnit,
+    isOrderableUnit,
+    isDespatchUnit,
+    isInvoiceUnit,
+    isVariableUnit,
+    quantityOfChildren,
+    totalQtyNextLower,
+    nextLowerLevelGtin,
+    nextLowerLevelQuantity,
+    netContentValue,
+    netContentUom,
+    grossWeightValue,
+    grossWeightUom,
+    heightValue,
+    widthValue,
+    depthValue,
+    dimUom,
+    gpcBrickCode,
+    targetMarketCountry,
+    countryOfOrigin,
+    informationProviderGln,
+    informationProviderName,
+    manufacturerGln,
+    tradeItemStatus,
+    effectiveDate,
+    startAvailDate,
+    endAvailDate,
+    publicationDate,
+    hasBatchNumberIndicator,
+    hasSerialNumberIndicator,
+    createdBy,
+    updatedBy,
+    launchDate,
+    quantityPerParent,
+    packagingLevel,
+    packSize,
+    status,
+    registrationNumber,
+    parentGTIN,
+    marketAuthorization,
+    authorizationCountry,
+    registrationDate,
+    expirationDate,
+    authorizationExpiry,
+    createdAt,
+    updatedAt,
+    isPharmaceuticalProduct,
+    pharmaceuticalExtension,
+    currentLocation,
+    currentLocationGln,
+    currentLocationName,
+    currentPackedInEpc,
+    childGtinCodes,
+  ];
 
   factory GTIN.fromJson(Map<String, dynamic> json) {
     String? marketAuth;
@@ -491,17 +256,24 @@ class GTIN extends Equatable {
       packagingType: json['packagingType'],
       unitOfMeasure: json['unitOfMeasure'],
       unitDescriptor: json['unitDescriptor'],
-      isBaseUnit: json['isBaseUnit'] == null ? null : json['isBaseUnit'] == true,
-      isConsumerUnit:
-          json['isConsumerUnit'] == null ? null : json['isConsumerUnit'] == true,
-      isOrderableUnit:
-          json['isOrderableUnit'] == null ? null : json['isOrderableUnit'] == true,
-      isDespatchUnit:
-          json['isDespatchUnit'] == null ? null : json['isDespatchUnit'] == true,
-      isInvoiceUnit:
-          json['isInvoiceUnit'] == null ? null : json['isInvoiceUnit'] == true,
-      isVariableUnit:
-          json['isVariableUnit'] == null ? null : json['isVariableUnit'] == true,
+      isBaseUnit: json['isBaseUnit'] == null
+          ? null
+          : json['isBaseUnit'] == true,
+      isConsumerUnit: json['isConsumerUnit'] == null
+          ? null
+          : json['isConsumerUnit'] == true,
+      isOrderableUnit: json['isOrderableUnit'] == null
+          ? null
+          : json['isOrderableUnit'] == true,
+      isDespatchUnit: json['isDespatchUnit'] == null
+          ? null
+          : json['isDespatchUnit'] == true,
+      isInvoiceUnit: json['isInvoiceUnit'] == null
+          ? null
+          : json['isInvoiceUnit'] == true,
+      isVariableUnit: json['isVariableUnit'] == null
+          ? null
+          : json['isVariableUnit'] == true,
       quantityOfChildren: json['quantityOfChildren'] != null
           ? int.tryParse(json['quantityOfChildren'].toString())
           : null,
@@ -543,8 +315,9 @@ class GTIN extends Equatable {
       startAvailDate: json['startAvailDate'] != null
           ? DateTime.parse(json['startAvailDate'])
           : null,
-      endAvailDate:
-          json['endAvailDate'] != null ? DateTime.parse(json['endAvailDate']) : null,
+      endAvailDate: json['endAvailDate'] != null
+          ? DateTime.parse(json['endAvailDate'])
+          : null,
       publicationDate: json['publicationDate'] != null
           ? DateTime.parse(json['publicationDate'])
           : null,
@@ -552,8 +325,9 @@ class GTIN extends Equatable {
       hasSerialNumberIndicator: json['hasSerialNumberIndicator'],
       createdBy: json['createdBy'],
       updatedBy: json['updatedBy'],
-      launchDate:
-          json['launchDate'] != null ? DateTime.parse(json['launchDate']) : null,
+      launchDate: json['launchDate'] != null
+          ? DateTime.parse(json['launchDate'])
+          : null,
       quantityPerParent: json['quantityPerParent'] != null
           ? int.tryParse(json['quantityPerParent'].toString())
           : null,
@@ -570,18 +344,18 @@ class GTIN extends Equatable {
       registrationDate: json['marketingAuthorizationDate'] != null
           ? DateTime.parse(json['marketingAuthorizationDate'])
           : json['registrationDate'] != null
-              ? DateTime.parse(json['registrationDate'])
-              : null,
+          ? DateTime.parse(json['registrationDate'])
+          : null,
       expirationDate: json['discontinuationDate'] != null
           ? DateTime.parse(json['discontinuationDate'])
           : json['expirationDate'] != null
-              ? DateTime.parse(json['expirationDate'])
-              : null,
+          ? DateTime.parse(json['expirationDate'])
+          : null,
       authorizationExpiry: json['authorizationExpiry'] != null
           ? DateTime.parse(json['authorizationExpiry'])
           : json['marketingAuthorizationDate'] != null
-              ? DateTime.parse(json['marketingAuthorizationDate'])
-              : null,
+          ? DateTime.parse(json['marketingAuthorizationDate'])
+          : null,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : null,
@@ -591,7 +365,8 @@ class GTIN extends Equatable {
       isPharmaceuticalProduct: json['isPharmaceuticalProduct'] == true,
       pharmaceuticalExtension: pharmaceuticalExtension,
       currentLocation: _parseCurrentLocation(json),
-      currentLocationGln: json['currentLocationGln'] as String? ??
+      currentLocationGln:
+          json['currentLocationGln'] as String? ??
           json['currentLocationGLN'] as String?,
       currentLocationName: json['currentLocationName'] as String?,
       currentPackedInEpc: json['currentPackedInEpc'] as String?,

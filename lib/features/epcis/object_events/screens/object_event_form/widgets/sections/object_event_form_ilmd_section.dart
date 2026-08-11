@@ -29,7 +29,8 @@ class ObjectEventFormIlmdSection extends StatefulWidget {
       _ObjectEventFormIlmdSectionState();
 }
 
-class _ObjectEventFormIlmdSectionState extends State<ObjectEventFormIlmdSection> {
+class _ObjectEventFormIlmdSectionState
+    extends State<ObjectEventFormIlmdSection> {
   late final TextEditingController _manufacturerController;
   final _dateFormat = DateFormat('yyyy-MM-dd');
 
@@ -95,14 +96,15 @@ class _ObjectEventFormIlmdSectionState extends State<ObjectEventFormIlmdSection>
         widget.ilmd[ilmdItemExpirationDateKey]?.toString() ?? '';
     final expirationDate = _parseExpirationDate();
 
-    final titleIsRequired = ObjectEventFormMandatoryFields.groupHasRequiredField(
-      fieldNames: ObjectEventFormMandatoryFields.ilmdFields,
-      action: widget.action,
-      businessStep: widget.businessStep,
-      epcListEmpty: widget.epcList.isEmpty,
-      quantityListEmpty: false,
-      epcList: widget.epcList,
-    );
+    final titleIsRequired =
+        ObjectEventFormMandatoryFields.groupHasRequiredField(
+          fieldNames: ObjectEventFormMandatoryFields.ilmdFields,
+          action: widget.action,
+          businessStep: widget.businessStep,
+          epcListEmpty: widget.epcList.isEmpty,
+          quantityListEmpty: false,
+          epcList: widget.epcList,
+        );
 
     return ObjectEventFormSectionCard(
       title: 'Instance/Lot Master Data (ILMD)',
@@ -127,10 +129,9 @@ class _ObjectEventFormIlmdSectionState extends State<ObjectEventFormIlmdSection>
               onTap: _selectExpirationDate,
               child: InputDecorator(
                 decoration: InputDecoration(
-                  label: objectEventFormFieldLabel(
-                    context,
-                    'Item Expiration Date (cbvmda:itemExpirationDate)',
-                    true,
+                  label: const ObjectEventFormFieldLabel(
+                    label: 'Item Expiration Date (cbvmda:itemExpirationDate)',
+                    isMandatory: true,
                   ),
                   border: const OutlineInputBorder(),
                 ),
@@ -145,10 +146,9 @@ class _ObjectEventFormIlmdSectionState extends State<ObjectEventFormIlmdSection>
             TextFormField(
               controller: _manufacturerController,
               decoration: InputDecoration(
-                label: objectEventFormFieldLabel(
-                  context,
-                  'Manufacturer of Goods (cbvmda:manufacturerOfGoods)',
-                  true,
+                label: const ObjectEventFormFieldLabel(
+                  label: 'Manufacturer of Goods (cbvmda:manufacturerOfGoods)',
+                  isMandatory: true,
                 ),
                 border: const OutlineInputBorder(),
               ),

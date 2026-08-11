@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_info_row.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_status_chip.dart';
@@ -32,35 +33,11 @@ class SgtinListItemCard extends StatelessWidget {
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
             : const EdgeInsets.all(16);
 
-        Widget infoRow(String iconAsset, String text) {
-          final rowColor =
-              Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                TraqIcon(iconAsset, size: 14, color: rowColor),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(color: rowColor),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
         return Card(
           color: Gs1ListItemSelectionStyle.cardBackground(context, isSelected),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(2),
-            side: BorderSide(
-              color: theme.colorScheme.outline.withOpacity(0.2),
-            ),
+            side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
           ),
           child: InkWell(
             onTap: onTap,
@@ -86,26 +63,46 @@ class SgtinListItemCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
-                        infoRow(
+                        Gs1ListItemInfoRow(
                           AppAssets.iconQr,
                           '${SgtinUiConstants.listCardGtinPrefix}${sgtin.gtinCode}',
+
+                          isSelected: isSelected,
+                          muted: muted,
+                          iconSize: 14,
+                          textStyle: theme.textTheme.bodySmall,
                         ),
                         if (sgtin.batchLotNumber != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             AppAssets.iconTag,
                             '${SgtinUiConstants.listCardBatchPrefix}${sgtin.batchLotNumber}',
+
+                            isSelected: isSelected,
+                            muted: muted,
+                            iconSize: 14,
+                            textStyle: theme.textTheme.bodySmall,
                           ),
                         if (sgtin.expiryDate != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             AppAssets.iconCalendar,
                             '${SgtinUiConstants.listCardExpiryPrefix}'
                             '${DateFormat('MMM dd, yyyy').format(sgtin.expiryDate!)}',
+
+                            isSelected: isSelected,
+                            muted: muted,
+                            iconSize: 14,
+                            textStyle: theme.textTheme.bodySmall,
                           ),
                         if (sgtin.currentLocation != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             AppAssets.iconMapPin,
                             '${SgtinUiConstants.listCardLocationPrefix}'
                             '${sgtin.currentLocation!.locationName}',
+
+                            isSelected: isSelected,
+                            muted: muted,
+                            iconSize: 14,
+                            textStyle: theme.textTheme.bodySmall,
                           ),
                       ],
                     ),

@@ -17,13 +17,12 @@ import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/trade_item_descriptive_attributes_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/trade_item_masterdata_bound_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharmaceutical_extension_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/regulatory_authority/regulatory_authority_extension.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/regulatory_authority/regulatory_authority_extension.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_detail_form.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_detail_header_card.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_industry_extensions_section.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_lazy_viewport_section.dart';
-
 
 class GtinDetailFormBody extends StatelessWidget {
   const GtinDetailFormBody({
@@ -81,19 +80,6 @@ class GtinDetailFormBody extends StatelessWidget {
   final Future<void> Function() onPickEndAvailDate;
   final Future<void> Function() onPickPublicationDate;
 
-  Widget _lazy({
-    required bool eager,
-    required double placeholderHeight,
-    required WidgetBuilder builder,
-  }) {
-    return Gs1LazyViewportSection(
-      eager: eager,
-      forceMount: forceMountAllSections,
-      placeholderHeight: placeholderHeight,
-      builder: builder,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (fullFormShimmer) {
@@ -130,7 +116,7 @@ class GtinDetailFormBody extends StatelessWidget {
             gtin: gtin,
             gtinCodeText: fields.gtinCodeController.text,
           ),
-          
+
           GtinIdentificationStructureCoreGroup(
             isReadOnly: idStructureReadOnly,
             gtinCodeController: fields.gtinCodeController,
@@ -157,7 +143,8 @@ class GtinDetailFormBody extends StatelessWidget {
             },
             showFieldSkeleton: false,
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 280,
             builder: (_) => MarketingAuthorizationBoundGroup(
@@ -173,7 +160,8 @@ class GtinDetailFormBody extends StatelessWidget {
               showFieldSkeleton: false,
             ),
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 280,
             builder: (_) => TradeItemDescriptiveAttributesCoreGroup(
@@ -187,7 +175,8 @@ class GtinDetailFormBody extends StatelessWidget {
               showFieldSkeleton: false,
             ),
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 360,
             builder: (_) => NetContentMeasurementsCoreGroup(
@@ -203,7 +192,8 @@ class GtinDetailFormBody extends StatelessWidget {
               showFieldSkeleton: false,
             ),
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 480,
             builder: (_) => PackagingHierarchyTradeItemRolesCoreGroup(
@@ -251,7 +241,8 @@ class GtinDetailFormBody extends StatelessWidget {
               showFieldSkeleton: false,
             ),
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 140,
             builder: (_) => ClassificationMarketOriginCoreGroup(
@@ -260,7 +251,8 @@ class GtinDetailFormBody extends StatelessWidget {
               showFieldSkeleton: false,
             ),
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 220,
             builder: (_) => InformationProviderManufacturerCoreGroup(
@@ -287,12 +279,14 @@ class GtinDetailFormBody extends StatelessWidget {
               showFieldSkeleton: false,
             ),
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 120,
             builder: (_) => GtinSupplyChainCard(gtin: gtin),
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 320,
             builder: (_) => LifecycleAvailabilityStatusCoreGroup(
@@ -319,7 +313,8 @@ class GtinDetailFormBody extends StatelessWidget {
               showFieldSkeleton: false,
             ),
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 180,
             builder: (_) => ProductionBatchSerialDateAssociationsCoreGroup(
@@ -337,7 +332,8 @@ class GtinDetailFormBody extends StatelessWidget {
               showFieldSkeleton: false,
             ),
           ),
-          _lazy(
+          Gs1LazyViewportSection(
+            forceMount: forceMountAllSections,
             eager: false,
             placeholderHeight: 160,
             builder: (_) => AuditCoreGroup(
@@ -349,7 +345,8 @@ class GtinDetailFormBody extends StatelessWidget {
           ),
         ],
       ),
-      industrySection: _lazy(
+      industrySection: Gs1LazyViewportSection(
+        forceMount: forceMountAllSections,
         eager: false,
         placeholderHeight: 360,
         builder: (_) => ListenableBuilder(
@@ -360,8 +357,8 @@ class GtinDetailFormBody extends StatelessWidget {
           builder: (context, _) {
             final targetMarket =
                 fields.targetMarketCountryController.text.trim().isEmpty
-                    ? routeGtin?.targetMarketCountry
-                    : fields.targetMarketCountryController.text.trim();
+                ? routeGtin?.targetMarketCountry
+                : fields.targetMarketCountryController.text.trim();
 
             final synced = state.gtin;
             final pharmaExt = synced?.pharmaceuticalExtension;

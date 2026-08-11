@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/formatters/gs1_input_formatters.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_scan_suffix_icon.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
@@ -62,13 +63,13 @@ class GlnEntryField extends StatelessWidget {
       inputFormatters: Gs1InputFormatters.gln(),
       onChanged: onChanged,
       suffixIcon: enabled && barcodeScanEnabled
-          ? Gs1FieldBarcodeScan.scanSuffixIcon(
-              context: context,
+          ? Gs1FieldScanSuffixIcon(
               kind: Gs1FieldScanKind.gln,
               onScanned: _applyScannedValue,
             )
           : null,
-      validator: validator ??
+      validator:
+          validator ??
           (optional
               ? GlnFieldValidators.validateGlnCodeOptional
               : GlnFieldValidators.validateGlnCode),

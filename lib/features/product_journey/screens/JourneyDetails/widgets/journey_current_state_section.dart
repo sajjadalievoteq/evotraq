@@ -18,7 +18,8 @@ class JourneyCurrentStateSection extends StatelessWidget {
     final last = JourneyAnalytics.lastStep(journey);
     final info = journey.productInfo;
 
-    final location = journey.currentLocation ??
+    final location =
+        journey.currentLocation ??
         info?.currentLocationName ??
         last?.locationName ??
         last?.locationGLN;

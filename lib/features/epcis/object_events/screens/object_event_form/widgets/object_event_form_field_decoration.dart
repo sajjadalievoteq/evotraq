@@ -8,42 +8,6 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 class ObjectEventFormFieldDecoration {
   ObjectEventFormFieldDecoration._();
 
-  static Widget buildFieldLabel(
-    BuildContext context,
-    String label,
-    bool isMandatory,
-  ) {
-    return objectEventFormFieldLabel(context, label, isMandatory);
-  }
-
-  static Widget buildRequiredIndicator(BuildContext context) {
-    return const ObjectEventFormRequiredIndicator();
-  }
-
-  static Widget buildValidationStatus({
-    required BuildContext context,
-    required String fieldName,
-    required ObjectEventFormValidationContext validation,
-  }) {
-    final error = validation.getFieldError(fieldName);
-
-    if (error != null && error.isNotEmpty) {
-      return TraqIcon(
-        AppAssets.iconAlert,
-        color: AppColorMapper.errorColor(context),
-        size: 20,
-      );
-    } else if (validation.hasFieldBeenValidated(fieldName)) {
-      return TraqIcon(
-        AppAssets.iconCheck,
-        color: AppColorMapper.successColor(context),
-        size: 20,
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
   static InputDecoration getFieldDecoration({
     required BuildContext context,
     required String fieldName,
@@ -58,7 +22,7 @@ class ObjectEventFormFieldDecoration {
     return InputDecoration(
       hintText: hintText,
       border: const OutlineInputBorder(),
-      label: buildFieldLabel(context, label, isMandatory),
+      label: ObjectEventFormFieldLabel(label: label, isMandatory: isMandatory),
       suffixIcon: error != null && error.isNotEmpty
           ? TraqIcon(
               AppAssets.iconAlert,

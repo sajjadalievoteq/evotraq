@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
+import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 
@@ -29,9 +29,9 @@ class CancelShippingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.cancelShippingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.cancelShippingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
@@ -39,13 +39,13 @@ class CancelShippingOperationListFilter {
               false) ||
           (operation.cancelReason?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.originalShippingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.originalShippingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.cancelShippingOperationId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.cancelShippingOperationId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false);
     }).toList();
 
@@ -81,9 +81,9 @@ class CancelShippingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.operationReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.operationReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
@@ -91,9 +91,9 @@ class CancelShippingOperationListFilter {
               false) ||
           (operation.cancelReason?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.originalShippingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.originalShippingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.operationId?.toLowerCase().contains(normalizedQuery) ??
               false);
@@ -114,7 +114,10 @@ class CancelShippingOperationListFilter {
   ) {
     switch (sortBy) {
       case 'cancelShippingReference':
-        return _compareStrings(a.cancelShippingReference, b.cancelShippingReference);
+        return _compareStrings(
+          a.cancelShippingReference,
+          b.cancelShippingReference,
+        );
       case 'sourceGLN':
         return _compareStrings(a.sourceGLN, b.sourceGLN);
       case 'destinationGLN':

@@ -25,9 +25,7 @@ class ProductHierarchyLeftPanelBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<ProductHierarchyCubit>();
 
-    if (state.isLoadingDetails ||
-        state.isResolvingRoot ||
-        state.isClimbing) {
+    if (state.isLoadingDetails || state.isResolvingRoot || state.isClimbing) {
       return const ProductHierarchySidebarSkeleton();
     }
 

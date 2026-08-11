@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_info_row.dart';
 
 import 'package:intl/intl.dart';
 
@@ -33,9 +34,7 @@ class SsccListItemCard extends StatelessWidget {
   final ValueChanged<String> onMenuSelected;
 
   @override
-
   Widget build(BuildContext context) {
-
     final theme = Theme.of(context);
 
     final muted = theme.colorScheme.onSurfaceVariant;
@@ -44,65 +43,32 @@ class SsccListItemCard extends StatelessWidget {
     final canEdit = edit_rules.canEditSsccRecord(sscc.status);
     final canDelete = edit_rules.canDeleteSscc(sscc.status);
 
-    Widget infoRow(String iconAsset, String text) {
-      final rowColor =
-          Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Row(
-          children: [
-            TraqIcon(iconAsset, size: 16, color: rowColor),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                text,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: rowColor),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return LayoutBuilder(
-
       builder: (context, constraints) {
-
         final isCompact = constraints.maxWidth < 420;
 
         final padding = isCompact
-
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
-
             : const EdgeInsets.all(16);
 
         return Card(
           elevation: 2,
           color: Gs1ListItemSelectionStyle.cardBackground(context, isSelected),
           child: InkWell(
-
             onTap: onTap,
 
             child: Padding(
-
               padding: padding,
 
               child: Row(
-
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-
                   Expanded(
-
                     child: Column(
-
                       crossAxisAlignment: CrossAxisAlignment.start,
 
                       children: [
-
                         Text(
                           sscc.ssccCode,
                           style: theme.textTheme.titleMedium?.copyWith(
@@ -115,69 +81,81 @@ class SsccListItemCard extends StatelessWidget {
                           maxLines: 1,
 
                           overflow: TextOverflow.ellipsis,
-
                         ),
 
                         const SizedBox(height: 8),
 
-                        infoRow(
+                        Gs1ListItemInfoRow(
                           AppAssets.iconBox,
                           '${SsccUiConstants.listCardTypePrefix}${status_rules.friendlyUnitTypeLabel(sscc.unitType)}',
+
+                          isSelected: isSelected,
+                          muted: muted,
                         ),
 
                         if (sscc.issuingGLN?.glnCode != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             NavIcons.gln,
                             '${SsccUiConstants.listCardIssuingGlnPrefix}${sscc.issuingGLN!.glnCode}',
+
+                            isSelected: isSelected,
+                            muted: muted,
                           ),
 
-                        if (sscc.sourceLocation?.locationName.isNotEmpty == true)
-                          infoRow(
+                        if (sscc.sourceLocation?.locationName.isNotEmpty ==
+                            true)
+                          Gs1ListItemInfoRow(
                             AppAssets.iconMapPin,
                             '${SsccUiConstants.listCardFromPrefix}${sscc.sourceLocation!.locationName}',
+
+                            isSelected: isSelected,
+                            muted: muted,
                           ),
 
                         if (sscc.destinationLocation?.locationName.isNotEmpty ==
                             true)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             AppAssets.iconMapPin,
                             '${SsccUiConstants.listCardToPrefix}${sscc.destinationLocation!.locationName}',
+
+                            isSelected: isSelected,
+                            muted: muted,
                           ),
 
                         if (sscc.shippingDate != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             NavIcons.shipping,
                             '${SsccUiConstants.listCardShippedPrefix}${dateFormat.format(sscc.shippingDate!)}',
+
+                            isSelected: isSelected,
+                            muted: muted,
                           ),
-
                       ],
-
                     ),
-
                   ),
 
                   const SizedBox(width: 12),
 
                   Column(
-
                     crossAxisAlignment: CrossAxisAlignment.end,
 
                     children: [
-
                       SsccStatusChip(status: sscc.status),
 
                       const SizedBox(height: 6),
 
                       PopupMenuButton<String>(
-
                         tooltip: SsccUiConstants.menuTooltipActions,
 
                         padding: EdgeInsets.zero,
 
-                        icon: TraqIcon(AppAssets.iconMoreVert, color: Gs1ListItemSelectionStyle.mutedColor(
+                        icon: TraqIcon(
+                          AppAssets.iconMoreVert,
+                          color: Gs1ListItemSelectionStyle.mutedColor(
                             isSelected,
                             muted,
-                          )),
+                          ),
+                        ),
 
                         onSelected: onMenuSelected,
 
@@ -208,7 +186,8 @@ class SsccListItemCard extends StatelessWidget {
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  TraqIcon(AppAssets.iconTrash,
+                                  TraqIcon(
+                                    AppAssets.iconTrash,
                                     size: 20,
                                     color: AppColorMapper.errorColor(context),
                                   ),
@@ -223,27 +202,15 @@ class SsccListItemCard extends StatelessWidget {
                               ),
                             ),
                         ],
-
                       ),
-
                     ],
-
                   ),
-
                 ],
-
               ),
-
             ),
-
           ),
-
         );
-
       },
-
     );
-
   }
-
 }

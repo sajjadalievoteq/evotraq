@@ -27,9 +27,7 @@ class SplashContent extends StatelessWidget {
       beginScale: TraqAnimationConstants.splashInitialScale,
       children: [
         Align(
-          child: SplashBrandIconTilt(
-            child: SplashBrandIcon(size: iconSize),
-          ),
+          child: SplashBrandIconTilt(child: SplashBrandIcon(size: iconSize)),
         ),
         Align(
           child: Padding(
@@ -46,8 +44,6 @@ class SplashContent extends StatelessWidget {
             ),
           ),
         ),
-
-
       ],
     );
   }

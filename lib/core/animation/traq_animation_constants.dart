@@ -1,39 +1,25 @@
 import 'package:flutter/material.dart';
 
-
-
-
-
 abstract final class TraqAnimationConstants {
-  
   static const Curve curve = Curves.easeOutCubic;
   static const Curve reverseCurve = Curves.easeInCubic;
   static const Curve iconPop = Curves.easeOutCubic;
 
-  
-  
   static const int formDurationMs = 480;
 
-  
   static const int fastDurationMs = 160;
 
-  
   static const int statusMs = 260;
 
-  
   static const int staggerDelayMs = 36;
 
-  
   static const int entranceMs = 280;
 
-  
   /// Branding panel entrance — short enough to avoid feeling sluggish alongside
   /// the auth form motion that runs in parallel.
   static const int brandingEntranceMs = 760;
   static const int brandingStaggerMs = 88;
 
-  
-  
   static const int splashEntranceMs = 280;
   static const int splashStaggerMs = 70;
   static const int splashProgressCycleMs = 1800;
@@ -47,10 +33,8 @@ abstract final class TraqAnimationConstants {
   static const Curve splashTiltOutCurve = Curves.easeOut;
   static const Curve splashTiltReturnCurve = Curves.easeInBack;
 
-  
   static const int swapMs = formDurationMs;
 
-  
   static const double formInitialScale = 0.97;
   static const double fieldInitialScale = 0.98;
   static const double buttonInitialScale = 0.95;
@@ -58,27 +42,22 @@ abstract final class TraqAnimationConstants {
   static const double iconPopBeginScale = 0.92;
   static const double splashInitialScale = 0.98;
 
-  
-  
   static const double fieldOffsetPx = 6;
 
-  
   static const double splashRisePx = 5;
 
-  
   static const double brandingSlidePx = 64;
 
   static const double entranceFadePortion = 0.6;
 
-  
   static const double slideUpDy = 0.015;
   static const double slideRightDx = 0.0;
   static const Offset slideUp = Offset(0, slideUpDy);
   static const Offset slideRight = Offset(slideRightDx, 0);
 
   // Router / navigation motion language — slide-first, snappy decelerations.
-  static const int navForwardMs = 480;
-  static const int navReverseMs = 440;
+  static const int navForwardMs = 800;
+  static const int navReverseMs = 720;
   static const Curve navCurve = Curves.easeOutCubic;
   static const Curve navReverseCurve = Curves.easeInCubic;
 
@@ -122,14 +101,13 @@ abstract final class TraqAnimationConstants {
   static Duration get splashTiltPause =>
       const Duration(milliseconds: splashTiltPauseMs);
   static Duration get splashTiltCycle => Duration(
-        milliseconds: splashTiltOutDurationMs +
-            splashTiltReturnDurationMs +
-            splashTiltPauseMs,
-      );
-  static Duration get navForward =>
-      const Duration(milliseconds: navForwardMs);
-  static Duration get navReverse =>
-      const Duration(milliseconds: navReverseMs);
+    milliseconds:
+        splashTiltOutDurationMs +
+        splashTiltReturnDurationMs +
+        splashTiltPauseMs,
+  );
+  static Duration get navForward => const Duration(milliseconds: navForwardMs);
+  static Duration get navReverse => const Duration(milliseconds: navReverseMs);
 
   static Duration get swap => formDuration;
   static Duration get stagger => staggerDelay;

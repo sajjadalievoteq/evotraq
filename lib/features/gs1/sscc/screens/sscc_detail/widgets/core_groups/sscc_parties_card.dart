@@ -3,7 +3,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/core/widgets/gln_selector.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/core_groups/sscc_party_field.dart';
 
 class SsccPartiesCard extends StatelessWidget {
   const SsccPartiesCard({
@@ -51,32 +51,36 @@ class SsccPartiesCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _partyField(
-            context,
+          SsccPartyField(
+            isReadOnly: isReadOnly,
+            pickerCatalog: pickerCatalog,
             label: 'Ship From GLN',
             selected: shipFromGln,
             storedCode: sscc?.shipFromGln,
             onChanged: onShipFromChanged,
           ),
           const SizedBox(height: 12),
-          _partyField(
-            context,
+          SsccPartyField(
+            isReadOnly: isReadOnly,
+            pickerCatalog: pickerCatalog,
             label: 'Ship To GLN',
             selected: shipToGln,
             storedCode: sscc?.shipToGln,
             onChanged: onShipToChanged,
           ),
           const SizedBox(height: 12),
-          _partyField(
-            context,
+          SsccPartyField(
+            isReadOnly: isReadOnly,
+            pickerCatalog: pickerCatalog,
             label: 'Bill To GLN',
             selected: billToGln,
             storedCode: sscc?.billToGln,
             onChanged: onBillToChanged,
           ),
           const SizedBox(height: 12),
-          _partyField(
-            context,
+          SsccPartyField(
+            isReadOnly: isReadOnly,
+            pickerCatalog: pickerCatalog,
             label: 'Ship For GLN',
             selected: shipForGln,
             storedCode: sscc?.shipForGln,
@@ -92,8 +96,9 @@ class SsccPartiesCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
           ],
-          _partyField(
-            context,
+          SsccPartyField(
+            isReadOnly: isReadOnly,
+            pickerCatalog: pickerCatalog,
             label: 'Current Custodian GLN',
             selected: custodianGln,
             storedCode: sscc?.currentCustodianGln,
@@ -101,29 +106,6 @@ class SsccPartiesCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _partyField(
-    BuildContext context, {
-    required String label,
-    required GLN? selected,
-    required String? storedCode,
-    required ValueChanged<GLN?> onChanged,
-  }) {
-    if (isReadOnly) {
-      final display = selected != null
-          ? '${selected.glnCode} – ${selected.locationName}'
-          : storedCode;
-      return SgtinInfoRow(label, display);
-    }
-
-    return GLNSelector(
-      label: label,
-      hintText: 'Search and select $label',
-      initialValue: selected,
-      onChanged: onChanged,
-      pickerCatalog: pickerCatalog,
     );
   }
 }

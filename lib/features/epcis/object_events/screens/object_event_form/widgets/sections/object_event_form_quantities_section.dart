@@ -93,7 +93,10 @@ class _ObjectEventFormQuantitiesSectionState
           TextField(
             controller: _epcClassController,
             decoration: InputDecoration(
-              label: objectEventFormFieldLabel(context, 'EPC Class', true),
+              label: const ObjectEventFormFieldLabel(
+                label: 'EPC Class',
+                isMandatory: true,
+              ),
               border: const OutlineInputBorder(),
             ),
           ),
@@ -104,7 +107,10 @@ class _ObjectEventFormQuantitiesSectionState
                 child: TextField(
                   controller: _quantityController,
                   decoration: InputDecoration(
-                    label: objectEventFormFieldLabel(context, 'Quantity', true),
+                    label: const ObjectEventFormFieldLabel(
+                      label: 'Quantity',
+                      isMandatory: true,
+                    ),
                     border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,

@@ -4,83 +4,8 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 
 import '../../../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
 
-enum SGTINStatus { initial, loading, success, error }
-
-class SGTINState extends Equatable {
-  final SGTINStatus status;
-  final List<SGTIN>? sgtins;
-  final SGTIN? sgtin;
-  final String? error;
-  final bool? isValidSGTIN;
-  final String? generatedSerialNumber;
-  final int currentPage;
-  final int totalElements;
-  final int totalPages;
-  final bool hasMoreData;
-  final bool creationSuccessful;
-  final List<String> availableTransitions;
-
-  const SGTINState({
-    this.status = SGTINStatus.initial,
-    this.sgtins,
-    this.sgtin,
-    this.error,
-    this.isValidSGTIN,
-    this.generatedSerialNumber,
-    this.currentPage = 0,
-    this.totalElements = 0,
-    this.totalPages = 0,
-    this.hasMoreData = false,
-    this.creationSuccessful = false,
-    this.availableTransitions = const [],
-  });
-
-  SGTINState copyWith({
-    SGTINStatus? status,
-    List<SGTIN>? sgtins,
-    SGTIN? sgtin,
-    String? error,
-    bool? isValidSGTIN,
-    String? generatedSerialNumber,
-    int? currentPage,
-    int? totalElements,
-    int? totalPages,
-    bool? hasMoreData,
-    bool? creationSuccessful,
-    List<String>? availableTransitions,
-  }) {
-    return SGTINState(
-      status: status ?? this.status,
-      sgtins: sgtins ?? this.sgtins,
-      sgtin: sgtin ?? this.sgtin,
-      error: error ?? this.error,
-      isValidSGTIN: isValidSGTIN ?? this.isValidSGTIN,
-      generatedSerialNumber: generatedSerialNumber ?? this.generatedSerialNumber,
-      currentPage: currentPage ?? this.currentPage,
-      totalElements: totalElements ?? this.totalElements,
-      totalPages: totalPages ?? this.totalPages,
-      hasMoreData: hasMoreData ?? this.hasMoreData,
-      creationSuccessful: creationSuccessful ?? this.creationSuccessful,
-      availableTransitions: availableTransitions ?? this.availableTransitions,
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-        status,
-        sgtins,
-        sgtin,
-        error,
-        isValidSGTIN,
-        generatedSerialNumber,
-        currentPage,
-        totalElements,
-        totalPages,
-        hasMoreData,
-        creationSuccessful,
-        availableTransitions,
-      ];
-}
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_state.dart';
+export 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_state.dart';
 
 class SGTINCubit extends Cubit<SGTINState> {
   final SGTINService _sgtinService;
@@ -88,18 +13,16 @@ class SGTINCubit extends Cubit<SGTINState> {
   static const int _defaultPageSize = 20;
 
   SGTINCubit({required SGTINService sgtinService})
-      : _sgtinService = sgtinService,
-        super(const SGTINState());
+    : _sgtinService = sgtinService,
+      super(const SGTINState());
 
   Future<void> fetchSGTINById(String id) async {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       final sgtin = await _sgtinService.getSGTINById(id);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: sgtin,
-        error: null,
-      ));
+      emit(
+        state.copyWith(status: SGTINStatus.success, sgtin: sgtin, error: null),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -109,11 +32,9 @@ class SGTINCubit extends Cubit<SGTINState> {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       final sgtin = await _sgtinService.getSGTINByEPC(epcUri);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: sgtin,
-        error: null,
-      ));
+      emit(
+        state.copyWith(status: SGTINStatus.success, sgtin: sgtin, error: null),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -123,11 +44,9 @@ class SGTINCubit extends Cubit<SGTINState> {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       final sgtin = await _sgtinService.getSGTINBySerialNumber(serialNumber);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: sgtin,
-        error: null,
-      ));
+      emit(
+        state.copyWith(status: SGTINStatus.success, sgtin: sgtin, error: null),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -153,25 +72,22 @@ class SGTINCubit extends Cubit<SGTINState> {
     }
 
     try {
-      if (epcUri != null &&
-          epcUri.isNotEmpty &&
-          page == 0 &&
-          !isLoadMore) {
+      if (epcUri != null && epcUri.isNotEmpty && page == 0 && !isLoadMore) {
         try {
           final sgtin = await _sgtinService.getSGTINByEPC(epcUri);
-          emit(state.copyWith(
-            status: SGTINStatus.success,
-            sgtins: [sgtin],
-            currentPage: 0,
-            totalElements: 1,
-            totalPages: 1,
-            hasMoreData: false,
-            error: null,
-          ));
+          emit(
+            state.copyWith(
+              status: SGTINStatus.success,
+              sgtins: [sgtin],
+              currentPage: 0,
+              totalElements: 1,
+              totalPages: 1,
+              hasMoreData: false,
+              error: null,
+            ),
+          );
           return;
-        } catch (_) {
-          
-        }
+        } catch (_) {}
       }
 
       final result = await _sgtinService.searchSGTINsAdvanced(
@@ -192,26 +108,31 @@ class SGTINCubit extends Cubit<SGTINState> {
       final bool isLast = result['last'] ?? true;
 
       if (page == 0 || !isLoadMore) {
-        emit(state.copyWith(
-          status: SGTINStatus.success,
-          sgtins: sgtins,
-          currentPage: page,
-          totalElements: totalElements,
-          totalPages: totalPages,
-          hasMoreData: !isLast,
-          error: null,
-        ));
+        emit(
+          state.copyWith(
+            status: SGTINStatus.success,
+            sgtins: sgtins,
+            currentPage: page,
+            totalElements: totalElements,
+            totalPages: totalPages,
+            hasMoreData: !isLast,
+            error: null,
+          ),
+        );
       } else {
-        final List<SGTIN> updatedSgtins = List.from(state.sgtins ?? [])..addAll(sgtins);
-        emit(state.copyWith(
-          status: SGTINStatus.success,
-          sgtins: updatedSgtins,
-          currentPage: page,
-          totalElements: totalElements,
-          totalPages: totalPages,
-          hasMoreData: !isLast,
-          error: null,
-        ));
+        final List<SGTIN> updatedSgtins = List.from(state.sgtins ?? [])
+          ..addAll(sgtins);
+        emit(
+          state.copyWith(
+            status: SGTINStatus.success,
+            sgtins: updatedSgtins,
+            currentPage: page,
+            totalElements: totalElements,
+            totalPages: totalPages,
+            hasMoreData: !isLast,
+            error: null,
+          ),
+        );
       }
     } catch (e) {
       _handleError(e);
@@ -246,22 +167,27 @@ class SGTINCubit extends Cubit<SGTINState> {
       );
 
       if (actualPage == 0 || state.sgtins == null) {
-        emit(state.copyWith(
-          status: SGTINStatus.success,
-          sgtins: sgtins,
-          currentPage: actualPage,
-          hasMoreData: sgtins.length >= actualSize,
-          error: null,
-        ));
+        emit(
+          state.copyWith(
+            status: SGTINStatus.success,
+            sgtins: sgtins,
+            currentPage: actualPage,
+            hasMoreData: sgtins.length >= actualSize,
+            error: null,
+          ),
+        );
       } else {
-        final List<SGTIN> updatedSgtins = List.from(state.sgtins!)..addAll(sgtins);
-        emit(state.copyWith(
-          status: SGTINStatus.success,
-          sgtins: updatedSgtins,
-          currentPage: actualPage,
-          hasMoreData: sgtins.length >= actualSize,
-          error: null,
-        ));
+        final List<SGTIN> updatedSgtins = List.from(state.sgtins!)
+          ..addAll(sgtins);
+        emit(
+          state.copyWith(
+            status: SGTINStatus.success,
+            sgtins: updatedSgtins,
+            currentPage: actualPage,
+            hasMoreData: sgtins.length >= actualSize,
+            error: null,
+          ),
+        );
       }
     } catch (e) {
       _handleError(e);
@@ -273,32 +199,36 @@ class SGTINCubit extends Cubit<SGTINState> {
     try {
       final sgtinToCreate = sgtin.copyWith(id: null);
       final createdSgtin = await _sgtinService.createSGTIN(sgtinToCreate);
-      
+
       List<SGTIN>? updatedSgtins;
       if (state.sgtins != null) {
         updatedSgtins = List<SGTIN>.from(state.sgtins!);
         updatedSgtins.add(createdSgtin);
       }
-      
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: createdSgtin,
-        sgtins: updatedSgtins,
-        error: null,
-        creationSuccessful: true,
-      ));
-      
+
+      emit(
+        state.copyWith(
+          status: SGTINStatus.success,
+          sgtin: createdSgtin,
+          sgtins: updatedSgtins,
+          error: null,
+          creationSuccessful: true,
+        ),
+      );
+
       Future.delayed(const Duration(milliseconds: 500), () {
         if (!isClosed) {
           emit(state.copyWith(creationSuccessful: false));
         }
       });
     } catch (e) {
-      emit(state.copyWith(
-        status: SGTINStatus.error,
-        error: "Failed to create SGTIN: ${e.toString()}",
-        creationSuccessful: false,
-      ));
+      emit(
+        state.copyWith(
+          status: SGTINStatus.error,
+          error: "Failed to create SGTIN: ${e.toString()}",
+          creationSuccessful: false,
+        ),
+      );
     }
   }
 
@@ -306,11 +236,13 @@ class SGTINCubit extends Cubit<SGTINState> {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       final updatedSgtin = await _sgtinService.updateSGTIN(id, sgtin);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: updatedSgtin,
-        error: null,
-      ));
+      emit(
+        state.copyWith(
+          status: SGTINStatus.success,
+          sgtin: updatedSgtin,
+          error: null,
+        ),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -320,61 +252,68 @@ class SGTINCubit extends Cubit<SGTINState> {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       await _sgtinService.deleteSGTIN(id);
-      
+
       if (state.sgtins != null) {
         final updatedSgtins = state.sgtins!
             .where((sgtin) => sgtin.id != id)
             .toList();
-        
-        emit(state.copyWith(
-          status: SGTINStatus.success,
-          sgtins: updatedSgtins,
-          error: null,
-        ));
+
+        emit(
+          state.copyWith(
+            status: SGTINStatus.success,
+            sgtins: updatedSgtins,
+            error: null,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          status: SGTINStatus.success,
-          error: null,
-        ));
+        emit(state.copyWith(status: SGTINStatus.success, error: null));
       }
     } catch (e) {
       _handleError(e);
     }
   }
 
-  Future<void> updateSGTINStatus(String id, ItemStatus status, {String? reason}) async {
+  Future<void> updateSGTINStatus(
+    String id,
+    ItemStatus status, {
+    String? reason,
+  }) async {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       final currentSgtin = await _sgtinService.getSGTINById(id);
-      
+
       final updatedSgtin = currentSgtin.copyWith(
         status: status,
         decommissionedReason: status == ItemStatus.DESTROYED ? reason : null,
-        decommissionedDate: status == ItemStatus.DESTROYED ? DateTime.now() : null,
+        decommissionedDate: status == ItemStatus.DESTROYED
+            ? DateTime.now()
+            : null,
         updatedAt: DateTime.now(),
       );
-      
+
       final result = await _sgtinService.updateSGTIN(id, updatedSgtin);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: result,
-        error: null,
-      ));
+      emit(
+        state.copyWith(status: SGTINStatus.success, sgtin: result, error: null),
+      );
     } catch (e) {
       _handleError(e);
     }
   }
 
-  Future<void> updateSGTINStatusBySerial(String serialNumber, String newStatus) async {
+  Future<void> updateSGTINStatusBySerial(
+    String serialNumber,
+    String newStatus,
+  ) async {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       final statusEnum = _parseItemStatus(newStatus) ?? ItemStatus.COMMISSIONED;
-      final sgtin = await _sgtinService.updateSGTINStatus(serialNumber, statusEnum);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: sgtin,
-        error: null,
-      ));
+      final sgtin = await _sgtinService.updateSGTINStatus(
+        serialNumber,
+        statusEnum,
+      );
+      emit(
+        state.copyWith(status: SGTINStatus.success, sgtin: sgtin, error: null),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -383,12 +322,13 @@ class SGTINCubit extends Cubit<SGTINState> {
   Future<void> assignLocation(String serialNumber, String glnCode) async {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
-      final sgtin = await _sgtinService.assignSGTINToLocation(serialNumber, glnCode);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: sgtin,
-        error: null,
-      ));
+      final sgtin = await _sgtinService.assignSGTINToLocation(
+        serialNumber,
+        glnCode,
+      );
+      emit(
+        state.copyWith(status: SGTINStatus.success, sgtin: sgtin, error: null),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -397,26 +337,35 @@ class SGTINCubit extends Cubit<SGTINState> {
   Future<void> packIntoSSCC(String serialNumber, String ssccCode) async {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
-      final sgtin = await _sgtinService.packSGTINIntoSSCC(serialNumber, ssccCode);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: sgtin,
-        error: null,
-      ));
+      final sgtin = await _sgtinService.packSGTINIntoSSCC(
+        serialNumber,
+        ssccCode,
+      );
+      emit(
+        state.copyWith(status: SGTINStatus.success, sgtin: sgtin, error: null),
+      );
     } catch (e) {
       _handleError(e);
     }
   }
 
-  Future<void> generateSerialNumber(String gtinCode, {bool randomized = true}) async {
+  Future<void> generateSerialNumber(
+    String gtinCode, {
+    bool randomized = true,
+  }) async {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
-      final serialNumber = await _sgtinService.generateSerialNumber(gtinCode, randomized: randomized);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        generatedSerialNumber: serialNumber,
-        error: null,
-      ));
+      final serialNumber = await _sgtinService.generateSerialNumber(
+        gtinCode,
+        randomized: randomized,
+      );
+      emit(
+        state.copyWith(
+          status: SGTINStatus.success,
+          generatedSerialNumber: serialNumber,
+          error: null,
+        ),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -426,11 +375,13 @@ class SGTINCubit extends Cubit<SGTINState> {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       final isValid = await _sgtinService.validateSGTIN(gtinCode, serialNumber);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        isValidSGTIN: isValid,
-        error: null,
-      ));
+      emit(
+        state.copyWith(
+          status: SGTINStatus.success,
+          isValidSGTIN: isValid,
+          error: null,
+        ),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -452,11 +403,13 @@ class SGTINCubit extends Cubit<SGTINState> {
         expiryDate: expiryDate ?? DateTime.now().add(const Duration(days: 365)),
         currentLocation: currentLocation,
       );
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtins: sgtins,
-        error: null,
-      ));
+      emit(
+        state.copyWith(
+          status: SGTINStatus.success,
+          sgtins: sgtins,
+          error: null,
+        ),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -466,11 +419,9 @@ class SGTINCubit extends Cubit<SGTINState> {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       final sgtin = await _sgtinService.decommissionSGTIN(serialNumber, reason);
-      emit(state.copyWith(
-        status: SGTINStatus.success,
-        sgtin: sgtin,
-        error: null,
-      ));
+      emit(
+        state.copyWith(status: SGTINStatus.success, sgtin: sgtin, error: null),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -502,9 +453,6 @@ class SGTINCubit extends Cubit<SGTINState> {
   }
 
   void _handleError(Object e) {
-    emit(state.copyWith(
-      status: SGTINStatus.error,
-      error: e.toString(),
-    ));
+    emit(state.copyWith(status: SGTINStatus.error, error: e.toString()));
   }
 }

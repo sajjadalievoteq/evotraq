@@ -13,7 +13,7 @@ import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/ca
 import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_statistics_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_management_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_health_tab.dart';
-import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_help_tab.dart';
+import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/help_widgets/cache_help_tab.dart';
 
 class CacheManagementScreen extends StatefulWidget {
   const CacheManagementScreen({super.key});
@@ -73,9 +73,12 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
     }
   }
 
-  Future<void> _performCacheAction(Future<bool> Function() action, String actionName) async {
+  Future<void> _performCacheAction(
+    Future<bool> Function() action,
+    String actionName,
+  ) async {
     setState(() => _isLoading = true);
-    
+
     try {
       final success = await action();
       if (success) {
@@ -117,91 +120,94 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
       body: LoadingOverlay(
         isLoading: _isLoading,
         child: _error != null
-            ? ErrorMessage(
-                message: _error!,
-                onRetry: _loadCacheData,
-              )
+            ? ErrorMessage(message: _error!, onRetry: _loadCacheData)
             : TabBarView(
                 controller: _tabController,
                 children: [
-                if (_statistics == null || _health == null)
-                  const Center(child: Text('No data available'))
-                else
-                  CacheOverviewTab(statistics: _statistics!, health: _health!),
-                if (_statistics == null)
-                  const Center(child: Text('No statistics available'))
-                else
-                  CacheStatisticsTab(statistics: _statistics!),
-                CacheManagementTab(
-                  onWarmUp: () => _performCacheAction(
-                    _cacheService.warmUpCache,
-                    'Cache Warm-up',
-                  ),
-                  onSynchronize: () => _performCacheAction(
-                    _cacheService.synchronizeCache,
-                    'Cache Synchronization',
-                  ),
-                  onIdentifyHotData: () => _performCacheAction(
-                    _cacheService.identifyAndCacheHotData,
-                    'Hot Data Identification',
-                  ),
-                  onClearQueryResults: () => _performCacheAction(
-                    _cacheService.clearQueryResultCache,
-                    'Clear Query Results Cache',
-                  ),
-                  onRefreshMasterData: () => _performCacheAction(
-                    _cacheService.refreshMasterDataCache,
-                    'Refresh Master Data Cache',
-                  ),
-                  onClearMasterData: () => _showConfirmationDialog(
-                    'Clear Master Data Cache',
-                    () => _performCacheAction(
-                      _cacheService.clearAllMasterDataCache,
+                  if (_statistics == null || _health == null)
+                    const Center(child: Text('No data available'))
+                  else
+                    CacheOverviewTab(
+                      statistics: _statistics!,
+                      health: _health!,
+                    ),
+                  if (_statistics == null)
+                    const Center(child: Text('No statistics available'))
+                  else
+                    CacheStatisticsTab(statistics: _statistics!),
+                  CacheManagementTab(
+                    onWarmUp: () => _performCacheAction(
+                      _cacheService.warmUpCache,
+                      'Cache Warm-up',
+                    ),
+                    onSynchronize: () => _performCacheAction(
+                      _cacheService.synchronizeCache,
+                      'Cache Synchronization',
+                    ),
+                    onIdentifyHotData: () => _performCacheAction(
+                      _cacheService.identifyAndCacheHotData,
+                      'Hot Data Identification',
+                    ),
+                    onClearQueryResults: () => _performCacheAction(
+                      _cacheService.clearQueryResultCache,
+                      'Clear Query Results Cache',
+                    ),
+                    onRefreshMasterData: () => _performCacheAction(
+                      _cacheService.refreshMasterDataCache,
+                      'Refresh Master Data Cache',
+                    ),
+                    onClearMasterData: () => _showConfirmationDialog(
                       'Clear Master Data Cache',
+                      () => _performCacheAction(
+                        _cacheService.clearAllMasterDataCache,
+                        'Clear Master Data Cache',
+                      ),
                     ),
-                  ),
-                  onClearHotData: () => _performCacheAction(
-                    _cacheService.clearHotDataCache,
-                    'Clear Hot Data Cache',
-                  ),
-                  onClearAll: () => _showConfirmationDialog(
-                    'Clear All Caches',
-                    () => _performCacheAction(
-                      _cacheService.clearAllCaches,
+                    onClearHotData: () => _performCacheAction(
+                      _cacheService.clearHotDataCache,
+                      'Clear Hot Data Cache',
+                    ),
+                    onClearAll: () => _showConfirmationDialog(
                       'Clear All Caches',
+                      () => _performCacheAction(
+                        _cacheService.clearAllCaches,
+                        'Clear All Caches',
+                      ),
+                    ),
+                    onClearMasterDataType: (dataType) => _performCacheAction(
+                      () => _cacheService.clearMasterDataCache(dataType),
+                      'Clear $dataType Cache',
+                    ),
+                    onClearEventDataType: (eventType) => _performCacheAction(
+                      () => _cacheService.clearHotDataCache(),
+                      'Clear $eventType Cache',
                     ),
                   ),
-                  onClearMasterDataType: (dataType) => _performCacheAction(
-                    () => _cacheService.clearMasterDataCache(dataType),
-                    'Clear $dataType Cache',
+                  CacheHealthTab(
+                    health: _health,
+                    distributedHealth: _distributedHealth,
+                    statistics: _statistics,
                   ),
-                  onClearEventDataType: (eventType) => _performCacheAction(
-                    () => _cacheService.clearHotDataCache(),
-                    'Clear $eventType Cache',
-                  ),
-                ),
-                CacheHealthTab(
-                  health: _health,
-                  distributedHealth: _distributedHealth,
-                  statistics: _statistics,
-                ),
-                const CacheHelpTab(),
+                  const CacheHelpTab(),
                 ],
               ),
       ),
     );
   }
 
-
-
-  Future<void> _showConfirmationDialog(String action, VoidCallback onConfirm) async {
+  Future<void> _showConfirmationDialog(
+    String action,
+    VoidCallback onConfirm,
+  ) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirm $action'),
-          content: Text('Are you sure you want to $action? This action cannot be undone.'),
+          content: Text(
+            'Are you sure you want to $action? This action cannot be undone.',
+          ),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),

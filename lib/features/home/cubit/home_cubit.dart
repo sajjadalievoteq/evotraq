@@ -107,7 +107,17 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  Future<void> refresh({String? accountEmail}) async {
+  /// [refreshHealth] controls whether this call re-runs the actuator health/info
+  /// check. Health status doesn't ride the WebSocket heartbeat, so the
+  /// reconnect-triggered resync in [_onConnectionChanged] passes `false` — it
+  /// only needs to re-sync dashboard stats/recent events, and skipping the
+  /// health re-check there avoids firing a redundant duplicate actuator
+  /// request when the socket's first "connected" event races with the health
+  /// check already kicked off by the initial [load].
+  Future<void> refresh({
+    String? accountEmail,
+    bool refreshHealth = true,
+  }) async {
     if (!_canReadDashboard) {
       emit(const HomeState(status: HomeLoadStatus.success));
       return;
@@ -124,15 +134,17 @@ class HomeCubit extends Cubit<HomeState> {
             recentEvents: cached.recentEvents,
             healthStatus: cached.healthStatus ?? state.healthStatus,
             lastDataRefreshAt: cached.lastDataRefreshAt,
-            healthLoading: _canReadHealth,
+            healthLoading: refreshHealth && _canReadHealth,
             liveUpdatesConnected: state.liveUpdatesConnected,
           ),
         );
-      } else {
+      } else if (refreshHealth) {
         emit(state.copyWith(healthLoading: _canReadHealth, clearError: true));
+      } else {
+        emit(state.copyWith(clearError: true));
       }
       await _revalidate(accountEmail: accountEmail, keepExistingOnError: true);
-      if (!isClosed) {
+      if (!isClosed && refreshHealth) {
         _startHealthLoad(accountEmail: accountEmail);
       }
       return;
@@ -195,7 +207,12 @@ class HomeCubit extends Cubit<HomeState> {
     if (connected) {
       stopPolling();
       // Immediate REST re-sync so the UI is current without waiting for the first heartbeat.
-      unawaited(refresh(accountEmail: _pollAccountEmail));
+      // refreshHealth: false — the actuator health/info check isn't tied to the WebSocket
+      // heartbeat, so re-running it here on every (re)connect only produces a redundant
+      // duplicate call racing with the one the initial `load()` already kicked off.
+      unawaited(
+        refresh(accountEmail: _pollAccountEmail, refreshHealth: false),
+      );
     } else {
       // Enable the REST fallback poll immediately (don't wait for the first periodic tick).
       startPolling(accountEmail: _pollAccountEmail);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_events_list/widgets/object_event_date_range_row.dart';
 
 class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
   const ObjectEventAdvancedFiltersPanel({
@@ -61,10 +62,7 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
           ),
           value: selectedAction,
           items: _actions
-              .map((a) => DropdownMenuItem(
-                    value: a,
-                    child: Text(a ?? 'All'),
-                  ))
+              .map((a) => DropdownMenuItem(value: a, child: Text(a ?? 'All')))
               .toList(),
           onChanged: onActionChanged,
         ),
@@ -82,10 +80,10 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
             value: selectedBizStep,
             items: [
               const DropdownMenuItem(value: null, child: Text('All')),
-              ...availableBizSteps.map((item) => DropdownMenuItem(
-                    value: item.urn,
-                    child: Text(item.label),
-                  )),
+              ...availableBizSteps.map(
+                (item) =>
+                    DropdownMenuItem(value: item.urn, child: Text(item.label)),
+              ),
             ],
             onChanged: onBizStepChanged,
           ),
@@ -103,10 +101,10 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
             value: selectedDisposition,
             items: [
               const DropdownMenuItem(value: null, child: Text('All')),
-              ...availableDispositions.map((item) => DropdownMenuItem(
-                    value: item.urn,
-                    child: Text(item.label),
-                  )),
+              ...availableDispositions.map(
+                (item) =>
+                    DropdownMenuItem(value: item.urn, child: Text(item.label)),
+              ),
             ],
             onChanged: onDispositionChanged,
           ),
@@ -134,13 +132,13 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        _DateRangeRow(
+        ObjectEventDateRangeRow(
           label: 'From',
           value: eventTimeFrom,
           onChanged: onEventTimeFromChanged,
         ),
         const SizedBox(height: 8),
-        _DateRangeRow(
+        ObjectEventDateRangeRow(
           label: 'To',
           value: eventTimeTo,
           onChanged: onEventTimeToChanged,
@@ -155,62 +153,6 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
             FilledButton(onPressed: onApply, child: const Text('Apply')),
           ],
         ),
-      ],
-    );
-  }
-}
-
-class _DateRangeRow extends StatelessWidget {
-  const _DateRangeRow({
-    required this.label,
-    this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final DateTime? value;
-  final ValueChanged<DateTime?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 36,
-          child: Text(label,
-              style: Theme.of(context).textTheme.bodySmall),
-        ),
-        Expanded(
-          child: InkWell(
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: value ?? DateTime.now(),
-                firstDate: DateTime(2020),
-                lastDate: DateTime.now().add(const Duration(days: 365)),
-              );
-              if (picked != null) onChanged(picked);
-            },
-            child: InputDecorator(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                isDense: true,
-                suffixIcon: TraqIcon(AppAssets.iconClock, size: 16),
-              ),
-              child: Text(
-                value != null
-                    ? '${value!.year}-${value!.month.toString().padLeft(2, '0')}-${value!.day.toString().padLeft(2, '0')}'
-                    : 'Select date',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          ),
-        ),
-        if (value != null)
-          IconButton(
-            icon: TraqIcon(AppAssets.iconX, size: 16),
-            onPressed: () => onChanged(null),
-          ),
       ],
     );
   }

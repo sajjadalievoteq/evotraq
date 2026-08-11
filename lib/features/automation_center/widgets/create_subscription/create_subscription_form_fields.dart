@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/automation_center/utils/notification_cons
 import 'package:traqtrace_app/features/automation_center/utils/subscription_format_utils.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_advanced_section.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_dropdown_section.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/preferred_time_field.dart';
 
 class CreateSubscriptionFormFields extends StatelessWidget {
   const CreateSubscriptionFormFields({
@@ -129,7 +130,7 @@ class CreateSubscriptionFormFields extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         if (_showsPreferredTime) ...[
-          const _PreferredTimeField(),
+          const PreferredTimeField(),
           const SizedBox(height: 12),
         ],
         FormBuilderDropdown<String>(
@@ -162,46 +163,6 @@ class CreateSubscriptionFormFields extends StatelessWidget {
         const SizedBox(height: 12),
         const SubscriptionAdvancedSection(),
       ],
-    );
-  }
-}
-
-/// Time-of-day picker for DAILY/WEEKLY/MONTHLY cadences, so users can pick e.g.
-/// "9:00 AM" instead of getting whatever moment happens to be 24h/1w/1mo after the
-/// subscription was created. Stores a [TimeOfDay] under the 'preferredTime' form field;
-/// the dialog reads `.hour`/`.minute` off it when building the submit request.
-class _PreferredTimeField extends StatelessWidget {
-  const _PreferredTimeField();
-
-  @override
-  Widget build(BuildContext context) {
-    return FormBuilderField<TimeOfDay>(
-      name: 'preferredTime',
-      builder: (field) {
-        final selected = field.value;
-        return InkWell(
-          borderRadius: BorderRadius.circular(4),
-          onTap: () async {
-            final picked = await showTimePicker(
-              context: context,
-              initialTime: selected ?? const TimeOfDay(hour: 9, minute: 0),
-            );
-            if (picked != null) {
-              field.didChange(picked);
-            }
-          },
-          child: InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Preferred Delivery Time',
-              helperText: 'The time of day deliveries should go out',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              suffixIcon: Icon(Icons.access_time),
-            ),
-            child: Text(selected?.format(context) ?? 'Not set (uses default)'),
-          ),
-        );
-      },
     );
   }
 }

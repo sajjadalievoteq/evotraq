@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/epc_uri_validators.dart';
 import 'package:traqtrace_app/core/utils/gs1_ai_normalizer.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_scan_suffix_icon.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
 class EpcEntryField extends StatefulWidget {
@@ -63,7 +64,6 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
     super.dispose();
   }
 
-
   void _onFocusChange() {
     if (!_focusNode.hasFocus) {
       _tryNormalize(widget.controller.text);
@@ -84,10 +84,8 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
     if (mounted) setState(() => _wasConverted = true);
   }
 
-
   String? _defaultValidator(String? value) =>
       validateEpcUriField(value?.trim(), required: widget.required);
-
 
   void _applyScannedValue(String value) {
     widget.controller.text = value;
@@ -95,7 +93,6 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
     widget.onChanged?.call(value);
     _tryNormalize(value);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +109,8 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
       controller: widget.controller,
       fieldName: widget.fieldName,
       label: widget.label,
-      hintText: widget.hintText ??
+      hintText:
+          widget.hintText ??
           'https://id.gs1.org/…  •  (01)…(21)…  •  urn:epc:id:sgtin:…',
       helperText: effectiveHelper,
       readOnly: !widget.enabled,
@@ -124,8 +122,7 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
       },
       onChanged: onUserChanged,
       suffixIcon: widget.enabled && widget.barcodeScanEnabled
-          ? Gs1FieldBarcodeScan.scanSuffixIcon(
-              context: context,
+          ? Gs1FieldScanSuffixIcon(
               kind: Gs1FieldScanKind.sgtin,
               onScanned: _applyScannedValue,
             )

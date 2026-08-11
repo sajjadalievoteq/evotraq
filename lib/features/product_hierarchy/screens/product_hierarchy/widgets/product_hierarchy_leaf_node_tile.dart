@@ -68,12 +68,11 @@ class ProductHierarchyLeafNodeTile extends StatelessWidget {
             border: isSearchMatch
                 ? Border.all(color: c.primary)
                 : softHighlight
-                    ? Border.all(
-                        color: c.primary
-                            .withValues(alpha: isFlashing ? 0.65 : 0.3),
-                        width: isFlashing ? 2 : 1,
-                      )
-                    : null,
+                ? Border.all(
+                    color: c.primary.withValues(alpha: isFlashing ? 0.65 : 0.3),
+                    width: isFlashing ? 2 : 1,
+                  )
+                : null,
           ),
           padding: const EdgeInsets.symmetric(
             horizontal: TraqSpacing.sm,

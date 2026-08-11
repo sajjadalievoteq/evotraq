@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_identification_chip.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
@@ -151,26 +152,6 @@ class _GtinIdentificationStructureCoreGroupState
     });
   }
 
-  Widget _chip({
-    required ThemeData theme,
-    required String label,
-    required String value,
-    Color? backgroundColor,
-    Color? foregroundColor,
-  }) {
-    final v = value.trim();
-    final text = v.isEmpty ? '—' : v;
-    return Chip(
-      backgroundColor: backgroundColor,
-      label: Text(
-        '$label $text',
-        style: theme.textTheme.labelSmall?.copyWith(color: foregroundColor),
-      ),
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -210,8 +191,7 @@ class _GtinIdentificationStructureCoreGroupState
             final chips = <Widget>[];
             if (_companyPrefixLength.text.trim().isNotEmpty) {
               chips.add(
-                _chip(
-                  theme: theme,
+                Gs1IdentificationChip(
                   label: GtinUiConstants.labelGcpLengthChip,
                   value: _companyPrefixLength.text,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
@@ -221,8 +201,7 @@ class _GtinIdentificationStructureCoreGroupState
             }
             if (_gs1CompanyPrefix.text.trim().isNotEmpty) {
               chips.add(
-                _chip(
-                  theme: theme,
+                Gs1IdentificationChip(
                   label: GtinUiConstants.labelGcpChip,
                   value: _gs1CompanyPrefix.text,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
@@ -232,8 +211,7 @@ class _GtinIdentificationStructureCoreGroupState
             }
             if (_itemReference.text.trim().isNotEmpty) {
               chips.add(
-                _chip(
-                  theme: theme,
+                Gs1IdentificationChip(
                   label: GtinUiConstants.labelItemReferenceChip,
                   value: _itemReference.text,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,

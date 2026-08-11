@@ -8,7 +8,6 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_cubit.dart';
 import 'package:traqtrace_app/features/product_hierarchy/widgets/product_hierarchy_section_label.dart';
 
-
 class ProductHierarchySidebarActions extends StatelessWidget {
   const ProductHierarchySidebarActions({super.key, required this.identifier});
   final String identifier;
@@ -33,9 +32,7 @@ class ProductHierarchySidebarActions extends StatelessWidget {
               onTap: !canAct
                   ? null
                   : () async {
-                      await Clipboard.setData(
-                        ClipboardData(text: identifier),
-                      );
+                      await Clipboard.setData(ClipboardData(text: identifier));
                       if (context.mounted) {
                         context.showSuccess(
                           'Identifier copied',

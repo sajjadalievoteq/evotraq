@@ -11,10 +11,6 @@ import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarc
 import 'package:traqtrace_app/features/product_hierarchy/utils/product_hierarchy_display_utils.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 
-
-
-
-
 class ProductHierarchySidebarContent extends StatelessWidget {
   const ProductHierarchySidebarContent({
     super.key,
@@ -31,12 +27,16 @@ class ProductHierarchySidebarContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final selected =
         ProductHierarchyTreeUtils.findNode(root, selectedEpc) ?? root;
-    final parent = ProductHierarchyTreeUtils.findParent(root, selected.node.epc);
+    final parent = ProductHierarchyTreeUtils.findParent(
+      root,
+      selected.node.epc,
+    );
     final path = ProductHierarchyTreeUtils.pathTo(root, selected.node.epc);
     final info = journey.productInfo;
     final depth = ProductHierarchyTreeUtils.depthOf(root, selected.node.epc);
-    final loadedStats =
-        ProductHierarchyTreeUtils.loadedDescendantStats(selected);
+    final loadedStats = ProductHierarchyTreeUtils.loadedDescendantStats(
+      selected,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

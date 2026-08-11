@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
-import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
-import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
 import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
 import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_state.dart';
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/mode_selector.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/validate_batch_fields.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/validate_kind_value_fields.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/validate_single_fields.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 
@@ -194,126 +195,6 @@ class _ValidateToolState extends State<ValidateTool> with Gs1InitialModeMixin {
     }
   }
 
-  Widget _singleFields(bool loading) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Gs1ToolModeSelector(
-          modes: _identifierKinds,
-          value: _singleKind,
-          enabled: !loading,
-          label: 'Identifier type',
-          onChanged: (v) => setState(() => _singleKind = v),
-        ),
-        const SizedBox(height: TraqSpacing.md),
-        if (_singleKind == 'gtin' || _singleKind == 'sgtin')
-          GtinEntryField(
-            controller: _singleValueController,
-            label: 'GTIN',
-            enabled: !loading,
-            validator: (v) => _validatorFor(_singleKind, v),
-          )
-        else
-          ValidatedTextFieldWrapper(
-            controller: _singleValueController,
-            fieldName: 'single_value',
-            decoration: InputDecoration(
-              labelText: _identifierKinds
-                  .firstWhere((k) => k.$1 == _singleKind)
-                  .$2,
-            ),
-            readOnly: loading,
-            validator: (v) => _validatorFor(_singleKind, v),
-          ),
-        if (_singleKind == 'sgtin') ...[
-          const SizedBox(height: TraqSpacing.md),
-          ValidatedTextFieldWrapper(
-            controller: _singleSerialController,
-            fieldName: 'single_serial',
-            decoration: const InputDecoration(labelText: 'Serial'),
-            readOnly: loading,
-            validator: (v) => _requiredValidator(v, 'Serial'),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _batchFields(bool loading) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'Paste identifiers (one per line). Optional type prefix: '
-          'GTIN,value · GLN,value · SSCC,value · SGTIN,gtin,serial. '
-          'Bare digits auto-detect by length.',
-          style: context.text.bodySm.copyWith(color: context.colors.textMuted),
-        ),
-        const SizedBox(height: TraqSpacing.md),
-        TextField(
-          controller: _pasteController,
-          minLines: 8,
-          maxLines: 16,
-          enabled: !loading,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Paste identifiers',
-            alignLabelWithHint: true,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _checkDigitFields(bool loading) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Gs1ToolModeSelector(
-          modes: _checkDigitKinds,
-          value: _checkDigitKind,
-          enabled: !loading,
-          label: 'Kind',
-          onChanged: (v) => setState(() => _checkDigitKind = v),
-        ),
-        const SizedBox(height: TraqSpacing.md),
-        ValidatedTextFieldWrapper(
-          controller: _checkDigitController,
-          fieldName: 'check_digit',
-          decoration: const InputDecoration(
-            labelText: 'Identifier or body (digits)',
-          ),
-          keyboardType: TextInputType.number,
-          readOnly: loading,
-          validator: (v) => _requiredValidator(v, 'Input'),
-        ),
-      ],
-    );
-  }
-
-  Widget _anatomyFields(bool loading) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Gs1ToolModeSelector(
-          modes: _identifierKinds,
-          value: _anatomyKind,
-          enabled: !loading,
-          label: 'Kind',
-          onChanged: (v) => setState(() => _anatomyKind = v),
-        ),
-        const SizedBox(height: TraqSpacing.md),
-        ValidatedTextFieldWrapper(
-          controller: _anatomyValueController,
-          fieldName: 'anatomy_value',
-          decoration: const InputDecoration(labelText: 'Value'),
-          readOnly: loading,
-          validator: (v) => _requiredValidator(v, 'Value'),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<Gs1ToolsCubit, Gs1ToolsState>(
@@ -347,10 +228,49 @@ class _ValidateToolState extends State<ValidateTool> with Gs1InitialModeMixin {
                 ),
                 const SizedBox(height: TraqSpacing.lg),
                 switch (_mode) {
-                  'batch' => _batchFields(loading),
-                  'check-digit' => _checkDigitFields(loading),
-                  'anatomy' => _anatomyFields(loading),
-                  _ => _singleFields(loading),
+                  'batch' => ValidateBatchFields(
+                    controller: _pasteController,
+                    loading: loading,
+                  ),
+                  'check-digit' => ValidateKindValueFields(
+                    kinds: _checkDigitKinds,
+                    kind: _checkDigitKind,
+                    controller: _checkDigitController,
+                    fieldName: 'check_digit',
+                    valueLabel: 'Identifier or body (digits)',
+                    requiredLabel: 'Input',
+                    keyboardType: TextInputType.number,
+                    loading: loading,
+                    onKindChanged: (value) {
+                      setState(() => _checkDigitKind = value);
+                    },
+                    requiredValidator: _requiredValidator,
+                  ),
+                  'anatomy' => ValidateKindValueFields(
+                    kinds: _identifierKinds,
+                    kind: _anatomyKind,
+                    controller: _anatomyValueController,
+                    fieldName: 'anatomy_value',
+                    valueLabel: 'Value',
+                    requiredLabel: 'Value',
+                    loading: loading,
+                    onKindChanged: (value) {
+                      setState(() => _anatomyKind = value);
+                    },
+                    requiredValidator: _requiredValidator,
+                  ),
+                  _ => ValidateSingleFields(
+                    identifierKinds: _identifierKinds,
+                    kind: _singleKind,
+                    valueController: _singleValueController,
+                    serialController: _singleSerialController,
+                    loading: loading,
+                    onKindChanged: (value) {
+                      setState(() => _singleKind = value);
+                    },
+                    validatorFor: _validatorFor,
+                    requiredValidator: _requiredValidator,
+                  ),
                 },
                 const SizedBox(height: TraqSpacing.lg),
                 CustomElevatedButton(

@@ -13,14 +13,14 @@ enum JourneyEventFilter {
 
 extension JourneyEventFilterX on JourneyEventFilter {
   String get label => switch (this) {
-        JourneyEventFilter.all => 'All',
-        JourneyEventFilter.packing => 'Packing',
-        JourneyEventFilter.shipping => 'Shipping',
-        JourneyEventFilter.receiving => 'Receiving',
-        JourneyEventFilter.aggregation => 'Aggregation',
-        JourneyEventFilter.commissioning => 'Commissioning',
-        JourneyEventFilter.decommissioning => 'Decommissioning',
-      };
+    JourneyEventFilter.all => 'All',
+    JourneyEventFilter.packing => 'Packing',
+    JourneyEventFilter.shipping => 'Shipping',
+    JourneyEventFilter.receiving => 'Receiving',
+    JourneyEventFilter.aggregation => 'Aggregation',
+    JourneyEventFilter.commissioning => 'Commissioning',
+    JourneyEventFilter.decommissioning => 'Decommissioning',
+  };
 
   bool matches(JourneyStep step) {
     if (this == JourneyEventFilter.all) return true;

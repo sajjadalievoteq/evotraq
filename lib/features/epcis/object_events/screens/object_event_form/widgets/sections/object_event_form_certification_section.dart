@@ -132,10 +132,9 @@ class _ObjectEventFormCertificationSectionState
           TextField(
             controller: _typeController,
             decoration: InputDecoration(
-              label: objectEventFormFieldLabel(
-                context,
-                'Certification Type',
-                true,
+              label: const ObjectEventFormFieldLabel(
+                label: 'Certification Type',
+                isMandatory: true,
               ),
               hintText: 'e.g., Organic, Fair Trade',
               border: const OutlineInputBorder(),
@@ -153,10 +152,9 @@ class _ObjectEventFormCertificationSectionState
           TextField(
             controller: _standardController,
             decoration: InputDecoration(
-              label: objectEventFormFieldLabel(
-                context,
-                'Certification Standard',
-                false,
+              label: const ObjectEventFormFieldLabel(
+                label: 'Certification Standard',
+                isMandatory: false,
               ),
               hintText: 'e.g., ISO, GS1 (optional if type is set)',
               border: const OutlineInputBorder(),
@@ -166,10 +164,9 @@ class _ObjectEventFormCertificationSectionState
           TextField(
             controller: _agencyController,
             decoration: InputDecoration(
-              label: objectEventFormFieldLabel(
-                context,
-                'Certifying Agency',
-                true,
+              label: const ObjectEventFormFieldLabel(
+                label: 'Certifying Agency',
+                isMandatory: true,
               ),
               border: const OutlineInputBorder(),
             ),

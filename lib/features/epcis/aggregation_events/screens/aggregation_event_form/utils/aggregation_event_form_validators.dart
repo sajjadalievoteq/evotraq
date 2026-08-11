@@ -11,8 +11,10 @@ class AggregationEventFormValidators {
 
   static final RegExp _urnEpc = RegExp(r'^urn:epc:', caseSensitive: false);
   static final RegExp _gs1ElementString = RegExp(r'\(\d{2}\)');
-  static final RegExp _digitalLink =
-      RegExp(r'^https://id\.gs1\.org/', caseSensitive: false);
+  static final RegExp _digitalLink = RegExp(
+    r'^https://id\.gs1\.org/',
+    caseSensitive: false,
+  );
   static final RegExp _ssccUrn = RegExp(
     r'^urn:epc:id:sscc:(\d{6,12})\.(\d{1,17})$',
     caseSensitive: false,
@@ -51,7 +53,7 @@ class AggregationEventFormValidators {
     if (Gs1CanonicalIdentifier.isSscc(trimmed)) {
       final extracted = Gs1CanonicalIdentifier.extractSscc18(trimmed);
       if (extracted != null && SsccFormat.isValidSscc(extracted)) return null;
-      
+
       if (_ssccUrn.hasMatch(trimmed)) {
         return _validateSsccEpcUri(trimmed);
       }

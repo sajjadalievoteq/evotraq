@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/convert_tool_fields.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
@@ -266,179 +267,6 @@ class _ConvertToolState extends State<ConvertTool> with Gs1InitialModeMixin {
   String? _requiredValidator(String? v, String label) =>
       (v ?? '').trim().isEmpty ? '$label is required' : null;
 
-  List<Widget> _idFields(bool loading, {required bool showLotExtension}) {
-    return switch (_idKind) {
-      'sgtin' => [
-        GtinEntryField(
-          controller: _gtinController,
-          label: 'GTIN',
-          enabled: !loading,
-          validator: _gtinValidator,
-        ),
-        const SizedBox(height: TraqSpacing.md),
-        ValidatedTextFieldWrapper(
-          controller: _serialController,
-          fieldName: 'serial',
-          decoration: const InputDecoration(labelText: 'Serial'),
-          readOnly: loading,
-          validator: (v) => _requiredValidator(v, 'Serial'),
-        ),
-      ],
-      'sscc' => [
-        ValidatedTextFieldWrapper(
-          controller: _ssccController,
-          fieldName: 'sscc',
-          decoration: const InputDecoration(labelText: 'SSCC'),
-          readOnly: loading,
-          keyboardType: TextInputType.number,
-          validator: _ssccValidator,
-        ),
-      ],
-      'gln' => [
-        ValidatedTextFieldWrapper(
-          controller: _glnController,
-          fieldName: 'gln',
-          decoration: const InputDecoration(labelText: 'GLN'),
-          readOnly: loading,
-          keyboardType: TextInputType.number,
-          validator: _glnValidator,
-        ),
-        const SizedBox(height: TraqSpacing.md),
-        ValidatedTextFieldWrapper(
-          controller: _extraController,
-          fieldName: 'extension',
-          decoration: const InputDecoration(labelText: 'Extension (optional)'),
-          readOnly: loading,
-          keyboardType: TextInputType.number,
-        ),
-      ],
-      _ => [
-        GtinEntryField(
-          controller: _gtinController,
-          label: 'GTIN',
-          enabled: !loading,
-          validator: _gtinValidator,
-        ),
-        if (showLotExtension) ...[
-          const SizedBox(height: TraqSpacing.md),
-          ValidatedTextFieldWrapper(
-            controller: _extraController,
-            fieldName: 'lot',
-            decoration: const InputDecoration(
-              labelText: 'Lot / batch (optional)',
-            ),
-            readOnly: loading,
-          ),
-        ],
-      ],
-    };
-  }
-
-  List<Widget> _modeFields(WorkbenchSlice slice) {
-    final loading = slice.isLoading;
-    switch (_mode) {
-      case 'urn-dl':
-        return [
-          Gs1ToolModeSelector(
-            modes: _urnDlDirections,
-            value: _direction,
-            enabled: !loading,
-            label: 'Direction',
-            onChanged: (v) => setState(() => _direction = v),
-          ),
-          const SizedBox(height: TraqSpacing.lg),
-          if (_direction == 'parse')
-            ValidatedTextFieldWrapper(
-              controller: _inputController,
-              fieldName: 'input',
-              decoration: const InputDecoration(
-                labelText: 'Digital Link URL or EPC URN',
-                hintText: 'https://id.gs1.org/… or urn:epc:id:…',
-              ),
-              maxLines: 3,
-              readOnly: loading,
-              validator: (v) => _requiredValidator(v, 'Input'),
-            )
-          else ...[
-            Gs1ToolModeSelector(
-              modes: _urnDlKinds,
-              value: _idKind,
-              enabled: !loading,
-              label: 'Identifier kind',
-              onChanged: (v) => setState(() => _idKind = v),
-            ),
-            const SizedBox(height: TraqSpacing.md),
-            ..._idFields(loading, showLotExtension: true),
-          ],
-        ];
-      case 'epc':
-        return [
-          Gs1ToolModeSelector(
-            modes: _epcDirections,
-            value: _direction,
-            enabled: !loading,
-            label: 'Direction',
-            onChanged: (v) => setState(() => _direction = v),
-          ),
-          const SizedBox(height: TraqSpacing.lg),
-          if (_direction == 'to-epc') ...[
-            Gs1ToolModeSelector(
-              modes: _epcKinds,
-              value: _idKind,
-              enabled: !loading,
-              label: 'Identifier kind',
-              onChanged: (v) => setState(() => _idKind = v),
-            ),
-            const SizedBox(height: TraqSpacing.md),
-            ..._idFields(loading, showLotExtension: false),
-          ] else ...[
-            Gs1ToolModeSelector(
-              modes: const [
-                ('SGTIN', 'SGTIN'),
-                ('SSCC', 'SSCC'),
-                ('GLN', 'GLN'),
-              ],
-              value: _epcType,
-              enabled: !loading,
-              label: 'GS1 type',
-              onChanged: (v) => setState(() => _epcType = v),
-            ),
-            const SizedBox(height: TraqSpacing.md),
-            ValidatedTextFieldWrapper(
-              controller: _inputController,
-              fieldName: 'epc_uri',
-              decoration: const InputDecoration(labelText: 'EPC URI'),
-              readOnly: loading,
-              validator: (v) => _requiredValidator(v, 'EPC URI'),
-            ),
-          ],
-        ];
-      default:
-        return [
-          Gs1ToolModeSelector(
-            modes: _elementDirections,
-            value: _direction,
-            enabled: !loading,
-            label: 'Direction',
-            onChanged: (v) => setState(() => _direction = v),
-          ),
-          const SizedBox(height: TraqSpacing.lg),
-          ValidatedTextFieldWrapper(
-            controller: _inputController,
-            fieldName: 'element_input',
-            decoration: InputDecoration(
-              labelText: _direction == 'dl-to-element'
-                  ? 'Digital Link URL'
-                  : 'GS1 element string',
-            ),
-            maxLines: 4,
-            readOnly: loading,
-            validator: (v) => _requiredValidator(v, 'Input'),
-          ),
-        ];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<Gs1ToolsCubit, Gs1ToolsState>(
@@ -475,7 +303,31 @@ class _ConvertToolState extends State<ConvertTool> with Gs1InitialModeMixin {
                   onChanged: _onModeChanged,
                 ),
                 const SizedBox(height: TraqSpacing.lg),
-                ..._modeFields(slice),
+                ConvertToolFields(
+                  slice: slice,
+                  mode: _mode,
+                  direction: _direction,
+                  idKind: _idKind,
+                  epcType: _epcType,
+                  inputController: _inputController,
+                  gtinController: _gtinController,
+                  serialController: _serialController,
+                  ssccController: _ssccController,
+                  glnController: _glnController,
+                  extraController: _extraController,
+                  urnDlDirections: _urnDlDirections,
+                  urnDlKinds: _urnDlKinds,
+                  epcDirections: _epcDirections,
+                  epcKinds: _epcKinds,
+                  elementDirections: _elementDirections,
+                  onDirectionChanged: (v) => setState(() => _direction = v),
+                  onIdKindChanged: (v) => setState(() => _idKind = v),
+                  onEpcTypeChanged: (v) => setState(() => _epcType = v),
+                  gtinValidator: _gtinValidator,
+                  ssccValidator: _ssccValidator,
+                  glnValidator: _glnValidator,
+                  requiredValidator: _requiredValidator,
+                ),
                 const SizedBox(height: TraqSpacing.lg),
                 CustomElevatedButton(
                   label: 'Convert',

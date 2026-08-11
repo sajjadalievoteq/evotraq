@@ -1,5 +1,7 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
+part 'sscc_copy_with.dart';
+
 class SSCC {
   final String? id;
   final String ssccCode;
@@ -124,131 +126,14 @@ class SSCC {
     required this.updatedAt,
   });
 
-  SSCC copyWith({
-    String? id,
-    String? ssccCode,
-    String? canonicalIdentifier,
-    UnitType? unitType,
-    LogisticUnitStatus? status,
-    ContentHomogeneity? contentHomogeneity,
-    String? containedGtin,
-    int? containedQuantity,
-    String? containedBatch,
-    DateTime? containedExpiry,
-    DateTime? allocatedAt,
-    DateTime? commissionedAt,
-    DateTime? packingDate,
-    DateTime? lastShipmentAt,
-    DateTime? shippingDate,
-    DateTime? receivingDate,
-    DateTime? decommissionedAt,
-    DateTime? nonReuseUntil,
-    DateTime? validFrom,
-    DateTime? validUntil,
-    DateTime? retentionExpiry,
-    String? gs1CompanyPrefix,
-    String? extensionDigit,
-    String? serialReference,
-    String? checkDigit,
-    SSCC? parentSscc,
-    String? parentSsccCode,
-    String? scanVisibleSsccCode,
-    int? childCount,
-    int? totalLeafCount,
-    String? shipFromGln,
-    String? shipToGln,
-    String? billToGln,
-    String? shipForGln,
-    String? currentLocationGln,
-    String? currentReadpointGln,
-    String? currentBizlocationGln,
-    String? currentCustodianGln,
-    GLN? currentLocation,
-    String? purchaseOrderNumber,
-    String? ginc,
-    String? gsin,
-    String? carrierRoutingCode,
-    String? shipToPostalCode,
-    String? aggregationEventId,
-    String? commissioningEventId,
-    List<String>? childSsccs,
-    List<String>? childSgtins,
-    GLN? sourceLocation,
-    GLN? destinationLocation,
-    GLN? issuingGLN,
-    List<String>? availableTransitions,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return SSCC(
-      id: id ?? this.id,
-      ssccCode: ssccCode ?? this.ssccCode,
-      canonicalIdentifier:
-          canonicalIdentifier ?? this.canonicalIdentifier,
-      unitType: unitType ?? this.unitType,
-      status: status ?? this.status,
-      contentHomogeneity: contentHomogeneity ?? this.contentHomogeneity,
-      containedGtin: containedGtin ?? this.containedGtin,
-      containedQuantity: containedQuantity ?? this.containedQuantity,
-      containedBatch: containedBatch ?? this.containedBatch,
-      containedExpiry: containedExpiry ?? this.containedExpiry,
-      allocatedAt: allocatedAt ?? this.allocatedAt,
-      commissionedAt: commissionedAt ?? this.commissionedAt,
-      packingDate: packingDate ?? this.packingDate,
-      lastShipmentAt: lastShipmentAt ?? this.lastShipmentAt,
-      shippingDate: shippingDate ?? this.shippingDate,
-      receivingDate: receivingDate ?? this.receivingDate,
-      decommissionedAt: decommissionedAt ?? this.decommissionedAt,
-      nonReuseUntil: nonReuseUntil ?? this.nonReuseUntil,
-      validFrom: validFrom ?? this.validFrom,
-      validUntil: validUntil ?? this.validUntil,
-      retentionExpiry: retentionExpiry ?? this.retentionExpiry,
-      gs1CompanyPrefix: gs1CompanyPrefix ?? this.gs1CompanyPrefix,
-      extensionDigit: extensionDigit ?? this.extensionDigit,
-      serialReference: serialReference ?? this.serialReference,
-      checkDigit: checkDigit ?? this.checkDigit,
-      parentSscc: parentSscc ?? this.parentSscc,
-      parentSsccCode: parentSsccCode ?? this.parentSsccCode,
-      scanVisibleSsccCode: scanVisibleSsccCode ?? this.scanVisibleSsccCode,
-      childCount: childCount ?? this.childCount,
-      totalLeafCount: totalLeafCount ?? this.totalLeafCount,
-      shipFromGln: shipFromGln ?? this.shipFromGln,
-      shipToGln: shipToGln ?? this.shipToGln,
-      billToGln: billToGln ?? this.billToGln,
-      shipForGln: shipForGln ?? this.shipForGln,
-      currentLocationGln: currentLocationGln ?? this.currentLocationGln,
-      currentReadpointGln: currentReadpointGln ?? this.currentReadpointGln,
-      currentBizlocationGln:
-          currentBizlocationGln ?? this.currentBizlocationGln,
-      currentCustodianGln: currentCustodianGln ?? this.currentCustodianGln,
-      currentLocation: currentLocation ?? this.currentLocation,
-      purchaseOrderNumber: purchaseOrderNumber ?? this.purchaseOrderNumber,
-      ginc: ginc ?? this.ginc,
-      gsin: gsin ?? this.gsin,
-      carrierRoutingCode: carrierRoutingCode ?? this.carrierRoutingCode,
-      shipToPostalCode: shipToPostalCode ?? this.shipToPostalCode,
-      aggregationEventId: aggregationEventId ?? this.aggregationEventId,
-      commissioningEventId:
-          commissioningEventId ?? this.commissioningEventId,
-      childSsccs: childSsccs ?? this.childSsccs,
-      childSgtins: childSgtins ?? this.childSgtins,
-      sourceLocation: sourceLocation ?? this.sourceLocation,
-      destinationLocation: destinationLocation ?? this.destinationLocation,
-      issuingGLN: issuingGLN ?? this.issuingGLN,
-      availableTransitions: availableTransitions ?? this.availableTransitions,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-
   factory SSCC.fromJson(Map<String, dynamic> json) {
     final String ssccCode = json['sscc'] ?? json['ssccCode'] ?? '';
     final DateTime now = DateTime.now();
-    final DateTime createdAt = _parseDateTime(json['createdAt']) ??
+    final DateTime createdAt =
+        _parseDateTime(json['createdAt']) ??
         _parseDateTime(json['statusDate']) ??
         now;
-    final DateTime updatedAt =
-        _parseDateTime(json['updatedAt']) ?? createdAt;
+    final DateTime updatedAt = _parseDateTime(json['updatedAt']) ?? createdAt;
 
     List<String>? transitions;
     final rawTransitions = json['availableTransitions'];
@@ -285,7 +170,8 @@ class SSCC {
       validUntil: _parseDateTime(json['validUntil']),
       retentionExpiry: _parseDateOnly(json['retentionExpiry']),
       gs1CompanyPrefix:
-          json['companyPrefix'] as String? ?? json['gs1CompanyPrefix'] as String?,
+          json['companyPrefix'] as String? ??
+          json['gs1CompanyPrefix'] as String?,
       extensionDigit: json['extensionDigit'] as String?,
       serialReference: json['serialReference'] as String?,
       checkDigit: json['checkDigit'] as String?,
@@ -297,7 +183,8 @@ class SSCC {
       childCount: json['childCount'] as int?,
       totalLeafCount: json['totalLeafCount'] as int?,
       shipFromGln: json['shipFromGLN'] as String?,
-      shipToGln: (json['shipToGLN'] as String?) ??
+      shipToGln:
+          (json['shipToGLN'] as String?) ??
           (json['inTransitDestinationGln'] as String?),
       billToGln: json['billToGLN'] as String?,
       shipForGln: json['shipForGLN'] as String?,
@@ -357,11 +244,9 @@ class SSCC {
         'purchaseOrderNumber': purchaseOrderNumber,
       if (gsin != null) 'gsin': gsin,
       if (ginc != null) 'ginc': ginc,
-      if (carrierRoutingCode != null)
-        'carrierRoutingCode': carrierRoutingCode,
+      if (carrierRoutingCode != null) 'carrierRoutingCode': carrierRoutingCode,
       if (shipToPostalCode != null) 'shipToPostalCode': shipToPostalCode,
-      if (aggregationEventId != null)
-        'aggregationEventId': aggregationEventId,
+      if (aggregationEventId != null) 'aggregationEventId': aggregationEventId,
       if (commissioningEventId != null)
         'commissioningEventId': commissioningEventId,
       if (currentReadpointGln != null)
@@ -428,7 +313,8 @@ class SSCC {
     if (json['currentLocation'] is Map<String, dynamic>) {
       return GLN.fromJson(json['currentLocation'] as Map<String, dynamic>);
     }
-    final glnCode = json['currentLocationGLN'] as String? ??
+    final glnCode =
+        json['currentLocationGLN'] as String? ??
         json['currentLocationGln'] as String? ??
         json['currentBizlocationGLN'] as String?;
     final locationName = json['currentLocationName'] as String?;
@@ -531,8 +417,4 @@ enum LogisticUnitStatus {
   VOIDED,
 }
 
-enum ContentHomogeneity {
-  HOMOGENEOUS,
-  MIXED,
-  UNKNOWN,
-}
+enum ContentHomogeneity { HOMOGENEOUS, MIXED, UNKNOWN }

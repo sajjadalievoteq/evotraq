@@ -25,15 +25,9 @@ class UserManagementUserInfoBadge extends StatelessWidget {
           width: 6,
           height: 6,
           margin: const EdgeInsets.only(right: 5, top: 1),
-          decoration: BoxDecoration(
-            color: valueColor,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: valueColor, shape: BoxShape.circle),
         ),
-        Text(
-          '$label: ',
-          style: bodySmall?.copyWith(color: mutedColor),
-        ),
+        Text('$label: ', style: bodySmall?.copyWith(color: mutedColor)),
         Text(
           value,
           style: bodySmall?.copyWith(

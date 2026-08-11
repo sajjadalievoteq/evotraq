@@ -13,7 +13,7 @@ class AggregationEventFormSourceListSection extends StatelessWidget {
   });
 
   final List<MapEntry<TextEditingController, TextEditingController>>
-      sourceListControllers;
+  sourceListControllers;
   final VoidCallback onAddSourceEntry;
   final ValueChanged<int> onRemoveSourceEntry;
 
@@ -29,10 +29,9 @@ class AggregationEventFormSourceListSection extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 'No sources added. Tap "Add Source" to specify where products came from.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(fontStyle: FontStyle.italic),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
               ),
             ),
           ...sourceListControllers.asMap().entries.map((entry) {
@@ -55,7 +54,8 @@ class AggregationEventFormSourceListSection extends StatelessWidget {
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: TraqIcon(AppAssets.iconTrash,
+                          icon: TraqIcon(
+                            AppAssets.iconTrash,
                             color: AppColorMapper.errorColor(context),
                             size: 20,
                           ),

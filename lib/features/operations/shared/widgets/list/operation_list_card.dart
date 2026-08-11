@@ -12,14 +12,18 @@ import 'package:traqtrace_app/data/models/operations/shared/operation_type.dart'
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_batch_status_utils.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_status_utils.dart';
-
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_card_footer.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_card_row.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_card_row_line.dart';
 
 class OperationListCard extends StatelessWidget {
   const OperationListCard({
     super.key,
     required this.operation,
     required this.isSelected,
-    required this.onTap, this.isInboxOutbox=false, this.perspectiveGln,
+    required this.onTap,
+    this.isInboxOutbox = false,
+    this.perspectiveGln,
   });
 
   final Operation operation;
@@ -44,8 +48,7 @@ class OperationListCard extends StatelessWidget {
     return switch (operation.operationType) {
       OperationType.shipping ||
       OperationType.returnShipping ||
-      OperationType.cancelShipping =>
-        'Outgoing',
+      OperationType.cancelShipping => 'Outgoing',
       _ => 'Incoming',
     };
   }
@@ -54,10 +57,8 @@ class OperationListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
-    final titleColor =
-        Gs1ListItemSelectionStyle.primaryTextColor(isSelected);
-    final rowColor =
-        Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
+    final titleColor = Gs1ListItemSelectionStyle.primaryTextColor(isSelected);
+    final rowColor = Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
 
     final status = _status(context);
     final rows = _rows();
@@ -87,12 +88,10 @@ class OperationListCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                     isInboxOutbox == true ? _inboxOutboxLabel() : status.label,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-
-                      ),
+                      isInboxOutbox == true
+                          ? _inboxOutboxLabel()
+                          : status.label,
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ),
                   const Spacer(),
@@ -118,11 +117,11 @@ class OperationListCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               for (final row in rows) ...[
-                _RowLine(row: row, color: rowColor),
+                OperationCardRowLine(row: row, color: rowColor),
                 const SizedBox(height: 4),
               ],
               const SizedBox(height: 4),
-              _Footer(
+              OperationCardFooter(
                 operation: operation,
                 isSelected: isSelected,
                 rowColor: rowColor,
@@ -133,11 +132,12 @@ class OperationListCard extends StatelessWidget {
       ),
     );
   }
-  static String displayOperationTypeName(String operationType) {
 
+  static String displayOperationTypeName(String operationType) {
     final name = operationType;
     return '${name[0].toUpperCase()}${name.substring(1)}';
   }
+
   String _title() {
     final ref = operation.operationReference;
     return switch (operation.operationType) {
@@ -146,10 +146,11 @@ class OperationListCard extends StatelessWidget {
             (operation.gtinCode != null
                 ? 'GTIN: ${operation.gtinCode}'
                 : 'Commissioning Operation'),
-      OperationType.returnReceiving => ref ??
-          (operation.epcList?.isNotEmpty == true
-              ? 'Return Receiving: ${operation.epcList!.first}'
-              : 'Return Receiving Operation'),
+      OperationType.returnReceiving =>
+        ref ??
+            (operation.epcList?.isNotEmpty == true
+                ? 'Return Receiving: ${operation.epcList!.first}'
+                : 'Return Receiving Operation'),
       OperationType.shipping => ref ?? 'Shipping Operation',
       OperationType.receiving => ref ?? 'Receiving Operation',
       OperationType.returnShipping => ref ?? 'Return Shipping Operation',
@@ -192,8 +193,7 @@ class OperationListCard extends StatelessWidget {
     };
   }
 
-  
-  List<_CardRow> _rows() {
+  List<OperationCardRow> _rows() {
     if (operation.operationType == OperationType.commissioning) {
       return [
         _row(
@@ -220,7 +220,6 @@ class OperationListCard extends StatelessWidget {
     ];
   }
 
-  
   String _commissioningSerialOrLocation() {
     final epcs = operation.epcList;
     if (epcs != null && epcs.isNotEmpty) {
@@ -239,10 +238,9 @@ class OperationListCard extends StatelessWidget {
     return text;
   }
 
-  _CardRow _row(String text, String icon) =>
-      _CardRow(text: text, iconAsset: icon);
+  OperationCardRow _row(String text, String icon) =>
+      OperationCardRow(text: text, iconAsset: icon);
 
-  
   String _sharedLocation() {
     for (final value in [
       operation.locationGLN,
@@ -278,98 +276,5 @@ class OperationListCard extends StatelessWidget {
   static String? formatTimestamp(DateTime? value) {
     if (value == null) return null;
     return DateFormat('MMM dd, yyyy HH:mm').format(value);
-  }
-}
-
-class _CardRow {
-  const _CardRow({
-    required this.text,
-    required this.iconAsset,
-  });
-
-  final String text;
-  final String iconAsset;
-}
-
-class _RowLine extends StatelessWidget {
-  const _RowLine({required this.row, required this.color});
-
-  final _CardRow row;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        TraqIcon(row.iconAsset, size: 16, color: color),
-        const SizedBox(width: 4),
-        Expanded(
-          child: Text(
-            row.text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: color),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Footer extends StatelessWidget {
-  const _Footer({
-    required this.operation,
-    required this.isSelected,
-    required this.rowColor,
-  });
-
-  final Operation operation;
-  final bool isSelected;
-  final Color rowColor;
-
-  @override
-  Widget build(BuildContext context) {
-    if (operation.operationType == OperationType.commissioning) {
-      final commissioned =
-          operation.totalCommissioned ?? operation.itemCount;
-      final failed = operation.totalFailedCount ?? 0;
-      return Row(
-        children: [
-          TraqIcon(AppAssets.iconCheck, size: 14, color: rowColor),
-          const SizedBox(width: 4),
-          Text(
-            '$commissioned commissioned',
-            style: TextStyle(color: rowColor, fontSize: 12),
-          ),
-          if (failed > 0) ...[
-            const SizedBox(width: 12),
-            TraqIcon(
-              AppAssets.iconAlert,
-              size: 14,
-              color: AppColorMapper.operationStatusColor(
-                context,
-                OperationStatus.failed,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '$failed failed',
-              style: TextStyle(
-                color: AppColorMapper.operationStatusColor(
-                  context,
-                  OperationStatus.failed,
-                ),
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ],
-      );
-    }
-
-    return Text(
-      '${operation.eventIds?.length ?? 0} events',
-      style: TextStyle(color: rowColor, fontSize: 12),
-    );
   }
 }

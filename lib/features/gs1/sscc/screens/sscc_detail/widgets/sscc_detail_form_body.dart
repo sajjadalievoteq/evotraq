@@ -150,11 +150,13 @@ class SsccDetailFormBody extends StatelessWidget {
     required String childEpc,
     required String childKind,
     required String aggregationEventId,
-  })? onAddChild;
+  })?
+  onAddChild;
   final Future<bool> Function({
     required int linkId,
     required String disaggregationEventId,
-  })? onDisaggregate;
+  })?
+  onDisaggregate;
   final VoidCallback onSave;
 
   final ValueChanged<GLN?> onIssuingGlnChanged;
@@ -167,21 +169,9 @@ class SsccDetailFormBody extends StatelessWidget {
   final VoidCallback onManualSsccCodeChanged;
   final bool forceMountAllSections;
 
-  Widget _lazy({
-    required double placeholderHeight,
-    required WidgetBuilder builder,
-  }) {
-    return Gs1LazyViewportSection(
-      forceMount: forceMountAllSections,
-      placeholderHeight: placeholderHeight,
-      builder: builder,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final showHeader =
-        ssccCodeController.text.isNotEmpty && !isCreating;
+    final showHeader = ssccCodeController.text.isNotEmpty && !isCreating;
 
     if (showSkeleton) {
       return RefreshIndicator(
@@ -288,7 +278,8 @@ class SsccDetailFormBody extends StatelessWidget {
                 ),
                 if (!isCreating) ...[
                   const SizedBox(height: 12),
-                  _lazy(
+                  Gs1LazyViewportSection(
+                    forceMount: forceMountAllSections,
                     placeholderHeight: 280,
                     builder: (_) => SsccPartiesCard(
                       borderColor: borderColor,
@@ -304,12 +295,14 @@ class SsccDetailFormBody extends StatelessWidget {
                       onShipForChanged: onShipForChanged,
                       onCustodianChanged: onCustodianChanged,
                       sscc: sscc,
-                      pickerCatalog:
-                          glnPickerCatalog.isEmpty ? null : glnPickerCatalog,
+                      pickerCatalog: glnPickerCatalog.isEmpty
+                          ? null
+                          : glnPickerCatalog,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _lazy(
+                  Gs1LazyViewportSection(
+                    forceMount: forceMountAllSections,
                     placeholderHeight: 220,
                     builder: (_) => SsccTransportCard(
                       borderColor: borderColor,
@@ -322,7 +315,8 @@ class SsccDetailFormBody extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _lazy(
+                  Gs1LazyViewportSection(
+                    forceMount: forceMountAllSections,
                     placeholderHeight: 200,
                     builder: (_) => SsccAggregationCard(
                       borderColor: borderColor,
@@ -334,7 +328,8 @@ class SsccDetailFormBody extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _lazy(
+                  Gs1LazyViewportSection(
+                    forceMount: forceMountAllSections,
                     placeholderHeight: 160,
                     builder: (_) => SsccEpcisAuditCard(
                       borderColor: borderColor,
@@ -343,42 +338,47 @@ class SsccDetailFormBody extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 24.0),
-                _lazy(
+                Gs1LazyViewportSection(
+                  forceMount: forceMountAllSections,
                   placeholderHeight: 280,
-                  builder: (_) => BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
-                    builder: (context, settingsState) {
-                      final settings = settingsState.settings;
-                      final currentSsccCode =
-                          (sscc?.ssccCode ?? ssccCodeController.text).trim();
-                      final hasSsccCode = currentSsccCode.isNotEmpty;
-                      final hasPersistedSscc = !isCreating && hasSsccCode;
+                  builder: (_) =>
+                      BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
+                        builder: (context, settingsState) {
+                          final settings = settingsState.settings;
+                          final currentSsccCode =
+                              (sscc?.ssccCode ?? ssccCodeController.text)
+                                  .trim();
+                          final hasSsccCode = currentSsccCode.isNotEmpty;
+                          final hasPersistedSscc = !isCreating && hasSsccCode;
 
-                      if (settings.isPharmaceuticalMode) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (hasPersistedSscc && sscc?.id != null) ...[
-                              SsccPharmaComplianceCard(
-                                borderColor: borderColor,
-                                ssccId: sscc!.id!,
-                                isReadOnly: isReadOnly,
-                              ),
-                              const SizedBox(height: 12),
-                            ],
-                            SSCCPharmaceuticalExtensionWidget(
-                              key: pharmaExtensionKey,
-                              ssccId: parseSsccId(sscc?.id),
-                              ssccCode: hasSsccCode ? currentSsccCode : null,
-                              isEditing: !isReadOnly,
-                              borderColor: borderColor,
-                            ),
-                          ],
-                        );
-                      }
+                          if (settings.isPharmaceuticalMode) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                if (hasPersistedSscc && sscc?.id != null) ...[
+                                  SsccPharmaComplianceCard(
+                                    borderColor: borderColor,
+                                    ssccId: sscc!.id!,
+                                    isReadOnly: isReadOnly,
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                SSCCPharmaceuticalExtensionWidget(
+                                  key: pharmaExtensionKey,
+                                  ssccId: parseSsccId(sscc?.id),
+                                  ssccCode: hasSsccCode
+                                      ? currentSsccCode
+                                      : null,
+                                  isEditing: !isReadOnly,
+                                  borderColor: borderColor,
+                                ),
+                              ],
+                            );
+                          }
 
-                      return const SizedBox.shrink();
-                    },
-                  ),
+                          return const SizedBox.shrink();
+                        },
+                      ),
                 ),
                 const SizedBox(height: 24),
                 if (embedded && allowMasterDataActions) ...[

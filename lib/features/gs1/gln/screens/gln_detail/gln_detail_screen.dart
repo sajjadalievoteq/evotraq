@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_awaiting_selection_pane.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -27,6 +28,8 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
+
+part 'gln_detail_actions.dart';
 
 class GLNDetailScreen extends StatefulWidget {
   final String? glnId;
@@ -145,269 +148,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     super.dispose();
   }
 
-  Future<void> _refresh() async {
-    if (widget.glnId != null) {
-      _glnCubit?.fetchGLNById(widget.glnId!);
-    }
-  }
-
-  void _applyGlnToLocalState(GLN g) {
-    _licenseValidFrom = g.licenseValidFrom;
-    _licenseExpiry = g.licenseExpiry;
-    _effectiveFrom = g.effectiveFrom;
-    _effectiveTo = g.effectiveTo;
-    _nonReuseUntil = g.nonReuseUntil;
-    _coordinates = g.coordinates;
-  }
-
-  void _populateFromGln(GLN? g) {
-    if (g == null) {
-      clearGlnFieldTexts();
-
-      _operatingStatus = 'ACTIVE';
-      _industryClassification = 'HEALTHCARE';
-      _glnSource = 'SELF_ALLOCATED';
-      _mobility = 'FIXED';
-      _digitalAddressType = 'URL';
-      _locationTypeLabel = 'Other';
-      _glnTypes = ['FIXED_PHYSICAL'];
-      _licenseValidFrom = null;
-      _licenseExpiry = null;
-      _effectiveFrom = null;
-      _effectiveTo = null;
-      _nonReuseUntil = null;
-      _coordinates = null;
-      return;
-    }
-
-    seedGlnFieldTexts(
-      glnCode: g.glnCode,
-      gs1CompanyPrefix: g.gs1CompanyPrefix ?? '',
-      locationReferenceDigits: g.locationReferenceDigits ?? '',
-      checkDigit: g.checkDigit ?? '',
-      parentGlnCode: g.parentGln?.glnCode ?? '',
-      glnExtensionComponent: g.glnExtensionComponent ?? '',
-      locationName: g.locationName,
-      addressLine1: g.addressLine1,
-      addressLine2: g.addressLine2 ?? '',
-      city: g.city,
-      stateProvince: g.stateProvince,
-      postalCode: g.postalCode,
-      country: g.country,
-      mobileLocationIdentifier: g.mobileLocationIdentifier ?? '',
-      registeredLegalName: g.registeredLegalName ?? '',
-      tradingName: g.tradingName ?? '',
-      leiCode: g.leiCode ?? '',
-      taxRegistrationNumber: g.taxRegistrationNumber ?? '',
-      countryOfIncorporationNumeric: g.countryOfIncorporationNumeric ?? '',
-      website: g.website ?? '',
-      contactName: g.contactName ?? '',
-      contactEmail: g.contactEmail ?? '',
-      contactPhone: g.contactPhone ?? '',
-      digitalAddressValue: g.digitalAddressValue ?? '',
-      supplyChainRoles: g.supplyChainRoles.join(', '),
-      locationRoles: g.locationRoles.join(', '),
-      licenseNumber: g.licenseNumber ?? '',
-      licenseType: g.licenseType ?? '',
-    );
-
-    _operatingStatus = (g.operatingStatus ?? 'ACTIVE').toUpperCase();
-    _industryClassification = g.industryClassification ?? 'HEALTHCARE';
-    _glnSource = g.glnSource ?? 'SELF_ALLOCATED';
-    _mobility = g.mobility ?? 'FIXED';
-    _digitalAddressType = g.digitalAddressType ?? 'URL';
-    _locationTypeLabel = GlnLocationTypeMapper.toDropdownLabel(g.locationType);
-    _glnTypes = g.glnTypes.isEmpty
-        ? ['FIXED_PHYSICAL']
-        : List<String>.from(g.glnTypes);
-
-    _applyGlnToLocalState(g);
-  }
-
-  void _maybeHydrateFromGln(GLN? g) {
-    if (widget.glnId != null && g == null) {
-      return;
-    }
-    final tag = widget.glnId == null ? 'create' : g!.glnCode;
-    if (_hydratedTag == tag) {
-      return;
-    }
-    _hydratedTag = tag;
-    _populateFromGln(g);
-    _formFieldsHydrated = true;
-    setState(() {});
-  }
-
-  List<String> _splitRoles(String? raw) {
-    if (raw == null || raw.trim().isEmpty) return [];
-    return raw
-        .split(',')
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
-  }
-
-  Future<void> _pickDate(
-    ValueChanged<DateTime?> onPick,
-    DateTime? current,
-  ) async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current ?? now,
-      firstDate: DateTime(1900),
-      lastDate: DateTime(now.year + 30),
-    );
-    if (picked != null) {
-      onPick(picked);
-    }
-  }
-
-  Future<void> _submitForm() async {
-    if (widget.awaitingListSelection) return;
-    if (_glnTypes.isEmpty) {
-      setState(() {
-        _glnTypesErrorText = GlnUiConstants.errorSelectGlnType;
-      });
-      context.showError(GlnUiConstants.errorFixForm);
-      return;
-    }
-    setState(() => _glnTypesErrorText = null);
-
-    if (!_forceMountAllSections) {
-      setState(() => _forceMountAllSections = true);
-      await Future<void>.delayed(Duration.zero);
-      if (!mounted) return;
-      await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
-    }
-
-    if (!(_formKey.currentState?.validate() ?? false)) {
-      context.showError(GlnUiConstants.errorFixForm);
-      return;
-    }
-
-    final glnCode = GlnFormat.stripGlnInput(glnFieldText('glnCode'));
-    final locationName = glnFieldText('locationName');
-    final addressLine1 = glnFieldText('addressLine1');
-    final city = glnFieldText('city');
-    final stateProvince = glnFieldText('stateProvince');
-    final postalCode = glnFieldText('postalCode');
-    final country = glnFieldText('country');
-
-    final isValid = _validationCubit.validateAllFields({
-      'glnCode': {
-        'value': glnCode,
-        'validator': GlnFieldValidators.validateGlnCode,
-      },
-      'locationName': {
-        'value': locationName,
-        'validator': GlnFieldValidators.validateLocationNameRequired,
-      },
-      'addressLine1': {
-        'value': addressLine1,
-        'validator': GlnFieldValidators.validateAddressLine1Required,
-      },
-      'city': {
-        'value': city,
-        'validator': GlnFieldValidators.validateCityRequired,
-      },
-      'stateProvince': {
-        'value': stateProvince,
-        'validator': GlnFieldValidators.validateStateProvinceRequired,
-      },
-      'postalCode': {
-        'value': postalCode,
-        'validator': GlnFieldValidators.validatePostalCodeRequired,
-      },
-      'country': {
-        'value': country,
-        'validator': GlnFieldValidators.validateCountryRequired,
-      },
-    });
-
-    if (!isValid) return;
-
-    final operatingStatus = _operatingStatus.toUpperCase();
-    final active = operatingStatus == 'ACTIVE';
-
-    final parentRaw = GlnFormat.stripGlnInput(glnFieldText('parentGlnCode'));
-    final parentGln = parentRaw.length == 13 ? GLN.fromCode(parentRaw) : null;
-
-    GLNPharmaceuticalExtension? pharmaceuticalExtension;
-    final pharmaSt = _pharmaExtensionKey.currentState;
-    if (pharmaSt != null && pharmaSt.hasData) {
-      pharmaceuticalExtension = pharmaSt.buildExtension(
-        glnId: null,
-        glnCode: glnCode,
-      );
-    }
-
-    final gln = GLN(
-      glnCode: glnCode,
-      locationName: locationName,
-      addressLine1: addressLine1,
-      addressLine2: _nonEmptyOrNull(glnFieldText('addressLine2')),
-      city: city,
-      stateProvince: stateProvince,
-      postalCode: postalCode,
-      country: country,
-      contactName: _nonEmptyOrNull(glnFieldText('contactName')),
-      contactEmail: _nonEmptyOrNull(glnFieldText('contactEmail')),
-      contactPhone: _nonEmptyOrNull(glnFieldText('contactPhone')),
-      locationType: GlnLocationTypeMapper.parseDropdown(_locationTypeLabel),
-      parentGln: parentGln,
-      licenseNumber: _nonEmptyOrNull(glnFieldText('licenseNumber')),
-      licenseType: _nonEmptyOrNull(glnFieldText('licenseType')),
-      licenseValidFrom: _licenseValidFrom,
-      licenseExpiry: _licenseExpiry,
-      active: active,
-      coordinates: _coordinates,
-      operatingStatus: operatingStatus,
-      effectiveFrom: _effectiveFrom,
-      effectiveTo: _effectiveTo,
-      nonReuseUntil: _nonReuseUntil,
-      gs1CompanyPrefix: _nonEmptyOrNull(glnFieldText('gs1CompanyPrefix')),
-      locationReferenceDigits:
-          _nonEmptyOrNull(glnFieldText('locationReferenceDigits')),
-      checkDigit: _nonEmptyOrNull(glnFieldText('checkDigit')),
-      registeredLegalName: _nonEmptyOrNull(glnFieldText('registeredLegalName')),
-      tradingName: _nonEmptyOrNull(glnFieldText('tradingName')),
-      leiCode: _nonEmptyOrNull(glnFieldText('leiCode')),
-      taxRegistrationNumber:
-          _nonEmptyOrNull(glnFieldText('taxRegistrationNumber')),
-      countryOfIncorporationNumeric: _nonEmptyOrNull(
-        glnFieldText('countryOfIncorporationNumeric').trim(),
-      ),
-      website: _nonEmptyOrNull(glnFieldText('website')),
-      digitalAddressType: _digitalAddressType,
-      digitalAddressValue: _nonEmptyOrNull(glnFieldText('digitalAddressValue')),
-      glnExtensionComponent:
-          _nonEmptyOrNull(glnFieldText('glnExtensionComponent')),
-      industryClassification: _industryClassification,
-      glnSource: _glnSource,
-      mobility: _mobility,
-      mobileLocationIdentifier:
-          _nonEmptyOrNull(glnFieldText('mobileLocationIdentifier')),
-      glnTypes: List<String>.from(_glnTypes),
-      supplyChainRoles: _splitRoles(glnFieldText('supplyChainRoles')),
-      locationRoles: _splitRoles(glnFieldText('locationRoles')),
-      pharmaceuticalExtension: pharmaceuticalExtension,
-    );
-
-    setState(() => _hasSubmittedForm = true);
-
-    final cubit = _glnCubit;
-    if (cubit == null) {
-      return;
-    }
-    if (widget.glnId != null) {
-      cubit.updateGLN(widget.glnId!, gln);
-    } else {
-      cubit.createGLN(gln);
-    }
-  }
-
   String? _nonEmptyOrNull(String s) {
     final t = s.trim();
     return t.isEmpty ? null : t;
@@ -421,45 +161,22 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
   @override
   Widget build(BuildContext context) {
     if (widget.awaitingListSelection) {
-      Widget pane(GLNState state) {
-        final listLoading =
-            state.isGlnListLoading || state.status == GLNStatus.initial;
-        if (listLoading) {
-          return SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              context.padding.top,
-              context.padding.top,
-              context.padding.top,
-              0,
-            ),
-            child: Gs1FormShimmerLayer(
-              show: true,
-              formColumn: const SizedBox.shrink(),
-              skeleton: const GlnDetailFormSkeleton(),
-            ),
-          );
-        }
-        return AppEmptyDetail(
-          title: GlnUiConstants.awaitingSelectionTitle,
-          subtitle: GlnUiConstants.awaitingSelectionSubtitle,
-          iconAsset: NavIcons.gln,
-        );
-      }
-
       if (widget.embedded) {
         return BlocBuilder<GLNCubit, GLNState>(
-          builder: (context, state) => pane(state),
+          builder: (context, state) => GlnAwaitingSelectionPane(state: state),
         );
       }
       final cubit = _glnCubit;
       if (cubit == null) {
-        return Scaffold(body: pane(const GLNState()));
+        return Scaffold(
+          body: GlnAwaitingSelectionPane(state: const GLNState()),
+        );
       }
       return BlocProvider<GLNCubit>.value(
         value: cubit,
         child: BlocBuilder<GLNCubit, GLNState>(
-          builder: (context, state) => Scaffold(body: pane(state)),
+          builder: (context, state) =>
+              Scaffold(body: GlnAwaitingSelectionPane(state: state)),
         ),
       );
     }
@@ -539,7 +256,8 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
               countryOfIncorporationNumericController,
           websiteController: websiteController,
           locationNameController: locationNameController,
-          mobileLocationIdentifierController: mobileLocationIdentifierController,
+          mobileLocationIdentifierController:
+              mobileLocationIdentifierController,
           addressLine1Controller: addressLine1Controller,
           addressLine2Controller: addressLine2Controller,
           cityController: cityController,
@@ -576,10 +294,8 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
             (d) => setState(() => _effectiveFrom = d),
             _effectiveFrom,
           ),
-          onPickEffectiveTo: () => _pickDate(
-            (d) => setState(() => _effectiveTo = d),
-            _effectiveTo,
-          ),
+          onPickEffectiveTo: () =>
+              _pickDate((d) => setState(() => _effectiveTo = d), _effectiveTo),
           onGlnTypesChanged: (next) {
             setState(() {
               _glnTypes = next;

@@ -69,10 +69,7 @@ class CbvVocabFlatTab extends StatelessWidget {
               Text(item.label, style: context.text.body),
               const SizedBox(width: TraqSpacing.sm),
               if (item.isCustom)
-                CbvStatusChip(
-                  label: 'Custom',
-                  color: context.colors.warning,
-                ),
+                CbvStatusChip(label: 'Custom', color: context.colors.warning),
             ],
           ),
           subtitle: Column(
@@ -80,14 +77,18 @@ class CbvVocabFlatTab extends StatelessWidget {
             children: [
               Text(
                 item.code,
-                style: context.text.mono
-                    .copyWith(fontSize: 11, color: context.colors.textMuted),
+                style: context.text.mono.copyWith(
+                  fontSize: 11,
+                  color: context.colors.textMuted,
+                ),
               ),
               if (item.group != null)
                 Text(
                   item.group!,
-                  style: context.text.cap
-                      .copyWith(color: context.colors.textFaint, fontSize: 10),
+                  style: context.text.cap.copyWith(
+                    color: context.colors.textFaint,
+                    fontSize: 10,
+                  ),
                 ),
             ],
           ),
@@ -108,8 +109,9 @@ class CbvVocabFlatTab extends StatelessWidget {
               else
                 CbvStatusChip(
                   label: item.enabled ? 'Enabled' : 'Disabled',
-                  color:
-                      item.enabled ? context.colors.success : context.colors.error,
+                  color: item.enabled
+                      ? context.colors.success
+                      : context.colors.error,
                 ),
               if (isAdmin && item.isCustom) ...[
                 const SizedBox(width: TraqSpacing.sm),

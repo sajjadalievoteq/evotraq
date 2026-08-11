@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_info_row.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
@@ -29,34 +30,16 @@ class ObjectEventListItemCard extends StatelessWidget {
     final muted = theme.colorScheme.onSurfaceVariant;
     final dateFormat = DateFormat('MMM dd, yyyy HH:mm');
 
-    Widget infoRow(String iconAsset, String text) {
-      final color = Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Row(
-          children: [
-            TraqIcon(iconAsset, size: 16, color: color),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                text,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: color, fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     final epcList = event.epcList ?? [];
     final primaryEpc = epcList.isNotEmpty ? epcList.first : null;
     final additionalCount = epcList.length > 1 ? epcList.length - 1 : 0;
     final locationGln = event.businessLocation ?? event.readPoint;
-    final locationName = locationGln != null ? glnDisplayLabel(locationGln) : null;
-    final bizStep =
-        ObjectEventSharedUiConstants.friendlyBizStep(event.businessStep);
+    final locationName = locationGln != null
+        ? glnDisplayLabel(locationGln)
+        : null;
+    final bizStep = ObjectEventSharedUiConstants.friendlyBizStep(
+      event.businessStep,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -80,12 +63,12 @@ class ObjectEventListItemCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-
                           event.eventId,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Gs1ListItemSelectionStyle.primaryTextColor(
-                                isSelected),
+                              isSelected,
+                            ),
                             fontFamily: primaryEpc != null ? 'monospace' : null,
                           ),
                           maxLines: 1,
@@ -93,23 +76,39 @@ class ObjectEventListItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         if (additionalCount > 0)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             AppAssets.iconBox,
                             '${ObjectEventListUiConstants.listCardEpcPrefix}+$additionalCount more EPC${additionalCount == 1 ? '' : 's'}',
+
+                            isSelected: isSelected,
+                            muted: muted,
+                            fontSize: 13,
                           ),
                         if (locationName != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             AppAssets.iconMapPin,
                             '${ObjectEventListUiConstants.listCardLocationPrefix}$locationName',
+
+                            isSelected: isSelected,
+                            muted: muted,
+                            fontSize: 13,
                           ),
                         if (event.businessStep != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             NavIcons.supplyChainTraversal,
                             '${ObjectEventListUiConstants.listCardBizStepPrefix}$bizStep',
+
+                            isSelected: isSelected,
+                            muted: muted,
+                            fontSize: 13,
                           ),
-                        infoRow(
+                        Gs1ListItemInfoRow(
                           AppAssets.iconClock,
                           dateFormat.format(event.eventTime.toLocal()),
+
+                          isSelected: isSelected,
+                          muted: muted,
+                          fontSize: 13,
                         ),
                       ],
                     ),

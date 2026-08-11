@@ -12,11 +12,11 @@ class JourneyCanvasPainter extends CustomPainter {
     required Path fullPath,
     required List<PathMetric> metrics,
     required double totalLength,
-  })  : _progress = progress,
-        _fullPath = fullPath,
-        _metrics = metrics,
-        _totalLength = totalLength,
-        super(repaint: progress);
+  }) : _progress = progress,
+       _fullPath = fullPath,
+       _metrics = metrics,
+       _totalLength = totalLength,
+       super(repaint: progress);
 
   final List<Offset> positions;
   final Color color;
@@ -27,7 +27,6 @@ class JourneyCanvasPainter extends CustomPainter {
 
   double get progress => _progress.value;
 
-  
   static ({Path path, List<PathMetric> metrics, double totalLength}) prepare(
     List<Offset> positions,
   ) {

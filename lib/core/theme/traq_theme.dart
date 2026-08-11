@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar_flexible_background.dart';
 
 part 'traq_theme_colors.dart';
 part 'traq_theme_tokens.dart';
@@ -11,13 +12,11 @@ part 'traq_theme_cards.dart';
 part 'traq_theme_inputs.dart';
 part 'traq_theme_menus.dart';
 part 'traq_theme_widgets.dart';
+part 'traq_theme_chip_widget.dart';
 part 'traq_theme_chips.dart';
 
 class TraqTheme {
   static String get appBarBackgroundAsset => TraqThemeAppBar.backgroundAsset;
-
-  static Widget appBarFlexibleBackground(TraqColors c) =>
-      TraqThemeAppBar.flexibleBackground(c);
 
   static ThemeData dark() => _build(TraqColors.dark, Brightness.dark);
   static ThemeData light() => _build(TraqColors.light, Brightness.light);
@@ -90,10 +89,7 @@ class TraqTheme {
         dividerColor: Colors.transparent,
       ),
       textTheme: TraqText.materialTextTheme(text),
-      extensions: <ThemeExtension<dynamic>>[
-        c,
-        _TraqTextExt(text),
-      ],
+      extensions: <ThemeExtension<dynamic>>[c, _TraqTextExt(text)],
     );
   }
 }
@@ -104,7 +100,7 @@ extension TraqContextX on BuildContext {
   OperationPalette get operationPalette => OperationPalette.of(this);
 
   Widget get appBarFlexibleBackground =>
-      TraqTheme.appBarFlexibleBackground(colors);
+      TraqAppBarFlexibleBackground(color: colors.primary);
 }
 
 extension TraqSemanticColors on TraqColors {

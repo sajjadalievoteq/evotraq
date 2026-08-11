@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/constrained_section_content.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
@@ -37,16 +38,6 @@ class GlnResultsList extends StatelessWidget {
   final void Function(GLN gln, String action) onRowMenuAction;
   final VoidCallback onLoadMore;
 
-  Widget _constrainedCenter(Widget child) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: Constants.sectionMaxWidth),
-        child: child,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GLNCubit, GLNState>(
@@ -81,8 +72,8 @@ class GlnResultsList extends StatelessWidget {
         }
 
         if (state.glns.isEmpty) {
-          return _constrainedCenter(
-            AppEmptyState(
+          return ConstrainedSectionContent(
+            child: AppEmptyState(
               iconAsset: NavIcons.gln,
               title: GlnUiConstants.emptyListTitle,
               subtitle: GlnUiConstants.emptyListSubtitle,
@@ -91,10 +82,12 @@ class GlnResultsList extends StatelessWidget {
               hasItems: hasActiveFilters,
               hasActiveFilters: hasActiveFilters,
               onClearFilters: onClearFilters,
-              primaryActionLabel:
-                  hasActiveFilters ? null : GlnUiConstants.emptyAddAction,
-              primaryActionIconAsset:
-                  hasActiveFilters ? null : AppAssets.iconPlus,
+              primaryActionLabel: hasActiveFilters
+                  ? null
+                  : GlnUiConstants.emptyAddAction,
+              primaryActionIconAsset: hasActiveFilters
+                  ? null
+                  : AppAssets.iconPlus,
               onPrimaryAction: hasActiveFilters ? null : onCreate,
             ),
           );
@@ -126,50 +119,54 @@ class GlnResultsList extends StatelessWidget {
                   return const SizedBox(height: Constants.spacing);
                 },
                 controller: scrollController,
-                physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-              padding: context.horizontalPadding,
-              addAutomaticKeepAlives: false,
-              addRepaintBoundaries: true,
-              cacheExtent: 400,
-              itemCount:
-                  glns.length +
-                  ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
-                  1,
-              itemBuilder: (context, index) {
-                if (index < glns.length) {
-                  final gln = glns[index];
-                  return _constrainedCenter(
-                    RepaintBoundary(
-                      child: GlnListItemCard(
-                        gln: gln,
-                        isSelected: gln.glnCode == selectedGlnCode,
-                        onTap: () => onTapGln(gln.glnCode),
-                        onMenuSelected: (action) =>
-                            onRowMenuAction(gln, action),
-                      ),
-                    ),
-                  );
-                }
-
-                final loaderIndex = glns.length;
-                final spacerIndex =
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                ),
+                padding: context.horizontalPadding,
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: true,
+                cacheExtent: 400,
+                itemCount:
                     glns.length +
-                    ((state.hasMoreData && state.isFetchingMore) ? 1 : 0);
+                    ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
+                    1,
+                itemBuilder: (context, index) {
+                  if (index < glns.length) {
+                    final gln = glns[index];
+                    return ConstrainedSectionContent(
+                      child: RepaintBoundary(
+                        child: GlnListItemCard(
+                          gln: gln,
+                          isSelected: gln.glnCode == selectedGlnCode,
+                          onTap: () => onTapGln(gln.glnCode),
+                          onMenuSelected: (action) =>
+                              onRowMenuAction(gln, action),
+                        ),
+                      ),
+                    );
+                  }
 
-                if (index == loaderIndex &&
-                    state.hasMoreData &&
-                    state.isFetchingMore) {
-                  return _constrainedCenter(const Gs1ListLoadMoreIndicator());
-                }
+                  final loaderIndex = glns.length;
+                  final spacerIndex =
+                      glns.length +
+                      ((state.hasMoreData && state.isFetchingMore) ? 1 : 0);
 
-                if (index == spacerIndex) {
-                  return const SizedBox(height: Constants.spacing);
-                }
+                  if (index == loaderIndex &&
+                      state.hasMoreData &&
+                      state.isFetchingMore) {
+                    return ConstrainedSectionContent(
+                      child: const Gs1ListLoadMoreIndicator(),
+                    );
+                  }
 
-                return const SizedBox.shrink();
-              },
+                  if (index == spacerIndex) {
+                    return const SizedBox(height: Constants.spacing);
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
-          ),
           ),
         );
       },

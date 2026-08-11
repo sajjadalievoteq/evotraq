@@ -9,12 +9,11 @@ class ReturnReceivingQuickFilterDialog {
   static Future<OperationQuickFilterResult?> open(
     BuildContext context, {
     required String? selectedStatus,
-  }) =>
-      OperationQuickFilterDialog.open(
-        context,
-        selectedStatus: selectedStatus,
-        statusFilterOptions: ReturnReceivingUiConstants.statusFilterOptions,
-        statusFilterLabel: ReturnReceivingUiConstants.statusFilterLabel,
-        footerHint: ReturnReceivingUiConstants.quickFiltersFooterHint,
-      );
+  }) => OperationQuickFilterDialog.open(
+    context,
+    selectedStatus: selectedStatus,
+    statusFilterOptions: ReturnReceivingUiConstants.statusFilterOptions,
+    statusFilterLabel: ReturnReceivingUiConstants.statusFilterLabel,
+    footerHint: ReturnReceivingUiConstants.quickFiltersFooterHint,
+  );
 }

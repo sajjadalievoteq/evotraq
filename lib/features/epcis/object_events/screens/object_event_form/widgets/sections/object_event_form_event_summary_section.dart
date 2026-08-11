@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/sections/object_event_summary_row.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart' as types;
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
@@ -59,48 +60,37 @@ class ObjectEventFormEventSummarySection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _summaryRow('Action', action ?? 'Not selected'),
+          ObjectEventSummaryRow('Action', action ?? 'Not selected'),
           const SizedBox(height: 4.0),
-          _summaryRow('Business Step', businessStep ?? 'Not selected'),
+          ObjectEventSummaryRow(
+            'Business Step',
+            businessStep ?? 'Not selected',
+          ),
           const SizedBox(height: 4.0),
-          _summaryRow('Disposition', disposition ?? 'Not selected'),
+          ObjectEventSummaryRow('Disposition', disposition ?? 'Not selected'),
           const SizedBox(height: 4.0),
-          _summaryRow('Location', _locationSummary),
+          ObjectEventSummaryRow('Location', _locationSummary),
           const SizedBox(height: 4.0),
-          _summaryRow('Objects', _objectsSummary),
+          ObjectEventSummaryRow('Objects', _objectsSummary),
           const SizedBox(height: 4.0),
           if (sourceList.isNotEmpty) ...[
-            _summaryRow(
+            ObjectEventSummaryRow(
               'Sources',
               sourceList.map((s) => '${s.type}:${s.id}').join(', '),
             ),
             const SizedBox(height: 4.0),
           ],
           if (destinationList.isNotEmpty) ...[
-            _summaryRow(
+            ObjectEventSummaryRow(
               'Destinations',
               destinationList.map((d) => '${d.type}:${d.id}').join(', '),
             ),
             const SizedBox(height: 4.0),
           ],
-          _summaryRow(
+          ObjectEventSummaryRow(
             'Time',
             '${eventTime.toLocal()} ($eventTimeZone)',
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _summaryRow(String label, String value) {
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          TextSpan(text: value),
         ],
       ),
     );

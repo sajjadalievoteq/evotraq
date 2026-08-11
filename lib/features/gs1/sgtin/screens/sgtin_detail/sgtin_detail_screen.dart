@@ -11,6 +11,7 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_form_bloc_body.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_scaffold.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_body.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_detail_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
@@ -294,98 +295,63 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
   Widget build(BuildContext context) {
     return BlocProvider<ValidationCubit>.value(
       value: _validationCubit,
-      child: _detailBody(context),
+      child: SgtinDetailBody(
+        awaitingListSelection: widget.awaitingListSelection,
+        embedded: widget.embedded,
+        onStateChanged: _handleSgtinState,
+        content: widget.embedded
+            ? _formBlocBody()
+            : SgtinDetailScaffold(
+                appBarTitle: _appBarTitle,
+                showEditAction: !widget.isCreating && !_isEditing,
+                showCloseEditAction: !widget.isCreating && _isEditing,
+                onEdit: () => setState(() => _isEditing = true),
+                onCloseEdit: () => setState(() => _isEditing = false),
+                body: _formBlocBody(),
+                showSaveFab: _isEditing || widget.isCreating,
+                isSaving: _isLocalLoading,
+                onSave: _submit,
+              ),
+      ),
     );
   }
 
-  Widget _detailBody(BuildContext context) {
-    if (widget.awaitingListSelection) {
-      return BlocBuilder<SGTINCubit, SGTINState>(
-        builder: (context, state) {
-          final listLoading =
-              state.status == SGTINStatus.loading ||
-              state.status == SGTINStatus.initial;
-          final body = listLoading
-              ? SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(
-                    context.padding.top,
-                    context.padding.top,
-                    context.padding.top,
-                    0,
-                  ),
-                  child: Gs1FormShimmerLayer(
-                    show: true,
-                    formColumn: const SizedBox.shrink(),
-                    skeleton: const SgtinDetailSkeleton(),
-                  ),
-                )
-              : AppEmptyDetail(
-                  title: SgtinUiConstants.awaitingSelectionTitle,
-                  subtitle: SgtinUiConstants.awaitingSelectionSubtitle,
-                  iconAsset: NavIcons.sgtin,
-                );
-          return widget.embedded ? body : Scaffold(body: body);
-        },
-      );
+  void _handleSgtinState(BuildContext context, SGTINState state) {
+    if (state.status == SGTINStatus.loading) return;
+
+    setState(() => _isLocalLoading = false);
+
+    if (state.status == SGTINStatus.error) {
+      context.showError(state.error ?? 'An error occurred');
+      return;
     }
 
-    return BlocListener<SGTINCubit, SGTINState>(
-      listenWhen: (prev, curr) =>
-          curr.status != prev.status ||
-          curr.sgtin != prev.sgtin ||
-          curr.creationSuccessful != prev.creationSuccessful,
-      listener: (context, state) {
-        if (state.status == SGTINStatus.loading) return;
+    if (state.status == SGTINStatus.success && state.sgtin != null) {
+      if (widget.sgtinId != null &&
+          state.sgtin!.id == widget.sgtinId &&
+          state.sgtin!.id != _loadedSgtinId) {
+        _populateForm(state.sgtin!);
+      } else if (widget.epcUri != null &&
+          state.sgtin!.canonicalIdentifier == widget.epcUri &&
+          state.sgtin!.id != _loadedSgtinId) {
+        _populateForm(state.sgtin!);
+      }
 
-        setState(() => _isLocalLoading = false);
-
-        if (state.status == SGTINStatus.error) {
-          context.showError(state.error ?? 'An error occurred');
-          return;
+      if (state.creationSuccessful) {
+        final serial = state.sgtin!.serialNumber;
+        if (widget.isCreating) {
+          context.showSuccess(SgtinUiConstants.successSgtinCreated(serial));
+        } else {
+          context.showSuccess(SgtinUiConstants.successSgtinUpdated(serial));
         }
 
-        if (state.status == SGTINStatus.success && state.sgtin != null) {
-          if (widget.sgtinId != null &&
-              state.sgtin!.id == widget.sgtinId &&
-              state.sgtin!.id != _loadedSgtinId) {
-            _populateForm(state.sgtin!);
-          } else if (widget.epcUri != null &&
-              state.sgtin!.canonicalIdentifier == widget.epcUri &&
-              state.sgtin!.id != _loadedSgtinId) {
-            _populateForm(state.sgtin!);
-          }
-
-          if (state.creationSuccessful) {
-            final serial = state.sgtin!.serialNumber;
-            if (widget.isCreating) {
-              context.showSuccess(SgtinUiConstants.successSgtinCreated(serial));
-            } else {
-              context.showSuccess(SgtinUiConstants.successSgtinUpdated(serial));
-            }
-
-            if (widget.onEmbeddedActionSuccess != null) {
-              widget.onEmbeddedActionSuccess!();
-            } else {
-              context.go(Constants.gs1SgtinsRoute);
-            }
-          }
+        if (widget.onEmbeddedActionSuccess != null) {
+          widget.onEmbeddedActionSuccess!();
+        } else {
+          context.go(Constants.gs1SgtinsRoute);
         }
-      },
-      child: widget.embedded
-          ? _formBlocBody()
-          : SgtinDetailScaffold(
-              appBarTitle: _appBarTitle,
-              showEditAction: !widget.isCreating && !_isEditing,
-              showCloseEditAction: !widget.isCreating && _isEditing,
-              onEdit: () => setState(() => _isEditing = true),
-              onCloseEdit: () => setState(() => _isEditing = false),
-              body: _formBlocBody(),
-              showSaveFab: _isEditing || widget.isCreating,
-              isSaving: _isLocalLoading,
-              onSave: _submit,
-            ),
-    );
+      }
+    }
   }
 
   SgtinDetailFormBlocBody _formBlocBody() {

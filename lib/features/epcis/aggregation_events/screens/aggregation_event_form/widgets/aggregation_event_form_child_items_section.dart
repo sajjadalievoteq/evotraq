@@ -33,7 +33,7 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
   final List<AggregationEventFormQuantityRowControllers> quantityRows;
   final VoidCallback onAddQuantityRow;
   final void Function(int index, AggregationEventFormQuantityRowControllers row)
-      onRemoveQuantityRow;
+  onRemoveQuantityRow;
 
   @override
   Widget build(BuildContext context) {
@@ -73,8 +73,8 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
                         hintText: 'SGTIN URN or (01)…(21)… barcode',
                         helperText: index == 0
                             ? (selectedAction == 'DELETE'
-                                ? 'Leave empty to unpack all items'
-                                : AggregationPharmaRulesText.childEpcsHint)
+                                  ? 'Leave empty to unpack all items'
+                                  : AggregationPharmaRulesText.childEpcsHint)
                             : null,
                       ),
                     ),
@@ -82,7 +82,8 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: IconButton(
-                          icon: TraqIcon(AppAssets.iconTrash,
+                          icon: TraqIcon(
+                            AppAssets.iconTrash,
                             color: AppColorMapper.errorColor(context),
                             size: 20,
                           ),
@@ -131,7 +132,8 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
                           const Spacer(),
                           if (quantityRows.length > 1)
                             IconButton(
-                              icon: TraqIcon(AppAssets.iconTrash,
+                              icon: TraqIcon(
+                                AppAssets.iconTrash,
                                 color: AppColorMapper.errorColor(context),
                                 size: 20,
                               ),
@@ -159,9 +161,10 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
                             flex: 2,
                             child: TextFormField(
                               controller: row.quantity,
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               decoration: const InputDecoration(
                                 labelText: 'Quantity *',
                                 border: OutlineInputBorder(),
@@ -169,7 +172,8 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
                               ),
                               validator: selectedAction == 'DELETE'
                                   ? null
-                                  : AggregationEventFormValidators.validateQuantity,
+                                  : AggregationEventFormValidators
+                                        .validateQuantity,
                             ),
                           ),
                           const SizedBox(width: 8),

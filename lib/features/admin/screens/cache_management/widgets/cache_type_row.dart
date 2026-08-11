@@ -32,8 +32,8 @@ class CacheTypeRow extends StatelessWidget {
               hitRatio > 0.8
                   ? AppColorMapper.successColor(context)
                   : hitRatio > 0.5
-                      ? AppColorMapper.warningColor(context)
-                      : AppColorMapper.errorColor(context),
+                  ? AppColorMapper.warningColor(context)
+                  : AppColorMapper.errorColor(context),
             ),
           ),
         ),

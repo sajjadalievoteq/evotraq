@@ -34,12 +34,15 @@ class AggregationEventFormEventDetailsSection extends StatelessWidget {
                   'ADD = pack items into container · OBSERVE = record state · DELETE = unpack',
             ),
             value: selectedAction,
-            items: ['ADD', 'OBSERVE', 'DELETE']
-                .map((a) => DropdownMenuItem(value: a, child: Text(a)))
-                .toList(),
+            items: [
+              'ADD',
+              'OBSERVE',
+              'DELETE',
+            ].map((a) => DropdownMenuItem(value: a, child: Text(a))).toList(),
             onChanged: onActionChanged,
-            validator: (value) =>
-                (value == null || value.isEmpty) ? 'Please select an action' : null,
+            validator: (value) => (value == null || value.isEmpty)
+                ? 'Please select an action'
+                : null,
           ),
           const SizedBox(height: 16),
           InkWell(

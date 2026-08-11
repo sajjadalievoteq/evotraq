@@ -13,7 +13,7 @@ class AggregationEventFormBusinessDataSection extends StatelessWidget {
   });
 
   final List<MapEntry<TextEditingController, TextEditingController>>
-      bizDataControllers;
+  bizDataControllers;
   final VoidCallback onAddBizDataField;
   final ValueChanged<int> onRemoveBizDataField;
 
@@ -29,10 +29,9 @@ class AggregationEventFormBusinessDataSection extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 'No custom business data added. Tap "Add Business Data" to include extra key-value context.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(fontStyle: FontStyle.italic),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
               ),
             ),
           ...bizDataControllers.asMap().entries.map((entry) {
@@ -69,7 +68,8 @@ class AggregationEventFormBusinessDataSection extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: TraqIcon(AppAssets.iconTrash,
+                    icon: TraqIcon(
+                      AppAssets.iconTrash,
                       color: AppColorMapper.errorColor(context),
                       size: 20,
                     ),

@@ -1,4 +1,1 @@
-enum AggregationParentPackMode {
-  sscc,
-  sgtin,
-}
+enum AggregationParentPackMode { sscc, sgtin }

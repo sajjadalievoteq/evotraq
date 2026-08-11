@@ -165,17 +165,6 @@ class GlnDetailFormBody extends StatelessWidget {
   final VoidCallback onPickLicenseExpiry;
   final ValueChanged<GeospatialCoordinates?> onCoordinatesChanged;
 
-  Widget _lazy({
-    required double placeholderHeight,
-    required WidgetBuilder builder,
-  }) {
-    return Gs1LazyViewportSection(
-      forceMount: forceMountAllSections,
-      placeholderHeight: placeholderHeight,
-      builder: builder,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final locationLine =
@@ -247,7 +236,8 @@ class GlnDetailFormBody extends StatelessWidget {
                 onPickEffectiveFrom: onPickEffectiveFrom,
                 onPickEffectiveTo: onPickEffectiveTo,
               ),
-              _lazy(
+              Gs1LazyViewportSection(
+                forceMount: forceMountAllSections,
                 placeholderHeight: 280,
                 builder: (_) => GlnTypesClassificationCoreGroup(
                   showFieldSkeleton: false,
@@ -265,7 +255,8 @@ class GlnDetailFormBody extends StatelessWidget {
                   locationRolesController: locationRolesController,
                 ),
               ),
-              _lazy(
+              Gs1LazyViewportSection(
+                forceMount: forceMountAllSections,
                 placeholderHeight: 360,
                 builder: (_) => GlnLegalEntityCoreGroup(
                   showFieldSkeleton: false,
@@ -281,7 +272,8 @@ class GlnDetailFormBody extends StatelessWidget {
                   websiteController: websiteController,
                 ),
               ),
-              _lazy(
+              Gs1LazyViewportSection(
+                forceMount: forceMountAllSections,
                 placeholderHeight: 420,
                 builder: (_) => GlnLocationAddressCoreGroup(
                   showFieldSkeleton: false,
@@ -300,7 +292,8 @@ class GlnDetailFormBody extends StatelessWidget {
                   countryController: countryController,
                 ),
               ),
-              _lazy(
+              Gs1LazyViewportSection(
+                forceMount: forceMountAllSections,
                 placeholderHeight: 180,
                 builder: (_) => GlnDigitalLocationCoreGroup(
                   showFieldSkeleton: false,
@@ -311,7 +304,8 @@ class GlnDetailFormBody extends StatelessWidget {
                   digitalAddressValueController: digitalAddressValueController,
                 ),
               ),
-              _lazy(
+              Gs1LazyViewportSection(
+                forceMount: forceMountAllSections,
                 placeholderHeight: 220,
                 builder: (_) => GlnContactCoreGroup(
                   showFieldSkeleton: false,
@@ -322,7 +316,8 @@ class GlnDetailFormBody extends StatelessWidget {
                   contactPhoneController: contactPhoneController,
                 ),
               ),
-              _lazy(
+              Gs1LazyViewportSection(
+                forceMount: forceMountAllSections,
                 placeholderHeight: 140,
                 builder: (_) => GlnOperationalLocationTypeCoreGroup(
                   showFieldSkeleton: false,
@@ -331,7 +326,8 @@ class GlnDetailFormBody extends StatelessWidget {
                   onLocationTypeChanged: onLocationTypeChanged,
                 ),
               ),
-              _lazy(
+              Gs1LazyViewportSection(
+                forceMount: forceMountAllSections,
                 placeholderHeight: 260,
                 builder: (_) => GlnLicenseCoreGroup(
                   showFieldSkeleton: false,
@@ -346,7 +342,8 @@ class GlnDetailFormBody extends StatelessWidget {
                   licenseTypeController: licenseTypeController,
                 ),
               ),
-              _lazy(
+              Gs1LazyViewportSection(
+                forceMount: forceMountAllSections,
                 placeholderHeight: 200,
                 builder: (_) => GlnGeospatialCoreGroup(
                   showFieldSkeleton: false,
@@ -355,7 +352,8 @@ class GlnDetailFormBody extends StatelessWidget {
                   isEditing: canEditMasterData,
                 ),
               ),
-              _lazy(
+              Gs1LazyViewportSection(
+                forceMount: forceMountAllSections,
                 placeholderHeight: 320,
                 builder: (_) => GlnIndustryExtensionsSection(
                   glnCodeController: glnCodeController,

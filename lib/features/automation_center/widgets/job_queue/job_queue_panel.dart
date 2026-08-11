@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/job_queue_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/job_queue_state.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_control_panel_dialog.dart';
@@ -13,14 +10,7 @@ import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialo
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_purge_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_schedule_job_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_worker_pool_config_dialog.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/job_queue_dashboard_snapshot.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_active_jobs_tab.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_dashboard_tab.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_history_tab.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_queue_tab.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_selected_tab_content.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_worker_pool_tab.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/utils/job_queue_filters.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_panel_content.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/utils/job_queue_priority_utils.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_loading_skeleton.dart';
@@ -34,11 +24,8 @@ class JobQueuePanel extends StatefulWidget {
   /// creates and owns a DI factory instance.
   final JobQueueCubit? cubit;
 
-  const JobQueuePanel({
-    Key? key,
-    this.embedded = false,
-    this.cubit,
-  }) : super(key: key);
+  const JobQueuePanel({Key? key, this.embedded = false, this.cubit})
+    : super(key: key);
 
   @override
   JobQueuePanelState createState() => JobQueuePanelState();
@@ -162,154 +149,26 @@ class JobQueuePanelState extends State<JobQueuePanel>
             );
           }
 
-          return _buildContent(context, snapshot);
-        },
-      ),
-    );
-  }
-
-  Widget _buildContent(
-    BuildContext context,
-    JobQueueDashboardSnapshot snapshot,
-  ) {
-    final c = context.colors;
-    final embedded = widget.embedded;
-
-    final activeJobs = snapshot.activeJobsList;
-    final queuedJobs = JobQueueFilters.byStatus(
-      snapshot.queuedJobsList,
-      _selectedStatus,
-    );
-    final jobHistory = JobQueueFilters.byJobType(
-      snapshot.recentHistory,
-      _selectedJobType,
-    );
-    final workerPoolStats = snapshot.workerPoolStats;
-
-    final tabBar = Material(
-      color: c.surface,
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
-        indicatorColor: c.primary,
-        indicatorWeight: 3,
-        labelColor: c.primary,
-        unselectedLabelColor: c.textMuted,
-        labelStyle: context.text.bodySm.copyWith(fontWeight: FontWeight.w600),
-        unselectedLabelStyle: context.text.bodySm,
-        tabs: const [
-          Tab(icon: TraqIcon(NavIcons.dashboard), text: 'Overview'),
-          Tab(icon: TraqIcon(AppAssets.iconPlay), text: 'Running'),
-          Tab(icon: TraqIcon(AppAssets.iconList), text: 'Waiting'),
-          Tab(icon: TraqIcon(AppAssets.iconClock), text: 'History'),
-          Tab(icon: TraqIcon(AppAssets.iconUsers), text: 'Worker Pool'),
-        ],
-        onTap: (_) => setState(() {}),
-      ),
-    );
-
-    if (embedded) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          tabBar,
-          Divider(height: 1, color: c.border),
-          const SizedBox(height: TraqSpacing.md),
-          JobQueueSelectedTabContent(
-            tabIndex: _tabController.index,
-            dashboardSnapshot: snapshot,
-            activeJobs: activeJobs,
-            queuedJobs: queuedJobs,
-            jobHistory: jobHistory,
-            workerPoolStats: workerPoolStats,
+          return JobQueuePanelContent(
+            snapshot: snapshot,
+            embedded: embedded,
+            tabController: _tabController,
             selectedStatus: _selectedStatus,
             statuses: _jobStatuses,
             selectedJobType: _selectedJobType,
             jobTypes: _jobTypes,
-            onDashboardRefresh: refreshCurrentTab,
+            onTabChanged: () => setState(() {}),
+            onRefresh: refreshCurrentTab,
             onSchedule: showScheduleJobDialog,
-            onOpenActive: () => _openTab(1),
-            onOpenQueue: () => _openTab(2),
-            onOpenHistory: () => _openTab(3),
-            onOpenWorkers: () => _openTab(4),
+            onOpenTab: _openTab,
             onCancel: _cancelJob,
             onRetry: _retryJob,
             onShowDetails: _showJobDetails,
             onStatusChanged: _onStatusFilterChanged,
             onJobTypeChanged: _onJobTypeFilterChanged,
             onConfigureWorkers: _showWorkerPoolConfig,
-          ),
-
-        ],
-      );
-    }
-
-    return ColoredBox(
-      color: c.background,
-      child: Column(
-        children: [
-          Expanded(
-            child: Column(
-              children: [
-                tabBar,
-                Divider(height: 1, color: c.border),
-                Expanded(
-                  child: ColoredBox(
-                    color: c.background,
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        JobQueueDashboardTab(
-                          snapshot: snapshot,
-                          embedded: false,
-                          onRefresh: refreshCurrentTab,
-                          onSchedule: showScheduleJobDialog,
-                          onOpenActive: () => _openTab(1),
-                          onOpenQueue: () => _openTab(2),
-                          onOpenHistory: () => _openTab(3),
-                          onOpenWorkers: () => _openTab(4),
-                        ),
-                        JobQueueActiveJobsTab(
-                          activeJobs: activeJobs,
-                          fill: true,
-                          onCancel: _cancelJob,
-                        ),
-                        JobQueueQueueTab(
-                          queuedJobs: queuedJobs,
-                          priorityDistribution: snapshot.priorityDistribution,
-                          fill: true,
-                          selectedStatus: _selectedStatus,
-                          statuses: _jobStatuses,
-                          onStatusChanged: _onStatusFilterChanged,
-                          onShowDetails: _showJobDetails,
-                          onCancel: _cancelJob,
-                        ),
-                        JobQueueHistoryTab(
-                          jobHistory: jobHistory,
-                          jobTypeDistribution: snapshot.jobTypeDistribution,
-                          fill: true,
-                          selectedJobType: _selectedJobType,
-                          jobTypes: _jobTypes,
-                          onJobTypeChanged: _onJobTypeFilterChanged,
-                          onShowDetails: _showJobDetails,
-                          onRetry: _retryJob,
-                        ),
-                        JobQueueWorkerPoolTab(
-                          workerPoolStats: workerPoolStats,
-                          snapshot: snapshot,
-                          fill: true,
-                          onConfigure: _showWorkerPoolConfig,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -451,7 +310,8 @@ class JobQueuePanelState extends State<JobQueuePanel>
         },
       };
 
-      if (jobType == 'NOTIFICATION_BATCH' || jobType == 'NOTIFICATION_SCHEDULED') {
+      if (jobType == 'NOTIFICATION_BATCH' ||
+          jobType == 'NOTIFICATION_SCHEDULED') {
         jobPayload['operation'] = 'processScheduledBatchNotifications';
       }
 

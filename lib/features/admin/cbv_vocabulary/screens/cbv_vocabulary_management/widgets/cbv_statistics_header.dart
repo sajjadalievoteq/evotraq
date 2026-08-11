@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/admin/cbv_vocabulary/cubit/admin_cbv_vocabulary_state.dart';
+import 'package:traqtrace_app/features/admin/cbv_vocabulary/screens/cbv_vocabulary_management/widgets/cbv_stat_card.dart';
 
 class CbvStatisticsHeader extends StatelessWidget {
-  const CbvStatisticsHeader({
-    super.key,
-    required this.state,
-  });
+  const CbvStatisticsHeader({super.key, required this.state});
 
   final AdminCbvVocabularyState state;
 
@@ -31,7 +28,7 @@ class CbvStatisticsHeader extends StatelessWidget {
           children: [
             SizedBox(
               width: cardWidth,
-              child: _StatCard(
+              child: CbvStatCard(
                 title: 'Biz Steps',
                 total: state.totalBizSteps,
                 enabled: state.enabledBizSteps,
@@ -42,7 +39,7 @@ class CbvStatisticsHeader extends StatelessWidget {
             ),
             SizedBox(
               width: cardWidth,
-              child: _StatCard(
+              child: CbvStatCard(
                 title: 'Dispositions',
                 total: state.totalDispositions,
                 enabled: state.enabledDispositions,
@@ -54,105 +51,6 @@ class CbvStatisticsHeader extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.title,
-    required this.total,
-    required this.enabled,
-    required this.disabled,
-    required this.iconAsset,
-    required this.color,
-  });
-
-  final String title;
-  final int total;
-  final int enabled;
-  final int disabled;
-  final String iconAsset;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(TraqSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                TraqIcon(iconAsset, color: color, size: 20),
-                const SizedBox(width: TraqSpacing.sm),
-                Text(
-                  title,
-                  style: context.text.h3.copyWith(color: color),
-                ),
-              ],
-            ),
-            const SizedBox(height: TraqSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _Stat(
-                    label: 'Total',
-                    value: total,
-                    color: colors.textPrimary,
-                  ),
-                ),
-                Expanded(
-                  child: _Stat(
-                    label: 'Enabled',
-                    value: enabled,
-                    color: colors.success,
-                  ),
-                ),
-                Expanded(
-                  child: _Stat(
-                    label: 'Disabled',
-                    value: disabled,
-                    color: disabled > 0 ? colors.warning : colors.textFaint,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Stat extends StatelessWidget {
-  const _Stat({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final int value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          '$value',
-          style: context.text.h2.copyWith(color: color),
-        ),
-        Text(
-          label,
-          style: context.text.bodySm.copyWith(color: context.colors.textMuted),
-        ),
-      ],
     );
   }
 }

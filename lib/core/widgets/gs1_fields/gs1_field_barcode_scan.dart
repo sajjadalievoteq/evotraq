@@ -9,8 +9,6 @@ import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 
 enum Gs1FieldScanKind { gln, gtin, sgtin, sscc }
 
@@ -53,10 +51,7 @@ abstract final class Gs1FieldBarcodeScan {
     if (result == null) return null;
 
     if (!result.isValid) {
-      _showError(
-        context,
-        result.error ?? 'Invalid barcode scan',
-      );
+      _showError(context, result.error ?? 'Invalid barcode scan');
       return null;
     }
 
@@ -113,10 +108,7 @@ abstract final class Gs1FieldBarcodeScan {
           return Gs1CanonicalIdentifier.forStorage(epc);
         }
         if (details.gtin != null && details.serial != null) {
-          return Gs1Converter.gtinSerialToEpc(
-            details.gtin!,
-            details.serial!,
-          );
+          return Gs1Converter.gtinSerialToEpc(details.gtin!, details.serial!);
         }
         return null;
 
@@ -140,20 +132,5 @@ abstract final class Gs1FieldBarcodeScan {
 
   static void _showError(BuildContext context, String message) {
     context.showError(message);
-  }
-
-  static Widget scanSuffixIcon({
-    required BuildContext context,
-    required Gs1FieldScanKind kind,
-    required ValueChanged<String> onScanned,
-  }) {
-    return IconButton(
-      icon: TraqIcon(AppAssets.iconQr),
-      tooltip: 'Scan barcode',
-      onPressed: () async {
-        final value = await scan(context, kind);
-        if (value != null) onScanned(value);
-      },
-    );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_search_hint_chip.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -22,20 +23,23 @@ class JourneyEmptyState extends StatelessWidget {
         runSpacing: 8,
         alignment: WrapAlignment.center,
         children: [
-          _hintChip(c, 'Serial Number', NavIcons.serialization),
-          _hintChip(c, 'SGTIN URI', AppAssets.iconLink),
-          _hintChip(c, 'SSCC', NavIcons.sscc),
+          JourneySearchHintChip(
+            colors: c,
+            label: 'Serial Number',
+            iconAsset: NavIcons.serialization,
+          ),
+          JourneySearchHintChip(
+            colors: c,
+            label: 'SGTIN URI',
+            iconAsset: AppAssets.iconLink,
+          ),
+          JourneySearchHintChip(
+            colors: c,
+            label: 'SSCC',
+            iconAsset: NavIcons.sscc,
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _hintChip(TraqColors c, String label, String iconAsset) {
-    return Chip(
-      avatar: TraqIcon(iconAsset, size: 18, color: c.textMuted),
-      label: Text(label, style: TextStyle(color: c.textSecondary)),
-      backgroundColor: c.surfaceMuted,
-      side: BorderSide(color: c.border),
     );
   }
 }

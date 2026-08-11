@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_title_block_skeleton_card.dart';
 
 /// Skeleton placeholder shapes used by subscription lists and the job queue.
 enum SubscriptionSkeletonShape {
@@ -37,9 +38,15 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
     final cards = List.generate(itemCount, (_) {
       switch (shape) {
         case SubscriptionSkeletonShape.activityCard:
-          return _TitleAndBlockCard(colors: c, contentHeight: 56);
+          return SubscriptionTitleBlockSkeletonCard(
+            colors: c,
+            contentHeight: 56,
+          );
         case SubscriptionSkeletonShape.jobQueueCard:
-          return _TitleAndBlockCard(colors: c, contentHeight: 48);
+          return SubscriptionTitleBlockSkeletonCard(
+            colors: c,
+            contentHeight: 48,
+          );
         case SubscriptionSkeletonShape.managementCard:
           return TraqCard(
             padding: TraqSpacing.surfacePad,
@@ -103,41 +110,6 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
       itemCount: cards.length,
       separatorBuilder: (_, __) => const SizedBox(height: TraqSpacing.md),
       itemBuilder: (_, i) => cards[i],
-    );
-  }
-}
-
-class _TitleAndBlockCard extends StatelessWidget {
-  const _TitleAndBlockCard({required this.colors, required this.contentHeight});
-
-  final TraqColors colors;
-  final double contentHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    return TraqCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: TraqSpacing.xl,
-            width: 160,
-            decoration: BoxDecoration(
-              color: colors.surfaceMuted,
-              borderRadius: TraqRadius.chip,
-            ),
-          ),
-          const SizedBox(height: TraqSpacing.md),
-          Container(
-            height: contentHeight,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: colors.surfaceMuted,
-              borderRadius: TraqRadius.card,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'package:traqtrace_app/core/widgets/anchored_snack_bar_positioned.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_content.dart';
+export 'package:traqtrace_app/core/widgets/snack_bar_interaction_scope.dart';
+export 'package:traqtrace_app/core/widgets/custom_snackbar_content.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -7,7 +11,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 enum CustomSnackBarVariant {
   success(AppAssets.iconCheck),
@@ -111,31 +114,6 @@ class SnackBarAnchorTracker {
   static void clear() => _lastInteractionRect = null;
 }
 
-class SnackBarInteractionScope extends StatelessWidget {
-  const SnackBarInteractionScope({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    if (context.isMobile) return child;
-
-    return Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: (event) {
-        final box = context.findRenderObject() as RenderBox?;
-        if (box == null) return;
-        SnackBarAnchorTracker.recordInteraction(
-          globalPosition: box.localToGlobal(event.localPosition),
-          screenSize: MediaQuery.sizeOf(context),
-          viewId: View.of(context).viewId,
-        );
-      },
-      child: child,
-    );
-  }
-}
-
 class CustomSnackBarPresenter {
   CustomSnackBarPresenter._();
 
@@ -183,7 +161,8 @@ class CustomSnackBarPresenter {
     }
 
     final anchorRect = _resolveAnchorRect(anchor);
-    final anchored = anchorRect != null &&
+    final anchored =
+        anchorRect != null &&
         _AnchoredSnackBarLayer.show(
           context: context,
           content: content,
@@ -246,10 +225,7 @@ class CustomSnackBarPresenter {
     required EdgeInsets viewPadding,
     double snackbarHeight = _estimatedHeight,
   }) {
-    final width = math.min(
-      _maxWidth,
-      screenSize.width - (_edgePadding * 2),
-    );
+    final width = math.min(_maxWidth, screenSize.width - (_edgePadding * 2));
 
     var left = anchorRect.left;
     if (left + width > screenSize.width - _edgePadding) {
@@ -269,11 +245,7 @@ class CustomSnackBarPresenter {
         ? anchorRect.top - _anchorGap - snackbarHeight
         : belowTop;
 
-    return (
-      top: top.clamp(minTop, maxTop),
-      left: left,
-      width: width,
-    );
+    return (top: top.clamp(minTop, maxTop), left: left, width: width);
   }
 }
 
@@ -303,7 +275,7 @@ final class _AnchoredSnackBarLayer {
 
     _entry = OverlayEntry(
       builder: (overlayContext) {
-        return _AnchoredSnackBarPositioned(
+        return AnchoredSnackBarPositioned(
           anchorRect: anchorRect,
           child: content,
         );
@@ -316,129 +288,62 @@ final class _AnchoredSnackBarLayer {
   }
 }
 
-class _AnchoredSnackBarPositioned extends StatefulWidget {
-  const _AnchoredSnackBarPositioned({
-    required this.anchorRect,
-    required this.child,
-  });
-
-  final Rect anchorRect;
-  final Widget child;
-
-  @override
-  State<_AnchoredSnackBarPositioned> createState() =>
-      _AnchoredSnackBarPositionedState();
-}
-
-class _AnchoredSnackBarPositionedState extends State<_AnchoredSnackBarPositioned> {
-  final GlobalKey _measureKey = GlobalKey();
-  double _measuredHeight = CustomSnackBarPresenter.estimatedSnackBarHeight;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(_updateMeasuredHeight);
-  }
-
-  void _updateMeasuredHeight(Duration _) {
-    if (!mounted) return;
-    final box = _measureKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !box.hasSize) return;
-
-    final height = box.size.height;
-    if ((height - _measuredHeight).abs() > 0.5) {
-      setState(() => _measuredHeight = height);
-      WidgetsBinding.instance.addPostFrameCallback(_updateMeasuredHeight);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final layout = CustomSnackBarPresenter.layoutForAnchor(
-      anchorRect: widget.anchorRect,
-      screenSize: mediaQuery.size,
-      viewPadding: mediaQuery.padding,
-      snackbarHeight: _measuredHeight,
-    );
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Positioned(
-          top: layout.top,
-          left: layout.left,
-          width: layout.width,
-          child: KeyedSubtree(
-            key: _measureKey,
-            child: widget.child,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 extension CustomSnackBarExtension on BuildContext {
   void showSuccess(
     String message, {
     String? title,
     Duration? duration,
     BuildContext? anchor,
-  }) =>
-      CustomSnackBarPresenter.show(
-        this,
-        variant: CustomSnackBarVariant.success,
-        message: message,
-        title: title,
-        duration: duration,
-        anchor: anchor,
-      );
+  }) => CustomSnackBarPresenter.show(
+    this,
+    variant: CustomSnackBarVariant.success,
+    message: message,
+    title: title,
+    duration: duration,
+    anchor: anchor,
+  );
 
   void showError(
     String message, {
     String? title,
     Duration? duration,
     BuildContext? anchor,
-  }) =>
-      CustomSnackBarPresenter.show(
-        this,
-        variant: CustomSnackBarVariant.error,
-        message: message,
-        title: title,
-        duration: duration,
-        anchor: anchor,
-      );
+  }) => CustomSnackBarPresenter.show(
+    this,
+    variant: CustomSnackBarVariant.error,
+    message: message,
+    title: title,
+    duration: duration,
+    anchor: anchor,
+  );
 
   void showWarning(
     String message, {
     String? title,
     Duration? duration,
     BuildContext? anchor,
-  }) =>
-      CustomSnackBarPresenter.show(
-        this,
-        variant: CustomSnackBarVariant.warning,
-        message: message,
-        title: title,
-        duration: duration,
-        anchor: anchor,
-      );
+  }) => CustomSnackBarPresenter.show(
+    this,
+    variant: CustomSnackBarVariant.warning,
+    message: message,
+    title: title,
+    duration: duration,
+    anchor: anchor,
+  );
 
   void showInfo(
     String message, {
     String? title,
     Duration? duration,
     BuildContext? anchor,
-  }) =>
-      CustomSnackBarPresenter.show(
-        this,
-        variant: CustomSnackBarVariant.info,
-        message: message,
-        title: title,
-        duration: duration,
-        anchor: anchor,
-      );
+  }) => CustomSnackBarPresenter.show(
+    this,
+    variant: CustomSnackBarVariant.info,
+    message: message,
+    title: title,
+    duration: duration,
+    anchor: anchor,
+  );
 
   void showSnackBar(SnackBar snackBar) {
     _AnchoredSnackBarLayer.dismiss();
@@ -449,97 +354,4 @@ extension CustomSnackBarExtension on BuildContext {
   }
 
   void dismissSnackBar() => CustomSnackBarPresenter.dismiss(this);
-}
-
-class CustomSnackBarWidget extends StatelessWidget {
-  final CustomSnackBarVariant variant;
-  final String message;
-  final String? title;
-  final VoidCallback? onClose;
-
-  const CustomSnackBarWidget({
-    super.key,
-    required this.variant,
-    required this.message,
-    this.title,
-    this.onClose,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final tone = variant.color(context);
-    final ec = context.colors;
-
-    final surface = ec.surface;
-    final text = ec.textPrimary;
-    final subText = ec.textMuted;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: tone.withOpacity(isDark ? 0.35 : 0.25)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.35 : 0.12),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: tone.withOpacity(isDark ? 0.18 : 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: TraqIcon(variant.iconAsset, color: tone, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (title != null && title!.trim().isNotEmpty) ...[
-                    Text(
-                      title!.trim(),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: text,
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                  ],
-                  Text(
-                    message,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: title == null ? text : subText,
-                      height: 1.25,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: onClose,
-              icon: TraqIcon(AppAssets.iconX, size: 18, color: subText.withOpacity(0.9)),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

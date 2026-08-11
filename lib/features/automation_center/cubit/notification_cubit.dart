@@ -7,6 +7,8 @@ import 'package:traqtrace_app/data/models/automation_center/notification_subscri
 import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 
+part 'notification_cubit_realtime.dart';
+
 class NotificationCubit extends Cubit<NotificationState> {
   final api.NotificationApiService _apiService;
   final WebSocketService _webSocketService;
@@ -385,10 +387,7 @@ class NotificationCubit extends Cubit<NotificationState> {
 
       final chunks = await Future.wait(
         subscriptions.map(
-          (sub) => _apiService.getWebhookHistory(
-            sub.id,
-            size: perSubscription,
-          ),
+          (sub) => _apiService.getWebhookHistory(sub.id, size: perSubscription),
         ),
       );
 
@@ -470,29 +469,6 @@ class NotificationCubit extends Cubit<NotificationState> {
       enableNotificationLive();
     } else {
       disableNotificationLive();
-    }
-  }
-
-  /// @Deprecated — use [enableNotificationLive]. Kept for call-site migration.
-  void connectWebSocket() => enableNotificationLive();
-
-  /// No longer disconnects the shared socket. Disables local notification Live only.
-  void disconnectWebSocket() => disableNotificationLive();
-
-  bool get isWebSocketConnected => _webSocketService.isConnected;
-
-  bool get isNotificationLive =>
-      state.notificationLiveEnabled &&
-      state.connectionStatus == NotificationConnectionStatus.connected;
-
-  void _onRealtimeNotificationReceived(Map<String, dynamic> notificationJson) {
-    if (isClosed || !state.notificationLiveEnabled) return;
-    try {
-      final notification = RealtimeNotification.fromJson(notificationJson);
-      emit(state.copyWith(lastRealtimeNotification: notification));
-    } catch (e) {
-      // Malformed push must not clobber subscription list status/error.
-      print('Failed to process realtime notification: $e');
     }
   }
 

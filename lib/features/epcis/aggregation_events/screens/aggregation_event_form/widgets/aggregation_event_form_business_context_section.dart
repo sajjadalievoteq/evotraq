@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/data/models/epcis/epcis_event.dart' as epcis_models;
+import 'package:traqtrace_app/data/models/epcis/epcis_event.dart'
+    as epcis_models;
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/widgets/aggregation_cbv_picker.dart';
 import 'package:traqtrace_app/features/epcis/object_events/widgets/object_event_form_section_card.dart';
 

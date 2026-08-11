@@ -29,8 +29,9 @@ class ProductHierarchyGroupChrome extends StatelessWidget {
     final c = context.colors;
     final frame = BorderSide(color: c.borderStrong);
 
-    final railCount =
-        inGroupBody ? depth : (isExpandedHeader && depth > 0 ? depth : 0);
+    final railCount = inGroupBody
+        ? depth
+        : (isExpandedHeader && depth > 0 ? depth : 0);
 
     Widget framed = child;
 

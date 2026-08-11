@@ -57,8 +57,7 @@ class JourneyKpiGrid extends StatelessWidget {
 
         final totalSpacing = spacing * (columns - 1);
         final tileWidth = (width - totalSpacing) / columns;
-        final aspectRatio =
-            (tileWidth / _tileTargetHeight).clamp(1.1, 3.0);
+        final aspectRatio = (tileWidth / _tileTargetHeight).clamp(1.1, 3.0);
 
         return GridView.count(
           crossAxisCount: columns,

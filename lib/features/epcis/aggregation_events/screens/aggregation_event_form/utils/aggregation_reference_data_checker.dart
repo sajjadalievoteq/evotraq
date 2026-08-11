@@ -17,11 +17,11 @@ class AggregationReferenceDataChecker {
     required SGTINService sgtinService,
     required SSCCService ssccService,
     required ReferenceDataValidationService referenceDataValidationService,
-  })  : _glnService = glnService,
-        _gtinService = gtinService,
-        _sgtinService = sgtinService,
-        _ssccService = ssccService,
-        _referenceDataValidationService = referenceDataValidationService;
+  }) : _glnService = glnService,
+       _gtinService = gtinService,
+       _sgtinService = sgtinService,
+       _ssccService = ssccService,
+       _referenceDataValidationService = referenceDataValidationService;
 
   final GLNService _glnService;
   final GTINService _gtinService;
@@ -47,25 +47,15 @@ class AggregationReferenceDataChecker {
     await _ensureGln(locationGlnCode, track);
 
     if (parentEpcUri != null && parentEpcUri.trim().isNotEmpty) {
-      await _ensureEpc(
-        parentEpcUri,
-        track,
-        contextLabel: 'Parent pack',
-      );
+      await _ensureEpc(parentEpcUri, track, contextLabel: 'Parent pack');
     }
 
     for (final child in childEpcUris) {
       if (child.trim().isEmpty) continue;
-      await _ensureEpc(
-        child,
-        track,
-        contextLabel: 'Item EPC',
-      );
+      await _ensureEpc(child, track, contextLabel: 'Item EPC');
     }
 
-    missing.sort(
-      (a, b) => a.sortOrder.compareTo(b.sortOrder),
-    );
+    missing.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
     return missing;
   }
 
@@ -73,8 +63,9 @@ class AggregationReferenceDataChecker {
     String glnCode,
     void Function(AggregationMissingReference item) track,
   ) async {
-    final normalized =
-        AggregationEventFormValidators.parseGlnToCode(glnCode.trim());
+    final normalized = AggregationEventFormValidators.parseGlnToCode(
+      glnCode.trim(),
+    );
     if (await _glnExists(normalized)) return;
 
     track(
@@ -204,8 +195,9 @@ class AggregationReferenceDataChecker {
       return true;
     } catch (_) {
       try {
-        final result =
-            await _referenceDataValidationService.validateSSCC(epcUri);
+        final result = await _referenceDataValidationService.validateSSCC(
+          epcUri,
+        );
         return result.exists;
       } catch (_) {
         return false;
@@ -224,15 +216,16 @@ class AggregationReferenceDataChecker {
           storedUri.toLowerCase() == normalizedUri.toLowerCase()) {
         return true;
       }
-      final recordGtin =
-          record.gtinCode.replaceAll(RegExp(r'\D'), '').padLeft(14, '0');
+      final recordGtin = record.gtinCode
+          .replaceAll(RegExp(r'\D'), '')
+          .padLeft(14, '0');
       if (recordGtin == normalizedGtin) return true;
-    } catch (_) {
-    }
+    } catch (_) {}
 
     try {
-      final result =
-          await _referenceDataValidationService.validateSGTIN(normalizedUri);
+      final result = await _referenceDataValidationService.validateSGTIN(
+        normalizedUri,
+      );
       return result.exists;
     } catch (_) {
       return false;

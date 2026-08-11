@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_job_detail_row.dart';
 
 class JobQueueJobDetailsDialog extends StatelessWidget {
   const JobQueueJobDetailsDialog({super.key, required this.job});
@@ -28,11 +29,11 @@ class JobQueueJobDetailsDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _DetailRow(
+              JobQueueJobDetailRow(
                 label: 'Status',
                 value: '${job['status'] ?? 'Unknown'}',
               ),
-              _DetailRow(
+              JobQueueJobDetailRow(
                 label: 'Priority',
                 value: '${job['priority'] ?? 'Default'}',
               ),
@@ -40,18 +41,30 @@ class JobQueueJobDetailsDialog extends StatelessWidget {
               Text('Timing', style: context.text.h3),
               const SizedBox(height: TraqSpacing.sm),
               if (job['submittedTime'] != null)
-                _DetailRow(
+                JobQueueJobDetailRow(
                   label: 'Submitted',
                   value: '${job['submittedTime']}',
                 ),
               if (job['startTime'] != null)
-                _DetailRow(label: 'Started', value: '${job['startTime']}'),
+                JobQueueJobDetailRow(
+                  label: 'Started',
+                  value: '${job['startTime']}',
+                ),
               if (job['endTime'] != null)
-                _DetailRow(label: 'Completed', value: '${job['endTime']}'),
+                JobQueueJobDetailRow(
+                  label: 'Completed',
+                  value: '${job['endTime']}',
+                ),
               if (job['executionTime'] != null)
-                _DetailRow(label: 'Duration', value: '${job['executionTime']}'),
+                JobQueueJobDetailRow(
+                  label: 'Duration',
+                  value: '${job['executionTime']}',
+                ),
               if (job['progress'] != null)
-                _DetailRow(label: 'Progress', value: '${job['progress']}%'),
+                JobQueueJobDetailRow(
+                  label: 'Progress',
+                  value: '${job['progress']}%',
+                ),
               if (job['errorMessage'] != null) ...[
                 const SizedBox(height: TraqSpacing.lg),
                 Container(
@@ -93,35 +106,6 @@ class JobQueueJobDetailsDialog extends StatelessWidget {
           child: const Text('Close'),
         ),
       ],
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 104,
-            child: Text(
-              label,
-              style: context.text.bodySm.copyWith(
-                color: context.colors.textMuted,
-              ),
-            ),
-          ),
-          Expanded(child: SelectableText(value)),
-        ],
-      ),
     );
   }
 }

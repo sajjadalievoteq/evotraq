@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_recent_event_card_row.dart';
+import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_recent_event_row_line.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -8,7 +10,6 @@ import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/features/epcis/utils/epcis_event_ui_utils.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_step_style.dart';
-
 
 class JourneyRecentEventCard extends StatelessWidget {
   const JourneyRecentEventCard({
@@ -26,12 +27,13 @@ class JourneyRecentEventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
-    final titleColor =
-        Gs1ListItemSelectionStyle.primaryTextColor(isSelected);
-    final rowColor =
-        Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
+    final titleColor = Gs1ListItemSelectionStyle.primaryTextColor(isSelected);
+    final rowColor = Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
 
-    final chipColor = EpcisEventUiUtils.eventTypeColor(context, event.eventType);
+    final chipColor = EpcisEventUiUtils.eventTypeColor(
+      context,
+      event.eventType,
+    );
     final chipLabel = _chipLabel();
     final title = _title();
     final rows = _rows();
@@ -100,7 +102,7 @@ class JourneyRecentEventCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               for (final row in rows) ...[
-                _RowLine(row: row, color: rowColor),
+                JourneyRecentEventRowLine(row: row, color: rowColor),
                 const SizedBox(height: 4),
               ],
             ],
@@ -118,9 +120,7 @@ class JourneyRecentEventCard extends StatelessWidget {
     if (lower.contains('aggregation')) return 'Aggregation';
     if (lower.contains('transaction')) return 'Transaction';
     if (lower.contains('transformation')) return 'Transformation';
-    return raw
-        .replaceAll(RegExp(r'Event$', caseSensitive: false), '')
-        .trim();
+    return raw.replaceAll(RegExp(r'Event$', caseSensitive: false), '').trim();
   }
 
   String _title() {
@@ -140,13 +140,13 @@ class JourneyRecentEventCard extends StatelessWidget {
     return '$n EPC${n == 1 ? '' : 's'}';
   }
 
-  List<_CardRow> _rows() {
-    final rows = <_CardRow>[];
+  List<JourneyRecentEventCardRow> _rows() {
+    final rows = <JourneyRecentEventCardRow>[];
 
     void add(String? text, String icon) {
       final value = text?.trim();
       if (value == null || value.isEmpty) return;
-      rows.add(_CardRow(text: value, iconAsset: icon));
+      rows.add(JourneyRecentEventCardRow(text: value, iconAsset: icon));
     }
 
     final epc = event.epcList
@@ -171,37 +171,5 @@ class JourneyRecentEventCard extends StatelessWidget {
     );
 
     return rows;
-  }
-}
-
-class _CardRow {
-  const _CardRow({required this.text, required this.iconAsset});
-
-  final String text;
-  final String iconAsset;
-}
-
-class _RowLine extends StatelessWidget {
-  const _RowLine({required this.row, required this.color});
-
-  final _CardRow row;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        TraqIcon(row.iconAsset, size: 16, color: color),
-        const SizedBox(width: 4),
-        Expanded(
-          child: Text(
-            row.text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: color),
-          ),
-        ),
-      ],
-    );
   }
 }

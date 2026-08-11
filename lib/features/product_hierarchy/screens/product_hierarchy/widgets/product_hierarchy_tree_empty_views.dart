@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+export 'product_hierarchy_tree_idle_view.dart';
+import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_tree_idle_view.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 
@@ -13,28 +15,6 @@ class ProductHierarchyTreeErrorView extends StatelessWidget {
       iconAsset: NavIcons.aggregationHierarchy,
       title: 'Unable to load hierarchy',
       subtitle: message,
-    );
-  }
-}
-
-class ProductHierarchyTreeIdleView extends StatelessWidget {
-  const ProductHierarchyTreeIdleView({
-    super.key,
-    required this.hasRecentParents,
-  });
-
-  final bool hasRecentParents;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppEmptyState(
-      iconAsset: NavIcons.aggregationHierarchy,
-      title: hasRecentParents
-          ? 'No SSCC or SGTIN has selected'
-          : 'No hierarchy to display',
-      subtitle: hasRecentParents
-          ? 'Select an SSCC or SGTIN from the list to view its packaging tree.'
-          : 'Search an SSCC or SGTIN to render its packaging tree.',
     );
   }
 }

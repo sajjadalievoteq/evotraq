@@ -3,8 +3,13 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/utils/product_hierarchy_tree_flatten.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_group_chrome.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_node_tile.dart';
+import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_load_indicator.dart';
+import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_load_more_sentinel.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
+
+export 'product_hierarchy_load_indicator.dart';
+export 'product_hierarchy_load_more_sentinel.dart';
 
 class ProductHierarchyFlatRow extends StatelessWidget {
   const ProductHierarchyFlatRow({
@@ -72,7 +77,8 @@ class ProductHierarchyFlatRow extends StatelessWidget {
           isLast: isLastInGroupBody && !isExpandedHeader,
           child: Padding(
             padding: EdgeInsets.only(
-              bottom: (!inGroupBody && !isExpandedHeader) ||
+              bottom:
+                  (!inGroupBody && !isExpandedHeader) ||
                       (isLastInGroupBody && !isExpandedHeader)
                   ? TraqSpacing.sm
                   : 0,
@@ -80,7 +86,8 @@ class ProductHierarchyFlatRow extends StatelessWidget {
             child: ProductHierarchyNodeTile(
               key: ValueKey(nodeState.node.epc),
               nodeState: nodeState,
-              isHighlighted: _same(nodeState.node.epc, selectedEpc) ||
+              isHighlighted:
+                  _same(nodeState.node.epc, selectedEpc) ||
                   nodeState.node.isFocused,
               isFlashing: _same(nodeState.node.epc, flashFocusEpc),
               isSearchMatch: _same(nodeState.node.epc, searchedEpc),
@@ -120,85 +127,5 @@ class ProductHierarchyFlatRow extends StatelessWidget {
                 ),
         ),
     };
-  }
-}
-
-/// Passive scroll-up load indicator. Shows a spinner while [isLoading] and
-/// nothing otherwise; the enclosing panel decides when to fetch the previous
-/// page (near-top scroll), so this widget never triggers a load itself.
-class ProductHierarchyLoadIndicator extends StatelessWidget {
-  const ProductHierarchyLoadIndicator({super.key, required this.isLoading});
-
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isLoading) return const SizedBox.shrink();
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: TraqSpacing.xs),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: SizedBox(
-          width: 16,
-          height: 16,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
-    );
-  }
-}
-
-class ProductHierarchyLoadMoreSentinel extends StatefulWidget {
-  const ProductHierarchyLoadMoreSentinel({
-    super.key,
-    required this.isLoading,
-    required this.onVisible,
-  });
-
-  final bool isLoading;
-  final VoidCallback onVisible;
-
-  @override
-  State<ProductHierarchyLoadMoreSentinel> createState() =>
-      _ProductHierarchyLoadMoreSentinelState();
-}
-
-class _ProductHierarchyLoadMoreSentinelState
-    extends State<ProductHierarchyLoadMoreSentinel> {
-  @override
-  void initState() {
-    super.initState();
-    _scheduleIfIdle();
-  }
-
-  @override
-  void didUpdateWidget(covariant ProductHierarchyLoadMoreSentinel oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.isLoading && !widget.isLoading) {
-      _scheduleIfIdle();
-    }
-  }
-
-  void _scheduleIfIdle() {
-    if (widget.isLoading) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !widget.isLoading) widget.onVisible();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!widget.isLoading) return const SizedBox.shrink();
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: TraqSpacing.xs),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: SizedBox(
-          width: 16,
-          height: 16,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
-    );
   }
 }

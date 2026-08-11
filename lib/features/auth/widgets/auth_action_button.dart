@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
+import 'package:traqtrace_app/core/animation/traq_fade_scale_transition.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class AuthActionButton extends StatelessWidget {
@@ -63,21 +64,18 @@ class AuthActionButton extends StatelessWidget {
         switchOutCurve: TraqAnimationConstants.reverseCurve,
         transitionBuilder: (child, animation) {
           if (reduce) return child;
-          return TraqAnimationManager.fadeScaleTransition(
-            child,
-            animation,
+          return TraqFadeScaleTransition(
+            child: child,
+            animation: animation,
             beginScale: TraqAnimationConstants.buttonInitialScale,
+            alignment: Alignment.center,
           );
         },
         child: KeyedSubtree(
           key: ValueKey<String>(
-            isLoading
-                ? 'loading'
-                : (isEnabled ? 'enabled' : 'disabled'),
+            isLoading ? 'loading' : (isEnabled ? 'enabled' : 'disabled'),
           ),
-          child: SizedBox(
-              height: 40,
-              width: double.infinity, child: button),
+          child: SizedBox(height: 40, width: double.infinity, child: button),
         ),
       ),
     );

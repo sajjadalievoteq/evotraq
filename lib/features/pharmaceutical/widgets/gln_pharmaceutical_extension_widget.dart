@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_clinical_trial_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_cold_chain_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_contacts_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_certifications_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_dea_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_dscsa_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_facility_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_fda_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_healthcare_ids_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_international_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_operational_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_registry_safety_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_state_license_section.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_wholesale_section.dart';
+
+part 'gln_pharmaceutical_extension_actions.dart';
 
 class GLNPharmaceuticalExtensionWidget extends StatefulWidget {
   final int? glnId;
@@ -30,30 +39,13 @@ class GLNPharmaceuticalExtensionWidget extends StatefulWidget {
       GLNPharmaceuticalExtensionWidgetState();
 }
 
-const Map<String, String> _usStateOptions = {
-  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas',
-  'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware',
-  'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'ID': 'Idaho',
-  'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa', 'KS': 'Kansas',
-  'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
-  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi',
-  'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada',
-  'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York',
-  'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio', 'OK': 'Oklahoma',
-  'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
-  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah',
-  'VT': 'Vermont', 'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia',
-  'WI': 'Wisconsin', 'WY': 'Wyoming', 'DC': 'District of Columbia',
-  'PR': 'Puerto Rico', 'GU': 'Guam', 'VI': 'Virgin Islands',
-};
-
 class GLNPharmaceuticalExtensionWidgetState
     extends State<GLNPharmaceuticalExtensionWidget> {
   GLNPharmaceuticalExtension? _extension;
   bool _isLoading = true;
 
   HealthcareFacilityType _healthcareFacilityType = HealthcareFacilityType.other;
-  
+
   final _fdaEstablishmentIdController = TextEditingController();
   final _fdaRegistrationNumberController = TextEditingController();
   DateTime? _fdaRegistrationDate;
@@ -234,434 +226,6 @@ class GLNPharmaceuticalExtensionWidgetState
     super.dispose();
   }
 
-  Future<void> _loadExtension() async {
-    if (widget.initialExtension != null) {
-      _populateFormFromExtension(widget.initialExtension!);
-      if (mounted) {
-        setState(() {
-          _extension = widget.initialExtension;
-          _isLoading = false;
-        });
-      }
-      return;
-    }
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _populateFormFromExtension(GLNPharmaceuticalExtension ext) {
-    _healthcareFacilityType = ext.healthcareFacilityType ?? HealthcareFacilityType.other;
-    
-    _fdaEstablishmentIdController.text = ext.fdaEstablishmentId ?? '';
-    _fdaRegistrationNumberController.text = ext.fdaRegistrationNumber ?? '';
-    _fdaRegistrationDate = ext.fdaRegistrationDate;
-    _fdaRegistrationExpiry = ext.fdaRegistrationExpiry;
-    _fdaEstablishmentTypeController.text = ext.fdaEstablishmentType ?? '';
-
-    _deaRegistrationNumberController.text = ext.deaRegistrationNumber ?? '';
-    _deaRegistrationExpiry = ext.deaRegistrationExpiry;
-    _deaScheduleAuthorizationController.text = ext.deaScheduleAuthorization ?? '';
-    _deaBusinessActivityController.text = ext.deaBusinessActivity ?? '';
-
-    _stateLicenseNumberController.text = ext.stateLicenseNumber ?? '';
-    _stateLicenseTypeController.text = ext.stateLicenseType ?? '';
-    _stateLicenseExpiry = ext.stateLicenseExpiry;
-    _stateLicenseState = ext.stateLicenseState;
-
-    _wholesaleLicenseNumberController.text = ext.wholesaleLicenseNumber ?? '';
-    _wholesaleLicenseExpiry = ext.wholesaleLicenseExpiry;
-    _isAuthorizedTradingPartner = ext.isAuthorizedTradingPartner;
-    _atpVerificationDate = ext.atpVerificationDate;
-    _vawdAccredited = ext.vawdAccredited;
-    _vawdAccreditationNumberController.text = ext.vawdAccreditationNumber ?? '';
-    _vawdExpiryDate = ext.vawdExpiryDate;
-
-    _hasColdChainCapability = ext.hasColdChainCapability;
-    _coldStorageMinTempController.text = ext.coldStorageMinTempCelsius?.toString() ?? '';
-    _coldStorageMaxTempController.text = ext.coldStorageMaxTempCelsius?.toString() ?? '';
-    _hasFreezerCapability = ext.hasFreezerCapability;
-    _freezerMinTempController.text = ext.freezerMinTempCelsius?.toString() ?? '';
-    _freezerMaxTempController.text = ext.freezerMaxTempCelsius?.toString() ?? '';
-    _hasControlledRoomTemp = ext.hasControlledRoomTemp;
-    _crtMinTempController.text = ext.crtMinTempCelsius?.toString() ?? '';
-    _crtMaxTempController.text = ext.crtMaxTempCelsius?.toString() ?? '';
-    _hasHumidityControl = ext.hasHumidityControl;
-    _humidityRangeMinController.text = ext.humidityRangeMin?.toString() ?? '';
-    _humidityRangeMaxController.text = ext.humidityRangeMax?.toString() ?? '';
-    _gdpCertified = ext.gdpCertified;
-    _gdpCertificationNumberController.text = ext.gdpCertificationNumber ?? '';
-    _gdpCertificationExpiry = ext.gdpCertificationExpiry;
-
-    _isClinicalTrialSite = ext.isClinicalTrialSite;
-    _clinicalTrialPhaseAuthorizedController.text = ext.clinicalTrialPhaseAuthorized ?? '';
-    _irbApprovalNumberController.text = ext.irbApprovalNumber ?? '';
-    _irbApprovalExpiry = ext.irbApprovalExpiry;
-
-    _isDscsaCompliant = ext.isDscsaCompliant;
-    _dscsaComplianceDate = ext.dscsaComplianceDate;
-    _hasSerializationCapability = ext.hasSerializationCapability;
-    _hasAggregationCapability = ext.hasAggregationCapability;
-    _interoperabilitySystemController.text = ext.interoperabilitySystem ?? '';
-
-    _npiNumberController.text = ext.npiNumber ?? '';
-    _ncpdpIdController.text = ext.ncpdpId ?? '';
-    _medicareProviderNumberController.text = ext.medicareProviderNumber ?? '';
-    _medicaidProviderNumberController.text = ext.medicaidProviderNumber ?? '';
-
-    _isIsoCertified = ext.isIsoCertified;
-    _isoCertificationTypeController.text = ext.isoCertificationType ?? '';
-    _isoCertificationNumberController.text = ext.isoCertificationNumber ?? '';
-    _isoCertificationExpiry = ext.isoCertificationExpiry;
-
-    _jcahoAccredited = ext.jcahoAccredited;
-    _jcahoAccreditationNumberController.text = ext.jcahoAccreditationNumber ?? '';
-    _jcahoAccreditationExpiry = ext.jcahoAccreditationExpiry;
-
-    _emaSiteIdController.text = ext.emaSiteId ?? '';
-    _pmdaSiteIdController.text = ext.pmdaSiteId ?? '';
-    _anvisaSiteIdController.text = ext.anvisaSiteId ?? '';
-    _nmpaSiteIdController.text = ext.nmpaSiteId ?? '';
-
-    _receivingHoursController.text = ext.receivingHours ?? '';
-    _dispatchHoursController.text = ext.dispatchHours ?? '';
-    _hasWeighbridge = ext.hasWeighbridge;
-    _hasLoadingDock = ext.hasLoadingDock;
-    _hasForkliftCapability = ext.hasForkliftCapability;
-    _canReceiveHazmat = ext.canReceiveHazmat;
-
-    _pharmacistInChargeController.text = ext.pharmacistInCharge ?? '';
-    _picLicenseNumberController.text = ext.picLicenseNumber ?? '';
-    _responsiblePersonNameController.text = ext.responsiblePersonName ?? '';
-    _responsiblePersonEmailController.text = ext.responsiblePersonEmail ?? '';
-    _responsiblePersonPhoneController.text = ext.responsiblePersonPhone ?? '';
-    _qualityContactNameController.text = ext.qualityContactName ?? '';
-    _qualityContactEmailController.text = ext.qualityContactEmail ?? '';
-    _qualityContactPhoneController.text = ext.qualityContactPhone ?? '';
-    _regulatoryContactNameController.text = ext.regulatoryContactName ?? '';
-    _regulatoryContactEmailController.text = ext.regulatoryContactEmail ?? '';
-    _regulatoryContactPhoneController.text = ext.regulatoryContactPhone ?? '';
-
-    _mahQualificationIndicator = ext.mahQualificationIndicator;
-    _mahTargetMarketsController.text = ext.mahTargetMarkets?.join(', ') ?? '';
-    _mahRegulatoryRegistrationNumberController.text =
-        ext.mahRegulatoryRegistrationNumber ?? '';
-
-    _brandsyncPartyIdController.text = ext.brandsyncPartyId ?? '';
-    _tatmeenPartyCodeController.text = ext.tatmeenPartyCode ?? '';
-    _pharmacovigilanceEmailController.text = ext.pharmacovigilanceEmail ?? '';
-    _recallContactEmailController.text = ext.recallContactEmail ?? '';
-    _recallContactPhoneController.text = ext.recallContactPhone ?? '';
-    _epcisCaptureEndpointUrlController.text = ext.epcisCaptureEndpointUrl ?? '';
-    _licensedAgentAuthorisationController.text =
-        ext.licensedAgentAuthorisationNumber ?? '';
-    _authorisedPrincipalMahGlnsController.text =
-        ext.authorisedPrincipalMahGlns ?? '';
-  }
-
-  GLNPharmaceuticalExtension _buildExtensionFromForm() {
-    return GLNPharmaceuticalExtension(
-      id: _extension?.id,
-      glnId: widget.glnId ?? 0,
-      glnCode: widget.glnCode,
-      healthcareFacilityType: _healthcareFacilityType,
-      fdaEstablishmentId: _fdaEstablishmentIdController.text.isNotEmpty 
-          ? _fdaEstablishmentIdController.text : null,
-      fdaRegistrationNumber: _fdaRegistrationNumberController.text.isNotEmpty 
-          ? _fdaRegistrationNumberController.text : null,
-      fdaRegistrationDate: _fdaRegistrationDate,
-      fdaRegistrationExpiry: _fdaRegistrationExpiry,
-      fdaEstablishmentType: _fdaEstablishmentTypeController.text.isNotEmpty 
-          ? _fdaEstablishmentTypeController.text : null,
-      deaRegistrationNumber: _deaRegistrationNumberController.text.isNotEmpty 
-          ? _deaRegistrationNumberController.text : null,
-      deaRegistrationExpiry: _deaRegistrationExpiry,
-      deaScheduleAuthorization: _deaScheduleAuthorizationController.text.isNotEmpty 
-          ? _deaScheduleAuthorizationController.text : null,
-      deaBusinessActivity: _deaBusinessActivityController.text.isNotEmpty 
-          ? _deaBusinessActivityController.text : null,
-      stateLicenseNumber: _stateLicenseNumberController.text.isNotEmpty 
-          ? _stateLicenseNumberController.text : null,
-      stateLicenseType: _stateLicenseTypeController.text.isNotEmpty 
-          ? _stateLicenseTypeController.text : null,
-      stateLicenseExpiry: _stateLicenseExpiry,
-      stateLicenseState: _stateLicenseState,
-      wholesaleLicenseNumber: _wholesaleLicenseNumberController.text.isNotEmpty 
-          ? _wholesaleLicenseNumberController.text : null,
-      wholesaleLicenseExpiry: _wholesaleLicenseExpiry,
-      isAuthorizedTradingPartner: _isAuthorizedTradingPartner,
-      atpVerificationDate: _atpVerificationDate,
-      vawdAccredited: _vawdAccredited,
-      vawdAccreditationNumber: _vawdAccreditationNumberController.text.isNotEmpty 
-          ? _vawdAccreditationNumberController.text : null,
-      vawdExpiryDate: _vawdExpiryDate,
-      hasColdChainCapability: _hasColdChainCapability,
-      coldStorageMinTempCelsius: double.tryParse(_coldStorageMinTempController.text),
-      coldStorageMaxTempCelsius: double.tryParse(_coldStorageMaxTempController.text),
-      hasFreezerCapability: _hasFreezerCapability,
-      freezerMinTempCelsius: double.tryParse(_freezerMinTempController.text),
-      freezerMaxTempCelsius: double.tryParse(_freezerMaxTempController.text),
-      hasControlledRoomTemp: _hasControlledRoomTemp,
-      crtMinTempCelsius: double.tryParse(_crtMinTempController.text),
-      crtMaxTempCelsius: double.tryParse(_crtMaxTempController.text),
-      hasHumidityControl: _hasHumidityControl,
-      humidityRangeMin: double.tryParse(_humidityRangeMinController.text),
-      humidityRangeMax: double.tryParse(_humidityRangeMaxController.text),
-      gdpCertified: _gdpCertified,
-      gdpCertificationNumber: _gdpCertificationNumberController.text.isNotEmpty 
-          ? _gdpCertificationNumberController.text : null,
-      gdpCertificationExpiry: _gdpCertificationExpiry,
-      isClinicalTrialSite: _isClinicalTrialSite,
-      clinicalTrialPhaseAuthorized: _clinicalTrialPhaseAuthorizedController.text.isNotEmpty 
-          ? _clinicalTrialPhaseAuthorizedController.text : null,
-      irbApprovalNumber: _irbApprovalNumberController.text.isNotEmpty 
-          ? _irbApprovalNumberController.text : null,
-      irbApprovalExpiry: _irbApprovalExpiry,
-      isDscsaCompliant: _isDscsaCompliant,
-      dscsaComplianceDate: _dscsaComplianceDate,
-      hasSerializationCapability: _hasSerializationCapability,
-      hasAggregationCapability: _hasAggregationCapability,
-      interoperabilitySystem: _interoperabilitySystemController.text.isNotEmpty 
-          ? _interoperabilitySystemController.text : null,
-      npiNumber: _npiNumberController.text.isNotEmpty 
-          ? _npiNumberController.text : null,
-      ncpdpId: _ncpdpIdController.text.isNotEmpty 
-          ? _ncpdpIdController.text : null,
-      medicareProviderNumber: _medicareProviderNumberController.text.isNotEmpty 
-          ? _medicareProviderNumberController.text : null,
-      medicaidProviderNumber: _medicaidProviderNumberController.text.isNotEmpty 
-          ? _medicaidProviderNumberController.text : null,
-      isIsoCertified: _isIsoCertified,
-      isoCertificationType: _isoCertificationTypeController.text.isNotEmpty 
-          ? _isoCertificationTypeController.text : null,
-      isoCertificationNumber: _isoCertificationNumberController.text.isNotEmpty 
-          ? _isoCertificationNumberController.text : null,
-      isoCertificationExpiry: _isoCertificationExpiry,
-      jcahoAccredited: _jcahoAccredited,
-      jcahoAccreditationNumber: _jcahoAccreditationNumberController.text.isNotEmpty 
-          ? _jcahoAccreditationNumberController.text : null,
-      jcahoAccreditationExpiry: _jcahoAccreditationExpiry,
-      emaSiteId: _emaSiteIdController.text.isNotEmpty 
-          ? _emaSiteIdController.text : null,
-      pmdaSiteId: _pmdaSiteIdController.text.isNotEmpty 
-          ? _pmdaSiteIdController.text : null,
-      anvisaSiteId: _anvisaSiteIdController.text.isNotEmpty 
-          ? _anvisaSiteIdController.text : null,
-      nmpaSiteId: _nmpaSiteIdController.text.isNotEmpty 
-          ? _nmpaSiteIdController.text : null,
-      receivingHours: _receivingHoursController.text.isNotEmpty 
-          ? _receivingHoursController.text : null,
-      dispatchHours: _dispatchHoursController.text.isNotEmpty 
-          ? _dispatchHoursController.text : null,
-      hasWeighbridge: _hasWeighbridge,
-      hasLoadingDock: _hasLoadingDock,
-      hasForkliftCapability: _hasForkliftCapability,
-      canReceiveHazmat: _canReceiveHazmat,
-      pharmacistInCharge: _pharmacistInChargeController.text.isNotEmpty 
-          ? _pharmacistInChargeController.text : null,
-      picLicenseNumber: _picLicenseNumberController.text.isNotEmpty 
-          ? _picLicenseNumberController.text : null,
-      responsiblePersonName: _responsiblePersonNameController.text.isNotEmpty 
-          ? _responsiblePersonNameController.text : null,
-      responsiblePersonEmail: _responsiblePersonEmailController.text.isNotEmpty 
-          ? _responsiblePersonEmailController.text : null,
-      responsiblePersonPhone: _responsiblePersonPhoneController.text.isNotEmpty 
-          ? _responsiblePersonPhoneController.text : null,
-      qualityContactName: _qualityContactNameController.text.isNotEmpty 
-          ? _qualityContactNameController.text : null,
-      qualityContactEmail: _qualityContactEmailController.text.isNotEmpty 
-          ? _qualityContactEmailController.text : null,
-      qualityContactPhone: _qualityContactPhoneController.text.isNotEmpty 
-          ? _qualityContactPhoneController.text : null,
-      regulatoryContactName: _regulatoryContactNameController.text.isNotEmpty 
-          ? _regulatoryContactNameController.text : null,
-      regulatoryContactEmail: _regulatoryContactEmailController.text.isNotEmpty 
-          ? _regulatoryContactEmailController.text : null,
-      regulatoryContactPhone: _regulatoryContactPhoneController.text.isNotEmpty 
-          ? _regulatoryContactPhoneController.text : null,
-      brandsyncPartyId: _brandsyncPartyIdController.text.isNotEmpty
-          ? _brandsyncPartyIdController.text
-          : null,
-      tatmeenPartyCode: _tatmeenPartyCodeController.text.isNotEmpty
-          ? _tatmeenPartyCodeController.text
-          : null,
-      pharmacovigilanceEmail:
-          _pharmacovigilanceEmailController.text.isNotEmpty
-              ? _pharmacovigilanceEmailController.text
-              : null,
-      recallContactEmail: _recallContactEmailController.text.isNotEmpty
-          ? _recallContactEmailController.text
-          : null,
-      recallContactPhone: _recallContactPhoneController.text.isNotEmpty
-          ? _recallContactPhoneController.text
-          : null,
-      epcisCaptureEndpointUrl:
-          _epcisCaptureEndpointUrlController.text.isNotEmpty
-              ? _epcisCaptureEndpointUrlController.text
-              : null,
-      licensedAgentAuthorisationNumber:
-          _licensedAgentAuthorisationController.text.isNotEmpty
-              ? _licensedAgentAuthorisationController.text
-              : null,
-      authorisedPrincipalMahGlns:
-          _authorisedPrincipalMahGlnsController.text.isNotEmpty
-              ? _authorisedPrincipalMahGlnsController.text
-              : null,
-      mahQualificationIndicator: _mahQualificationIndicator,
-      mahTargetMarkets: _mahMarketsFromForm(),
-      mahRegulatoryRegistrationNumber:
-          _mahRegulatoryRegistrationNumberController.text.isNotEmpty
-              ? _mahRegulatoryRegistrationNumberController.text
-              : null,
-    );
-  }
-
-  List<String>? _mahMarketsFromForm() {
-    final t = _mahTargetMarketsController.text.trim();
-    if (t.isEmpty) return null;
-    final parts =
-        t.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-    return parts.isEmpty ? null : parts;
-  }
-
-  bool get hasData =>
-      _fdaEstablishmentIdController.text.isNotEmpty ||
-      _fdaRegistrationNumberController.text.isNotEmpty ||
-      _deaRegistrationNumberController.text.isNotEmpty ||
-      _stateLicenseNumberController.text.isNotEmpty ||
-      _wholesaleLicenseNumberController.text.isNotEmpty ||
-      _isAuthorizedTradingPartner ||
-      _vawdAccredited ||
-      _hasColdChainCapability ||
-      _gdpCertified ||
-      _isClinicalTrialSite ||
-      _isDscsaCompliant ||
-      _npiNumberController.text.isNotEmpty ||
-      _healthcareFacilityType != HealthcareFacilityType.other ||
-      _brandsyncPartyIdController.text.isNotEmpty ||
-      _tatmeenPartyCodeController.text.isNotEmpty ||
-      _pharmacovigilanceEmailController.text.isNotEmpty ||
-      _recallContactEmailController.text.isNotEmpty ||
-      _recallContactPhoneController.text.isNotEmpty ||
-      _epcisCaptureEndpointUrlController.text.isNotEmpty ||
-      _licensedAgentAuthorisationController.text.isNotEmpty ||
-      _authorisedPrincipalMahGlnsController.text.isNotEmpty ||
-      _mahQualificationIndicator ||
-      _mahTargetMarketsController.text.isNotEmpty ||
-      _mahRegulatoryRegistrationNumberController.text.isNotEmpty;
-
-  GLNPharmaceuticalExtension? buildExtension({int? glnId, String? glnCode}) {
-    if (!hasData) return null;
-    
-    final extension = _buildExtensionFromForm();
-    return GLNPharmaceuticalExtension(
-      id: extension.id,
-      glnId: glnId ?? widget.glnId ?? extension.glnId,
-      glnCode: glnCode ?? widget.glnCode ?? extension.glnCode,
-      healthcareFacilityType: extension.healthcareFacilityType,
-      fdaEstablishmentId: extension.fdaEstablishmentId,
-      fdaRegistrationNumber: extension.fdaRegistrationNumber,
-      fdaRegistrationDate: extension.fdaRegistrationDate,
-      fdaRegistrationExpiry: extension.fdaRegistrationExpiry,
-      fdaEstablishmentType: extension.fdaEstablishmentType,
-      deaRegistrationNumber: extension.deaRegistrationNumber,
-      deaRegistrationExpiry: extension.deaRegistrationExpiry,
-      deaScheduleAuthorization: extension.deaScheduleAuthorization,
-      deaBusinessActivity: extension.deaBusinessActivity,
-      stateLicenseNumber: extension.stateLicenseNumber,
-      stateLicenseType: extension.stateLicenseType,
-      stateLicenseExpiry: extension.stateLicenseExpiry,
-      stateLicenseState: extension.stateLicenseState,
-      wholesaleLicenseNumber: extension.wholesaleLicenseNumber,
-      wholesaleLicenseExpiry: extension.wholesaleLicenseExpiry,
-      isAuthorizedTradingPartner: extension.isAuthorizedTradingPartner,
-      atpVerificationDate: extension.atpVerificationDate,
-      vawdAccredited: extension.vawdAccredited,
-      vawdAccreditationNumber: extension.vawdAccreditationNumber,
-      vawdExpiryDate: extension.vawdExpiryDate,
-      hasColdChainCapability: extension.hasColdChainCapability,
-      coldStorageMinTempCelsius: extension.coldStorageMinTempCelsius,
-      coldStorageMaxTempCelsius: extension.coldStorageMaxTempCelsius,
-      hasFreezerCapability: extension.hasFreezerCapability,
-      freezerMinTempCelsius: extension.freezerMinTempCelsius,
-      freezerMaxTempCelsius: extension.freezerMaxTempCelsius,
-      hasControlledRoomTemp: extension.hasControlledRoomTemp,
-      crtMinTempCelsius: extension.crtMinTempCelsius,
-      crtMaxTempCelsius: extension.crtMaxTempCelsius,
-      hasHumidityControl: extension.hasHumidityControl,
-      humidityRangeMin: extension.humidityRangeMin,
-      humidityRangeMax: extension.humidityRangeMax,
-      gdpCertified: extension.gdpCertified,
-      gdpCertificationNumber: extension.gdpCertificationNumber,
-      gdpCertificationExpiry: extension.gdpCertificationExpiry,
-      isClinicalTrialSite: extension.isClinicalTrialSite,
-      clinicalTrialPhaseAuthorized: extension.clinicalTrialPhaseAuthorized,
-      irbApprovalNumber: extension.irbApprovalNumber,
-      irbApprovalExpiry: extension.irbApprovalExpiry,
-      isDscsaCompliant: extension.isDscsaCompliant,
-      dscsaComplianceDate: extension.dscsaComplianceDate,
-      hasSerializationCapability: extension.hasSerializationCapability,
-      hasAggregationCapability: extension.hasAggregationCapability,
-      interoperabilitySystem: extension.interoperabilitySystem,
-      npiNumber: extension.npiNumber,
-      ncpdpId: extension.ncpdpId,
-      medicareProviderNumber: extension.medicareProviderNumber,
-      medicaidProviderNumber: extension.medicaidProviderNumber,
-      isIsoCertified: extension.isIsoCertified,
-      isoCertificationType: extension.isoCertificationType,
-      isoCertificationNumber: extension.isoCertificationNumber,
-      isoCertificationExpiry: extension.isoCertificationExpiry,
-      jcahoAccredited: extension.jcahoAccredited,
-      jcahoAccreditationNumber: extension.jcahoAccreditationNumber,
-      jcahoAccreditationExpiry: extension.jcahoAccreditationExpiry,
-      emaSiteId: extension.emaSiteId,
-      pmdaSiteId: extension.pmdaSiteId,
-      anvisaSiteId: extension.anvisaSiteId,
-      nmpaSiteId: extension.nmpaSiteId,
-      receivingHours: extension.receivingHours,
-      dispatchHours: extension.dispatchHours,
-      hasWeighbridge: extension.hasWeighbridge,
-      hasLoadingDock: extension.hasLoadingDock,
-      hasForkliftCapability: extension.hasForkliftCapability,
-      canReceiveHazmat: extension.canReceiveHazmat,
-      pharmacistInCharge: extension.pharmacistInCharge,
-      picLicenseNumber: extension.picLicenseNumber,
-      responsiblePersonName: extension.responsiblePersonName,
-      responsiblePersonEmail: extension.responsiblePersonEmail,
-      responsiblePersonPhone: extension.responsiblePersonPhone,
-      qualityContactName: extension.qualityContactName,
-      qualityContactEmail: extension.qualityContactEmail,
-      qualityContactPhone: extension.qualityContactPhone,
-      regulatoryContactName: extension.regulatoryContactName,
-      regulatoryContactEmail: extension.regulatoryContactEmail,
-      regulatoryContactPhone: extension.regulatoryContactPhone,
-      brandsyncPartyId: extension.brandsyncPartyId,
-      tatmeenPartyCode: extension.tatmeenPartyCode,
-      pharmacovigilanceEmail: extension.pharmacovigilanceEmail,
-      recallContactEmail: extension.recallContactEmail,
-      recallContactPhone: extension.recallContactPhone,
-      epcisCaptureEndpointUrl: extension.epcisCaptureEndpointUrl,
-      licensedAgentAuthorisationNumber:
-          extension.licensedAgentAuthorisationNumber,
-      authorisedPrincipalMahGlns: extension.authorisedPrincipalMahGlns,
-      mahQualificationIndicator: extension.mahQualificationIndicator,
-      mahTargetMarkets: extension.mahTargetMarkets,
-      mahRegulatoryRegistrationNumber:
-          extension.mahRegulatoryRegistrationNumber,
-    );
-  }
-
-  String? validate() {
-    return null;
-  }
-
-  Future<bool> save() async {
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -671,1146 +235,249 @@ class GLNPharmaceuticalExtensionWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildRegistryAndSafetySection(),
-        const SizedBox(height: 16),
-        _buildFacilitySection(),
-        const SizedBox(height: 16),
-        _buildFdaSection(context),
-        const SizedBox(height: 16),
-        _buildDeaSection(context),
-        const SizedBox(height: 16),
-        _buildStateLicenseSection(),
-        const SizedBox(height: 16),
-        _buildWholesaleSection(),
-        const SizedBox(height: 16),
-        _buildColdChainSection(),
-        const SizedBox(height: 16),
-        _buildClinicalTrialSection(),
-        const SizedBox(height: 16),
-        _buildDscsaSection(),
-        const SizedBox(height: 16),
-        _buildHealthcareIdsSection(),
-        const SizedBox(height: 16),
-        _buildCertificationsSection(),
-        const SizedBox(height: 16),
-        _buildInternationalSection(),
-        const SizedBox(height: 16),
-        _buildOperationalSection(),
-        const SizedBox(height: 16),
-        _buildContactsSection(),
-      ],
-    );
-  }
-
-  Widget _buildRegistryAndSafetySection() {
-    final outline = Theme.of(context).colorScheme.outlineVariant;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Pharmaceutical Details',
-          style:  TextStyle(fontWeight: FontWeight.bold, color: context.colors.textPrimary,fontSize: 16),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        SizedBox(height: 16,),
-        Gs1GroupCard(
-          title: GlnPharmaceuticalExtensionUiConstants.sectionUaeRegistry,
-          outlineColor: outline,
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _brandsyncPartyIdController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelBrandSyncPartyId,
-                  enabled: widget.isEditing,
-                  maxLength: 50,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildTextField(
-                  controller: _tatmeenPartyCodeController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelTatmeenPartyCode,
-                  enabled: widget.isEditing,
-                  maxLength: 50,
-                ),
-              ),
-            ],
-          ),
+        GlnPharmaceuticalRegistrySafetySection(
+          brandsyncPartyIdController: _brandsyncPartyIdController,
+          tatmeenPartyCodeController: _tatmeenPartyCodeController,
+          mahTargetMarketsController: _mahTargetMarketsController,
+          mahRegistrationNumberController:
+              _mahRegulatoryRegistrationNumberController,
+          licensedAgentAuthorisationController:
+              _licensedAgentAuthorisationController,
+          authorisedPrincipalMahGlnsController:
+              _authorisedPrincipalMahGlnsController,
+          pharmacovigilanceEmailController: _pharmacovigilanceEmailController,
+          recallContactEmailController: _recallContactEmailController,
+          recallContactPhoneController: _recallContactPhoneController,
+          epcisCaptureEndpointUrlController: _epcisCaptureEndpointUrlController,
+          mahQualificationIndicator: _mahQualificationIndicator,
+          isEditing: widget.isEditing,
+          onMahQualificationChanged: (value) {
+            setState(() => _mahQualificationIndicator = value);
+          },
         ),
         const SizedBox(height: 16),
-        Gs1GroupCard(
-          title: GlnPharmaceuticalExtensionUiConstants.sectionMahTargetMarkets,
-          outlineColor: outline,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSwitch(
-                label: GlnPharmaceuticalExtensionUiConstants.labelMahQualificationIndicator,
-                value: _mahQualificationIndicator,
-                onChanged: widget.isEditing
-                    ? (value) => setState(() => _mahQualificationIndicator = value)
-                    : null,
-              ),
-              const SizedBox(height: 12),
-              _buildTextField(
-                controller: _mahTargetMarketsController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelMahTargetMarketsIso,
-                hint: GlnPharmaceuticalExtensionUiConstants.hintMahTargetMarketsIso,
-                enabled: widget.isEditing,
-                maxLength: 200,
-              ),
-              const SizedBox(height: 12),
-              _buildTextField(
-                controller: _mahRegulatoryRegistrationNumberController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelMahRegulatoryRegistrationNumber,
-                enabled: widget.isEditing,
-                maxLength: 50,
-              ),
-            ],
-          ),
+        GlnPharmaceuticalFacilitySection(
+          facilityType: _healthcareFacilityType,
+          isEditing: widget.isEditing,
+          onChanged: (value) {
+            setState(() => _healthcareFacilityType = value);
+          },
         ),
         const SizedBox(height: 16),
-        Gs1GroupCard(
-          title: GlnPharmaceuticalExtensionUiConstants.sectionLicensedAgent,
-          outlineColor: outline,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTextField(
-                controller: _licensedAgentAuthorisationController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelLicensedAgentAuthorisationNumber,
-                enabled: widget.isEditing,
-                maxLength: 50,
-              ),
-              const SizedBox(height: 12),
-              _buildTextField(
-                controller: _authorisedPrincipalMahGlnsController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelAuthorisedPrincipalMahGlns,
-                hint: GlnPharmaceuticalExtensionUiConstants.hintAuthorisedPrincipalMahGlns,
-                enabled: widget.isEditing,
-                maxLength: 500,
-              ),
-            ],
-          ),
+        GlnPharmaceuticalFdaSection(
+          establishmentIdController: _fdaEstablishmentIdController,
+          registrationNumberController: _fdaRegistrationNumberController,
+          establishmentTypeController: _fdaEstablishmentTypeController,
+          registrationDate: _fdaRegistrationDate,
+          registrationExpiry: _fdaRegistrationExpiry,
+          isEditing: widget.isEditing,
+          onRegistrationDateChanged: (date) {
+            setState(() => _fdaRegistrationDate = date);
+          },
+          onRegistrationExpiryChanged: (date) {
+            setState(() => _fdaRegistrationExpiry = date);
+          },
         ),
         const SizedBox(height: 16),
-        Gs1GroupCard(
-          title: GlnPharmaceuticalExtensionUiConstants.sectionPharmacovigilance,
-          outlineColor: outline,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTextField(
-                controller: _pharmacovigilanceEmailController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelPharmacovigilanceEmail,
-                enabled: widget.isEditing,
-                keyboardType: TextInputType.emailAddress,
-                maxLength: 254,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _recallContactEmailController,
-                      label: GlnPharmaceuticalExtensionUiConstants.labelRecallContactEmail,
-                      enabled: widget.isEditing,
-                      keyboardType: TextInputType.emailAddress,
-                      maxLength: 254,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _recallContactPhoneController,
-                      label: GlnPharmaceuticalExtensionUiConstants.labelRecallContactPhone,
-                      enabled: widget.isEditing,
-                      keyboardType: TextInputType.phone,
-                      maxLength: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        GlnPharmaceuticalDeaSection(
+          registrationNumberController: _deaRegistrationNumberController,
+          scheduleAuthorizationController: _deaScheduleAuthorizationController,
+          businessActivityController: _deaBusinessActivityController,
+          registrationExpiry: _deaRegistrationExpiry,
+          isEditing: widget.isEditing,
+          onRegistrationExpiryChanged: (date) {
+            setState(() => _deaRegistrationExpiry = date);
+          },
         ),
         const SizedBox(height: 16),
-        Gs1GroupCard(
-          title: GlnPharmaceuticalExtensionUiConstants.sectionEpicsDataExchange,
-          outlineColor: outline,
-          child: _buildTextField(
-            controller: _epcisCaptureEndpointUrlController,
-            label: GlnPharmaceuticalExtensionUiConstants.labelEpicsCaptureEndpointUrl,
-            hint: GlnPharmaceuticalExtensionUiConstants.hintHttpsUrl,
-            enabled: widget.isEditing,
-            keyboardType: TextInputType.url,
-            maxLength: 500,
-          ),
+        GlnPharmaceuticalStateLicenseSection(
+          licenseNumberController: _stateLicenseNumberController,
+          licenseTypeController: _stateLicenseTypeController,
+          selectedState: _stateLicenseState,
+          licenseExpiry: _stateLicenseExpiry,
+          isEditing: widget.isEditing,
+          onStateChanged: (value) {
+            setState(() => _stateLicenseState = value);
+          },
+          onLicenseExpiryChanged: (date) {
+            setState(() => _stateLicenseExpiry = date);
+          },
         ),
-      ],
-    );
-  }
-
-  Widget _buildFacilitySection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardHealthcareFacilityType,
-      AppAssets.iconMedical,
-      [
-        DropdownButtonFormField<HealthcareFacilityType>(
-          value: _healthcareFacilityType,
-          dropdownColor: context.colors.surface,
-          decoration: const InputDecoration(
-            labelText: GlnPharmaceuticalExtensionUiConstants.labelFacilityType,
-            border: OutlineInputBorder(),
-
-
-          ),
-          items: HealthcareFacilityType.values.map((type) {
-            return DropdownMenuItem(
-              value: type,
-              child: Text(type.displayName),
-            );
-          }).toList(),
-          onChanged: widget.isEditing
-              ? (value) {
-                  if (value != null) {
-                    setState(() {
-                      _healthcareFacilityType = value;
-                    });
-                  }
-                }
-              : null,
+        const SizedBox(height: 16),
+        GlnPharmaceuticalWholesaleSection(
+          licenseNumberController: _wholesaleLicenseNumberController,
+          vawdAccreditationNumberController: _vawdAccreditationNumberController,
+          licenseExpiry: _wholesaleLicenseExpiry,
+          isAuthorizedTradingPartner: _isAuthorizedTradingPartner,
+          atpVerificationDate: _atpVerificationDate,
+          vawdAccredited: _vawdAccredited,
+          vawdExpiryDate: _vawdExpiryDate,
+          isEditing: widget.isEditing,
+          onLicenseExpiryChanged: (date) {
+            setState(() => _wholesaleLicenseExpiry = date);
+          },
+          onAuthorizedTradingPartnerChanged: (value) {
+            setState(() => _isAuthorizedTradingPartner = value);
+          },
+          onAtpVerificationDateChanged: (date) {
+            setState(() => _atpVerificationDate = date);
+          },
+          onVawdAccreditedChanged: (value) {
+            setState(() => _vawdAccredited = value);
+          },
+          onVawdExpiryDateChanged: (date) {
+            setState(() => _vawdExpiryDate = date);
+          },
         ),
-      ],
-      context
-    );
-  }
-
-  Widget _buildFdaSection(BuildContext context) {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardFdaEstablishment,
-      AppAssets.iconVerified,
-      [
-        _buildTextField(
-          controller: _fdaEstablishmentIdController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelFdaEstablishmentId,
-          enabled: widget.isEditing,
-          maxLength: 20,
+        const SizedBox(height: 16),
+        GlnPharmaceuticalColdChainSection(
+          coldStorageMinController: _coldStorageMinTempController,
+          coldStorageMaxController: _coldStorageMaxTempController,
+          freezerMinController: _freezerMinTempController,
+          freezerMaxController: _freezerMaxTempController,
+          crtMinController: _crtMinTempController,
+          crtMaxController: _crtMaxTempController,
+          humidityMinController: _humidityRangeMinController,
+          humidityMaxController: _humidityRangeMaxController,
+          gdpCertificationNumberController: _gdpCertificationNumberController,
+          hasColdChainCapability: _hasColdChainCapability,
+          hasFreezerCapability: _hasFreezerCapability,
+          hasControlledRoomTemp: _hasControlledRoomTemp,
+          hasHumidityControl: _hasHumidityControl,
+          gdpCertified: _gdpCertified,
+          gdpCertificationExpiry: _gdpCertificationExpiry,
+          isEditing: widget.isEditing,
+          onColdChainCapabilityChanged: (value) {
+            setState(() => _hasColdChainCapability = value);
+          },
+          onFreezerCapabilityChanged: (value) {
+            setState(() => _hasFreezerCapability = value);
+          },
+          onControlledRoomTempChanged: (value) {
+            setState(() => _hasControlledRoomTemp = value);
+          },
+          onHumidityControlChanged: (value) {
+            setState(() => _hasHumidityControl = value);
+          },
+          onGdpCertifiedChanged: (value) {
+            setState(() => _gdpCertified = value);
+          },
+          onGdpCertificationExpiryChanged: (date) {
+            setState(() => _gdpCertificationExpiry = date);
+          },
         ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _fdaRegistrationNumberController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelFdaRegistrationNumber,
-          enabled: widget.isEditing,
-          maxLength: 50,
+        const SizedBox(height: 16),
+        GlnPharmaceuticalClinicalTrialSection(
+          phaseAuthorizedController: _clinicalTrialPhaseAuthorizedController,
+          irbApprovalNumberController: _irbApprovalNumberController,
+          isClinicalTrialSite: _isClinicalTrialSite,
+          irbApprovalExpiry: _irbApprovalExpiry,
+          isEditing: widget.isEditing,
+          onClinicalTrialSiteChanged: (value) {
+            setState(() => _isClinicalTrialSite = value);
+          },
+          onIrbApprovalExpiryChanged: (date) {
+            setState(() => _irbApprovalExpiry = date);
+          },
         ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _fdaEstablishmentTypeController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelFdaEstablishmentType,
-          enabled: widget.isEditing,
-          maxLength: 50,
+        const SizedBox(height: 16),
+        GlnPharmaceuticalDscsaSection(
+          interoperabilitySystemController: _interoperabilitySystemController,
+          isDscsaCompliant: _isDscsaCompliant,
+          complianceDate: _dscsaComplianceDate,
+          hasSerializationCapability: _hasSerializationCapability,
+          hasAggregationCapability: _hasAggregationCapability,
+          isEditing: widget.isEditing,
+          onDscsaCompliantChanged: (value) {
+            setState(() => _isDscsaCompliant = value);
+          },
+          onComplianceDateChanged: (date) {
+            setState(() => _dscsaComplianceDate = date);
+          },
+          onSerializationCapabilityChanged: (value) {
+            setState(() => _hasSerializationCapability = value);
+          },
+          onAggregationCapabilityChanged: (value) {
+            setState(() => _hasAggregationCapability = value);
+          },
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildDateField(
-                label: GlnPharmaceuticalExtensionUiConstants.labelRegistrationDate,
-                value: _fdaRegistrationDate,
-                onChanged: widget.isEditing
-                    ? (date) => setState(() => _fdaRegistrationDate = date)
-                    : null,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDateField(
-                label: GlnPharmaceuticalExtensionUiConstants.labelRegistrationExpiry,
-                value: _fdaRegistrationExpiry,
-                onChanged: widget.isEditing
-                    ? (date) => setState(() => _fdaRegistrationExpiry = date)
-                    : null,
-              ),
-            ),
-          ],
+        const SizedBox(height: 16),
+        GlnPharmaceuticalHealthcareIdsSection(
+          npiNumberController: _npiNumberController,
+          ncpdpIdController: _ncpdpIdController,
+          medicareProviderNumberController: _medicareProviderNumberController,
+          medicaidProviderNumberController: _medicaidProviderNumberController,
+          isEditing: widget.isEditing,
+        ),
+        const SizedBox(height: 16),
+        GlnPharmaceuticalCertificationsSection(
+          isoTypeController: _isoCertificationTypeController,
+          isoNumberController: _isoCertificationNumberController,
+          jcahoNumberController: _jcahoAccreditationNumberController,
+          isIsoCertified: _isIsoCertified,
+          isoExpiry: _isoCertificationExpiry,
+          isJcahoAccredited: _jcahoAccredited,
+          jcahoExpiry: _jcahoAccreditationExpiry,
+          isEditing: widget.isEditing,
+          onIsoCertifiedChanged: (value) {
+            setState(() => _isIsoCertified = value);
+          },
+          onIsoExpiryChanged: (date) {
+            setState(() => _isoCertificationExpiry = date);
+          },
+          onJcahoAccreditedChanged: (value) {
+            setState(() => _jcahoAccredited = value);
+          },
+          onJcahoExpiryChanged: (date) {
+            setState(() => _jcahoAccreditationExpiry = date);
+          },
+        ),
+        const SizedBox(height: 16),
+        GlnPharmaceuticalInternationalSection(
+          emaSiteIdController: _emaSiteIdController,
+          pmdaSiteIdController: _pmdaSiteIdController,
+          anvisaSiteIdController: _anvisaSiteIdController,
+          nmpaSiteIdController: _nmpaSiteIdController,
+          isEditing: widget.isEditing,
+        ),
+        const SizedBox(height: 16),
+        GlnPharmaceuticalOperationalSection(
+          receivingHoursController: _receivingHoursController,
+          dispatchHoursController: _dispatchHoursController,
+          hasWeighbridge: _hasWeighbridge,
+          hasLoadingDock: _hasLoadingDock,
+          hasForkliftCapability: _hasForkliftCapability,
+          canReceiveHazmat: _canReceiveHazmat,
+          isEditing: widget.isEditing,
+          onWeighbridgeChanged: (value) {
+            setState(() => _hasWeighbridge = value);
+          },
+          onLoadingDockChanged: (value) {
+            setState(() => _hasLoadingDock = value);
+          },
+          onForkliftCapabilityChanged: (value) {
+            setState(() => _hasForkliftCapability = value);
+          },
+          onReceiveHazmatChanged: (value) {
+            setState(() => _canReceiveHazmat = value);
+          },
+        ),
+        const SizedBox(height: 16),
+        GlnPharmaceuticalContactsSection(
+          pharmacistInChargeController: _pharmacistInChargeController,
+          picLicenseNumberController: _picLicenseNumberController,
+          responsibleNameController: _responsiblePersonNameController,
+          responsibleEmailController: _responsiblePersonEmailController,
+          responsiblePhoneController: _responsiblePersonPhoneController,
+          qualityNameController: _qualityContactNameController,
+          qualityEmailController: _qualityContactEmailController,
+          qualityPhoneController: _qualityContactPhoneController,
+          regulatoryNameController: _regulatoryContactNameController,
+          regulatoryEmailController: _regulatoryContactEmailController,
+          regulatoryPhoneController: _regulatoryContactPhoneController,
+          isEditing: widget.isEditing,
         ),
       ],
-      context
-    );
-  }
-
-  Widget _buildDeaSection(BuildContext context) {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardDeaRegistration,
-      AppAssets.iconSecurity,
-
-      [
-        _buildTextField(
-          controller: _deaRegistrationNumberController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelDeaRegistrationNumber,
-          enabled: widget.isEditing,
-          maxLength: 20,
-        ),
-        const SizedBox(height: 12),
-        _buildDateField(
-          label: GlnPharmaceuticalExtensionUiConstants.labelDeaRegistrationExpiry,
-          value: _deaRegistrationExpiry,
-          onChanged: widget.isEditing
-              ? (date) => setState(() => _deaRegistrationExpiry = date)
-              : null,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _deaScheduleAuthorizationController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelDeaScheduleAuthorization,
-          enabled: widget.isEditing,
-          hint: GlnPharmaceuticalExtensionUiConstants.hintDeaSchedule,
-          maxLength: 50,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _deaBusinessActivityController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelDeaBusinessActivity,
-          enabled: widget.isEditing,
-          maxLength: 100,
-        ),
-      ],
-      context
-    );
-  }
-
-  Widget _buildStateLicenseSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardStateProvincialLicense,
-      AppAssets.iconBadge,
-      [
-        Row(
-          children: [
-            Expanded(
-              child: _buildTextField(
-                controller: _stateLicenseNumberController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelLicenseNumber,
-                enabled: widget.isEditing,
-                maxLength: 50,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: _stateLicenseState,
-                dropdownColor: context.colors.surface,
-                decoration: const InputDecoration(
-
-                  labelText: GlnPharmaceuticalExtensionUiConstants.labelStateDropdown,
-                  border: OutlineInputBorder(),
-                ),
-                items: [
-                  const DropdownMenuItem<String>(
-                    value: null,
-                    child: Text(GlnExtensionSharedUiConstants.selectState),
-                  ),
-                  ..._usStateOptions.entries.map((entry) => DropdownMenuItem<String>(
-                    value: entry.key,
-                    child: Text('${entry.key} - ${entry.value}'),
-                  )),
-                ],
-                onChanged: widget.isEditing ? (value) => setState(() => _stateLicenseState = value) : null,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _stateLicenseTypeController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelLicenseType,
-          enabled: widget.isEditing,
-          maxLength: 50,
-        ),
-        const SizedBox(height: 12),
-        _buildDateField(
-          label: GlnPharmaceuticalExtensionUiConstants.labelLicenseExpiry,
-          value: _stateLicenseExpiry,
-          onChanged: widget.isEditing
-              ? (date) => setState(() => _stateLicenseExpiry = date)
-              : null,
-        ),
-      ],
-      context
-    );
-  }
-
-  Widget _buildWholesaleSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardWholesaleDistribution,
-      NavIcons.logistics,
-      [
-        _buildTextField(
-          controller: _wholesaleLicenseNumberController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelWholesaleLicenseNumber,
-          enabled: widget.isEditing,
-          maxLength: 50,
-        ),
-        const SizedBox(height: 12),
-        _buildDateField(
-          label: GlnPharmaceuticalExtensionUiConstants.labelWholesaleLicenseExpiry,
-          value: _wholesaleLicenseExpiry,
-          onChanged: widget.isEditing
-              ? (date) => setState(() => _wholesaleLicenseExpiry = date)
-              : null,
-        ),
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelAuthorizedTradingPartner,
-          value: _isAuthorizedTradingPartner,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _isAuthorizedTradingPartner = value)
-              : null,
-        ),
-        if (_isAuthorizedTradingPartner) ...[
-          const SizedBox(height: 12),
-          _buildDateField(
-            label: GlnPharmaceuticalExtensionUiConstants.labelAtpVerificationDate,
-            value: _atpVerificationDate,
-            onChanged: widget.isEditing
-                ? (date) => setState(() => _atpVerificationDate = date)
-                : null,
-          ),
-        ],
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelVawdAccredited,
-          value: _vawdAccredited,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _vawdAccredited = value)
-              : null,
-        ),
-        if (_vawdAccredited) ...[
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _vawdAccreditationNumberController,
-            label: GlnPharmaceuticalExtensionUiConstants.labelVawdAccreditationNumber,
-            enabled: widget.isEditing,
-            maxLength: 50,
-          ),
-          const SizedBox(height: 12),
-          _buildDateField(
-            label: GlnPharmaceuticalExtensionUiConstants.labelVawdExpiryDate,
-            value: _vawdExpiryDate,
-            onChanged: widget.isEditing
-                ? (date) => setState(() => _vawdExpiryDate = date)
-                : null,
-          ),
-        ],
-      ],context
-    );
-  }
-
-  Widget _buildColdChainSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardColdChainStorage,
-      AppAssets.iconSparkle,
-      [
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelColdChainCapability,
-          value: _hasColdChainCapability,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _hasColdChainCapability = value)
-              : null,
-        ),
-        if (_hasColdChainCapability) ...[
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _coldStorageMinTempController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelMinTempC,
-                  enabled: widget.isEditing,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildTextField(
-                  controller: _coldStorageMaxTempController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelMaxTempC,
-                  enabled: widget.isEditing,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                ),
-              ),
-            ],
-          ),
-        ],
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelFreezerCapability,
-          value: _hasFreezerCapability,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _hasFreezerCapability = value)
-              : null,
-        ),
-        if (_hasFreezerCapability) ...[
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _freezerMinTempController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelFreezerMinC,
-                  enabled: widget.isEditing,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildTextField(
-                  controller: _freezerMaxTempController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelFreezerMaxC,
-                  enabled: widget.isEditing,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                ),
-              ),
-            ],
-          ),
-        ],
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelControlledRoomTemperature,
-          value: _hasControlledRoomTemp,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _hasControlledRoomTemp = value)
-              : null,
-        ),
-        if (_hasControlledRoomTemp) ...[
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _crtMinTempController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelCrtMinC,
-                  enabled: widget.isEditing,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildTextField(
-                  controller: _crtMaxTempController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelCrtMaxC,
-                  enabled: widget.isEditing,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                ),
-              ),
-            ],
-          ),
-        ],
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelHumidityControl,
-          value: _hasHumidityControl,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _hasHumidityControl = value)
-              : null,
-        ),
-        if (_hasHumidityControl) ...[
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _humidityRangeMinController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelMinHumidityPct,
-                  enabled: widget.isEditing,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildTextField(
-                  controller: _humidityRangeMaxController,
-                  label: GlnPharmaceuticalExtensionUiConstants.labelMaxHumidityPct,
-                  enabled: widget.isEditing,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                ),
-              ),
-            ],
-          ),
-        ],
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelGdpCertified,
-          value: _gdpCertified,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _gdpCertified = value)
-              : null,
-        ),
-        if (_gdpCertified) ...[
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _gdpCertificationNumberController,
-            label: GlnPharmaceuticalExtensionUiConstants.labelGdpCertificationNumber,
-            enabled: widget.isEditing,
-            maxLength: 50,
-          ),
-          const SizedBox(height: 12),
-          _buildDateField(
-            label: GlnPharmaceuticalExtensionUiConstants.labelGdpCertificationExpiry,
-            value: _gdpCertificationExpiry,
-            onChanged: widget.isEditing
-                ? (date) => setState(() => _gdpCertificationExpiry = date)
-                : null,
-          ),
-        ],
-      ],
-      context
-    );
-  }
-
-  Widget _buildClinicalTrialSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardClinicalTrialSite,
-      AppAssets.iconScience,
-      [
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelClinicalTrialSiteSwitch,
-          value: _isClinicalTrialSite,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _isClinicalTrialSite = value)
-              : null,
-        ),
-        if (_isClinicalTrialSite) ...[
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _clinicalTrialPhaseAuthorizedController,
-            label: GlnPharmaceuticalExtensionUiConstants.labelClinicalTrialPhaseAuthorized,
-            enabled: widget.isEditing,
-            hint: GlnPharmaceuticalExtensionUiConstants.hintClinicalTrialPhase,
-            maxLength: 50,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _irbApprovalNumberController,
-            label: GlnPharmaceuticalExtensionUiConstants.labelIrbApprovalNumber,
-            enabled: widget.isEditing,
-            maxLength: 50,
-          ),
-          const SizedBox(height: 12),
-          _buildDateField(
-            label: GlnPharmaceuticalExtensionUiConstants.labelIrbApprovalExpiry,
-            value: _irbApprovalExpiry,
-            onChanged: widget.isEditing
-                ? (date) => setState(() => _irbApprovalExpiry = date)
-                : null,
-          ),
-        ],
-      ],
-      context
-    );
-  }
-
-  Widget _buildDscsaSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardDscsaCompliance,
-      AppAssets.iconVerified,
-      [
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelDscsaCompliant,
-          value: _isDscsaCompliant,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _isDscsaCompliant = value)
-              : null,
-        ),
-        if (_isDscsaCompliant) ...[
-          const SizedBox(height: 12),
-          _buildDateField(
-            label: GlnPharmaceuticalExtensionUiConstants.labelDscsaComplianceDate,
-            value: _dscsaComplianceDate,
-            onChanged: widget.isEditing
-                ? (date) => setState(() => _dscsaComplianceDate = date)
-                : null,
-          ),
-        ],
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelSerializationCapability,
-          value: _hasSerializationCapability,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _hasSerializationCapability = value)
-              : null,
-        ),
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelAggregationCapability,
-          value: _hasAggregationCapability,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _hasAggregationCapability = value)
-              : null,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _interoperabilitySystemController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelInteroperabilitySystem,
-          enabled: widget.isEditing,
-          maxLength: 200,
-        ),
-      ],
-      context
-    );
-  }
-
-  Widget _buildHealthcareIdsSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardHealthcareIdentifiers,
-      AppAssets.iconNumbers,
-      [
-        _buildTextField(
-          controller: _npiNumberController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelNpiNumber,
-          enabled: widget.isEditing,
-          maxLength: 15,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _ncpdpIdController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelNcpdpId,
-          enabled: widget.isEditing,
-          maxLength: 20,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _medicareProviderNumberController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelMedicareProviderNumber,
-          enabled: widget.isEditing,
-          maxLength: 20,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _medicaidProviderNumberController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelMedicaidProviderNumber,
-          enabled: widget.isEditing,
-          maxLength: 20,
-        ),
-      ],
-      context
-    );
-  }
-
-  Widget _buildCertificationsSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardCertificationsAccreditations,
-      AppAssets.iconWorkspacePremium,
-      [
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelIsoCertified,
-          value: _isIsoCertified,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _isIsoCertified = value)
-              : null,
-        ),
-        if (_isIsoCertified) ...[
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _isoCertificationTypeController,
-            label: GlnPharmaceuticalExtensionUiConstants.labelIsoCertificationType,
-            enabled: widget.isEditing,
-            hint: GlnPharmaceuticalExtensionUiConstants.hintIsoCertificationType,
-            maxLength: 50,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _isoCertificationNumberController,
-            label: GlnPharmaceuticalExtensionUiConstants.labelIsoCertificationNumber,
-            enabled: widget.isEditing,
-            maxLength: 50,
-          ),
-          const SizedBox(height: 12),
-          _buildDateField(
-            label: GlnPharmaceuticalExtensionUiConstants.labelIsoCertificationExpiry,
-            value: _isoCertificationExpiry,
-            onChanged: widget.isEditing
-                ? (date) => setState(() => _isoCertificationExpiry = date)
-                : null,
-          ),
-        ],
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelJcahoAccredited,
-          value: _jcahoAccredited,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _jcahoAccredited = value)
-              : null,
-        ),
-        if (_jcahoAccredited) ...[
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _jcahoAccreditationNumberController,
-            label: GlnPharmaceuticalExtensionUiConstants.labelJcahoAccreditationNumber,
-            enabled: widget.isEditing,
-            maxLength: 50,
-          ),
-          const SizedBox(height: 12),
-          _buildDateField(
-            label: GlnPharmaceuticalExtensionUiConstants.labelJcahoAccreditationExpiry,
-            value: _jcahoAccreditationExpiry,
-            onChanged: widget.isEditing
-                ? (date) => setState(() => _jcahoAccreditationExpiry = date)
-                : null,
-          ),
-        ],
-      ],
-      context
-    );
-  }
-
-  Widget _buildInternationalSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardInternationalRegulatoryIds,
-      AppAssets.iconGlobe,
-      [
-        _buildTextField(
-          controller: _emaSiteIdController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelEmaSiteId,
-          enabled: widget.isEditing,
-          maxLength: 50,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _pmdaSiteIdController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelPmdaSiteId,
-          enabled: widget.isEditing,
-          maxLength: 50,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _anvisaSiteIdController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelAnvisaSiteId,
-          enabled: widget.isEditing,
-          maxLength: 50,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _nmpaSiteIdController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelNmpaSiteId,
-          enabled: widget.isEditing,
-          maxLength: 50,
-        ),
-      ],
-      context
-    );
-  }
-
-  Widget _buildOperationalSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardOperationalDetails,
-      AppAssets.iconClock,
-      [
-        _buildTextField(
-          controller: _receivingHoursController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelReceivingHours,
-          enabled: widget.isEditing,
-          maxLength: 100,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _dispatchHoursController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelDispatchHours,
-          enabled: widget.isEditing,
-          maxLength: 100,
-        ),
-        const SizedBox(height: 12),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelHasWeighbridge,
-          value: _hasWeighbridge,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _hasWeighbridge = value)
-              : null,
-        ),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelHasLoadingDock,
-          value: _hasLoadingDock,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _hasLoadingDock = value)
-              : null,
-        ),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelHasForkliftCapability,
-          value: _hasForkliftCapability,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _hasForkliftCapability = value)
-              : null,
-        ),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelCanReceiveHazmat,
-          value: _canReceiveHazmat,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _canReceiveHazmat = value)
-              : null,
-        ),
-      ],
-      context
-    );
-  }
-
-  Widget _buildContactsSection() {
-    return _buildSection(
-      GlnPharmaceuticalExtensionUiConstants.cardContactInformation,
-      AppAssets.iconPhone,
-      [
-        const Text(
-          GlnPharmaceuticalExtensionUiConstants.headingPharmacistInCharge,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        _buildTextField(
-          controller: _pharmacistInChargeController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelName,
-          enabled: widget.isEditing,
-          maxLength: 200,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _picLicenseNumberController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelLicenseNumber,
-          enabled: widget.isEditing,
-          maxLength: 50,
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          GlnPharmaceuticalExtensionUiConstants.headingResponsiblePerson,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        _buildTextField(
-          controller: _responsiblePersonNameController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelName,
-          enabled: widget.isEditing,
-          maxLength: 200,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildTextField(
-                controller: _responsiblePersonEmailController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelEmail,
-                enabled: widget.isEditing,
-                keyboardType: TextInputType.emailAddress,
-                maxLength: 255,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildTextField(
-                controller: _responsiblePersonPhoneController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelPhone,
-                enabled: widget.isEditing,
-                keyboardType: TextInputType.phone,
-                maxLength: 50,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          GlnPharmaceuticalExtensionUiConstants.headingQualityContact,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        _buildTextField(
-          controller: _qualityContactNameController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelName,
-          enabled: widget.isEditing,
-          maxLength: 200,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildTextField(
-                controller: _qualityContactEmailController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelEmail,
-                enabled: widget.isEditing,
-                keyboardType: TextInputType.emailAddress,
-                maxLength: 255,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildTextField(
-                controller: _qualityContactPhoneController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelPhone,
-                enabled: widget.isEditing,
-                keyboardType: TextInputType.phone,
-                maxLength: 50,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          GlnPharmaceuticalExtensionUiConstants.headingRegulatoryContact,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        _buildTextField(
-          controller: _regulatoryContactNameController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelName,
-          enabled: widget.isEditing,
-          maxLength: 200,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildTextField(
-                controller: _regulatoryContactEmailController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelEmail,
-                enabled: widget.isEditing,
-                keyboardType: TextInputType.emailAddress,
-                maxLength: 255,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildTextField(
-                controller: _regulatoryContactPhoneController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelPhone,
-                enabled: widget.isEditing,
-                keyboardType: TextInputType.phone,
-                maxLength: 50,
-              ),
-            ),
-          ],
-        ),
-      ],
-      context
-    );
-  }
-
-  Widget _buildSection(String title, String iconAsset, List<Widget> children,BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                TraqIcon(iconAsset, size: 20, color: context.colors.textPrimary),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: context.colors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    bool enabled = true,
-    String? hint,
-    TextInputType keyboardType = TextInputType.text,
-    int maxLines = 1,
-    int? maxLength,
-  }) {
-    return TextFormField(
-      controller: controller,
-      enabled: enabled,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      inputFormatters: maxLength != null
-          ? [LengthLimitingTextInputFormatter(maxLength)]
-          : null,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
-        filled: !enabled,
-        fillColor: enabled ? null : Colors.grey.shade100,
-      ),
-    );
-  }
-
-  Widget _buildDateField({
-    required String label,
-    required DateTime? value,
-    required Function(DateTime?)? onChanged,
-  }) {
-    return InkWell(
-      onTap: onChanged != null
-          ? () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: value ?? DateTime.now(),
-                firstDate: DateTime(1900),
-                lastDate: DateTime(2100),
-              );
-              if (date != null) {
-                onChanged(date);
-              }
-            }
-          : null,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          filled: onChanged == null,
-          fillColor: onChanged == null ? Colors.grey.shade100 : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              value != null
-                  ? '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}'
-                  : GlnExtensionSharedUiConstants.dateNotSet,
-              style: TextStyle(
-                color: value != null ? Colors.black : Colors.grey,
-              ),
-            ),
-            if (onChanged != null)
-              TraqIcon(AppAssets.iconClock, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSwitch({
-    required String label,
-    required bool value,
-    required Function(bool)? onChanged,
-  }) {
-    return SwitchListTile(
-      title: Text(label),
-      value: value,
-      onChanged: onChanged,
-      contentPadding: EdgeInsets.zero,
     );
   }
 }

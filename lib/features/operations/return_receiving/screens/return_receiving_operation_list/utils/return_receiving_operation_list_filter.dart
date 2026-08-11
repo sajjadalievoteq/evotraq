@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_response_model.dart';
+import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 
@@ -29,9 +29,9 @@ class ReturnReceivingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.returnReceivingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.returnReceivingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
@@ -39,9 +39,9 @@ class ReturnReceivingOperationListFilter {
               false) ||
           (operation.trackingNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.returnReceivingOperationId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.returnReceivingOperationId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false);
     }).toList();
 
@@ -77,9 +77,9 @@ class ReturnReceivingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.operationReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.operationReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
@@ -106,7 +106,10 @@ class ReturnReceivingOperationListFilter {
   ) {
     switch (sortBy) {
       case 'returnReceivingReference':
-        return _compareStrings(a.returnReceivingReference, b.returnReceivingReference);
+        return _compareStrings(
+          a.returnReceivingReference,
+          b.returnReceivingReference,
+        );
       case 'sourceGLN':
         return _compareStrings(a.sourceGLN, b.sourceGLN);
       case 'receivingGLN':

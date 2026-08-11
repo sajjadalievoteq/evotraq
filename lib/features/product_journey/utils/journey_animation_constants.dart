@@ -1,13 +1,6 @@
-
-
-
 abstract final class JourneyAnimationConstants {
-  
   static const int canvasPaneSwitchMs = 800;
 
-  
-  
-  
   static const int canvasEntranceMs = 1200;
   static const double lineProgressStart = 0.0;
   static const double lineProgressEnd = 0.60;
@@ -16,18 +9,14 @@ abstract final class JourneyAnimationConstants {
   static const double pinStaggerWindow = 0.45;
   static const double pinStaggerMaxStart = 0.95;
 
-  
   static const int pinFilterDimMs = 260;
   static const int pinFilterBounceMs = 920;
 
-  
   static const int pinSelectedPulseMs = 1400;
   static const int pinSelectedScaleMs = 220;
 
-  
   static const int filterChipBounceMs = 280;
 
-  
   static const int stepMarkerScaleMs = 200;
 
   static Duration get canvasPaneSwitch =>

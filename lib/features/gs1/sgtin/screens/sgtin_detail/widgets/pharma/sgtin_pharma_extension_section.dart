@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/pharma/sgtin_pharma_info_row.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/pharma/sgtin_pharma_boolean_row.dart';
 
 class SgtinPharmaExtensionSection extends StatelessWidget {
   const SgtinPharmaExtensionSection({
@@ -36,26 +36,36 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
               padding: const EdgeInsets.only(top: 4, bottom: 8),
             ),
             if (ext.reportingRegimes.isNotEmpty)
-              _infoRow(context, 'Reporting Regimes',
-                  ext.reportingRegimes.join(' • ')),
+              SgtinPharmaInfoRow(
+                'Reporting Regimes',
+                ext.reportingRegimes.join(' • '),
+              ),
             if (ext.emvoUploadStatus != null) ...[
               const SizedBox(height: 8),
-              _infoRow(context, 'EMVO Upload Status',
-                  ext.emvoUploadStatus!,
-                  valueColor: _submissionColor(context, ext.emvoUploadStatus)),
+              SgtinPharmaInfoRow(
+                'EMVO Upload Status',
+                ext.emvoUploadStatus!,
+                valueColor: _submissionColor(context, ext.emvoUploadStatus),
+              ),
             ],
             if (ext.tatmeenSubmissionStatus != null) ...[
               const SizedBox(height: 8),
-              _infoRow(context, 'Tatmeen Submission',
-                  ext.tatmeenSubmissionStatus!,
-                  valueColor:
-                      _submissionColor(context, ext.tatmeenSubmissionStatus)),
+              SgtinPharmaInfoRow(
+                'Tatmeen Submission',
+                ext.tatmeenSubmissionStatus!,
+                valueColor: _submissionColor(
+                  context,
+                  ext.tatmeenSubmissionStatus,
+                ),
+              ),
             ],
             if (ext.dscsaTransactionHash != null) ...[
               const SizedBox(height: 8),
-              _infoRow(context, 'DSCSA Transaction Hash',
-                  ext.dscsaTransactionHash!,
-                  monospace: true),
+              SgtinPharmaInfoRow(
+                'DSCSA Transaction Hash',
+                ext.dscsaTransactionHash!,
+                monospace: true,
+              ),
             ],
             const SizedBox(height: 16),
           ],
@@ -64,23 +74,32 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
             'Cold Chain Monitoring',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
           ),
-          _boolRow(context, 'Cold Chain Excursion', ext.coldChainExcursionFlag,
-              trueColor: AppColorMapper.errorColor(context)),
+          SgtinPharmaBooleanRow(
+            'Cold Chain Excursion',
+            ext.coldChainExcursionFlag,
+            trueColor: AppColorMapper.errorColor(context),
+          ),
           if (ext.tempMinRecorded != null) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'Min Temp Recorded',
-                '${ext.tempMinRecorded!.toStringAsFixed(2)} °C'),
+            SgtinPharmaInfoRow(
+              'Min Temp Recorded',
+              '${ext.tempMinRecorded!.toStringAsFixed(2)} °C',
+            ),
           ],
           if (ext.tempMaxRecorded != null) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'Max Temp Recorded',
-                '${ext.tempMaxRecorded!.toStringAsFixed(2)} °C'),
+            SgtinPharmaInfoRow(
+              'Max Temp Recorded',
+              '${ext.tempMaxRecorded!.toStringAsFixed(2)} °C',
+            ),
           ],
           if (ext.lastSensorEventId != null) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'Last Sensor Event ID',
-                ext.lastSensorEventId!,
-                monospace: true),
+            SgtinPharmaInfoRow(
+              'Last Sensor Event ID',
+              ext.lastSensorEventId!,
+              monospace: true,
+            ),
           ],
           const SizedBox(height: 16),
 
@@ -88,22 +107,28 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
             'Anti-Counterfeit & Tamper Evidence',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
           ),
-          _infoRow(context, 'Anti-Tamper Seal Status',
-              ext.antiTamperStatus.displayName,
-              valueColor: _tamperColor(context, ext.antiTamperStatus)),
+          SgtinPharmaInfoRow(
+            'Anti-Tamper Seal Status',
+            ext.antiTamperStatus.displayName,
+            valueColor: _tamperColor(context, ext.antiTamperStatus),
+          ),
           if (ext.fraudScore != null) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'Fraud Risk Score',
-                ext.fraudScore!.toStringAsFixed(2),
-                valueColor: ext.fraudScore! > 0.5
-                    ? AppColorMapper.errorColor(context)
-                    : null),
+            SgtinPharmaInfoRow(
+              'Fraud Risk Score',
+              ext.fraudScore!.toStringAsFixed(2),
+              valueColor: ext.fraudScore! > 0.5
+                  ? AppColorMapper.errorColor(context)
+                  : null,
+            ),
           ],
           if (ext.duplicateEvidenceCount > 0) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'Duplicate Evidence Records',
-                ext.duplicateEvidenceCount.toString(),
-                valueColor: AppColorMapper.warningColor(context)),
+            SgtinPharmaInfoRow(
+              'Duplicate Evidence Records',
+              ext.duplicateEvidenceCount.toString(),
+              valueColor: AppColorMapper.warningColor(context),
+            ),
           ],
           const SizedBox(height: 16),
 
@@ -112,9 +137,11 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
               'Controlled Substances',
               padding: const EdgeInsets.only(top: 4, bottom: 8),
             ),
-            _infoRow(context, 'Custody Reference',
-                ext.controlledCustodyRef!,
-                monospace: true),
+            SgtinPharmaInfoRow(
+              'Custody Reference',
+              ext.controlledCustodyRef!,
+              monospace: true,
+            ),
             const SizedBox(height: 16),
           ],
 
@@ -122,18 +149,22 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
             'Dispensing & Returns',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
           ),
-          _infoRow(context, 'Return Status',
-              ext.returnStatus.displayName,
-              valueColor: _returnColor(context, ext.returnStatus)),
+          SgtinPharmaInfoRow(
+            'Return Status',
+            ext.returnStatus.displayName,
+            valueColor: _returnColor(context, ext.returnStatus),
+          ),
           if (ext.dispenseEventId != null) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'Dispense Event ID',
-                ext.dispenseEventId!,
-                monospace: true),
+            SgtinPharmaInfoRow(
+              'Dispense Event ID',
+              ext.dispenseEventId!,
+              monospace: true,
+            ),
           ],
           if (ext.dispenseGln != null) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'Dispensing Location GLN', ext.dispenseGln!),
+            SgtinPharmaInfoRow('Dispensing Location GLN', ext.dispenseGln!),
           ],
           const SizedBox(height: 16),
 
@@ -141,13 +172,18 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
             'Recall Status',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
           ),
-          _boolRow(context, 'Recall Affected', ext.recallAffectedFlag,
-              trueColor: AppColorMapper.errorColor(context)),
+          SgtinPharmaBooleanRow(
+            'Recall Affected',
+            ext.recallAffectedFlag,
+            trueColor: AppColorMapper.errorColor(context),
+          ),
           if (ext.recallNotificationId != null) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'Recall Notification ID',
-                ext.recallNotificationId!,
-                monospace: true),
+            SgtinPharmaInfoRow(
+              'Recall Notification ID',
+              ext.recallNotificationId!,
+              monospace: true,
+            ),
           ],
           const SizedBox(height: 16),
 
@@ -155,19 +191,25 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
             'Parallel Trade / Repackaging',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
           ),
-          _infoRow(context, 'Parallel Trade Status',
-              ext.parallelTradeStatus.displayName),
+          SgtinPharmaInfoRow(
+            'Parallel Trade Status',
+            ext.parallelTradeStatus.displayName,
+          ),
           if (ext.newSerialLinkage != null) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'New Serial Linkage',
-                ext.newSerialLinkage!,
-                monospace: true),
+            SgtinPharmaInfoRow(
+              'New Serial Linkage',
+              ext.newSerialLinkage!,
+              monospace: true,
+            ),
           ],
           if (ext.originalSgtinRef != null) ...[
             const SizedBox(height: 8),
-            _infoRow(context, 'Original SGTIN',
-                ext.originalSgtinRef!,
-                monospace: true),
+            SgtinPharmaInfoRow(
+              'Original SGTIN',
+              ext.originalSgtinRef!,
+              monospace: true,
+            ),
           ],
 
           if (ext.protocolId != null || ext.trialSubjectLinkage != null) ...[
@@ -177,88 +219,18 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
               padding: const EdgeInsets.only(top: 4, bottom: 8),
             ),
             if (ext.protocolId != null)
-              _infoRow(context, 'Protocol ID', ext.protocolId!),
+              SgtinPharmaInfoRow('Protocol ID', ext.protocolId!),
             if (ext.trialSubjectLinkage != null) ...[
               const SizedBox(height: 8),
-              _infoRow(context, 'Trial Subject Linkage',
-                  ext.trialSubjectLinkage!,
-                  monospace: true),
+              SgtinPharmaInfoRow(
+                'Trial Subject Linkage',
+                ext.trialSubjectLinkage!,
+                monospace: true,
+              ),
             ],
           ],
         ],
       ),
-    );
-  }
-
-  Widget _infoRow(
-    BuildContext context,
-    String label,
-    String value, {
-    Color? valueColor,
-    bool monospace = false,
-  }) {
-    final theme = Theme.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 190,
-          child: Text(
-            label,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value.isEmpty ? '—' : value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: valueColor ?? theme.colorScheme.onSurface,
-              fontFamily: monospace ? 'monospace' : null,
-              fontWeight: valueColor != null ? FontWeight.w600 : null,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _boolRow(
-    BuildContext context,
-    String label,
-    bool value, {
-    Color? trueColor,
-    Color? falseColor,
-  }) {
-    final theme = Theme.of(context);
-    final color = value
-        ? (trueColor ?? AppColorMapper.successColor(context))
-        : (falseColor ?? Colors.grey);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 190,
-          child: Text(
-            label,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          ),
-        ),
-        TraqIcon(
-          value ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
-          size: 18,
-          color: color,
-        ),
-        const SizedBox(width: 6),
-        Text(
-          value ? 'Yes' : 'No',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
-        ),
-      ],
     );
   }
 

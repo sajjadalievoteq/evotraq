@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/services/scanner_detection_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_input_manual_tab.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_input_scanner_tab.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
-import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
 import 'package:traqtrace_app/features/barcode/widgets/dialog/gs1_barcode_scan_dialog.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -27,7 +28,6 @@ class EPCInputWidget extends StatefulWidget {
   final String? label;
   final bool? scannerAvailable;
 
-  
   final Future<EPCParseResult?> Function(String input)? onParseFallback;
 
   @override
@@ -57,7 +57,8 @@ class _EPCInputWidgetState extends State<EPCInputWidget> {
   }
 
   List<String> get _allowedFormatStrings {
-    final types = widget.allowedTypes ??
+    final types =
+        widget.allowedTypes ??
         EPCType.values.where((t) => t != EPCType.unknown).toList();
     return types
         .map((t) => t.name.toUpperCase())
@@ -218,108 +219,18 @@ class _EPCInputWidgetState extends State<EPCInputWidget> {
     }
   }
 
-  Widget _typeBadge(EPCParseResult result) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Chip(
-          label: Text('${result.typeLabel} detected',style: TextStyle(color: Colors.white),),
-          backgroundColor: colorScheme.primaryContainer,
-          side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.3)),
-        ),
-      ),
-    );
-  }
-
-  Widget _manualTab() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            EpcEntryField(
-              controller: _controller,
-              label: widget.label ?? 'Item Barcode',
-              hintText: widget.placeholder ??
-                  'Enter SGTIN or SSCC barcode',
-              validator: _fieldValidator,
-              onChanged: _tryParse,
-              onEditingComplete: () => _handleAdd(),
-            ),
-            if (_lastParsed != null) _typeBadge(_lastParsed!),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _lastParsed != null ? () => _handleAdd() : null,
-              icon: TraqIcon(AppAssets.iconPlus),
-              label: const Text('Add Item'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _scannerTab() {
-    final canAdd = _lastParsed != null && _errorMessage == null;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Gs1BarcodeScanTrigger(
-              title: widget.label ?? 'Scan EPC',
-              allowedFormats: _allowedFormatStrings,
-              onScanResult: (result) {
-                if (!result.isValid) return;
-                setState(() => _lastScannedRaw = result.data);
-                _tryParse(result.data);
-              },
-            ),
-            if (_lastScannedRaw != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                'Last scan',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              const SizedBox(height: 4),
-              SelectableText(
-                _lastScannedRaw!,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            if (_lastParsed != null) _typeBadge(_lastParsed!),
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  _errorMessage!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: canAdd ? () => _handleAdd() : null,
-              icon: TraqIcon(AppAssets.iconPlus),
-              label: const Text('Add Item'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!_isScannable) {
-      return _manualTab();
+      return EpcInputManualTab(
+        controller: _controller,
+        label: widget.label ?? 'Item Barcode',
+        hintText: widget.placeholder ?? 'Enter SGTIN or SSCC barcode',
+        parsedResult: _lastParsed,
+        validator: _fieldValidator,
+        onChanged: _tryParse,
+        onAdd: _handleAdd,
+      );
     }
 
     return Column(
@@ -342,7 +253,28 @@ class _EPCInputWidgetState extends State<EPCInputWidget> {
           onSelectionChanged: _onModeChanged,
         ),
         const SizedBox(height: 12),
-        _mode == _EpcInputMode.scanner ? _scannerTab() : _manualTab(),
+        _mode == _EpcInputMode.scanner
+            ? EpcInputScannerTab(
+                title: widget.label ?? 'Scan EPC',
+                allowedFormats: _allowedFormatStrings,
+                lastScannedRaw: _lastScannedRaw,
+                parsedResult: _lastParsed,
+                errorMessage: _errorMessage,
+                onScanData: (data) {
+                  setState(() => _lastScannedRaw = data);
+                  _tryParse(data);
+                },
+                onAdd: _handleAdd,
+              )
+            : EpcInputManualTab(
+                controller: _controller,
+                label: widget.label ?? 'Item Barcode',
+                hintText: widget.placeholder ?? 'Enter SGTIN or SSCC barcode',
+                parsedResult: _lastParsed,
+                validator: _fieldValidator,
+                onChanged: _tryParse,
+                onAdd: _handleAdd,
+              ),
       ],
     );
   }

@@ -7,13 +7,16 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'sgtin_service_constants.dart';
 
+part 'sgtin_service_operations.dart';
+
 class SGTINService {
   final DioService _dioService;
 
   SGTINService({required DioService dioService}) : _dioService = dioService;
 
   static const _headers = {
-    SgtinServiceConstants.headerContentType: SgtinServiceConstants.contentTypeJson,
+    SgtinServiceConstants.headerContentType:
+        SgtinServiceConstants.contentTypeJson,
   };
 
   Future<SGTIN> getSGTINById(String id) async {
@@ -29,7 +32,8 @@ class SGTINService {
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errLoadById}: ${response.statusMessage}',
+      message:
+          '${SgtinServiceConstants.errLoadById}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
@@ -67,7 +71,8 @@ class SGTINService {
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errLoadBySerial}: ${response.statusMessage}',
+      message:
+          '${SgtinServiceConstants.errLoadBySerial}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
@@ -78,7 +83,10 @@ class SGTINService {
   }) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathBase}',
-      queryParameters: {SgtinServiceConstants.qPage: page, SgtinServiceConstants.qSize: size},
+      queryParameters: {
+        SgtinServiceConstants.qPage: page,
+        SgtinServiceConstants.qSize: size,
+      },
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -105,7 +113,9 @@ class SGTINService {
     if (kDebugMode) {
       debugPrint('[SGTINService] createSGTIN json=$jsonData');
       debugPrint('[SGTINService] currentLocation=${sgtin.currentLocation}');
-      debugPrint('[SGTINService] currentLocation.glnCode=${sgtin.currentLocation?.glnCode}');
+      debugPrint(
+        '[SGTINService] currentLocation.glnCode=${sgtin.currentLocation?.glnCode}',
+      );
     }
 
     final response = await _dioService.post(
@@ -127,7 +137,10 @@ class SGTINService {
 
     if (response.statusCode == SgtinServiceConstants.statusNotFound &&
         errorBody != null &&
-        errorBody[SgtinServiceConstants.rMessage]?.toString().contains('GTIN not found') == true) {
+        errorBody[SgtinServiceConstants.rMessage]?.toString().contains(
+              'GTIN not found',
+            ) ==
+            true) {
       throw ApiException(
         statusCode: response.statusCode,
         message: SgtinServiceConstants.errGtinNotFound,
@@ -139,16 +152,20 @@ class SGTINService {
         message: SgtinServiceConstants.errDuplicateSerial,
         responseBody: response.data is String ? response.data as String? : null,
       );
-    } else if (response.statusCode == SgtinServiceConstants.statusBadRequest && errorBody != null) {
+    } else if (response.statusCode == SgtinServiceConstants.statusBadRequest &&
+        errorBody != null) {
       throw ApiException(
         statusCode: response.statusCode,
-        message: errorBody[SgtinServiceConstants.rMessage] ?? SgtinServiceConstants.errInvalidData,
+        message:
+            errorBody[SgtinServiceConstants.rMessage] ??
+            SgtinServiceConstants.errInvalidData,
         responseBody: response.data is String ? response.data as String? : null,
       );
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: errorBody?[SgtinServiceConstants.rMessage] ??
+      message:
+          errorBody?[SgtinServiceConstants.rMessage] ??
           '${SgtinServiceConstants.errCreate}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
@@ -196,7 +213,8 @@ class SGTINService {
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errFindByGtin}: ${response.statusMessage}',
+      message:
+          '${SgtinServiceConstants.errFindByGtin}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
@@ -217,7 +235,8 @@ class SGTINService {
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errFindByBatch}: ${response.statusMessage}',
+      message:
+          '${SgtinServiceConstants.errFindByBatch}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
@@ -238,7 +257,8 @@ class SGTINService {
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errFindByStatus}: ${response.statusMessage}',
+      message:
+          '${SgtinServiceConstants.errFindByStatus}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
@@ -258,7 +278,8 @@ class SGTINService {
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errFindByLocation}: ${response.statusMessage}',
+      message:
+          '${SgtinServiceConstants.errFindByLocation}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
@@ -278,7 +299,8 @@ class SGTINService {
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errFindBySscc}: ${response.statusMessage}',
+      message:
+          '${SgtinServiceConstants.errFindBySscc}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
@@ -301,12 +323,15 @@ class SGTINService {
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errFindExpiring}: ${response.statusMessage}',
+      message:
+          '${SgtinServiceConstants.errFindExpiring}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
-  Future<List<SGTIN>> findSGTINsByRegulatoryMarket(String regulatoryMarket) async {
+  Future<List<SGTIN>> findSGTINsByRegulatoryMarket(
+    String regulatoryMarket,
+  ) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathMarket}',
       queryParameters: {SgtinServiceConstants.qMarket: regulatoryMarket},
@@ -322,7 +347,8 @@ class SGTINService {
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errFindByMarket}: ${response.statusMessage}',
+      message:
+          '${SgtinServiceConstants.errFindByMarket}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
@@ -336,12 +362,12 @@ class SGTINService {
     int size = SgtinServiceConstants.defaultSize,
   }) async {
     final queryParams = <String, dynamic>{
-      SgtinServiceConstants.qPage:           page,
-      SgtinServiceConstants.qSize:           size,
-      SgtinServiceConstants.qGtinId:         ?gtinId,
+      SgtinServiceConstants.qPage: page,
+      SgtinServiceConstants.qSize: size,
+      SgtinServiceConstants.qGtinId: ?gtinId,
       SgtinServiceConstants.qBatchLotNumber: ?batchLotNumber,
       if (status != null) SgtinServiceConstants.qStatus: status.name,
-      SgtinServiceConstants.qLocationId:     ?locationId,
+      SgtinServiceConstants.qLocationId: ?locationId,
     };
 
     final response = await _dioService.get(
@@ -380,9 +406,9 @@ class SGTINService {
     String sortDirection = SgtinServiceConstants.defaultSortDirection,
   }) async {
     final queryParams = <String, dynamic>{
-      SgtinServiceConstants.qPage:      page,
-      SgtinServiceConstants.qSize:      size,
-      SgtinServiceConstants.qSortBy:    sortBy,
+      SgtinServiceConstants.qPage: page,
+      SgtinServiceConstants.qSize: size,
+      SgtinServiceConstants.qSortBy: sortBy,
       SgtinServiceConstants.qDirection: sortDirection,
       if (gtinCode != null && gtinCode.isNotEmpty)
         SgtinServiceConstants.qGtinCode: gtinCode,
@@ -406,236 +432,33 @@ class SGTINService {
     if (response.statusCode == SgtinServiceConstants.statusOk) {
       final data = json.decode(response.data);
       return {
-        SgtinServiceConstants.rContent:       (data[SgtinServiceConstants.rContent] as List?)
-                               ?.map((item) {
-                                 if (item is! Map<String, dynamic>) return null;
-                                 try {
-                                   return SGTIN.fromJson(item);
-                                 } catch (_) {
-                                   return null;
-                                 }
-                               })
-                               .whereType<SGTIN>()
-                               .toList() ??
-                           [],
-        SgtinServiceConstants.rTotalElements: data[SgtinServiceConstants.rTotalElements] ?? 0,
-        SgtinServiceConstants.rTotalPages:    data[SgtinServiceConstants.rTotalPages] ?? 0,
-        SgtinServiceConstants.rNumber:        data[SgtinServiceConstants.rNumber] ?? 0,
-        SgtinServiceConstants.rSize:          data[SgtinServiceConstants.rSize] ?? size,
-        SgtinServiceConstants.rFirst:         data[SgtinServiceConstants.rFirst] ?? true,
-        SgtinServiceConstants.rLast:          data[SgtinServiceConstants.rLast] ?? true,
+        SgtinServiceConstants.rContent:
+            (data[SgtinServiceConstants.rContent] as List?)
+                ?.map((item) {
+                  if (item is! Map<String, dynamic>) return null;
+                  try {
+                    return SGTIN.fromJson(item);
+                  } catch (_) {
+                    return null;
+                  }
+                })
+                .whereType<SGTIN>()
+                .toList() ??
+            [],
+        SgtinServiceConstants.rTotalElements:
+            data[SgtinServiceConstants.rTotalElements] ?? 0,
+        SgtinServiceConstants.rTotalPages:
+            data[SgtinServiceConstants.rTotalPages] ?? 0,
+        SgtinServiceConstants.rNumber: data[SgtinServiceConstants.rNumber] ?? 0,
+        SgtinServiceConstants.rSize: data[SgtinServiceConstants.rSize] ?? size,
+        SgtinServiceConstants.rFirst:
+            data[SgtinServiceConstants.rFirst] ?? true,
+        SgtinServiceConstants.rLast: data[SgtinServiceConstants.rLast] ?? true,
       };
     }
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errSearch}: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String? : null,
-    );
-  }
-
-  Future<SGTIN> updateSGTINStatus(
-    String serialNumber,
-    ItemStatus newStatus,
-  ) async {
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemStatus}',
-      queryParameters: {SgtinServiceConstants.qSerialNumber: serialNumber},
-      headers: _headers,
-      data: json.encode({SgtinServiceConstants.bStatus: newStatus.name}),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SgtinServiceConstants.statusOk) {
-      return SGTIN.fromJson(json.decode(response.data));
-    }
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errUpdateStatus}: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String? : null,
-    );
-  }
-
-  Future<SGTIN> assignSGTINToLocation(
-    String serialNumber,
-    String glnCode,
-  ) async {
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemLocation(serialNumber)}',
-      headers: _headers,
-      data: json.encode({SgtinServiceConstants.bGlnCode: glnCode}),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SgtinServiceConstants.statusOk) {
-      return SGTIN.fromJson(json.decode(response.data));
-    }
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errAssignLocation}: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String? : null,
-    );
-  }
-
-  Future<SGTIN> packSGTINIntoSSCC(String serialNumber, String ssccCode) async {
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemPack(serialNumber)}',
-      headers: _headers,
-      data: json.encode({SgtinServiceConstants.bSsccCode: ssccCode}),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SgtinServiceConstants.statusOk) {
-      return SGTIN.fromJson(json.decode(response.data));
-    }
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errPack}: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String? : null,
-    );
-  }
-
-  Future<String> generateSerialNumber(
-    String gtinCode, {
-    bool randomized = true,
-  }) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathGenerateSerial(gtinCode)}',
-      queryParameters: {SgtinServiceConstants.qRandomized: randomized.toString()},
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SgtinServiceConstants.statusOk) {
-      final data = json.decode(response.data);
-      return data[SgtinServiceConstants.rSerialNumber] ?? '';
-    }
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errGenSerial}: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String? : null,
-    );
-  }
-
-  Future<bool> validateSGTIN(String gtinCode, String serialNumber) async {
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathValidate}',
-      headers: _headers,
-      data: json.encode({
-        SgtinServiceConstants.bGtinCode:    gtinCode,
-        SgtinServiceConstants.bSerialNumber: serialNumber,
-      }),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SgtinServiceConstants.statusOk) {
-      final data = json.decode(response.data);
-      return data[SgtinServiceConstants.rValid] ?? false;
-    }
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errValidate}: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String? : null,
-    );
-  }
-
-  Future<int> countSGTINsByGTINAndStatus(
-    String gtinCode,
-    ItemStatus status,
-  ) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathCount(gtinCode)}',
-      queryParameters: {SgtinServiceConstants.qStatus: status.name},
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SgtinServiceConstants.statusOk) {
-      final data = json.decode(response.data);
-      return data[SgtinServiceConstants.rCount] ?? 0;
-    }
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errCount}: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String? : null,
-    );
-  }
-
-  Future<List<SGTIN>> commissionMultipleSGTINs({
-    required String gtinCode,
-    required int quantity,
-    required String batchLotNumber,
-    required DateTime expiryDate,
-    String? currentLocation,
-  }) async {
-    final expiryDateStr = DateFormat('yyyy-MM-dd').format(expiryDate);
-
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathCommission}',
-      headers: _headers,
-      data: json.encode({
-        SgtinServiceConstants.bGtinCode:        gtinCode,
-        SgtinServiceConstants.bQuantity:        quantity,
-        SgtinServiceConstants.bBatchLotNumber:  batchLotNumber,
-        SgtinServiceConstants.bExpiryDate:      expiryDateStr,
-        SgtinServiceConstants.bCurrentLocation: ?currentLocation,
-      }),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SgtinServiceConstants.statusCreated) {
-      return (json.decode(response.data) as List)
-          .map((item) => SGTIN.fromJson(item))
-          .toList();
-    }
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errCommission}: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String? : null,
-    );
-  }
-
-  Future<SGTIN> decommissionSGTIN(String serialNumber, String reason) async {
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemDecommission}',
-      queryParameters: {SgtinServiceConstants.qSerialNumber: serialNumber},
-      headers: _headers,
-      data: json.encode({SgtinServiceConstants.bReason: reason}),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SgtinServiceConstants.statusOk) {
-      return SGTIN.fromJson(json.decode(response.data));
-    }
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errDecommission}: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String? : null,
-    );
-  }
-
-  Future<List<String>> getAvailableTransitions(String id) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemTransitions(id)}',
-      headers: _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SgtinServiceConstants.statusOk) {
-      final body = json.decode(response.data) as Map<String, dynamic>;
-      return List<String>.from(body['availableTransitions'] as List);
-    }
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: '${SgtinServiceConstants.errGetTransitions}: ${response.statusMessage}',
       responseBody: response.data is String ? response.data as String? : null,
     );
   }

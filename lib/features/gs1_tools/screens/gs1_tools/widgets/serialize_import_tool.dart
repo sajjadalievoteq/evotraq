@@ -36,12 +36,12 @@ class _SerializeImportToolState extends State<SerializeImportTool> {
 
   Future<void> _loadTemplate() async {
     try {
-      final text =
-          await rootBundle.loadString(EpcisImportTemplate.assetPath);
+      final text = await rootBundle.loadString(EpcisImportTemplate.assetPath);
       if (!mounted) return;
       setState(() {
-        _templateText = const JsonEncoder.withIndent('  ')
-            .convert(jsonDecode(text));
+        _templateText = const JsonEncoder.withIndent(
+          '  ',
+        ).convert(jsonDecode(text));
         _templateError = null;
       });
     } catch (e) {
@@ -51,7 +51,8 @@ class _SerializeImportToolState extends State<SerializeImportTool> {
   }
 
   Future<void> _downloadTemplate() async {
-    final raw = _templateText ??
+    final raw =
+        _templateText ??
         await rootBundle.loadString(EpcisImportTemplate.assetPath);
     web_download.downloadBytes(
       bytes: utf8.encode(raw),

@@ -24,8 +24,7 @@ class Gs1ToolModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final safeValue =
-        modes.any((m) => m.$1 == value) ? value : modes.first.$1;
+    final safeValue = modes.any((m) => m.$1 == value) ? value : modes.first.$1;
     if (modes.length <= 3) {
       return SegmentedButton<String>(
         segments: [
@@ -74,20 +73,4 @@ mixin Gs1InitialModeMixin<T extends StatefulWidget> on State<T> {
       clear?.call();
     });
   }
-}
-
-Widget gs1SubmitButton({
-  required bool loading,
-  required VoidCallback onPressed,
-  String label = 'Run',
-}) {
-  return Padding(
-    padding: const EdgeInsets.only(top: TraqSpacing.lg),
-    child: CustomElevatedButton(
-      label: label,
-      isLoading: loading,
-      isEnabled: !loading,
-      onPressed: onPressed,
-    ),
-  );
 }

@@ -18,10 +18,10 @@ class JourneyCubit extends Cubit<JourneyState> {
     required ProductJourneyService service,
     required DashboardService dashboardService,
     AuthCubit? authCubit,
-  })  : _service = service,
-        _dashboardService = dashboardService,
-        _authCubit = authCubit ?? getIt<AuthCubit>(),
-        super(const JourneyState());
+  }) : _service = service,
+       _dashboardService = dashboardService,
+       _authCubit = authCubit ?? getIt<AuthCubit>(),
+       super(const JourneyState());
 
   final ProductJourneyService _service;
   final DashboardService _dashboardService;
@@ -45,7 +45,6 @@ class JourneyCubit extends Cubit<JourneyState> {
     }
   }
 
-  
   Future<void> loadRecentEvents() async {
     if (!_authCubit.state.canReadDashboard) return;
     if (_recentEventsRequested) return;
@@ -58,60 +57,67 @@ class JourneyCubit extends Cubit<JourneyState> {
       final summary = await _dashboardService.getSummary(recentLimit: 10);
       final events = summary.recentEvents;
       if (isClosed) return;
-      
+
       if (state.isLoaded || state.isLoading) {
         emit(state.copyWith(recentEventsLoading: false));
         return;
       }
-      emit(state.copyWith(
-        recentEvents: events.take(10).toList(growable: false),
-        recentEventsLoading: false,
-      ));
+      emit(
+        state.copyWith(
+          recentEvents: events.take(10).toList(growable: false),
+          recentEventsLoading: false,
+        ),
+      );
     } catch (e, stackTrace) {
       debugPrint('[JourneyCubit] loadRecentEvents failed: $e\n$stackTrace');
       if (isClosed) return;
-      emit(state.copyWith(
-        recentEvents: const [],
-        recentEventsLoading: false,
-      ));
+      emit(state.copyWith(recentEvents: const [], recentEventsLoading: false));
     }
   }
 
   Future<void> search(String identifier) async {
     if (identifier.trim().isEmpty) return;
-    emit(state.copyWith(
-      status: JourneyStatus.loading,
-      journey: null,
-      selectedStep: null,
-      errorMessage: null,
-      searchResults: const [],
-      eventFilter: JourneyEventFilter.all,
-    ));
+    emit(
+      state.copyWith(
+        status: JourneyStatus.loading,
+        journey: null,
+        selectedStep: null,
+        errorMessage: null,
+        searchResults: const [],
+        eventFilter: JourneyEventFilter.all,
+      ),
+    );
     try {
       final journey = await _getJourneyCached(identifier);
       if (isClosed) return;
       if (journey == null || journey.steps.isEmpty) {
-        emit(state.copyWith(
-          status: JourneyStatus.error,
-          journey: null,
-          errorMessage:
-              'No journey data found for "$identifier". Try a full SGTIN, SSCC, or EPC URI.',
-        ));
+        emit(
+          state.copyWith(
+            status: JourneyStatus.error,
+            journey: null,
+            errorMessage:
+                'No journey data found for "$identifier". Try a full SGTIN, SSCC, or EPC URI.',
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          status: JourneyStatus.loaded,
-          journey: journey,
-          errorMessage: null,
-        ));
+        emit(
+          state.copyWith(
+            status: JourneyStatus.loaded,
+            journey: journey,
+            errorMessage: null,
+          ),
+        );
       }
     } catch (e, stackTrace) {
       debugPrint('[JourneyCubit] search failed: $e\n$stackTrace');
       if (isClosed) return;
-      emit(state.copyWith(
-        status: JourneyStatus.error,
-        journey: null,
-        errorMessage: 'Failed to load journey. Check your connection.',
-      ));
+      emit(
+        state.copyWith(
+          status: JourneyStatus.error,
+          journey: null,
+          errorMessage: 'Failed to load journey. Check your connection.',
+        ),
+      );
     }
   }
 

@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
+import 'package:traqtrace_app/core/animation/traq_fade_scale_transition.dart';
 import 'package:traqtrace_app/core/widgets/route_aware_selection_area.dart';
+import 'package:traqtrace_app/core/widgets/router_transitions/traq_fade_through_transition.dart';
+import 'package:traqtrace_app/core/widgets/router_transitions/traq_modal_transition.dart';
+import 'package:traqtrace_app/core/widgets/router_transitions/traq_shared_axis_horizontal_transition.dart';
+import 'package:traqtrace_app/core/widgets/router_transitions/transition_pointer_guard.dart';
 
 /// Navigation intent for page transitions — not route-specific animation code.
 enum TraqNavigationTransitionType {
@@ -26,21 +31,27 @@ abstract final class TraqRouterTransitions {
   static Page<T> page<T extends Object?>({
     required LocalKey key,
     required Widget child,
-    TraqNavigationTransitionType type = TraqNavigationTransitionType.fadeThrough,
+    TraqNavigationTransitionType type =
+        TraqNavigationTransitionType.fadeThrough,
     bool animate = true,
   }) {
     return switch (type) {
       TraqNavigationTransitionType.fadeThrough => fadeThroughPage(
-          key: key,
-          child: child,
-          animate: animate,
-        ),
+        key: key,
+        child: child,
+        animate: animate,
+      ),
       TraqNavigationTransitionType.sharedAxisHorizontal =>
         sharedAxisHorizontalPage(key: key, child: child, animate: animate),
-      TraqNavigationTransitionType.auth =>
-        authShellPage(key: key, child: child),
-      TraqNavigationTransitionType.modal =>
-        modalPage(key: key, child: child, animate: animate),
+      TraqNavigationTransitionType.auth => authShellPage(
+        key: key,
+        child: child,
+      ),
+      TraqNavigationTransitionType.modal => modalPage(
+        key: key,
+        child: child,
+        animate: animate,
+      ),
     };
   }
 
@@ -54,7 +65,12 @@ abstract final class TraqRouterTransitions {
       key: key,
       child: child,
       animate: animate,
-      builder: _fadeThroughBuilder,
+      builder: (context, animation, secondaryAnimation, child) =>
+          TraqFadeThroughTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
+          ),
     );
   }
 
@@ -68,7 +84,12 @@ abstract final class TraqRouterTransitions {
       key: key,
       child: child,
       animate: animate,
-      builder: _sharedAxisHorizontalBuilder,
+      builder: (context, animation, secondaryAnimation, child) =>
+          TraqSharedAxisHorizontalTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
+          ),
     );
   }
 
@@ -85,8 +106,13 @@ abstract final class TraqRouterTransitions {
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final content = TraqAnimationManager.reduceMotion(context)
             ? child
-            : TraqAnimationManager.fadeScaleTransition(child, animation);
-        return _TransitionPointerGuard(animation: animation, child: content);
+            : TraqFadeScaleTransition(
+                animation: animation,
+                beginScale: TraqAnimationConstants.formInitialScale,
+                alignment: Alignment.center,
+                child: child,
+              );
+        return TransitionPointerGuard(animation: animation, child: content);
       },
     );
   }
@@ -101,7 +127,12 @@ abstract final class TraqRouterTransitions {
       key: key,
       child: child,
       animate: animate,
-      builder: _modalBuilder,
+      builder: (context, animation, secondaryAnimation, child) =>
+          TraqModalTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
+          ),
     );
   }
 
@@ -114,12 +145,15 @@ abstract final class TraqRouterTransitions {
       Animation<double> animation,
       Animation<double> secondaryAnimation,
       Widget child,
-    ) builder,
+    )
+    builder,
   }) {
-    final duration =
-        animate ? TraqAnimationConstants.navForward : Duration.zero;
-    final reverseDuration =
-        animate ? TraqAnimationConstants.navReverse : Duration.zero;
+    final duration = animate
+        ? TraqAnimationConstants.navForward
+        : Duration.zero;
+    final reverseDuration = animate
+        ? TraqAnimationConstants.navReverse
+        : Duration.zero;
 
     return CustomTransitionPage<T>(
       key: key,
@@ -133,166 +167,7 @@ abstract final class TraqRouterTransitions {
         } else {
           content = builder(context, animation, secondaryAnimation, child);
         }
-        return _TransitionPointerGuard(animation: animation, child: content);
-      },
-    );
-  }
-
-  static CurvedAnimation _primary(Animation<double> animation) {
-    return CurvedAnimation(
-      parent: animation,
-      curve: TraqAnimationConstants.navCurve,
-      reverseCurve: TraqAnimationConstants.navReverseCurve,
-    );
-  }
-
-  /// Peer: slide in from the trailing edge (right-to-left in LTR) while fading
-  /// in; outgoing eases out toward the leading edge.
-  static Widget _fadeThroughBuilder(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    final incoming = _primary(animation);
-    final outgoing = CurvedAnimation(
-      parent: secondaryAnimation,
-      curve: TraqAnimationConstants.navCurve,
-    );
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-    // Enter from the trailing edge and settle at zero => right-to-left motion.
-    final enterDx = isRtl
-        ? -TraqAnimationConstants.navSharedAxisDx
-        : TraqAnimationConstants.navSharedAxisDx;
-    final exitDx = isRtl
-        ? TraqAnimationConstants.navSharedAxisOutgoingDx
-        : -TraqAnimationConstants.navSharedAxisOutgoingDx;
-
-    return FadeTransition(
-      opacity: Tween<double>(begin: 1, end: 0.4).animate(outgoing),
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: Offset.zero,
-          end: Offset(exitDx, 0),
-        ).animate(outgoing),
-        child: FadeTransition(
-          opacity: incoming,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(enterDx, 0),
-              end: Offset.zero,
-            ).animate(incoming),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Detail push: enter from trailing edge; exit opposite — slide only + fade.
-  static Widget _sharedAxisHorizontalBuilder(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    final primary = _primary(animation);
-    final secondary = CurvedAnimation(
-      parent: secondaryAnimation,
-      curve: TraqAnimationConstants.navCurve,
-      reverseCurve: TraqAnimationConstants.navReverseCurve,
-    );
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final enterDx = isRtl
-        ? -TraqAnimationConstants.navSharedAxisDx
-        : TraqAnimationConstants.navSharedAxisDx;
-    final exitDx = isRtl
-        ? TraqAnimationConstants.navSharedAxisOutgoingDx
-        : -TraqAnimationConstants.navSharedAxisOutgoingDx;
-
-    // Fade only the first portion so the slide reads cleanly.
-    final fadeIn = CurvedAnimation(
-      parent: animation,
-      curve: const Interval(0.0, 0.55, curve: TraqAnimationConstants.navCurve),
-      reverseCurve: const Interval(
-        0.45,
-        1.0,
-        curve: TraqAnimationConstants.navReverseCurve,
-      ),
-    );
-
-    return FadeTransition(
-      opacity: Tween<double>(begin: 1, end: 0.65).animate(secondary),
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: Offset.zero,
-          end: Offset(exitDx, 0),
-        ).animate(secondary),
-        child: FadeTransition(
-          opacity: fadeIn,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(enterDx, 0),
-              end: Offset.zero,
-            ).animate(primary),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Modal: slide up from below + fade.
-  static Widget _modalBuilder(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    final primary = _primary(animation);
-    final secondary = CurvedAnimation(
-      parent: secondaryAnimation,
-      curve: TraqAnimationConstants.navCurve,
-    );
-
-    return FadeTransition(
-      opacity: Tween<double>(begin: 1, end: 0.75).animate(secondary),
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: Offset.zero,
-          end: const Offset(0, -0.02),
-        ).animate(secondary),
-        child: FadeTransition(
-          opacity: primary,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, TraqAnimationConstants.navModalDy),
-              end: Offset.zero,
-            ).animate(primary),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Blocks pointer input while a route transition is in flight.
-class _TransitionPointerGuard extends StatelessWidget {
-  const _TransitionPointerGuard({required this.animation, required this.child});
-
-  final Animation<double> animation;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      child: child,
-      builder: (context, child) {
-        final animating = animation.status == AnimationStatus.forward ||
-            animation.status == AnimationStatus.reverse;
-        return IgnorePointer(ignoring: animating, child: child!);
+        return TransitionPointerGuard(animation: animation, child: content);
       },
     );
   }

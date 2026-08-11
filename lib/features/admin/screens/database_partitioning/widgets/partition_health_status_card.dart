@@ -57,9 +57,7 @@ class PartitionHealthStatusCard extends StatelessWidget {
             if (healthStatus['issues'] != null &&
                 (healthStatus['issues'] as List).isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(
-                '${(healthStatus['issues'] as List).length} issue(s) found',
-              ),
+              Text('${(healthStatus['issues'] as List).length} issue(s) found'),
             ],
           ],
         ),

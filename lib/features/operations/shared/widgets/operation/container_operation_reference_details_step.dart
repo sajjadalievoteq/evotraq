@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/reference_field_prefix_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
@@ -15,8 +16,6 @@ import 'package:traqtrace_app/features/operations/shared/widgets/operation/opera
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_auto_reference_notice.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_event_time_tile.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_gln_selector.dart';
-
-
 
 class ContainerOperationReferenceDetailsStep extends StatelessWidget {
   const ContainerOperationReferenceDetailsStep({
@@ -67,15 +66,6 @@ class ContainerOperationReferenceDetailsStep extends StatelessWidget {
   final bool showProductionSection;
 
   String get _operationLabel => isUnpacking ? 'Unpacking' : 'Packing';
-
-  Widget _prefixIcon(String asset, {required bool pad}) {
-    final icon = TraqIcon(asset);
-    if (!pad) return icon;
-    return Padding(
-      padding: const EdgeInsets.only(left: 5),
-      child: icon,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,8 +136,8 @@ class ContainerOperationReferenceDetailsStep extends StatelessWidget {
                     'Identify the parent logistic unit — SSCC (carton/pallet) '
                     'or SGTIN (serialized product acting as container).',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   if (parentContainerId != null) ...[
@@ -188,8 +178,8 @@ class ContainerOperationReferenceDetailsStep extends StatelessWidget {
                       hintText: 'e.g., WO-12345',
                       helperText: 'GS1 bizTransactionList: Work Order (btt:wo)',
                       border: const OutlineInputBorder(),
-                      prefixIcon: _prefixIcon(
-                        AppAssets.iconList,
+                      prefixIcon: ReferenceFieldPrefixIcon(
+                        asset: AppAssets.iconList,
                         pad: padWorkOrderBatchIcons,
                       ),
                     ),
@@ -203,8 +193,8 @@ class ContainerOperationReferenceDetailsStep extends StatelessWidget {
                       helperText:
                           'GS1 ILMD: cbvmda:lotNumber — required for FMD / DSCSA',
                       border: const OutlineInputBorder(),
-                      prefixIcon: _prefixIcon(
-                        AppAssets.iconPin,
+                      prefixIcon: ReferenceFieldPrefixIcon(
+                        asset: AppAssets.iconPin,
                         pad: padWorkOrderBatchIcons,
                       ),
                     ),

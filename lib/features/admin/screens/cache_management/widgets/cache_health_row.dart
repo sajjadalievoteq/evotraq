@@ -4,12 +4,7 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class CacheHealthRow extends StatelessWidget {
-  const CacheHealthRow(
-    this.label,
-    this.value,
-    this.isHealthy, {
-    super.key,
-  });
+  const CacheHealthRow(this.label, this.value, this.isHealthy, {super.key});
 
   final String label;
   final String value;
@@ -22,10 +17,7 @@ class CacheHealthRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text(label, style: Theme.of(context).textTheme.bodyMedium),
           Row(
             children: [
               TraqIcon(
@@ -39,11 +31,11 @@ class CacheHealthRow extends StatelessWidget {
               Text(
                 value,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: isHealthy
-                          ? AppColorMapper.successColor(context)
-                          : AppColorMapper.errorColor(context),
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: isHealthy
+                      ? AppColorMapper.successColor(context)
+                      : AppColorMapper.errorColor(context),
+                ),
               ),
             ],
           ),

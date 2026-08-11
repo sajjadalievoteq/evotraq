@@ -31,8 +31,9 @@ abstract final class JourneyAnalytics {
   static int shipmentCount(ProductJourney journey) =>
       journey.steps.where((s) => JourneyEventFilter.shipping.matches(s)).length;
 
-  static int aggregationCount(ProductJourney journey) =>
-      journey.steps.where((s) => JourneyEventFilter.aggregation.matches(s)).length;
+  static int aggregationCount(ProductJourney journey) => journey.steps
+      .where((s) => JourneyEventFilter.aggregation.matches(s))
+      .length;
 
   static int businessPartnerCount(ProductJourney journey) => journey.steps
       .map((s) => s.locationGLN ?? s.locationName)

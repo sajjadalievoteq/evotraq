@@ -12,10 +12,15 @@ import 'package:traqtrace_app/data/services/postman_collection_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/postman_collection_action_card.dart';
+
 class PostmanCollectionDialog extends StatefulWidget {
   const PostmanCollectionDialog({Key? key}) : super(key: key);
 
-  static Future<void> show(BuildContext context, {required bool isAdmin}) async {
+  static Future<void> show(
+    BuildContext context, {
+    required bool isAdmin,
+  }) async {
     Navigator.of(context).pop();
 
     if (!isAdmin) {
@@ -154,7 +159,7 @@ class _PostmanCollectionDialogState extends State<PostmanCollectionDialog> {
             ),
             const SizedBox(height: 20),
 
-            _ActionCard(
+            PostmanCollectionActionCard(
               iconAsset: AppAssets.iconDownload,
               title: 'Download Collection',
               subtitle: 'Get the latest Postman collection zip',
@@ -165,7 +170,7 @@ class _PostmanCollectionDialogState extends State<PostmanCollectionDialog> {
 
             const SizedBox(height: 12),
 
-            _ActionCard(
+            PostmanCollectionActionCard(
               iconAsset: AppAssets.iconUpload,
               title: 'Upload New Collection',
               subtitle: 'Replace the hosted file (.zip or .json)',
@@ -187,84 +192,3 @@ class _PostmanCollectionDialogState extends State<PostmanCollectionDialog> {
 }
 
 enum _Status { idle, loading }
-
-class _ActionCard extends StatelessWidget {
-  final String iconAsset;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final bool isLoading;
-  final VoidCallback? onTap;
-
-  const _ActionCard({
-    required this.iconAsset,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.isLoading,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: color.withOpacity(0.08),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: isLoading
-                    ? SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: color,
-                        ),
-                      )
-                    : TraqIcon(iconAsset, color: color, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: onTap == null
-                            ? Colors.grey
-                            : Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey.shade600,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              TraqIcon(AppAssets.iconChevronR,
-                color: onTap == null ? Colors.grey.shade400 : color,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

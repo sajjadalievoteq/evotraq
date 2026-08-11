@@ -52,7 +52,12 @@ class JourneyMobileLayout extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(context.padding.top, context.padding.top, context.padding.top, 8),
+          padding: EdgeInsets.fromLTRB(
+            context.padding.top,
+            context.padding.top,
+            context.padding.top,
+            8,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -109,13 +114,12 @@ class JourneyMobileLayout extends StatelessWidget {
                   snapSizes: const [0.28, 0.55, 0.90],
                   builder: (context, scrollController) =>
                       JourneyMobileBottomSheet(
-                    scrollController: scrollController,
-                    child: const JourneySidebarSkeleton(),
-                  ),
+                        scrollController: scrollController,
+                        child: const JourneySidebarSkeleton(),
+                      ),
                 ),
               if (loaded)
                 DraggableScrollableSheet(
-
                   initialChildSize: 0.075,
                   minChildSize: 0.075,
                   maxChildSize: 1,
@@ -123,9 +127,9 @@ class JourneyMobileLayout extends StatelessWidget {
                   snapSizes: const [0.28, 0.55, 0.90],
                   builder: (context, scrollController) =>
                       JourneyMobileBottomSheet(
-                    scrollController: scrollController,
-                    child: JourneySidebarContent(journey: state.journey!),
-                  ),
+                        scrollController: scrollController,
+                        child: JourneySidebarContent(journey: state.journey!),
+                      ),
                 ),
               if (!state.isLoaded && !state.isLoading)
                 Positioned.fill(
@@ -140,12 +144,12 @@ class JourneyMobileLayout extends StatelessWidget {
                               onRetry: onRetry,
                             )
                           : state.searchResults.isNotEmpty
-                              ? const SizedBox.shrink()
-                              : JourneyRecentEventsSection(
-                                  events: state.recentEvents,
-                                  isLoading: state.recentEventsLoading,
-                                  onEventTap: onRecentEventTap,
-                                ),
+                          ? const SizedBox.shrink()
+                          : JourneyRecentEventsSection(
+                              events: state.recentEvents,
+                              isLoading: state.recentEventsLoading,
+                              onEventTap: onRecentEventTap,
+                            ),
                     ),
                   ),
                 ),

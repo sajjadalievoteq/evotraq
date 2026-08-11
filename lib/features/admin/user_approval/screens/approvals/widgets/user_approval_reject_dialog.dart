@@ -25,9 +25,7 @@ class UserApprovalRejectDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Are you sure you want to reject $displayName\'s registration?',
-          ),
+          Text('Are you sure you want to reject $displayName\'s registration?'),
           const SizedBox(height: 16),
           const Text(UserApprovalConstants.rejectDialogActionSummary),
           const SizedBox(height: 8),

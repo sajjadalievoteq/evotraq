@@ -26,18 +26,16 @@ class UserApprovalsHeaderSection extends StatelessWidget {
       children: [
         Text(
           UserApprovalConstants.approvalsTitle,
-          style: Theme.of(context)
-              .textTheme
-              .headlineSmall
-              ?.copyWith(fontWeight: FontWeight.w700),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 8),
         Text(
           'You have $pendingCount pending user registrations that require your approval.',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: Colors.grey[700]),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
         ),
       ],
     );

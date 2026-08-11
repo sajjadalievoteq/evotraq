@@ -20,8 +20,12 @@ class UserManagementUserDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = '${user.firstName} ${user.lastName}'.trim();
-    final spacingSm = density == UserManagementUserDetailsDensity.compact ? 2.0 : 4.0;
-    final spacingMd = density == UserManagementUserDetailsDensity.compact ? 8.0 : 12.0;
+    final spacingSm = density == UserManagementUserDetailsDensity.compact
+        ? 2.0
+        : 4.0;
+    final spacingMd = density == UserManagementUserDetailsDensity.compact
+        ? 8.0
+        : 12.0;
     final colors = context.colors;
 
     final Color roleColor = switch (user.role) {
@@ -32,8 +36,9 @@ class UserManagementUserDetails extends StatelessWidget {
       _ => colors.success,
     };
 
-    final Color statusColor =
-        user.enabled ? colors.success : colors.textSecondary;
+    final Color statusColor = user.enabled
+        ? colors.success
+        : colors.textSecondary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,26 +47,21 @@ class UserManagementUserDetails extends StatelessWidget {
         if (density == UserManagementUserDetailsDensity.comfy) ...[
           Text(
             name.isEmpty ? user.username : name,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           SizedBox(height: spacingSm),
-          Text(
-            user.email,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis),
           SizedBox(height: spacingSm),
           Text(
             'Username: ${user.username}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colors.primary,
-                ),
+              fontWeight: FontWeight.w700,
+              color: colors.primary,
+            ),
           ),
           SizedBox(height: spacingMd),
         ] else ...[

@@ -29,27 +29,25 @@ class UnpackingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.unpackingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.unpackingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.parentContainerId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.parentContainerId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.unpackingLocationGLN
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.unpackingLocationGLN?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.workOrderNumber
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.workOrderNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||
           (operation.batchNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.unpackingOperationId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.unpackingOperationId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false);
     }).toList();
 
@@ -85,19 +83,17 @@ class UnpackingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.operationReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.operationReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
-          (operation.parentContainerId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.parentContainerId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.primaryGln?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.workOrderNumber
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.workOrderNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||
           (operation.batchNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||

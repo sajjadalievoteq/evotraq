@@ -5,6 +5,8 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_structure_chips.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_identification_chip.dart';
+import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/core_groups/gln_identification_shimmer_chip.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
@@ -142,45 +144,6 @@ class _GlnIdentificationStructureCoreGroupState
     });
   }
 
-  Widget _chip({
-    required ThemeData theme,
-    required String label,
-    required String value,
-    Color? backgroundColor,
-    Color? foregroundColor,
-  }) {
-    final v = value.trim();
-    final text = v.isEmpty ? '—' : v;
-    return Chip(
-      backgroundColor: backgroundColor,
-      label: Text(
-        '$label $text',
-        style: theme.textTheme.labelSmall?.copyWith(color: foregroundColor),
-      ),
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-  }
-
-  Widget _shimmerChip({required ThemeData theme}) {
-    final isDark = theme.brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
-
-    return Chip(
-      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-      label: Container(
-        height: 14,
-        width: 120,
-        decoration: BoxDecoration(
-          color: baseColor,
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final fields = Column(
@@ -219,9 +182,9 @@ class _GlnIdentificationStructureCoreGroupState
                 runSpacing: 4,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  _shimmerChip(theme: t),
-                  _shimmerChip(theme: t),
-                  _shimmerChip(theme: t),
+                  const GlnIdentificationShimmerChip(),
+                  const GlnIdentificationShimmerChip(),
+                  const GlnIdentificationShimmerChip(),
                 ],
               );
             }
@@ -229,8 +192,7 @@ class _GlnIdentificationStructureCoreGroupState
             final chips = <Widget>[];
             if (_companyPrefixLength.text.trim().isNotEmpty) {
               chips.add(
-                _chip(
-                  theme: t,
+                Gs1IdentificationChip(
                   label: GlnUiConstants.labelGcpLength,
                   value: _companyPrefixLength.text,
                   backgroundColor: t.colorScheme.surfaceContainerHighest,
@@ -240,8 +202,7 @@ class _GlnIdentificationStructureCoreGroupState
             }
             if (widget.gs1CompanyPrefixController.text.trim().isNotEmpty) {
               chips.add(
-                _chip(
-                  theme: t,
+                Gs1IdentificationChip(
                   label: GlnUiConstants.labelGcp,
                   value: widget.gs1CompanyPrefixController.text,
                   backgroundColor: t.colorScheme.surfaceContainerHighest,
@@ -253,8 +214,7 @@ class _GlnIdentificationStructureCoreGroupState
                 .trim()
                 .isNotEmpty) {
               chips.add(
-                _chip(
-                  theme: t,
+                Gs1IdentificationChip(
                   label: GlnUiConstants.labelLocationReference,
                   value: widget.locationReferenceDigitsController.text,
                   backgroundColor: t.colorScheme.surfaceContainerHighest,

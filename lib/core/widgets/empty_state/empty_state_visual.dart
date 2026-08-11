@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/empty_state_icon_aura.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/empty_state_action_row.dart';
 
+export 'empty_state_hover_action.dart';
 
 class EmptyStateVisualScaffold extends StatefulWidget {
   const EmptyStateVisualScaffold({
@@ -83,7 +85,7 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _IconAura(
+              EmptyStateIconAura(
                 iconAsset: widget.iconAsset,
                 size: metrics.iconSize,
                 breath: reduceMotion ? null : _breathController,
@@ -92,7 +94,9 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
               Text(
                 widget.title,
                 textAlign: TextAlign.center,
-                style: metrics.titleStyle(theme).copyWith(
+                style: metrics
+                    .titleStyle(theme)
+                    .copyWith(
                       color: scheme.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
@@ -111,7 +115,7 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
               ],
               if (widget.actions.isNotEmpty) ...[
                 SizedBox(height: metrics.gapBeforeActions),
-                _ActionRow(
+                EmptyStateActionRow(
                   actions: widget.actions,
                   fullWidth: layout.isCompact,
                 ),
@@ -131,8 +135,9 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
     // panel bodies). Works whether height is bounded or unbounded.
     final centered = LayoutBuilder(
       builder: (context, constraints) {
-        final minHeight =
-            constraints.hasBoundedHeight ? constraints.maxHeight : 0.0;
+        final minHeight = constraints.hasBoundedHeight
+            ? constraints.maxHeight
+            : 0.0;
         return SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: minHeight),
@@ -153,10 +158,7 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
           opacity: t,
           child: Transform.translate(
             offset: Offset(0, (1 - t) * 10),
-            child: Transform.scale(
-              scale: 0.97 + (0.03 * t),
-              child: child,
-            ),
+            child: Transform.scale(scale: 0.97 + (0.03 * t), child: child),
           ),
         );
       },
@@ -170,8 +172,8 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
   ) {
     final effective = density == EmptyStateDensity.auto
         ? (layout.isCompact
-            ? EmptyStateDensity.compact
-            : EmptyStateDensity.comfortable)
+              ? EmptyStateDensity.compact
+              : EmptyStateDensity.comfortable)
         : density;
 
     if (effective == EmptyStateDensity.compact || layout.isCompact) {
@@ -227,126 +229,5 @@ class _EmptyMetrics {
   final double gapBeforeActions;
   final TextStyle Function(ThemeData theme) titleStyle;
 }
-
-class _IconAura extends StatelessWidget {
-  const _IconAura({
-    required this.iconAsset,
-    required this.size,
-    this.breath,
-  });
-
-  final String iconAsset;
-  final double size;
-  final Animation<double>? breath;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final ring = size * 1.7;
-
-    Widget aura = Container(
-      width: ring,
-      height: ring,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [
-            scheme.primary.withValues(alpha: 0.14),
-            scheme.surfaceContainerHighest.withValues(alpha: 0.55),
-            scheme.surface.withValues(alpha: 0),
-          ],
-          stops: const [0.0, 0.55, 1.0],
-        ),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.45),
-        ),
-      ),
-      alignment: Alignment.center,
-      child: TraqIcon(
-        iconAsset,
-        size: size,
-        color: scheme.primary.withValues(alpha: 0.85),
-      ),
-    );
-
-    if (breath == null) return aura;
-
-    return AnimatedBuilder(
-      animation: breath!,
-      builder: (context, child) {
-        final t = breath!.value;
-        final scale = 1.0 + (t * 0.03);
-        final opacity = 0.92 + (t * 0.08);
-        return Opacity(
-          opacity: opacity,
-          child: Transform.scale(scale: scale, child: child),
-        );
-      },
-      child: aura,
-    );
-  }
-}
-
-class _ActionRow extends StatelessWidget {
-  const _ActionRow({required this.actions, required this.fullWidth});
-
-  final List<Widget> actions;
-  final bool fullWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    if (actions.isEmpty) return const SizedBox.shrink();
-    if (fullWidth) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < actions.length; i++) ...[
-            if (i > 0) const SizedBox(height: 10),
-            actions[i],
-          ],
-        ],
-      );
-    }
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 12,
-      runSpacing: 10,
-      children: actions,
-    );
-  }
-}
-
-
-class EmptyStateHoverAction extends StatefulWidget {
-  const EmptyStateHoverAction({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  State<EmptyStateHoverAction> createState() => _EmptyStateHoverActionState();
-}
-
-class _EmptyStateHoverActionState extends State<EmptyStateHoverAction> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedScale(
-        scale: _hovered ? 1.02 : 1.0,
-        duration: const Duration(milliseconds: 140),
-        curve: Curves.easeOut,
-        child: AnimatedOpacity(
-          opacity: _hovered ? 1 : 0.98,
-          duration: const Duration(milliseconds: 140),
-          child: widget.child,
-        ),
-      ),
-    );
-  }
-}
-
 
 const kDefaultEmptyStateIcon = NavIcons.packaging;

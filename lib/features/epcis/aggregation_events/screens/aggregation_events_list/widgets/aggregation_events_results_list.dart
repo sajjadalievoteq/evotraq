@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/constrained_section_content.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -32,16 +33,6 @@ class AggregationEventsResultsList extends StatelessWidget {
   final ValueChanged<AggregationEvent> onTapEvent;
   final VoidCallback onLoadMore;
 
-  Widget _constrainedCenter(Widget child) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: Constants.sectionMaxWidth),
-        child: child,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AggregationEventsCubit, AggregationEventsState>(
@@ -64,8 +55,8 @@ class AggregationEventsResultsList extends StatelessWidget {
 
         if (state.aggregationEvents.isEmpty) {
           final filtered = state.hasActiveFilters;
-          return _constrainedCenter(
-            AppEmptyState(
+          return ConstrainedSectionContent(
+            child: AppEmptyState(
               iconAsset: NavIcons.aggregationEvents,
               title: AggregationEventUiConstants.emptyListTitle,
               subtitle: AggregationEventUiConstants.emptyListSubtitle,
@@ -74,8 +65,9 @@ class AggregationEventsResultsList extends StatelessWidget {
               hasItems: filtered,
               hasActiveFilters: filtered,
               onClearFilters: onClearFilters,
-              primaryActionLabel:
-                  filtered ? null : AggregationEventUiConstants.emptyAddAction,
+              primaryActionLabel: filtered
+                  ? null
+                  : AggregationEventUiConstants.emptyAddAction,
               primaryActionIconAsset: filtered ? null : AppAssets.iconPlus,
               onPrimaryAction: filtered ? null : onCreate,
             ),
@@ -112,7 +104,8 @@ class AggregationEventsResultsList extends StatelessWidget {
                   left: context.padding.left,
                   right: context.padding.left,
                 ),
-                itemCount: state.aggregationEvents.length +
+                itemCount:
+                    state.aggregationEvents.length +
                     (state.hasMoreData && isFetchingMore ? 1 : 0) +
                     1,
                 separatorBuilder: (_, __) =>
@@ -120,10 +113,11 @@ class AggregationEventsResultsList extends StatelessWidget {
                 itemBuilder: (context, index) {
                   if (index < state.aggregationEvents.length) {
                     final event = state.aggregationEvents[index];
-                    final isSelected = event.id == selectedEventId ||
+                    final isSelected =
+                        event.id == selectedEventId ||
                         event.eventId == selectedEventId;
-                    return _constrainedCenter(
-                      RepaintBoundary(
+                    return ConstrainedSectionContent(
+                      child: RepaintBoundary(
                         child: AggregationEventListItemCard(
                           event: event,
                           isSelected: isSelected,
@@ -134,13 +128,16 @@ class AggregationEventsResultsList extends StatelessWidget {
                   }
 
                   final loaderIndex = state.aggregationEvents.length;
-                  final spacerIndex = state.aggregationEvents.length +
+                  final spacerIndex =
+                      state.aggregationEvents.length +
                       (state.hasMoreData && isFetchingMore ? 1 : 0);
 
                   if (index == loaderIndex &&
                       state.hasMoreData &&
                       isFetchingMore) {
-                    return _constrainedCenter(const Gs1ListLoadMoreIndicator());
+                    return ConstrainedSectionContent(
+                      child: const Gs1ListLoadMoreIndicator(),
+                    );
                   }
 
                   if (index == spacerIndex) {

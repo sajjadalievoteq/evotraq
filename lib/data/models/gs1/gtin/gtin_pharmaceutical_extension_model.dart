@@ -1,5 +1,10 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_types.dart';
+export 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_types.dart';
+
+part 'gtin_pharmaceutical_copy_with.dart';
+
 double? _jsonDouble(dynamic v) {
   if (v == null) return null;
   if (v is num) return v.toDouble();
@@ -14,176 +19,6 @@ int? _jsonInt(dynamic v) {
   final s = v.toString().trim();
   if (s.isEmpty) return null;
   return int.tryParse(s);
-}
-
-enum DeaSchedule {
-  scheduleI,
-  scheduleII,
-  scheduleIII,
-  scheduleIV,
-  scheduleV,
-  none,
-}
-
-extension DeaScheduleExtension on DeaSchedule {
-  String get value {
-    switch (this) {
-      case DeaSchedule.scheduleI:
-        return 'I';
-      case DeaSchedule.scheduleII:
-        return 'II';
-      case DeaSchedule.scheduleIII:
-        return 'III';
-      case DeaSchedule.scheduleIV:
-        return 'IV';
-      case DeaSchedule.scheduleV:
-        return 'V';
-      case DeaSchedule.none:
-        return '';
-    }
-  }
-
-  String get displayName {
-    switch (this) {
-      case DeaSchedule.scheduleI:
-        return 'Schedule I - High abuse potential, no accepted medical use';
-      case DeaSchedule.scheduleII:
-        return 'Schedule II - High abuse potential, severe dependence';
-      case DeaSchedule.scheduleIII:
-        return 'Schedule III - Moderate abuse potential';
-      case DeaSchedule.scheduleIV:
-        return 'Schedule IV - Low abuse potential';
-      case DeaSchedule.scheduleV:
-        return 'Schedule V - Lowest abuse potential';
-      case DeaSchedule.none:
-        return 'Not a Controlled Substance';
-    }
-  }
-
-  static DeaSchedule fromString(String? value) {
-    if (value == null || value.isEmpty) return DeaSchedule.none;
-    switch (value.toUpperCase()) {
-      case 'I':
-        return DeaSchedule.scheduleI;
-      case 'II':
-        return DeaSchedule.scheduleII;
-      case 'III':
-        return DeaSchedule.scheduleIII;
-      case 'IV':
-        return DeaSchedule.scheduleIV;
-      case 'V':
-        return DeaSchedule.scheduleV;
-      default:
-        return DeaSchedule.none;
-    }
-  }
-}
-
-enum PregnancyCategory {
-  categoryA,
-  categoryB,
-  categoryC,
-  categoryD,
-  categoryX,
-  notClassified,
-}
-
-extension PregnancyCategoryExtension on PregnancyCategory {
-  String get value {
-    switch (this) {
-      case PregnancyCategory.categoryA:
-        return 'A';
-      case PregnancyCategory.categoryB:
-        return 'B';
-      case PregnancyCategory.categoryC:
-        return 'C';
-      case PregnancyCategory.categoryD:
-        return 'D';
-      case PregnancyCategory.categoryX:
-        return 'X';
-      case PregnancyCategory.notClassified:
-        return '';
-    }
-  }
-
-  String get displayName {
-    switch (this) {
-      case PregnancyCategory.categoryA:
-        return 'Category A - Adequate studies show no risk';
-      case PregnancyCategory.categoryB:
-        return 'Category B - No risk in animal studies';
-      case PregnancyCategory.categoryC:
-        return 'Category C - Risk cannot be ruled out';
-      case PregnancyCategory.categoryD:
-        return 'Category D - Positive evidence of risk';
-      case PregnancyCategory.categoryX:
-        return 'Category X - Contraindicated in pregnancy';
-      case PregnancyCategory.notClassified:
-        return 'Not Classified';
-    }
-  }
-
-  static PregnancyCategory fromString(String? value) {
-    if (value == null || value.isEmpty) return PregnancyCategory.notClassified;
-    switch (value.toUpperCase()) {
-      case 'A':
-        return PregnancyCategory.categoryA;
-      case 'B':
-        return PregnancyCategory.categoryB;
-      case 'C':
-        return PregnancyCategory.categoryC;
-      case 'D':
-        return PregnancyCategory.categoryD;
-      case 'X':
-        return PregnancyCategory.categoryX;
-      default:
-        return PregnancyCategory.notClassified;
-    }
-  }
-}
-
-class ActiveIngredient extends Equatable {
-  final String name;
-  final double? amount;
-  final String? unit;
-  final String substanceRoleCode;
-  final int sequence;
-  final String? basisOfStrength;
-
-  ActiveIngredient({
-    required this.name,
-    this.amount,
-    this.unit,
-    this.substanceRoleCode = 'ACTIVE',
-    this.sequence = 0,
-    this.basisOfStrength,
-  });
-
-  factory ActiveIngredient.fromJson(Map<String, dynamic> json) {
-    return ActiveIngredient(
-      name: json['name'] ?? '',
-      amount: _jsonDouble(json['amount']),
-      unit: json['unit'] as String?,
-      substanceRoleCode: json['substanceRoleCode'] as String? ?? 'ACTIVE',
-      sequence: _jsonInt(json['sequence']) ?? 0,
-      basisOfStrength: json['basisOfStrength'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'amount': amount,
-      'unit': unit,
-      'substanceRoleCode': substanceRoleCode,
-      'sequence': sequence,
-      'basisOfStrength': basisOfStrength,
-    };
-  }
-
-  @override
-  List<Object?> get props =>
-      [name, amount, unit, substanceRoleCode, sequence, basisOfStrength];
 }
 
 class GTINPharmaceuticalExtension extends Equatable {
@@ -390,7 +225,8 @@ class GTINPharmaceuticalExtension extends Equatable {
           ? DateTime.tryParse(json['emaApprovalDate'].toString())
           : null,
       emaProcedureNumber: json['emaProcedureNumber'],
-      activeIngredients: (json['activeIngredients'] as List<dynamic>?)
+      activeIngredients:
+          (json['activeIngredients'] as List<dynamic>?)
               ?.map((e) => ActiveIngredient.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -399,8 +235,9 @@ class GTINPharmaceuticalExtension extends Equatable {
       blackBoxWarningText: json['blackBoxWarningText'],
       contraindications: json['contraindications'],
       drugInteractions: json['drugInteractions'],
-      pregnancyCategory:
-          PregnancyCategoryExtension.fromString(json['pregnancyCategory']),
+      pregnancyCategory: PregnancyCategoryExtension.fromString(
+        json['pregnancyCategory'],
+      ),
       regulatedProductName: json['regulatedProductName'] as String?,
       dosageFormTypeCode: json['dosageFormTypeCode'] as String?,
       routeOfAdministrationEdqmCode:
@@ -413,12 +250,14 @@ class GTINPharmaceuticalExtension extends Equatable {
           json['marketingAuthorizationNumber'] as String?,
       marketingAuthorizationValidFrom:
           json['marketingAuthorizationValidFrom'] != null
-              ? DateTime.tryParse(json['marketingAuthorizationValidFrom'].toString())
-              : null,
+          ? DateTime.tryParse(
+              json['marketingAuthorizationValidFrom'].toString(),
+            )
+          : null,
       marketingAuthorizationValidTo:
           json['marketingAuthorizationValidTo'] != null
-              ? DateTime.tryParse(json['marketingAuthorizationValidTo'].toString())
-              : null,
+          ? DateTime.tryParse(json['marketingAuthorizationValidTo'].toString())
+          : null,
       regulatoryStatus: json['regulatoryStatus'] as String?,
       additionalAtcCodes: _stringList(json['additionalAtcCodes']),
       nhmnGermanyPzn: json['nhmnGermanyPzn'] as String?,
@@ -495,8 +334,7 @@ class GTINPharmaceuticalExtension extends Equatable {
       'fdaApplicationNumber': fdaApplicationNumber,
       'emaApprovalDate': emaApprovalDate?.toIso8601String().split('T').first,
       'emaProcedureNumber': emaProcedureNumber,
-      'activeIngredients':
-          activeIngredients.map((e) => e.toJson()).toList(),
+      'activeIngredients': activeIngredients.map((e) => e.toJson()).toList(),
       'inactiveIngredients': inactiveIngredients,
       'blackBoxWarning': blackBoxWarning,
       'blackBoxWarningText': blackBoxWarningText,
@@ -511,10 +349,14 @@ class GTINPharmaceuticalExtension extends Equatable {
       'mahCountry': mahCountry,
       'licensedAgentGlns': licensedAgentGlns,
       'marketingAuthorizationNumber': marketingAuthorizationNumber,
-      'marketingAuthorizationValidFrom':
-          marketingAuthorizationValidFrom?.toIso8601String().split('T').first,
-      'marketingAuthorizationValidTo':
-          marketingAuthorizationValidTo?.toIso8601String().split('T').first,
+      'marketingAuthorizationValidFrom': marketingAuthorizationValidFrom
+          ?.toIso8601String()
+          .split('T')
+          .first,
+      'marketingAuthorizationValidTo': marketingAuthorizationValidTo
+          ?.toIso8601String()
+          .split('T')
+          .first,
       'regulatoryStatus': regulatoryStatus,
       'additionalAtcCodes': additionalAtcCodes,
       'nhmnGermanyPzn': nhmnGermanyPzn,
@@ -543,267 +385,79 @@ class GTINPharmaceuticalExtension extends Equatable {
     };
   }
 
-  GTINPharmaceuticalExtension copyWith({
-    int? id,
-    int? gtinId,
-    String? gtinCode,
-    String? ndcNumber,
-    String? dinNumber,
-    String? eanPharmaCode,
-    String? drugClass,
-    String? therapeuticClass,
-    String? pharmacologicalClass,
-    String? atcCode,
-    bool? isControlledSubstance,
-    DeaSchedule? deaSchedule,
-    String? controlClass,
-    String? dosageForm,
-    String? strength,
-    String? strengthUnit,
-    String? routeOfAdministration,
-    String? storageConditions,
-    double? minStorageTempCelsius,
-    double? maxStorageTempCelsius,
-    bool? requiresRefrigeration,
-    bool? requiresFreezing,
-    bool? lightSensitive,
-    bool? humiditySensitive,
-    bool? requiresPrescription,
-    String? prescriptionType,
-    DateTime? fdaApprovalDate,
-    String? fdaApplicationNumber,
-    DateTime? emaApprovalDate,
-    String? emaProcedureNumber,
-    List<ActiveIngredient>? activeIngredients,
-    String? inactiveIngredients,
-    bool? blackBoxWarning,
-    String? blackBoxWarningText,
-    String? contraindications,
-    String? drugInteractions,
-    PregnancyCategory? pregnancyCategory,
-    String? regulatedProductName,
-    String? dosageFormTypeCode,
-    String? routeOfAdministrationEdqmCode,
-    String? mahGln,
-    String? mahName,
-    String? mahCountry,
-    List<String>? licensedAgentGlns,
-    String? marketingAuthorizationNumber,
-    DateTime? marketingAuthorizationValidFrom,
-    DateTime? marketingAuthorizationValidTo,
-    String? regulatoryStatus,
-    List<String>? additionalAtcCodes,
-    String? nhmnGermanyPzn,
-    String? nhmnFranceCip,
-    String? nhmnSpainCn,
-    String? nhmnBrazilAnvisa,
-    String? nhmnPortugalAim,
-    String? nhmnUsaNdc,
-    String? nhmnItalyAifa,
-    String? localDrugCodeUaeGcc,
-    String? dataCarrierTypeCode,
-    bool? antiTamperingIndicator,
-    bool? pseudoGtinNtinFlag,
-    bool? coldChainRequired,
-    String? prescriptionStatusCategory,
-    bool? specControlledSubstanceIndicator,
-    String? specControlledSubstanceSchedule,
-    bool? additionalMonitoringIndicator,
-    int? shelfLifeMonths,
-    int? shelfLifeAfterOpeningDays,
-    String? countryOfManufactureNumeric,
-    String? packSizeDescription,
-    double? activePotencyAi7004,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return GTINPharmaceuticalExtension(
-      id: id ?? this.id,
-      gtinId: gtinId ?? this.gtinId,
-      gtinCode: gtinCode ?? this.gtinCode,
-      ndcNumber: ndcNumber ?? this.ndcNumber,
-      dinNumber: dinNumber ?? this.dinNumber,
-      eanPharmaCode: eanPharmaCode ?? this.eanPharmaCode,
-      drugClass: drugClass ?? this.drugClass,
-      therapeuticClass: therapeuticClass ?? this.therapeuticClass,
-      pharmacologicalClass: pharmacologicalClass ?? this.pharmacologicalClass,
-      atcCode: atcCode ?? this.atcCode,
-      isControlledSubstance: isControlledSubstance ?? this.isControlledSubstance,
-      deaSchedule: deaSchedule ?? this.deaSchedule,
-      controlClass: controlClass ?? this.controlClass,
-      dosageForm: dosageForm ?? this.dosageForm,
-      strength: strength ?? this.strength,
-      strengthUnit: strengthUnit ?? this.strengthUnit,
-      routeOfAdministration:
-          routeOfAdministration ?? this.routeOfAdministration,
-      storageConditions: storageConditions ?? this.storageConditions,
-      minStorageTempCelsius:
-          minStorageTempCelsius ?? this.minStorageTempCelsius,
-      maxStorageTempCelsius:
-          maxStorageTempCelsius ?? this.maxStorageTempCelsius,
-      requiresRefrigeration:
-          requiresRefrigeration ?? this.requiresRefrigeration,
-      requiresFreezing: requiresFreezing ?? this.requiresFreezing,
-      lightSensitive: lightSensitive ?? this.lightSensitive,
-      humiditySensitive: humiditySensitive ?? this.humiditySensitive,
-      requiresPrescription: requiresPrescription ?? this.requiresPrescription,
-      prescriptionType: prescriptionType ?? this.prescriptionType,
-      fdaApprovalDate: fdaApprovalDate ?? this.fdaApprovalDate,
-      fdaApplicationNumber: fdaApplicationNumber ?? this.fdaApplicationNumber,
-      emaApprovalDate: emaApprovalDate ?? this.emaApprovalDate,
-      emaProcedureNumber: emaProcedureNumber ?? this.emaProcedureNumber,
-      activeIngredients: activeIngredients ?? this.activeIngredients,
-      inactiveIngredients: inactiveIngredients ?? this.inactiveIngredients,
-      blackBoxWarning: blackBoxWarning ?? this.blackBoxWarning,
-      blackBoxWarningText: blackBoxWarningText ?? this.blackBoxWarningText,
-      contraindications: contraindications ?? this.contraindications,
-      drugInteractions: drugInteractions ?? this.drugInteractions,
-      pregnancyCategory: pregnancyCategory ?? this.pregnancyCategory,
-      regulatedProductName:
-          regulatedProductName ?? this.regulatedProductName,
-      dosageFormTypeCode: dosageFormTypeCode ?? this.dosageFormTypeCode,
-      routeOfAdministrationEdqmCode:
-          routeOfAdministrationEdqmCode ?? this.routeOfAdministrationEdqmCode,
-      mahGln: mahGln ?? this.mahGln,
-      mahName: mahName ?? this.mahName,
-      mahCountry: mahCountry ?? this.mahCountry,
-      licensedAgentGlns: licensedAgentGlns ?? this.licensedAgentGlns,
-      marketingAuthorizationNumber:
-          marketingAuthorizationNumber ?? this.marketingAuthorizationNumber,
-      marketingAuthorizationValidFrom: marketingAuthorizationValidFrom ??
-          this.marketingAuthorizationValidFrom,
-      marketingAuthorizationValidTo: marketingAuthorizationValidTo ??
-          this.marketingAuthorizationValidTo,
-      regulatoryStatus: regulatoryStatus ?? this.regulatoryStatus,
-      additionalAtcCodes: additionalAtcCodes ?? this.additionalAtcCodes,
-      nhmnGermanyPzn: nhmnGermanyPzn ?? this.nhmnGermanyPzn,
-      nhmnFranceCip: nhmnFranceCip ?? this.nhmnFranceCip,
-      nhmnSpainCn: nhmnSpainCn ?? this.nhmnSpainCn,
-      nhmnBrazilAnvisa: nhmnBrazilAnvisa ?? this.nhmnBrazilAnvisa,
-      nhmnPortugalAim: nhmnPortugalAim ?? this.nhmnPortugalAim,
-      nhmnUsaNdc: nhmnUsaNdc ?? this.nhmnUsaNdc,
-      nhmnItalyAifa: nhmnItalyAifa ?? this.nhmnItalyAifa,
-      localDrugCodeUaeGcc:
-          localDrugCodeUaeGcc ?? this.localDrugCodeUaeGcc,
-      dataCarrierTypeCode: dataCarrierTypeCode ?? this.dataCarrierTypeCode,
-      antiTamperingIndicator:
-          antiTamperingIndicator ?? this.antiTamperingIndicator,
-      pseudoGtinNtinFlag: pseudoGtinNtinFlag ?? this.pseudoGtinNtinFlag,
-      coldChainRequired: coldChainRequired ?? this.coldChainRequired,
-      prescriptionStatusCategory:
-          prescriptionStatusCategory ?? this.prescriptionStatusCategory,
-      specControlledSubstanceIndicator: specControlledSubstanceIndicator ??
-          this.specControlledSubstanceIndicator,
-      specControlledSubstanceSchedule: specControlledSubstanceSchedule ??
-          this.specControlledSubstanceSchedule,
-      additionalMonitoringIndicator: additionalMonitoringIndicator ??
-          this.additionalMonitoringIndicator,
-      shelfLifeMonths: shelfLifeMonths ?? this.shelfLifeMonths,
-      shelfLifeAfterOpeningDays:
-          shelfLifeAfterOpeningDays ?? this.shelfLifeAfterOpeningDays,
-      countryOfManufactureNumeric:
-          countryOfManufactureNumeric ?? this.countryOfManufactureNumeric,
-      packSizeDescription: packSizeDescription ?? this.packSizeDescription,
-      activePotencyAi7004:
-          activePotencyAi7004 ?? this.activePotencyAi7004,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-
-  bool get hasStorageRequirements =>
-      requiresRefrigeration ||
-      requiresFreezing ||
-      lightSensitive ||
-      humiditySensitive ||
-      minStorageTempCelsius != null ||
-      maxStorageTempCelsius != null;
-
-  String get storageRequirementsSummary {
-    List<String> requirements = [];
-    if (requiresFreezing) requirements.add('Frozen');
-    if (requiresRefrigeration) requirements.add('Refrigerated');
-    if (lightSensitive) requirements.add('Light Protected');
-    if (humiditySensitive) requirements.add('Humidity Controlled');
-    if (minStorageTempCelsius != null && maxStorageTempCelsius != null) {
-      requirements.add('${minStorageTempCelsius}°C - ${maxStorageTempCelsius}°C');
-    }
-    return requirements.isEmpty ? 'Room Temperature' : requirements.join(', ');
-  }
-
   @override
   List<Object?> get props => [
-        id,
-        gtinId,
-        gtinCode,
-        ndcNumber,
-        dinNumber,
-        eanPharmaCode,
-        drugClass,
-        therapeuticClass,
-        pharmacologicalClass,
-        atcCode,
-        isControlledSubstance,
-        deaSchedule,
-        controlClass,
-        dosageForm,
-        strength,
-        strengthUnit,
-        routeOfAdministration,
-        storageConditions,
-        minStorageTempCelsius,
-        maxStorageTempCelsius,
-        requiresRefrigeration,
-        requiresFreezing,
-        lightSensitive,
-        humiditySensitive,
-        requiresPrescription,
-        prescriptionType,
-        fdaApprovalDate,
-        fdaApplicationNumber,
-        emaApprovalDate,
-        emaProcedureNumber,
-        activeIngredients,
-        inactiveIngredients,
-        blackBoxWarning,
-        blackBoxWarningText,
-        contraindications,
-        drugInteractions,
-        pregnancyCategory,
-        regulatedProductName,
-        dosageFormTypeCode,
-        routeOfAdministrationEdqmCode,
-        mahGln,
-        mahName,
-        mahCountry,
-        licensedAgentGlns,
-        marketingAuthorizationNumber,
-        marketingAuthorizationValidFrom,
-        marketingAuthorizationValidTo,
-        regulatoryStatus,
-        additionalAtcCodes,
-        nhmnGermanyPzn,
-        nhmnFranceCip,
-        nhmnSpainCn,
-        nhmnBrazilAnvisa,
-        nhmnPortugalAim,
-        nhmnUsaNdc,
-        nhmnItalyAifa,
-        localDrugCodeUaeGcc,
-        dataCarrierTypeCode,
-        antiTamperingIndicator,
-        pseudoGtinNtinFlag,
-        coldChainRequired,
-        prescriptionStatusCategory,
-        specControlledSubstanceIndicator,
-        specControlledSubstanceSchedule,
-        additionalMonitoringIndicator,
-        shelfLifeMonths,
-        shelfLifeAfterOpeningDays,
-        countryOfManufactureNumeric,
-        packSizeDescription,
-        activePotencyAi7004,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    gtinId,
+    gtinCode,
+    ndcNumber,
+    dinNumber,
+    eanPharmaCode,
+    drugClass,
+    therapeuticClass,
+    pharmacologicalClass,
+    atcCode,
+    isControlledSubstance,
+    deaSchedule,
+    controlClass,
+    dosageForm,
+    strength,
+    strengthUnit,
+    routeOfAdministration,
+    storageConditions,
+    minStorageTempCelsius,
+    maxStorageTempCelsius,
+    requiresRefrigeration,
+    requiresFreezing,
+    lightSensitive,
+    humiditySensitive,
+    requiresPrescription,
+    prescriptionType,
+    fdaApprovalDate,
+    fdaApplicationNumber,
+    emaApprovalDate,
+    emaProcedureNumber,
+    activeIngredients,
+    inactiveIngredients,
+    blackBoxWarning,
+    blackBoxWarningText,
+    contraindications,
+    drugInteractions,
+    pregnancyCategory,
+    regulatedProductName,
+    dosageFormTypeCode,
+    routeOfAdministrationEdqmCode,
+    mahGln,
+    mahName,
+    mahCountry,
+    licensedAgentGlns,
+    marketingAuthorizationNumber,
+    marketingAuthorizationValidFrom,
+    marketingAuthorizationValidTo,
+    regulatoryStatus,
+    additionalAtcCodes,
+    nhmnGermanyPzn,
+    nhmnFranceCip,
+    nhmnSpainCn,
+    nhmnBrazilAnvisa,
+    nhmnPortugalAim,
+    nhmnUsaNdc,
+    nhmnItalyAifa,
+    localDrugCodeUaeGcc,
+    dataCarrierTypeCode,
+    antiTamperingIndicator,
+    pseudoGtinNtinFlag,
+    coldChainRequired,
+    prescriptionStatusCategory,
+    specControlledSubstanceIndicator,
+    specControlledSubstanceSchedule,
+    additionalMonitoringIndicator,
+    shelfLifeMonths,
+    shelfLifeAfterOpeningDays,
+    countryOfManufactureNumeric,
+    packSizeDescription,
+    activePotencyAi7004,
+    createdAt,
+    updatedAt,
+  ];
 }

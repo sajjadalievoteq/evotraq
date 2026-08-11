@@ -36,10 +36,7 @@ class CacheDetailedStatsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text(title, style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 16),
             ...stats.entries.map(
               (entry) => Padding(
@@ -54,8 +51,8 @@ class CacheDetailedStatsCard extends StatelessWidget {
                     Text(
                       formatCacheStatValue(entry.value),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),

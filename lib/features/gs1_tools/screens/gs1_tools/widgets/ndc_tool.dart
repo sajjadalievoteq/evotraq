@@ -66,9 +66,8 @@ class _NdcToolState extends State<NdcTool> with Gs1InitialModeMixin {
     super.dispose();
   }
 
-  WorkbenchInstructions get _instructions => _mode == 'gtin-to-ndc'
-      ? _gtinToNdcInstructions
-      : _ndcToGtinInstructions;
+  WorkbenchInstructions get _instructions =>
+      _mode == 'gtin-to-ndc' ? _gtinToNdcInstructions : _ndcToGtinInstructions;
 
   void _loadExample(String example) {
     setState(() {

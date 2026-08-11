@@ -3,7 +3,6 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/empty_state_visual.dart';
 
-
 class AppEmptyState extends StatelessWidget {
   const AppEmptyState({
     super.key,
@@ -58,20 +57,18 @@ class AppEmptyState extends StatelessWidget {
       );
     }
 
-    // if (!_isFiltered &&
-    //     primaryActionLabel != null &&
-    //     onPrimaryAction != null) {
-    //   actions.add(
-    //     EmptyStateHoverAction(
-    //       child: CustomButtonWidget(
-    //         title: primaryActionLabel!,
-    //         iconAsset: primaryActionIconAsset,
-    //         onTap: onPrimaryAction,
-    //       ),
-    //     ),
-    //   );
-    // }
-    //
+    if (!_isFiltered && primaryActionLabel != null && onPrimaryAction != null) {
+      actions.add(
+        EmptyStateHoverAction(
+          child: CustomButtonWidget(
+            title: primaryActionLabel!,
+            iconAsset: primaryActionIconAsset,
+            onTap: onPrimaryAction,
+          ),
+        ),
+      );
+    }
+
     if (!_isFiltered &&
         secondaryActionLabel != null &&
         onSecondaryAction != null) {

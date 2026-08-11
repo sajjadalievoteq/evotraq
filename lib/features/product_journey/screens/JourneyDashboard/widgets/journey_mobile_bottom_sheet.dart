@@ -38,18 +38,22 @@ class JourneyMobileBottomSheet extends StatelessWidget {
           ),
         ],
       ),
-      
-      
+
       child: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(
-          dragDevices: _dragDevices,
-        ),
+        behavior: ScrollConfiguration.of(
+          context,
+        ).copyWith(dragDevices: _dragDevices),
         child: ListView(
           controller: scrollController,
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          padding: EdgeInsets.fromLTRB(context.padding.top, 0, context.padding.top, 24),
+          padding: EdgeInsets.fromLTRB(
+            context.padding.top,
+            0,
+            context.padding.top,
+            24,
+          ),
           children: [
             SizedBox(
               height: 28,

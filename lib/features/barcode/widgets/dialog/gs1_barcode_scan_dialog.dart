@@ -42,15 +42,18 @@ abstract final class GS1BarcodeScanDialog {
               verifyWithBackend: verifyWithBackend,
               scanMode: scanMode,
               onBarcodeDetected: (gs1ElementString, _, __) {
-                final pipelineResult =
-                    Gs1ScanPipeline.processScan(gs1ElementString);
+                final pipelineResult = Gs1ScanPipeline.processScan(
+                  gs1ElementString,
+                );
                 if (!pipelineResult.isValid) {
                   result = pipelineResult;
                   return;
                 }
 
                 if (!_isAllowedType(
-                    pipelineResult.barcodeType, allowedFormats)) {
+                  pipelineResult.barcodeType,
+                  allowedFormats,
+                )) {
                   result = ScanResult.error(
                     data: gs1ElementString,
                     error:
@@ -93,31 +96,6 @@ abstract final class GS1BarcodeScanDialog {
     );
     if (result == null || !result.isValid) return null;
     return result.data;
-  }
-
-  static Widget iconButton({
-    required BuildContext context,
-    required String title,
-    required ValueChanged<ScanResult> onResult,
-    List<String> allowedFormats = const [],
-    bool verifyWithBackend = false,
-    ScanMode scanMode = ScanMode.single,
-    String tooltip = 'Scan barcode',
-  }) {
-    return IconButton(
-      icon: TraqIcon(AppAssets.iconQr),
-      tooltip: tooltip,
-      onPressed: () async {
-        final result = await show(
-          context,
-          title: title,
-          allowedFormats: allowedFormats,
-          verifyWithBackend: verifyWithBackend,
-          scanMode: scanMode,
-        );
-        if (result != null) onResult(result);
-      },
-    );
   }
 
   static bool _isAllowedType(String? barcodeType, List<String> allowedFormats) {
@@ -168,7 +146,8 @@ class Gs1BarcodeScanTrigger extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TraqIcon(AppAssets.iconQr,
+          TraqIcon(
+            AppAssets.iconQr,
             size: showPreview ? 48 : 40,
             color: colorScheme.primary.withValues(alpha: 0.7),
           ),
@@ -181,8 +160,8 @@ class Gs1BarcodeScanTrigger extends StatelessWidget {
           Text(
             'Camera, wired scanner, or manual entry',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -196,8 +175,8 @@ class Gs1BarcodeScanTrigger extends StatelessWidget {
             Text(
               'Allowed formats: ${allowedFormats.join(', ')}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withValues(alpha: 0.45),
-                  ),
+                color: colorScheme.onSurface.withValues(alpha: 0.45),
+              ),
               textAlign: TextAlign.center,
             ),
           ],

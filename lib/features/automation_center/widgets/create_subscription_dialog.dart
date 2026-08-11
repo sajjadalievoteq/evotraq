@@ -3,15 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/create_subscription_form_fields.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/notification_subscription_help.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/help_widgets/notification_subscription_help.dart';
 import 'package:traqtrace_app/features/automation_center/utils/subscription_delivery_utils.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/delivery_test_feedback.dart';
 
 class CreateSubscriptionDialog extends StatefulWidget {
   final NotificationSubscription? subscription;
@@ -48,9 +48,10 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         SubscriptionDeliveryUtils.isEmailEndpoint(endpoint)
         ? 'EMAIL'
         : 'WEBHOOK';
-    _selectedSubscriptionType = widget.subscription?.subscriptionType ??
-        'REALTIME';
-    _selectedNotificationFrequency = widget.subscription?.notificationFrequency ??
+    _selectedSubscriptionType =
+        widget.subscription?.subscriptionType ?? 'REALTIME';
+    _selectedNotificationFrequency =
+        widget.subscription?.notificationFrequency ??
         _typeDefaultFrequency[_selectedSubscriptionType];
   }
 
@@ -84,9 +85,11 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       'notificationFormat':
           subscription.notificationFormat ??
           (_selectedDeliveryMethod == 'EMAIL' ? 'EMAIL_HTML' : 'SUMMARY'),
-      'notificationFrequency': subscription.notificationFrequency ??
+      'notificationFrequency':
+          subscription.notificationFrequency ??
           _typeDefaultFrequency[subscription.subscriptionType],
-      if (subscription.preferredHour != null && subscription.preferredMinute != null)
+      if (subscription.preferredHour != null &&
+          subscription.preferredMinute != null)
         'preferredTime': TimeOfDay(
           hour: subscription.preferredHour!,
           minute: subscription.preferredMinute!,
@@ -187,20 +190,24 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                       });
                       final defaultFrequency = _typeDefaultFrequency[value];
                       if (defaultFrequency != null) {
-                        setState(() => _selectedNotificationFrequency = defaultFrequency);
-                        _formKey.currentState?.patchValue(
-                          {'notificationFrequency': defaultFrequency},
+                        setState(
+                          () =>
+                              _selectedNotificationFrequency = defaultFrequency,
                         );
+                        _formKey.currentState?.patchValue({
+                          'notificationFrequency': defaultFrequency,
+                        });
                       }
                     },
-                    selectedNotificationFrequency: _selectedNotificationFrequency,
+                    selectedNotificationFrequency:
+                        _selectedNotificationFrequency,
                     onNotificationFrequencyChanged: (value) {
                       setState(() => _selectedNotificationFrequency = value);
                     },
                   ),
                   if (_isTesting || _testMessage != null) ...[
                     const SizedBox(height: TraqSpacing.md),
-                    _DeliveryTestFeedback(
+                    DeliveryTestFeedback(
                       testing: _isTesting,
                       success: _testSucceeded,
                       message: _testMessage,
@@ -343,15 +350,18 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       final String subscriptionType = formData['subscriptionType'];
       final bool usesCadence =
           subscriptionType == 'BATCH' || subscriptionType == 'SCHEDULED';
-      final String? notificationFrequency =
-          usesCadence ? formData['notificationFrequency'] as String? : null;
+      final String? notificationFrequency = usesCadence
+          ? formData['notificationFrequency'] as String?
+          : null;
 
-      final bool usesPreferredTime = usesCadence &&
+      final bool usesPreferredTime =
+          usesCadence &&
           (notificationFrequency == 'DAILY' ||
               notificationFrequency == 'WEEKLY' ||
               notificationFrequency == 'MONTHLY');
-      final TimeOfDay? preferredTime =
-          usesPreferredTime ? formData['preferredTime'] as TimeOfDay? : null;
+      final TimeOfDay? preferredTime = usesPreferredTime
+          ? formData['preferredTime'] as TimeOfDay?
+          : null;
 
       if (_isEditing) {
         context.read<NotificationCubit>().updateSubscription(
@@ -380,63 +390,5 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         );
       }
     }
-  }
-}
-
-class _DeliveryTestFeedback extends StatelessWidget {
-  const _DeliveryTestFeedback({
-    required this.testing,
-    required this.success,
-    required this.message,
-  });
-
-  final bool testing;
-  final bool? success;
-  final String? message;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = testing
-        ? context.colors.secondary
-        : success == true
-        ? AppColorMapper.successColor(context)
-        : AppColorMapper.errorColor(context);
-
-    return Semantics(
-      liveRegion: true,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(TraqSpacing.md),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          border: Border.all(color: color.withValues(alpha: 0.35)),
-          borderRadius: TraqRadius.card,
-        ),
-        child: Row(
-          children: [
-            if (testing)
-              SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2, color: color),
-              )
-            else
-              TraqIcon(
-                success == true
-                    ? AppAssets.iconCheckCircle
-                    : AppAssets.iconXCircle,
-                color: color,
-              ),
-            const SizedBox(width: TraqSpacing.sm),
-            Expanded(
-              child: Text(
-                testing ? 'Testing delivery connection…' : message ?? '',
-                style: context.text.bodySm.copyWith(color: color),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

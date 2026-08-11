@@ -18,20 +18,11 @@ class CacheStatisticsTab extends StatelessWidget {
             statistics.queryResults,
           ),
           const SizedBox(height: 16),
-          CacheDetailedStatsCard(
-            'Master Data Cache',
-            statistics.masterData,
-          ),
+          CacheDetailedStatsCard('Master Data Cache', statistics.masterData),
           const SizedBox(height: 16),
-          CacheDetailedStatsCard(
-            'Hot Data Cache',
-            statistics.hotData,
-          ),
+          CacheDetailedStatsCard('Hot Data Cache', statistics.hotData),
           const SizedBox(height: 16),
-          CacheDetailedStatsCard(
-            'Overall Statistics',
-            statistics.overall,
-          ),
+          CacheDetailedStatsCard('Overall Statistics', statistics.overall),
         ],
       ),
     );

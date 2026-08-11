@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_controlled_substance_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_data_carrier_integrity_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_dosage_route_composition_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_drug_classification_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_drug_identification_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_national_identifiers_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_prescription_requirements_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_regulatory_approvals_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_storage_handling_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_tech_dispensing_lifecycle_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_tech_mah_authorization_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_tech_product_coded_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_warnings_precautions_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_controlled_substance_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_data_carrier_integrity_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_dosage_route_composition_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_drug_classification_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_drug_identification_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_national_identifiers_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_prescription_requirements_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_regulatory_approvals_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_storage_handling_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_tech_dispensing_lifecycle_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_tech_mah_authorization_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_tech_product_coded_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_warnings_precautions_widget.dart';
 
 class PharmaceuticalExtensionGroupedBody extends StatelessWidget {
   const PharmaceuticalExtensionGroupedBody({

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
-import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_ai_table.dart';
 import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
 import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_state.dart';
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/mode_selector.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/ai_element_compose_fields.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/ai_element_parse_fields.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/ai_element_table_fields.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 
@@ -134,8 +133,9 @@ class _AiElementToolState extends State<AiElementTool>
 
   static Map<String, String> _pairsFrom(String elementString) {
     final pairs = <String, String>{};
-    for (final match
-        in RegExp(r'\((\d{2,4})\)([^(]*)').allMatches(elementString)) {
+    for (final match in RegExp(
+      r'\((\d{2,4})\)([^(]*)',
+    ).allMatches(elementString)) {
       pairs[match.group(1)!] = match.group(2)!.trim();
     }
     return pairs;
@@ -152,130 +152,6 @@ class _AiElementToolState extends State<AiElementTool>
       default:
         break;
     }
-  }
-
-  Widget _parseFields(bool loading) {
-    return TextField(
-      controller: _parseController,
-      decoration: const InputDecoration(
-        labelText: 'GS1 element string',
-        hintText: 'Paste barcode data or human-readable AIs',
-      ),
-      maxLines: 6,
-      enabled: !loading,
-    );
-  }
-
-  Widget _composeFields(bool loading) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 2,
-              child: ValidatedTextFieldWrapper(
-                controller: _aiController,
-                fieldName: 'ai',
-                decoration: const InputDecoration(labelText: 'AI'),
-                keyboardType: TextInputType.number,
-                readOnly: loading,
-              ),
-            ),
-            const SizedBox(width: TraqSpacing.md),
-            Expanded(
-              flex: 5,
-              child: ValidatedTextFieldWrapper(
-                controller: _valueController,
-                fieldName: 'ai_value',
-                decoration: const InputDecoration(labelText: 'Value'),
-                readOnly: loading,
-              ),
-            ),
-            const SizedBox(width: TraqSpacing.sm),
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: CustomOutlinedButtonWidget(
-                title: 'Add',
-                onTap: () {
-                  if (!loading) _addPair();
-                },
-              ),
-            ),
-          ],
-        ),
-        if (_ais.isNotEmpty) ...[
-          const SizedBox(height: TraqSpacing.md),
-          Wrap(
-            spacing: TraqSpacing.sm,
-            runSpacing: TraqSpacing.sm,
-            children: [
-              for (final entry in _ais.entries)
-                Chip(
-                  label: Text('(${entry.key}) ${entry.value}'),
-                  onDeleted: loading ? null : () => _removePair(entry.key),
-                ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _tableFields() {
-    final rows = Gs1AiTable.search(_searchController.text);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            labelText: 'Search AI code, title, or format',
-            prefixIcon: Padding(
-              padding: const EdgeInsets.all(12),
-              child: TraqIcon(AppAssets.iconSearch, size: 20),
-            ),
-          ),
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: TraqSpacing.md),
-        if (rows.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: TraqSpacing.lg),
-            child: Text(
-              'No matching Application Identifiers.',
-              style: context.text.bodySm.copyWith(
-                color: context.colors.textMuted,
-              ),
-            ),
-          )
-        else
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 420),
-            child: ListView.separated(
-              shrinkWrap: true,
-              itemCount: rows.length,
-              separatorBuilder: (_, __) =>
-                  Divider(height: 1, color: context.colors.border),
-              itemBuilder: (context, index) {
-                final row = rows[index];
-                return ListTile(
-                  dense: true,
-                  title: Text('(${row.code}) ${row.title}'),
-                  subtitle: Text(row.format),
-                  trailing: row.fnc1
-                      ? Tooltip(
-                          message: 'Variable length (FNC1 separated)',
-                          child: TraqIcon(AppAssets.iconArrowR, size: 16),
-                        )
-                      : null,
-                );
-              },
-            ),
-          ),
-      ],
-    );
   }
 
   @override
@@ -309,9 +185,22 @@ class _AiElementToolState extends State<AiElementTool>
               ),
               const SizedBox(height: TraqSpacing.lg),
               switch (_mode) {
-                'build' => _composeFields(loading),
-                'table' => _tableFields(),
-                _ => _parseFields(loading),
+                'build' => AiElementComposeFields(
+                  aiController: _aiController,
+                  valueController: _valueController,
+                  pairs: _ais,
+                  loading: loading,
+                  onAdd: _addPair,
+                  onRemove: _removePair,
+                ),
+                'table' => AiElementTableFields(
+                  searchController: _searchController,
+                  onSearchChanged: (_) => setState(() {}),
+                ),
+                _ => AiElementParseFields(
+                  controller: _parseController,
+                  loading: loading,
+                ),
               },
               if (_mode != 'table') ...[
                 const SizedBox(height: TraqSpacing.lg),

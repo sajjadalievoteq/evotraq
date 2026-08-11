@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_awaiting_selection_pane.dart';
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_document_unit_descriptor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -16,7 +18,7 @@ import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/gtin_detail_screen_fields.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharmaceutical_extension_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/regulatory_authority/regulatory_authority_extension.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/regulatory_authority/regulatory_authority_extension.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_detail_form_body.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_detail_form_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
@@ -62,23 +64,6 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
 
   bool _detailHydratedForRouteGtin = false;
   bool _forceMountAllSections = false;
-
-  String? _docUnitDescriptorFromBackend({
-    required String? unitDescriptor,
-    required String? packagingLevel,
-  }) {
-    final u = (unitDescriptor ?? '').trim();
-    if (u.isNotEmpty) return u;
-
-    final p = (packagingLevel ?? '').trim().toUpperCase();
-    return switch (p) {
-      'ITEM' => 'BASE_UNIT_OR_EACH',
-      'PACK' => 'PACK_OR_INNER_PACK',
-      'CASE' => 'CASE',
-      'PALLET' => 'PALLET',
-      _ => null,
-    };
-  }
 
   @override
   void initState() {
@@ -143,7 +128,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       try {
-        final unitDescriptor = _docUnitDescriptorFromBackend(
+        final unitDescriptor = GtinDocumentUnitDescriptor.fromBackend(
           unitDescriptor: gtin.unitDescriptor,
           packagingLevel: gtin.packagingLevel,
         );
@@ -173,7 +158,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
 
   Future<void> _refreshGtin() async {
     if (widget.gtinCode != null) {
-      (_gtinCubit ?? context.read<GTINCubit>()).fetchGTINDetails(widget.gtinCode!);
+      (_gtinCubit ?? context.read<GTINCubit>()).fetchGTINDetails(
+        widget.gtinCode!,
+      );
     }
   }
 
@@ -210,14 +197,11 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
       initialTime: TimeOfDay.fromDateTime(current ?? now),
     );
     if (time == null || !mounted) return;
-    onPicked(
-      DateTime(date.year, date.month, date.day, time.hour, time.minute),
-    );
+    onPicked(DateTime(date.year, date.month, date.day, time.hour, time.minute));
     setState(() {});
   }
 
   Future<void> _submitForm() async {
-    
     if (!_forceMountAllSections) {
       setState(() => _forceMountAllSections = true);
       await Future<void>.delayed(Duration.zero);
@@ -324,45 +308,22 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
   @override
   Widget build(BuildContext context) {
     if (widget.awaitingListSelection) {
-      Widget pane(GTINState state) {
-        final listLoading =
-            state.isGtinListLoading || state.status == GTINStatus.initial;
-        if (listLoading) {
-          return SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              context.padding.top,
-              context.padding.top,
-              context.padding.top,
-              0,
-            ),
-            child: Gs1FormShimmerLayer(
-              show: true,
-              formColumn: const SizedBox.shrink(),
-              skeleton: const GtinDetailFormSkeleton(),
-            ),
-          );
-        }
-        return AppEmptyDetail(
-          title: GtinUiConstants.awaitingSelectionTitle,
-          subtitle: GtinUiConstants.awaitingSelectionSubtitle,
-          iconAsset: NavIcons.gtin,
-        );
-      }
-
       if (widget.embedded) {
         return BlocBuilder<GTINCubit, GTINState>(
-          builder: (context, state) => pane(state),
+          builder: (context, state) => GtinAwaitingSelectionPane(state: state),
         );
       }
       final cubit = _gtinCubit;
       if (cubit == null) {
-        return Scaffold(body: pane(const GTINState()));
+        return Scaffold(
+          body: GtinAwaitingSelectionPane(state: const GTINState()),
+        );
       }
       return BlocProvider<GTINCubit>.value(
         value: cubit,
         child: BlocBuilder<GTINCubit, GTINState>(
-          builder: (context, state) => Scaffold(body: pane(state)),
+          builder: (context, state) =>
+              Scaffold(body: GtinAwaitingSelectionPane(state: state)),
         ),
       );
     }
@@ -480,24 +441,23 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
             current: effectiveDate,
             onPicked: (d) {
               effectiveDate = d;
-              effectiveDateDisplayController.text =
-                  formatDateTimeWithOffset(d);
+              effectiveDateDisplayController.text = formatDateTimeWithOffset(d);
             },
           ),
           onPickStartAvailDate: () => _pickDateTime(
             current: startAvailDate,
             onPicked: (d) {
               startAvailDate = d;
-              startAvailDateDisplayController.text =
-                  formatDateTimeWithOffset(d);
+              startAvailDateDisplayController.text = formatDateTimeWithOffset(
+                d,
+              );
             },
           ),
           onPickEndAvailDate: () => _pickDateTime(
             current: endAvailDate,
             onPicked: (d) {
               endAvailDate = d;
-              endAvailDateDisplayController.text =
-                  formatDateTimeWithOffset(d);
+              endAvailDateDisplayController.text = formatDateTimeWithOffset(d);
             },
           ),
           onPickPublicationDate: () => _pickDateOnly(
@@ -511,7 +471,10 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
       },
     );
 
-    final bodyWithRefresh = RefreshIndicator(onRefresh: _refreshGtin, child: body);
+    final bodyWithRefresh = RefreshIndicator(
+      onRefresh: _refreshGtin,
+      child: body,
+    );
 
     final scaffold = Gs1MasterDataDetailScaffold(
       embedded: widget.embedded,

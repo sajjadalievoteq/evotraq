@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_epcis_preview_row.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/models/commissioning_epc_item.dart';
-
 
 class CommissioningEpcisPreviewCard extends StatelessWidget {
   const CommissioningEpcisPreviewCard({
@@ -32,20 +32,34 @@ class CommissioningEpcisPreviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _row('action', 'ADD'),
-          _row('bizStep', 'urn:epcglobal:cbv:bizstep:commissioning'),
-          _row('disposition', 'urn:epcglobal:cbv:disp:active'),
+          const CommissioningEpcisPreviewRow('action', 'ADD'),
+          const CommissioningEpcisPreviewRow(
+            'bizStep',
+            'urn:epcglobal:cbv:bizstep:commissioning',
+          ),
+          const CommissioningEpcisPreviewRow(
+            'disposition',
+            'urn:epcglobal:cbv:disp:active',
+          ),
           if (bizLocationGln != null)
-            _row('bizLocation', bizLocationGln!),
-          if (readPointGln != null) _row('readPoint', readPointGln!),
-          _row('epcList', '${epcList.length} EPC(s)'),
-          ...epcList.take(5).map((e) => Padding(
-                padding: const EdgeInsets.only(left: 12, top: 2),
-                child: Text(
-                  e,
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+            CommissioningEpcisPreviewRow('bizLocation', bizLocationGln!),
+          if (readPointGln != null)
+            CommissioningEpcisPreviewRow('readPoint', readPointGln!),
+          CommissioningEpcisPreviewRow('epcList', '${epcList.length} EPC(s)'),
+          ...epcList
+              .take(5)
+              .map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(left: 12, top: 2),
+                  child: Text(
+                    e,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                    ),
+                  ),
                 ),
-              )),
+              ),
           if (epcList.length > 5)
             Padding(
               padding: const EdgeInsets.only(left: 12, top: 2),
@@ -53,32 +67,17 @@ class CommissioningEpcisPreviewCard extends StatelessWidget {
             ),
           if (hasSgtin && batchLot != null && batchLot!.isNotEmpty) ...[
             const SizedBox(height: 8),
-            const Text('ILMD (pharma)', style: TextStyle(fontWeight: FontWeight.w600)),
-            _row('lotNumber', batchLot!),
-            if (expiryDate != null)
-              _row('itemExpirationDate', expiryDate!.toIso8601String().split('T').first),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _row(String key, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 110,
-            child: Text(
-              key,
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+            const Text(
+              'ILMD (pharma)',
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
-          ),
-          Expanded(
-            child: Text(value, style: const TextStyle(fontSize: 12)),
-          ),
+            CommissioningEpcisPreviewRow('lotNumber', batchLot!),
+            if (expiryDate != null)
+              CommissioningEpcisPreviewRow(
+                'itemExpirationDate',
+                expiryDate!.toIso8601String().split('T').first,
+              ),
+          ],
         ],
       ),
     );

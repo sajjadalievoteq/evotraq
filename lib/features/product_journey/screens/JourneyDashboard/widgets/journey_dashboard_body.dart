@@ -121,10 +121,7 @@ class _JourneyDashboardBodyState extends State<JourneyDashboardBody> {
             onRecentEventTap: _onRecentEventTap,
             onScanResult: _onScanResult,
           ),
-          detail: JourneyCanvasPane(
-            state: state,
-            onStepTapped: _onStepTapped,
-          ),
+          detail: JourneyCanvasPane(state: state, onStepTapped: _onStepTapped),
         ),
         fallback: JourneyMobileLayout(
           state: state,

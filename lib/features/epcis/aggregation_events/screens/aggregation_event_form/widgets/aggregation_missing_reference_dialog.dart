@@ -5,10 +5,7 @@ import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregat
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/utils/aggregation_missing_reference.dart';
 
 class AggregationMissingReferenceDialog extends StatelessWidget {
-  const AggregationMissingReferenceDialog({
-    super.key,
-    required this.missing,
-  });
+  const AggregationMissingReferenceDialog({super.key, required this.missing});
 
   final List<AggregationMissingReference> missing;
 
@@ -26,7 +23,8 @@ class AggregationMissingReferenceDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final createActions = <AggregationReferenceKind, AggregationMissingReference>{};
+    final createActions =
+        <AggregationReferenceKind, AggregationMissingReference>{};
     for (final item in missing) {
       createActions.putIfAbsent(item.kind, () => item);
     }
@@ -107,9 +105,9 @@ class AggregationMissingReferenceDialog extends StatelessWidget {
   }
 
   String _iconAssetFor(AggregationReferenceKind kind) => switch (kind) {
-        AggregationReferenceKind.gln => AppAssets.iconMapPin,
-        AggregationReferenceKind.gtin => AppAssets.iconQr,
-        AggregationReferenceKind.sgtin => AppAssets.iconBox,
-        AggregationReferenceKind.sscc => AppAssets.iconBox,
-      };
+    AggregationReferenceKind.gln => AppAssets.iconMapPin,
+    AggregationReferenceKind.gtin => AppAssets.iconQr,
+    AggregationReferenceKind.sgtin => AppAssets.iconBox,
+    AggregationReferenceKind.sscc => AppAssets.iconBox,
+  };
 }

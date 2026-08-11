@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/features/admin/screens/industry_test_data/industry_test_data_view.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/services/admin/industry_test_data_service.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/features/admin/screens/industry_test_data/widgets/industry_pharma_tab.dart';
 
 class IndustryTestDataScreen extends StatefulWidget {
   const IndustryTestDataScreen({Key? key}) : super(key: key);
@@ -22,7 +17,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   bool _isLoading = false;
   String? _statusMessage;
   bool _isError = false;
-  
+
   int _gtinProgress = 0;
   int _gtinTotal = 0;
   int _glnProgress = 0;
@@ -76,7 +71,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
       _isLoading = true;
       _gtinProgress = 0;
       _gtinTotal = 50;
-      _statusMessage = 'Starting GTIN generation for pharmaceutical products...';
+      _statusMessage =
+          'Starting GTIN generation for pharmaceutical products...';
       _isError = false;
     });
 
@@ -91,9 +87,14 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
         },
       );
 
-      _setStatus('Successfully created $_gtinTotal pharmaceutical GTINs with extensions!');
+      _setStatus(
+        'Successfully created $_gtinTotal pharmaceutical GTINs with extensions!',
+      );
     } catch (e) {
-      _setStatus('Error generating pharmaceutical GTINs: ${e.toString()}', isError: true);
+      _setStatus(
+        'Error generating pharmaceutical GTINs: ${e.toString()}',
+        isError: true,
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -108,7 +109,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
       _isLoading = true;
       _glnProgress = 0;
       _glnTotal = 50;
-      _statusMessage = 'Starting GLN generation for pharmaceutical locations...';
+      _statusMessage =
+          'Starting GLN generation for pharmaceutical locations...';
       _isError = false;
     });
 
@@ -123,9 +125,14 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
         },
       );
 
-      _setStatus('Successfully created $_glnTotal pharmaceutical GLNs with extensions!');
+      _setStatus(
+        'Successfully created $_glnTotal pharmaceutical GLNs with extensions!',
+      );
     } catch (e) {
-      _setStatus('Error generating pharmaceutical GLNs: ${e.toString()}', isError: true);
+      _setStatus(
+        'Error generating pharmaceutical GLNs: ${e.toString()}',
+        isError: true,
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -140,7 +147,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
       _isLoading = true;
       _sgtinProgress = 0;
       _sgtinTotal = 100;
-      _statusMessage = 'Starting SGTIN generation for pharmaceutical products...';
+      _statusMessage =
+          'Starting SGTIN generation for pharmaceutical products...';
       _isError = false;
     });
 
@@ -157,7 +165,10 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
 
       _setStatus('Successfully created $_sgtinTotal pharmaceutical SGTINs!');
     } catch (e) {
-      _setStatus('Error generating pharmaceutical SGTINs: ${e.toString()}', isError: true);
+      _setStatus(
+        'Error generating pharmaceutical SGTINs: ${e.toString()}',
+        isError: true,
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -172,7 +183,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
       _isLoading = true;
       _ssccProgress = 0;
       _ssccTotal = 50;
-      _statusMessage = 'Starting SSCC generation for pharmaceutical containers...';
+      _statusMessage =
+          'Starting SSCC generation for pharmaceutical containers...';
       _isError = false;
     });
 
@@ -187,9 +199,14 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
         },
       );
 
-      _setStatus('Successfully created $_ssccTotal pharmaceutical SSCCs with extensions!');
+      _setStatus(
+        'Successfully created $_ssccTotal pharmaceutical SSCCs with extensions!',
+      );
     } catch (e) {
-      _setStatus('Error generating pharmaceutical SSCCs: ${e.toString()}', isError: true);
+      _setStatus(
+        'Error generating pharmaceutical SSCCs: ${e.toString()}',
+        isError: true,
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -211,15 +228,16 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
     });
 
     try {
-      final result = await _testDataService!.generatePharmaFullConnectedSupplyChain(
-        onProgress: (current, total, status) {
-          setState(() {
-            _eventProgress = current;
-            _eventTotal = total;
-            _statusMessage = status;
-          });
-        },
-      );
+      final result = await _testDataService!
+          .generatePharmaFullConnectedSupplyChain(
+            onProgress: (current, total, status) {
+              setState(() {
+                _eventProgress = current;
+                _eventTotal = total;
+                _statusMessage = status;
+              });
+            },
+          );
       final shipping = result['shippingOperationsCreated'] ?? 0;
       final receiving = result['receivingOperationsCreated'] ?? 0;
       final inTransit = result['inTransitShipmentsOpen'] ?? 0;
@@ -337,19 +355,20 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
     });
 
     try {
-      final result = await _testDataService!.cleanupPackedHierarchy(runId: runId);
+      final result = await _testDataService!.cleanupPackedHierarchy(
+        runId: runId,
+      );
       final deleted = (result['deletedRows'] as num?)?.toInt() ?? 0;
       setState(() {
         _lastHierarchyRunId = null;
         _lastHierarchyRootEpc = null;
         _lastHierarchyRootSscc = null;
       });
-      _setStatus('Hierarchy cleanup done — ≈$deleted rows removed for runId=$runId.');
-    } catch (e) {
       _setStatus(
-        'Error cleaning hierarchy: ${e.toString()}',
-        isError: true,
+        'Hierarchy cleanup done — ≈$deleted rows removed for runId=$runId.',
       );
+    } catch (e) {
+      _setStatus('Error cleaning hierarchy: ${e.toString()}', isError: true);
     } finally {
       setState(() {
         _isLoading = false;
@@ -359,143 +378,33 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Industry Test Data Generation'),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          tabs: const [
-            Tab(
-              icon: TraqIcon(AppAssets.iconMedical),
-              text: 'Pharmaceutical',
-            ),
-          ],
-        ),
-      ),
-      drawer: const AppDrawer(),
-      body: Column(
-        children: [
-          if (_statusMessage != null)
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 180),
-              child: Material(
-                color: _isError
-                    ? AppColorMapper.errorColor(context).withValues(alpha: 0.15)
-                    : AppColorMapper.successColor(context).withValues(alpha: 0.15),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TraqIcon(
-                        _isError ? AppAssets.iconXCircle : AppAssets.iconInfo,
-                        color: _isError ? AppColorMapper.errorColor(context) : AppColorMapper.successColor(context),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: SelectableText(
-                          _statusMessage!,
-                          style: TextStyle(
-                            color: _isError
-                                ? AppColorMapper.errorColor(context)
-                                : AppColorMapper.successColor(context),
-                          ),
-                        ),
-                      ),
-                      if (_isLoading)
-                        const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          
-          if (_isLoading && (_gtinProgress > 0 || _glnProgress > 0 || _sgtinProgress > 0 || _ssccProgress > 0 || _eventProgress > 0))
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Column(
-                children: [
-                  if (_gtinProgress > 0)
-                    LinearProgressIndicator(
-                      value: _gtinTotal > 0 ? _gtinProgress / _gtinTotal : 0,
-                      backgroundColor: Colors.grey.shade300,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        context.colors.textSecondary,
-                      ),
-                    ),
-                  if (_glnProgress > 0)
-                    LinearProgressIndicator(
-                      value: _glnTotal > 0 ? _glnProgress / _glnTotal : 0,
-                      backgroundColor: Colors.grey.shade300,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        context.colors.textSecondary,
-                      ),
-                    ),
-                  if (_sgtinProgress > 0)
-                    LinearProgressIndicator(
-                      value: _sgtinTotal > 0 ? _sgtinProgress / _sgtinTotal : 0,
-                      backgroundColor: Colors.grey.shade300,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        context.colors.textSecondary,
-                      ),
-                    ),
-                  if (_ssccProgress > 0)
-                    LinearProgressIndicator(
-                      value: _ssccTotal > 0 ? _ssccProgress / _ssccTotal : 0,
-                      backgroundColor: Colors.grey.shade300,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        context.colors.textSecondary,
-                      ),
-                    ),
-                  if (_eventProgress > 0)
-                    LinearProgressIndicator(
-                      value: _eventTotal > 0 ? _eventProgress / _eventTotal : 0,
-                      backgroundColor: Colors.grey.shade300,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        context.colors.textSecondary,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                IndustryPharmaTab(
-                  isDarkMode: isDarkMode,
-                  isLoading: _isLoading,
-                  hierarchyLevelsController: _hierarchyLevelsController,
-                  hierarchyChildrenController: _hierarchyChildrenController,
-                  lastHierarchyRunId: _lastHierarchyRunId,
-                  lastHierarchyRootEpc: _lastHierarchyRootEpc,
-                  lastHierarchyRootSscc: _lastHierarchyRootSscc,
-                  onGeneratePharmaGTINs: _generatePharmaGTINs,
-                  onGeneratePharmaGLNs: _generatePharmaGLNs,
-                  onGeneratePharmaSGTINs: _generatePharmaSGTINs,
-                  onGeneratePharmaSSCCs: _generatePharmaSSCCs,
-                  onGeneratePharmaFullSupplyChain: _generatePharmaFullSupplyChain,
-                  onGeneratePackedHierarchy: _generatePackedHierarchy,
-                  onCleanupPackedHierarchy: _cleanupPackedHierarchy,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return IndustryTestDataView(
+      tabController: _tabController,
+      statusMessage: _statusMessage,
+      isError: _isError,
+      isLoading: _isLoading,
+      gtinProgress: _gtinProgress,
+      gtinTotal: _gtinTotal,
+      glnProgress: _glnProgress,
+      glnTotal: _glnTotal,
+      sgtinProgress: _sgtinProgress,
+      sgtinTotal: _sgtinTotal,
+      ssccProgress: _ssccProgress,
+      ssccTotal: _ssccTotal,
+      eventProgress: _eventProgress,
+      eventTotal: _eventTotal,
+      hierarchyLevelsController: _hierarchyLevelsController,
+      hierarchyChildrenController: _hierarchyChildrenController,
+      lastHierarchyRunId: _lastHierarchyRunId,
+      lastHierarchyRootEpc: _lastHierarchyRootEpc,
+      lastHierarchyRootSscc: _lastHierarchyRootSscc,
+      onGeneratePharmaGTINs: _generatePharmaGTINs,
+      onGeneratePharmaGLNs: _generatePharmaGLNs,
+      onGeneratePharmaSGTINs: _generatePharmaSGTINs,
+      onGeneratePharmaSSCCs: _generatePharmaSSCCs,
+      onGeneratePharmaFullSupplyChain: _generatePharmaFullSupplyChain,
+      onGeneratePackedHierarchy: _generatePackedHierarchy,
+      onCleanupPackedHierarchy: _cleanupPackedHierarchy,
     );
   }
-
-
-
-
-
 }

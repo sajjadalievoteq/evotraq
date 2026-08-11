@@ -31,10 +31,9 @@ class AggregationEventFormParentContainerSection extends StatelessWidget {
           Text(
             'Supports URN, SSCC barcode (00)…, SGTIN barcode (01)…(21)…, and GS1 Digital Link. '
             'All inputs are auto-converted to URN on save.',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: Colors.grey.shade600),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
           ),
         ],
       ),

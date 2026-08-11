@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_info_row.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/widgets/gln_active_chip.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
@@ -38,35 +39,15 @@ class GlnListItemCard extends StatelessWidget {
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
             : const EdgeInsets.all(16);
 
-        Widget infoRow(String iconAsset, String text) {
-          final rowColor =
-              Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                TraqIcon(iconAsset, size: 16, color: rowColor),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: rowColor),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
         final cityCountry = [
           if (gln.city.isNotEmpty) gln.city,
           if (gln.country.isNotEmpty) gln.country,
         ].join(', ');
 
-        final menuIconColor =
-            Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
+        final menuIconColor = Gs1ListItemSelectionStyle.mutedColor(
+          isSelected,
+          muted,
+        );
 
         return Card(
           elevation: 2,
@@ -94,16 +75,34 @@ class GlnListItemCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 10),
-                        infoRow(
+                        Gs1ListItemInfoRow(
                           AppAssets.iconMapPin,
                           '${GlnUiConstants.listCardGlnPrefix}${gln.glnCode}',
+
+                          isSelected: isSelected,
+                          muted: muted,
                         ),
                         if (gln.addressLine1.isNotEmpty)
-                          infoRow(AppAssets.iconMapPin, gln.addressLine1),
+                          Gs1ListItemInfoRow(
+                            AppAssets.iconMapPin,
+                            gln.addressLine1,
+                            isSelected: isSelected,
+                            muted: muted,
+                          ),
                         if (cityCountry.isNotEmpty)
-                          infoRow(AppAssets.iconMapPin, cityCountry),
+                          Gs1ListItemInfoRow(
+                            AppAssets.iconMapPin,
+                            cityCountry,
+                            isSelected: isSelected,
+                            muted: muted,
+                          ),
                         if (gln.contactEmail?.isNotEmpty == true)
-                          infoRow(AppAssets.iconMail, gln.contactEmail!),
+                          Gs1ListItemInfoRow(
+                            AppAssets.iconMail,
+                            gln.contactEmail!,
+                            isSelected: isSelected,
+                            muted: muted,
+                          ),
                       ],
                     ),
                   ),
@@ -134,7 +133,10 @@ class GlnListItemCard extends StatelessWidget {
                       PopupMenuButton<String>(
                         tooltip: GlnUiConstants.menuTooltipActions,
                         padding: EdgeInsets.zero,
-                        icon: TraqIcon(AppAssets.iconMoreVert, color: menuIconColor),
+                        icon: TraqIcon(
+                          AppAssets.iconMoreVert,
+                          color: menuIconColor,
+                        ),
                         onSelected: onMenuSelected,
                         itemBuilder: (context) => [
                           PopupMenuItem(
@@ -161,7 +163,8 @@ class GlnListItemCard extends StatelessWidget {
                             value: 'delete',
                             child: Row(
                               children: [
-                                TraqIcon(AppAssets.iconTrash,
+                                TraqIcon(
+                                  AppAssets.iconTrash,
                                   size: 20,
                                   color: AppColorMapper.errorColor(context),
                                 ),
@@ -188,4 +191,3 @@ class GlnListItemCard extends StatelessWidget {
     );
   }
 }
-          

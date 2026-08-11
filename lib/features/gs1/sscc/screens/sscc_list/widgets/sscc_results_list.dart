@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/constrained_section_content.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
@@ -39,21 +40,12 @@ class SsccResultsList extends StatelessWidget {
   final void Function(SSCC sscc, String action) onRowMenuAction;
   final VoidCallback onLoadMore;
 
-  Widget _constrainedCenter(Widget child) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: Constants.sectionMaxWidth),
-        child: child,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SSCCCubit, SSCCState>(
       listenWhen: (previous, current) =>
-          current.status == SSCCStatus.error && previous.status != SSCCStatus.error,
+          current.status == SSCCStatus.error &&
+          previous.status != SSCCStatus.error,
       listener: (context, state) {
         if (state.error != null) {
           context.showError(userFacingSsccErrorMessage(state.error));
@@ -68,8 +60,8 @@ class SsccResultsList extends StatelessWidget {
         }
 
         if (state.ssccs.isEmpty) {
-          return _constrainedCenter(
-            AppEmptyState(
+          return ConstrainedSectionContent(
+            child: AppEmptyState(
               iconAsset: NavIcons.sscc,
               title: SsccUiConstants.emptyListTitle,
               subtitle: SsccUiConstants.emptyListSubtitle,
@@ -78,10 +70,12 @@ class SsccResultsList extends StatelessWidget {
               hasItems: hasActiveFilters,
               hasActiveFilters: hasActiveFilters,
               onClearFilters: onClearFilters,
-              primaryActionLabel:
-                  hasActiveFilters ? null : SsccUiConstants.emptyAddAction,
-              primaryActionIconAsset:
-                  hasActiveFilters ? null : AppAssets.iconPlus,
+              primaryActionLabel: hasActiveFilters
+                  ? null
+                  : SsccUiConstants.emptyAddAction,
+              primaryActionIconAsset: hasActiveFilters
+                  ? null
+                  : AppAssets.iconPlus,
               onPrimaryAction: hasActiveFilters ? null : onCreate,
             ),
           );
@@ -117,7 +111,8 @@ class SsccResultsList extends StatelessWidget {
                   left: context.padding.left,
                   right: context.padding.left,
                 ),
-                itemCount: state.ssccs.length +
+                itemCount:
+                    state.ssccs.length +
                     (state.hasMoreData && isFetchingMore ? 1 : 0) +
                     1,
                 separatorBuilder: (_, __) =>
@@ -125,8 +120,8 @@ class SsccResultsList extends StatelessWidget {
                 itemBuilder: (context, index) {
                   if (index < state.ssccs.length) {
                     final sscc = state.ssccs[index];
-                    return _constrainedCenter(
-                      RepaintBoundary(
+                    return ConstrainedSectionContent(
+                      child: RepaintBoundary(
                         child: SsccListItemCard(
                           sscc: sscc,
                           isSelected: sscc.ssccCode == selectedSsccCode,
@@ -139,13 +134,16 @@ class SsccResultsList extends StatelessWidget {
                   }
 
                   final loaderIndex = state.ssccs.length;
-                  final spacerIndex = state.ssccs.length +
+                  final spacerIndex =
+                      state.ssccs.length +
                       (state.hasMoreData && isFetchingMore ? 1 : 0);
 
                   if (index == loaderIndex &&
                       state.hasMoreData &&
                       isFetchingMore) {
-                    return _constrainedCenter(const Gs1ListLoadMoreIndicator());
+                    return ConstrainedSectionContent(
+                      child: const Gs1ListLoadMoreIndicator(),
+                    );
                   }
 
                   if (index == spacerIndex) {

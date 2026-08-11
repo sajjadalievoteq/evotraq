@@ -24,14 +24,11 @@ class CacheStatCard extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(title, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }

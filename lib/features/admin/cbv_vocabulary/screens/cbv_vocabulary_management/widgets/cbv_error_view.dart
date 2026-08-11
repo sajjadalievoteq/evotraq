@@ -17,13 +17,19 @@ class CbvErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TraqIcon(AppAssets.iconAlert, size: 64, color: context.colors.error),
+            TraqIcon(
+              AppAssets.iconAlert,
+              size: 64,
+              color: context.colors.error,
+            ),
             const SizedBox(height: TraqSpacing.lg),
             Text('Failed to load CBV vocabulary', style: context.text.h3),
             const SizedBox(height: TraqSpacing.sm),
             Text(
               message,
-              style: context.text.bodySm.copyWith(color: context.colors.textMuted),
+              style: context.text.bodySm.copyWith(
+                color: context.colors.textMuted,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: TraqSpacing.xl),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
@@ -8,12 +7,10 @@ import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_state.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_validation_context.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_validators.dart';
-import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_error_banner.dart';
-import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_field_decoration.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_cbv_biz_step_dropdown.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_cbv_disposition_dropdown.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_read_only_field.dart';
 import 'package:traqtrace_app/features/epcis/object_events/widgets/object_event_form_section_card.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CbvBizStepDispositionPicker extends StatefulWidget {
   final String? action;
@@ -53,7 +50,6 @@ class _CbvBizStepDispositionPickerState
 
   bool _isActionChanging = false;
 
-
   String _versionString() =>
       widget.epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
 
@@ -62,7 +58,6 @@ class _CbvBizStepDispositionPickerState
 
   String _fmtDisposition(String urn) =>
       CbvVocabularyFormatter.formatDisposition(_versionString(), urn);
-
 
   @override
   void initState() {
@@ -106,7 +101,6 @@ class _CbvBizStepDispositionPickerState
     }
   }
 
-
   void _reformatSelectionsForVersion() {
     if (_selectedBizStep != null) {
       _selectedBizStep = _fmtBizStep(
@@ -132,8 +126,7 @@ class _CbvBizStepDispositionPickerState
           );
 
     if (currentCode == null || !allowed.any((i) => i.code == currentCode)) {
-      final defaultCode =
-          state.actionBizStepCodes[widget.action]?.firstOrNull;
+      final defaultCode = state.actionBizStepCodes[widget.action]?.firstOrNull;
       CbvVocabularyItem? next;
       if (defaultCode != null) {
         for (final item in allowed) {
@@ -170,9 +163,10 @@ class _CbvBizStepDispositionPickerState
     });
   }
 
-
   List<CbvVocabularyItem> _bizStepsFor(
-      String? action, CbvVocabularyState state) {
+    String? action,
+    CbvVocabularyState state,
+  ) {
     final codes = state.actionBizStepCodes[action];
     final all = state.bizSteps;
     if (codes == null || codes.isEmpty) {
@@ -184,7 +178,9 @@ class _CbvBizStepDispositionPickerState
   }
 
   List<CbvVocabularyItem> _dispositionsFor(
-      String? bizCode, List<CbvVocabularyItem> all) {
+    String? bizCode,
+    List<CbvVocabularyItem> all,
+  ) {
     if (bizCode == null) return [];
 
     final liveCodes = context
@@ -202,49 +198,6 @@ class _CbvBizStepDispositionPickerState
 
     return all;
   }
-
-
-  Widget _buildFieldSkeleton(String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AppShimmer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 50,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.white24),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  List<DropdownMenuItem<String>> _buildMenuItems({
-    required List<CbvVocabularyItem> items,
-    required String Function(String urn) formatter,
-  }) {
-    return items
-        .map(
-          (item) => DropdownMenuItem<String>(
-            value: formatter(item.urn),
-            child: Text(item.label),
-          ),
-        )
-        .toList();
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -280,170 +233,81 @@ class _CbvBizStepDispositionPickerState
       listenWhen: (prev, curr) => !prev.isLoaded && curr.isLoaded,
       listener: (context, state) => _applyActionDefaults(state),
       builder: (context, state) {
+        final isLoading =
+            _isActionChanging ||
+            state.isLoading ||
+            state.status == CbvVocabularyStatus.initial;
+        final bizSteps = _bizStepsFor(widget.action, state);
+        final bizCode = _selectedBizStep == null
+            ? null
+            : CbvVocabularyFormatter.shortName(
+                CbvVocabularyFormatter.canonicalBizStepUrn(_selectedBizStep!),
+              );
+        final dispositions = _dispositionsFor(bizCode, state.dispositions);
         return ObjectEventFormSectionCard(
           title: 'Business Context',
           showTitleRequiredIndicator: titleIsRequired,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildBizStepDropdown(state),
+              ObjectEventCbvBizStepDropdown(
+                items: bizSteps,
+                selectedValue: _selectedBizStep,
+                epcisVersion: widget.epcisVersion,
+                isMandatory: widget.isBizStepMandatory,
+                validation: widget.validation,
+                isLoading: isLoading,
+                hasError: state.hasError,
+                onRefresh: () {
+                  context.read<CbvVocabularyCubit>().refresh();
+                },
+                onDefaultSelected: (selected) {
+                  if (!mounted) return;
+                  setState(() => _selectedBizStep = selected);
+                  widget.onBizStepChanged(selected);
+                  _applyActionDefaults(
+                    context.read<CbvVocabularyCubit>().state,
+                  );
+                },
+                onChanged: (selected) {
+                  setState(() {
+                    _selectedBizStep = selected;
+                    _selectedDisposition = null;
+                    widget.onBizStepChanged(selected);
+                    widget.onDispositionChanged(null);
+                    widget.validation.markFieldAsValid('businessStep');
+                    _applyActionDefaults(
+                      context.read<CbvVocabularyCubit>().state,
+                    );
+                  });
+                },
+              ),
               const SizedBox(height: 16.0),
-              _buildDispositionDropdown(state),
+              ObjectEventCbvDispositionDropdown(
+                items: dispositions,
+                selectedValue: _selectedDisposition,
+                epcisVersion: widget.epcisVersion,
+                isMandatory: widget.isDispositionMandatory,
+                validation: widget.validation,
+                isLoading: isLoading,
+                disabled: _selectedBizStep == null,
+                onDefaultSelected: (selected) {
+                  if (!mounted) return;
+                  setState(() => _selectedDisposition = selected);
+                  widget.onDispositionChanged(selected);
+                },
+                onChanged: (selected) {
+                  setState(() {
+                    _selectedDisposition = selected;
+                    widget.onDispositionChanged(selected);
+                    widget.validation.markFieldAsValid('disposition');
+                  });
+                },
+              ),
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildBizStepDropdown(CbvVocabularyState state) {
-    if (_isActionChanging ||
-        state.isLoading ||
-        state.status == CbvVocabularyStatus.initial) {
-      return _buildFieldSkeleton('Business Step');
-    }
-
-    if (state.hasError) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ObjectEventFormErrorBanner(
-            message: 'Could not load vocabulary. Please retry.',
-            onDismiss: () {},
-          ),
-          TextButton.icon(
-            onPressed: () => context.read<CbvVocabularyCubit>().refresh(),
-            icon: TraqIcon(AppAssets.iconRefresh),
-            label: const Text('Retry'),
-          ),
-        ],
-      );
-    }
-
-    final bizSteps = _bizStepsFor(widget.action, state);
-    if (bizSteps.isEmpty) {
-      return const Text(
-        'No business step options are available.',
-        style: TextStyle(color: Colors.grey),
-      );
-    }
-
-    final selectable = bizSteps.map((i) => _fmtBizStep(i.urn)).toList();
-    String? dropdownValue =
-        _selectedBizStep != null && selectable.contains(_selectedBizStep)
-            ? _selectedBizStep
-            : null;
-
-    if (dropdownValue == null && selectable.isNotEmpty) {
-      dropdownValue = selectable.first;
-      if (_selectedBizStep != dropdownValue) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          setState(() => _selectedBizStep = dropdownValue);
-          widget.onBizStepChanged(dropdownValue);
-          _applyActionDefaults(context.read<CbvVocabularyCubit>().state);
-        });
-      }
-    }
-
-    return DropdownButtonFormField<String>(
-      value: dropdownValue,
-      decoration: ObjectEventFormFieldDecoration.getFieldDecoration(
-        context: context,
-        fieldName: 'businessStep',
-        label: 'Business Step',
-        hintText: 'Select a business step',
-        isMandatory: widget.isBizStepMandatory,
-        validation: widget.validation,
-      ),
-      items: _buildMenuItems(items: bizSteps, formatter: _fmtBizStep),
-      validator: (v) {
-        final error = ObjectEventFormValidators.validateBusinessStepCbv(
-          v,
-          epcisVersion: widget.epcisVersion,
-        );
-        widget.validation.setFieldError('businessStep', error);
-        return error;
-      },
-      onChanged: (selected) {
-        if (selected == null) return;
-        setState(() {
-          _selectedBizStep = selected;
-          _selectedDisposition = null;
-          widget.onBizStepChanged(selected);
-          widget.onDispositionChanged(null);
-          widget.validation.markFieldAsValid('businessStep');
-          _applyActionDefaults(context.read<CbvVocabularyCubit>().state);
-        });
-      },
-    );
-  }
-
-  Widget _buildDispositionDropdown(CbvVocabularyState state) {
-    if (_isActionChanging ||
-        state.isLoading ||
-        state.status == CbvVocabularyStatus.initial) {
-      return _buildFieldSkeleton('Disposition');
-    }
-
-    final bizCode = _selectedBizStep == null
-        ? null
-        : CbvVocabularyFormatter.shortName(
-            CbvVocabularyFormatter.canonicalBizStepUrn(_selectedBizStep!),
-          );
-    final dispositions = _dispositionsFor(bizCode, state.dispositions);
-    final disabled = _selectedBizStep == null;
-
-    if (!disabled && dispositions.isEmpty) {
-      return const Text(
-        'No disposition options for the selected business step.',
-        style: TextStyle(color: Colors.grey),
-      );
-    }
-
-    final selectable = dispositions.map((d) => _fmtDisposition(d.urn)).toList();
-    String? dropdownValue =
-        _selectedDisposition != null && selectable.contains(_selectedDisposition)
-            ? _selectedDisposition
-            : null;
-
-    if (dropdownValue == null && selectable.isNotEmpty) {
-      dropdownValue = selectable.first;
-      if (_selectedDisposition != dropdownValue) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          setState(() => _selectedDisposition = dropdownValue);
-          widget.onDispositionChanged(dropdownValue);
-        });
-      }
-    }
-
-    return DropdownButtonFormField<String>(
-      value: dropdownValue,
-      decoration: ObjectEventFormFieldDecoration.getFieldDecoration(
-        context: context,
-        fieldName: 'disposition',
-        label: 'Disposition',
-        hintText: 'Select a disposition',
-        isMandatory: widget.isDispositionMandatory,
-        validation: widget.validation,
-      ),
-      items: _buildMenuItems(items: dispositions, formatter: _fmtDisposition),
-      validator: (v) {
-        final error = ObjectEventFormValidators.validateDispositionCbv(v);
-        widget.validation.setFieldError('disposition', error);
-        return error;
-      },
-      onChanged: disabled
-          ? null
-          : (selected) {
-              if (selected == null) return;
-              setState(() {
-                _selectedDisposition = selected;
-                widget.onDispositionChanged(selected);
-                widget.validation.markFieldAsValid('disposition');
-              });
-            },
     );
   }
 }

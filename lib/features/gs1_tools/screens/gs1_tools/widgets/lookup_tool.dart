@@ -67,14 +67,11 @@ class _LookupToolState extends State<LookupTool> {
                 ValidatedTextFieldWrapper(
                   controller: _identifierController,
                   fieldName: 'identifier',
-                  decoration: const InputDecoration(
-                    labelText: 'GTIN or GLN',
-                  ),
+                  decoration: const InputDecoration(labelText: 'GTIN or GLN'),
                   keyboardType: TextInputType.number,
                   readOnly: slice.isLoading,
-                  validator: (v) => (v ?? '').trim().isEmpty
-                      ? 'Enter a GTIN or GLN'
-                      : null,
+                  validator: (v) =>
+                      (v ?? '').trim().isEmpty ? 'Enter a GTIN or GLN' : null,
                 ),
                 const SizedBox(height: TraqSpacing.lg),
                 CustomElevatedButton(

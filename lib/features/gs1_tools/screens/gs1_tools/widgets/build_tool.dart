@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/gs1_submit_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
@@ -123,8 +124,7 @@ class _BuildToolState extends State<BuildTool> with Gs1InitialModeMixin {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<Gs1ToolsCubit, Gs1ToolsState>(
-      buildWhen: (p, c) =>
-          p.build != c.build || p.initialMode != c.initialMode,
+      buildWhen: (p, c) => p.build != c.build || p.initialMode != c.initialMode,
       builder: (context, state) {
         final cubit = context.read<Gs1ToolsCubit>();
         applyInitialMode(
@@ -213,8 +213,9 @@ class _BuildToolState extends State<BuildTool> with Gs1InitialModeMixin {
                   const SizedBox(height: TraqSpacing.md),
                   DropdownButtonFormField<int>(
                     value: _targetLength,
-                    decoration:
-                        const InputDecoration(labelText: 'Target length'),
+                    decoration: const InputDecoration(
+                      labelText: 'Target length',
+                    ),
                     items: const [
                       DropdownMenuItem(value: 8, child: Text('GTIN-8')),
                       DropdownMenuItem(value: 12, child: Text('GTIN-12')),
@@ -249,7 +250,7 @@ class _BuildToolState extends State<BuildTool> with Gs1InitialModeMixin {
                         : (v) => setState(() => _indicator = v),
                   ),
                 ],
-                gs1SubmitButton(
+                Gs1SubmitButton(
                   loading: slice.isLoading,
                   onPressed: () => _submit(cubit),
                   label: 'Build',

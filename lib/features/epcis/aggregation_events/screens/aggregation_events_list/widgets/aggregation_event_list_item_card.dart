@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_info_row.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/aggregation_events/utils/aggregation_event_ui_constants.dart';
@@ -27,27 +28,6 @@ class AggregationEventListItemCard extends StatelessWidget {
     final muted = theme.colorScheme.onSurfaceVariant;
     final dateFormat = DateFormat('MMM dd, yyyy HH:mm');
 
-    Widget infoRow(String iconAsset, String text) {
-      final color = Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Row(
-          children: [
-            TraqIcon(iconAsset, size: 16, color: color),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                text,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: color, fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     String truncateEpc(String? epc) {
       if (epc == null) return '—';
       if (epc.length <= 40) return epc;
@@ -55,11 +35,13 @@ class AggregationEventListItemCard extends StatelessWidget {
     }
 
     final childCount = event.childEPCs.length;
-    final locationName = event.businessLocation?.locationName ??
+    final locationName =
+        event.businessLocation?.locationName ??
         event.businessLocation?.glnCode ??
         event.readPoint?.glnCode;
     final bizStep = AggregationEventUiConstants.friendlyBizStep(
-        event.businessStep);
+      event.businessStep,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -88,31 +70,48 @@ class AggregationEventListItemCard extends StatelessWidget {
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Gs1ListItemSelectionStyle.primaryTextColor(
-                                isSelected),
+                              isSelected,
+                            ),
                             fontFamily: 'monospace',
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
-                        infoRow(
+                        Gs1ListItemInfoRow(
                           AppAssets.iconLayers,
                           '${AggregationEventUiConstants.listCardItemCountPrefix}'
                           '$childCount child EPC${childCount == 1 ? '' : 's'}',
+
+                          isSelected: isSelected,
+                          muted: muted,
+                          fontSize: 13,
                         ),
                         if (locationName != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             AppAssets.iconMapPin,
                             '${AggregationEventUiConstants.listCardLocationPrefix}$locationName',
+
+                            isSelected: isSelected,
+                            muted: muted,
+                            fontSize: 13,
                           ),
                         if (event.businessStep != null)
-                          infoRow(
+                          Gs1ListItemInfoRow(
                             NavIcons.supplyChainTraversal,
                             '${AggregationEventUiConstants.listCardBizStepPrefix}$bizStep',
+
+                            isSelected: isSelected,
+                            muted: muted,
+                            fontSize: 13,
                           ),
-                        infoRow(
+                        Gs1ListItemInfoRow(
                           AppAssets.iconClock,
                           dateFormat.format(event.eventTime.toLocal()),
+
+                          isSelected: isSelected,
+                          muted: muted,
+                          fontSize: 13,
                         ),
                       ],
                     ),

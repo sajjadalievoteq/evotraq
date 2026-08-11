@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
-import 'package:traqtrace_app/features/automation_center/screens/subscription_details/widgets/subscription_details_body.dart';
-import 'package:traqtrace_app/features/automation_center/utils/subscription_delivery_utils.dart';
 import 'package:traqtrace_app/features/automation_center/utils/subscription_filter_utils.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_action_menu.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_status_chip.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_empty_state.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_loading_skeleton.dart';
+import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_master_list.dart';
+import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_detail_pane.dart';
+import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/embedded_full_details_pane.dart';
 
 class SubscriptionManagementBody extends StatefulWidget {
   const SubscriptionManagementBody({
@@ -158,21 +154,20 @@ class _SubscriptionManagementBodyState
         }
 
         final selected = filtered.firstWhere((s) => s.id == selectedId);
-        final stats =
-            state.lastLoadedStatsSubscriptionId == selected.id
+        final stats = state.lastLoadedStatsSubscriptionId == selected.id
             ? state.lastLoadedStats
             : selected.stats;
 
         return LayoutBuilder(
           builder: (context, constraints) {
             final stacked = constraints.maxWidth < 900 || context.isMobile;
-            final list = _SubscriptionMasterList(
+            final list = SubscriptionMasterList(
               subscriptions: filtered,
               selectedId: selectedId,
               onSelected: _selectSubscription,
             );
             final detail = _showFullDetails && !stacked
-                ? _EmbeddedFullDetailsPane(
+                ? EmbeddedFullDetailsPane(
                     subscription: selected,
                     stats: stats,
                     onBack: () => setState(() => _showFullDetails = false),
@@ -181,7 +176,7 @@ class _SubscriptionManagementBodyState
                     onPause: widget.onPause,
                     onResume: widget.onResume,
                   )
-                : _SubscriptionDetailPane(
+                : SubscriptionDetailPane(
                     subscription: selected,
                     onEdit: widget.onEdit,
                     onDelete: widget.onDelete,
@@ -216,366 +211,6 @@ class _SubscriptionManagementBodyState
           },
         );
       },
-    );
-  }
-}
-
-class _SubscriptionMasterList extends StatelessWidget {
-  const _SubscriptionMasterList({
-    required this.subscriptions,
-    required this.selectedId,
-    required this.onSelected,
-  });
-
-  final List<NotificationSubscription> subscriptions;
-  final String selectedId;
-  final ValueChanged<NotificationSubscription> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: EdgeInsets.zero,
-      itemCount: subscriptions.length,
-      separatorBuilder: (_, _) => const SizedBox(height: TraqSpacing.sm),
-      itemBuilder: (context, index) {
-        final sub = subscriptions[index];
-        return _SubscriptionMasterRow(
-          subscription: sub,
-          selected: sub.id == selectedId,
-          onTap: () => onSelected(sub),
-        );
-      },
-    );
-  }
-}
-
-class _SubscriptionMasterRow extends StatelessWidget {
-  const _SubscriptionMasterRow({
-    required this.subscription,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final NotificationSubscription subscription;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final created = DateFormat.yMMMd().format(subscription.createdAt.toLocal());
-
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: selected ? c.primary.withValues(alpha: 0.06) : c.surface,
-        borderRadius: TraqRadius.card,
-        border: Border.all(
-          color: selected ? c.primary.withValues(alpha: 0.5) : c.border,
-          width: selected ? 1.5 : 1,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: TraqRadius.card,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: TraqSpacing.md,
-              vertical: TraqSpacing.md,
-            ),
-            child: Row(
-              children: [
-                TraqIcon(
-                  SubscriptionDeliveryUtils.iconForEndpoint(
-                    subscription.webhookUrl,
-                  ),
-                  size: 18,
-                  color: selected ? c.primary : c.textMuted,
-                ),
-                const SizedBox(width: TraqSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        subscription.subscriptionName,
-                        style: context.text.bodySm.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: c.textPrimary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: TraqSpacing.xs),
-                      Text(
-                        subscription.webhookUrl,
-                        style: context.text.cap.copyWith(color: c.textMuted),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        'Created $created',
-                        style: context.text.cap.copyWith(color: c.textMuted),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: TraqSpacing.xs),
-                TraqIcon(
-                  AppAssets.iconChevronR,
-                  size: 14,
-                  color: c.textMuted,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SubscriptionDetailPane extends StatelessWidget {
-  const _SubscriptionDetailPane({
-    required this.subscription,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onPause,
-    required this.onResume,
-    required this.onViewDetails,
-    this.onViewAllActivity,
-  });
-
-  final NotificationSubscription subscription;
-  final void Function(NotificationSubscription) onEdit;
-  final void Function(NotificationSubscription) onDelete;
-  final void Function(NotificationSubscription) onPause;
-  final void Function(NotificationSubscription) onResume;
-  final VoidCallback onViewDetails;
-  final VoidCallback? onViewAllActivity;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final created = DateFormat.yMMMd().format(subscription.createdAt.toLocal());
-    final deliveryLabel = SubscriptionDeliveryUtils.labelForEndpoint(
-      subscription.webhookUrl,
-    );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: TraqRadius.card,
-        border: Border.all(color: c.border),
-      ),
-      child: Padding(
-        padding: TraqSpacing.surfacePad,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: ListView(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TraqIcon(
-                        SubscriptionDeliveryUtils.iconForEndpoint(
-                          subscription.webhookUrl,
-                        ),
-                        size: 22,
-                        color: c.primary,
-                      ),
-                      const SizedBox(width: TraqSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    subscription.subscriptionName,
-                                    style: context.text.h3.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                SubscriptionStatusChip(
-                                  status: subscription.status,
-                                ),
-                                SubscriptionActionMenu(
-                                  subscription: subscription,
-                                  onEdit: () => onEdit(subscription),
-                                  onPause: () => onPause(subscription),
-                                  onResume: () => onResume(subscription),
-                                  onDelete: () => onDelete(subscription),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: TraqSpacing.xs),
-                            Text(
-                              'Endpoint: ${subscription.webhookUrl}',
-                              style: context.text.bodySm.copyWith(
-                                color: c.textMuted,
-                              ),
-                            ),
-                            Text(
-                              'Created: $created',
-                              style: context.text.bodySm.copyWith(
-                                color: c.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: TraqSpacing.lg),
-                  _ConfigRow(label: 'Delivery', value: deliveryLabel),
-                  _ConfigRow(
-                    label: 'Type',
-                    value: subscription.subscriptionType,
-                  ),
-                  _ConfigRow(
-                    label: 'Format',
-                    value: subscription.notificationFormat ?? '—',
-                  ),
-                  const SizedBox(height: TraqSpacing.lg),
-                  Text(
-                    'Delivery metrics and per-event history live on the '
-                    'Activity tab.',
-                    style: context.text.bodySm.copyWith(color: c.textMuted),
-                  ),
-
-                ],
-              ),
-            ),
-            const SizedBox(height: TraqSpacing.md),
-            FilledButton(
-              onPressed: onViewDetails,
-              child: const Text('Open full details'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmbeddedFullDetailsPane extends StatelessWidget {
-  const _EmbeddedFullDetailsPane({
-    required this.subscription,
-    required this.stats,
-    required this.onBack,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onPause,
-    required this.onResume,
-  });
-
-  final NotificationSubscription subscription;
-  final NotificationStats? stats;
-  final VoidCallback onBack;
-  final void Function(NotificationSubscription) onEdit;
-  final void Function(NotificationSubscription) onDelete;
-  final void Function(NotificationSubscription) onPause;
-  final void Function(NotificationSubscription) onResume;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: TraqRadius.card,
-        border: Border.all(color: c.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TraqSpacing.sm,
-              TraqSpacing.sm,
-              TraqSpacing.md,
-              TraqSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                IconButton(
-                  tooltip: 'Back to summary',
-                  onPressed: onBack,
-                  icon: const TraqIcon(AppAssets.iconChevronL, size: 18),
-                ),
-                Expanded(
-                  child: Text(
-                    'Subscription details',
-                    style: context.text.body.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                SubscriptionActionMenu(
-                  subscription: subscription,
-                  onEdit: () => onEdit(subscription),
-                  onPause: () => onPause(subscription),
-                  onResume: () => onResume(subscription),
-                  onDelete: () => onDelete(subscription),
-                ),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: c.border),
-          Expanded(
-            child: Padding(
-              padding: TraqSpacing.surfacePad,
-              child: SubscriptionDetailsBody(
-                subscription: subscription,
-                stats: stats,
-                embedded: true,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ConfigRow extends StatelessWidget {
-  const _ConfigRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 88,
-            child: Text(
-              label,
-              style: context.text.cap.copyWith(
-                color: c.textMuted,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: context.text.bodySm.copyWith(color: c.textPrimary),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

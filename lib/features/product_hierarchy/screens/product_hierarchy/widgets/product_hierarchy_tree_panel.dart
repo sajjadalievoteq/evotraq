@@ -108,9 +108,7 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
     _scrollToken = token;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted ||
-          _scrollToken != token ||
-          !_scrollController.hasClients) {
+      if (!mounted || _scrollToken != token || !_scrollController.hasClients) {
         return;
       }
       final position = _scrollController.position;
@@ -198,7 +196,8 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
         // Keep both panels in sync: show skeleton if we are resolving the root,
         // climbing levels, loading node details for the first time,
         // or if the initial "recent parents" list is still loading on the left.
-        final showSkeleton = state.isResolvingRoot ||
+        final showSkeleton =
+            state.isResolvingRoot ||
             state.isClimbing ||
             state.recentParentsLoading ||
             (state.isLoadingDetails && state.root == null);
@@ -208,9 +207,7 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
         }
 
         if ((state.hierarchyError ?? '').isNotEmpty) {
-          return ProductHierarchyTreeErrorView(
-            message: state.hierarchyError!,
-          );
+          return ProductHierarchyTreeErrorView(message: state.hierarchyError!);
         }
 
         final root = state.root;

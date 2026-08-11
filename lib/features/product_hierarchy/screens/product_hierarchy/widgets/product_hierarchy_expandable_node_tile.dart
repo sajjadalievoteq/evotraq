@@ -118,9 +118,7 @@ class ProductHierarchyExpandableNodeTile extends StatelessWidget {
                   ),
                   const SizedBox(width: 5),
                   TraqIcon(
-                    node.isSscc
-                        ? NavIcons.sscc
-                        : NavIcons.aggregationHierarchy,
+                    node.isSscc ? NavIcons.sscc : NavIcons.aggregationHierarchy,
                     size: 20,
                     color: iconFg,
                   ),

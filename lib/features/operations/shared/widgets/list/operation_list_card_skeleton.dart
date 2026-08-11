@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
-
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_row_skeleton.dart';
 
 class OperationListCardSkeleton extends StatelessWidget {
   const OperationListCardSkeleton({super.key});
@@ -25,11 +25,11 @@ class OperationListCardSkeleton extends StatelessWidget {
             SizedBox(height: 20),
             AppSkeletonBox(width: double.infinity, height: 20, radius: 6),
             SizedBox(height: 10),
-            _RowSkeleton(textWidth: 180),
+            OperationListRowSkeleton(textWidth: 180),
             SizedBox(height: 10),
-            _RowSkeleton(textWidth: 160),
+            OperationListRowSkeleton(textWidth: 160),
             SizedBox(height: 10),
-            _RowSkeleton(textWidth: 140),
+            OperationListRowSkeleton(textWidth: 140),
             SizedBox(height: 10),
 
             Row(
@@ -42,23 +42,6 @@ class OperationListCardSkeleton extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _RowSkeleton extends StatelessWidget {
-  const _RowSkeleton({required this.textWidth});
-
-  final double textWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const AppSkeletonBox(width: 16, height: 16, radius: 4),
-        const SizedBox(width: 4),
-        AppSkeletonBox(width: textWidth, height: 14, radius: 6),
-      ],
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_cbv_status.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
@@ -71,30 +72,6 @@ class _SubscriptionAdvancedSectionState
         .toList();
   }
 
-  Widget _cbvStatus(CbvVocabularyState state) {
-    if (state.isLoading && !state.isLoaded) {
-      return const Padding(
-        padding: EdgeInsets.only(bottom: 12),
-        child: LinearProgressIndicator(),
-      );
-    }
-    if (state.hasError && !state.isLoaded) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Row(
-          children: [
-            const Expanded(child: Text('Failed to load CBV vocabulary.')),
-            TextButton(
-              onPressed: () => context.read<CbvVocabularyCubit>().refresh(),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-    return const SizedBox.shrink();
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -121,7 +98,10 @@ class _SubscriptionAdvancedSectionState
                 helperText: 'Select which EPCIS event types to monitor',
               ),
               const SizedBox(height: 12),
-              _cbvStatus(cbvState),
+              SubscriptionCbvStatus(
+                state: cbvState,
+                onRetry: () => context.read<CbvVocabularyCubit>().refresh(),
+              ),
               SubscriptionEnhancedDropdown(
                 name: 'bizStep',
                 label: 'Business Step',

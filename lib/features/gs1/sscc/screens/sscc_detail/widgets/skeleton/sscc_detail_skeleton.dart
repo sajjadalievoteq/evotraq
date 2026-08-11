@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_skeleton_group_card.dart';
@@ -20,25 +20,11 @@ class SsccDetailSkeleton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final c = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
     final accent = isDark ? Colors.grey.shade700 : Colors.grey.shade400;
-    final border = Theme.of(context).colorScheme.outlineVariant.withValues(
-          alpha: 0.45,
-        );
+    final border = Theme.of(
+      context,
+    ).colorScheme.outlineVariant.withValues(alpha: 0.45);
 
     final settings = context.watch<SystemSettingsCubit>().state.settings;
-
-    Widget group({
-      required double titleWidth,
-      required List<double> fieldHeights,
-      double fieldSpacing = 12,
-    }) {
-      return SsccSkeletonGroupCard(
-        borderColor: border,
-        baseColor: c,
-        titleWidth: titleWidth,
-        fieldHeights: fieldHeights,
-        fieldSpacing: fieldSpacing,
-      );
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -86,56 +72,76 @@ class SsccDetailSkeleton extends StatelessWidget {
           const SizedBox(height: 16),
         ],
         if (showCreateSection) ...[
-          group(
+          SsccSkeletonGroupCard(
+            borderColor: border,
+            baseColor: c,
             titleWidth: 200,
             fieldHeights: const [56, 56, 56],
             fieldSpacing: 16,
           ),
           const SizedBox(height: 16),
         ],
-        group(
+        SsccSkeletonGroupCard(
+          borderColor: border,
+          baseColor: c,
           titleWidth: 200,
           fieldHeights: const [56, 56, 56, 56, 56, 56],
           fieldSpacing: 16,
         ),
         const SizedBox(height: 12),
-        group(
+        SsccSkeletonGroupCard(
+          borderColor: border,
+          baseColor: c,
           titleWidth: 140,
           fieldHeights: const [56, 24, 24],
         ),
         const SizedBox(height: 12),
-        group(
+        SsccSkeletonGroupCard(
+          borderColor: border,
+          baseColor: c,
           titleWidth: 160,
           fieldHeights: const [56, 24, 24],
         ),
         const SizedBox(height: 12),
-        group(
+        SsccSkeletonGroupCard(
+          borderColor: border,
+          baseColor: c,
           titleWidth: 180,
           fieldHeights: const [56, 56, 56, 56, 56],
         ),
         const SizedBox(height: 12),
-        group(
+        SsccSkeletonGroupCard(
+          borderColor: border,
+          baseColor: c,
           titleWidth: 170,
           fieldHeights: const [56, 56, 56, 56],
         ),
         const SizedBox(height: 12),
-        group(
+        SsccSkeletonGroupCard(
+          borderColor: border,
+          baseColor: c,
           titleWidth: 120,
           fieldHeights: const [24, 24, 24, 24, 72],
         ),
         const SizedBox(height: 12),
-        group(
+        SsccSkeletonGroupCard(
+          borderColor: border,
+          baseColor: c,
           titleWidth: 130,
           fieldHeights: const [24, 24, 24, 24, 24, 24],
         ),
         if (settings.isPharmaceuticalMode) ...[
           const SizedBox(height: 24),
-          group(
+          SsccSkeletonGroupCard(
+            borderColor: border,
+            baseColor: c,
             titleWidth: 150,
             fieldHeights: const [24, 56, 56],
           ),
           const SizedBox(height: 12),
-          group(
+          SsccSkeletonGroupCard(
+            borderColor: border,
+            baseColor: c,
             titleWidth: 180,
             fieldHeights: const [56, 56, 56, 56, 56],
             fieldSpacing: 16,

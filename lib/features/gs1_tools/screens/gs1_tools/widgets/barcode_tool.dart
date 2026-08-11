@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/barcode_tool_fields.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
@@ -247,141 +248,6 @@ class _BarcodeToolState extends State<BarcodeTool> with Gs1InitialModeMixin {
     }
   }
 
-  List<Widget> _fieldsFor(bool loading) {
-    switch (_mode) {
-      case 'datamatrix':
-      case 'gs1128':
-        return [
-          ValidatedTextFieldWrapper(
-            controller: _elementController,
-            fieldName: 'element_string',
-            decoration: const InputDecoration(labelText: 'GS1 element string'),
-            maxLines: 4,
-            readOnly: loading,
-            validator: (v) => _requiredValidator(v, 'Element string'),
-          ),
-        ];
-      case 'pharma':
-        return [
-          GtinEntryField(
-            controller: _gtinController,
-            label: 'GTIN (AI 01)',
-            enabled: !loading,
-            validator: CheckDigitUtils.validateGtin,
-          ),
-          const SizedBox(height: TraqSpacing.md),
-          ValidatedTextFieldWrapper(
-            controller: _serialController,
-            fieldName: 'serial',
-            decoration: const InputDecoration(labelText: 'Serial (AI 21)'),
-            readOnly: loading,
-            validator: (v) => _requiredValidator(v, 'Serial'),
-          ),
-          const SizedBox(height: TraqSpacing.md),
-          ValidatedTextFieldWrapper(
-            controller: _expiryController,
-            fieldName: 'expiry',
-            decoration: const InputDecoration(
-              labelText: 'Expiry YYMMDD (AI 17)',
-              helperText: 'Day 00 = last day of month',
-            ),
-            keyboardType: TextInputType.number,
-            readOnly: loading,
-            validator: (v) {
-              return Gs1DateUtils.validateYymmdd(v, label: 'Expiry');
-            },
-          ),
-          const SizedBox(height: TraqSpacing.md),
-          ValidatedTextFieldWrapper(
-            controller: _batchController,
-            fieldName: 'batch',
-            decoration: const InputDecoration(
-              labelText: 'Batch / lot (AI 10)',
-            ),
-            readOnly: loading,
-            validator: (v) => _requiredValidator(v, 'Batch/Lot'),
-          ),
-        ];
-      case 'sscc':
-        return [
-          ValidatedTextFieldWrapper(
-            controller: _ssccController,
-            fieldName: 'sscc',
-            decoration: const InputDecoration(labelText: 'SSCC'),
-            keyboardType: TextInputType.number,
-            readOnly: loading,
-            validator: CheckDigitUtils.validateSscc,
-          ),
-        ];
-      case 'ean13':
-        return [
-          GtinEntryField(
-            controller: _gtinController,
-            label: 'GTIN-13',
-            enabled: !loading,
-            validator: (v) => CheckDigitUtils.validateGS1CheckDigit(
-              v,
-              allowedLengths: const {13},
-              label: 'GTIN-13',
-            ),
-          ),
-        ];
-      case 'upca':
-        return [
-          GtinEntryField(
-            controller: _gtinController,
-            label: 'GTIN-12 (UPC-A)',
-            enabled: !loading,
-            validator: (v) => CheckDigitUtils.validateGS1CheckDigit(
-              v,
-              allowedLengths: const {12},
-              label: 'GTIN-12',
-            ),
-          ),
-        ];
-      case 'itf14':
-        return [
-          GtinEntryField(
-            controller: _gtinController,
-            label: 'GTIN-14',
-            enabled: !loading,
-            validator: (v) => CheckDigitUtils.validateGS1CheckDigit(
-              v,
-              allowedLengths: const {14},
-              label: 'GTIN-14',
-            ),
-          ),
-        ];
-      case 'qrdl':
-        return [
-          ValidatedTextFieldWrapper(
-            controller: _dataController,
-            fieldName: 'digital_link',
-            decoration: const InputDecoration(
-              labelText: 'Digital Link URL',
-              hintText: 'https://id.gs1.org/…',
-            ),
-            maxLines: 3,
-            readOnly: loading,
-            validator: (v) => _requiredValidator(v, 'Digital Link'),
-          ),
-        ];
-      default:
-        return [
-          ValidatedTextFieldWrapper(
-            controller: _verifyController,
-            fieldName: 'verify_input',
-            decoration: const InputDecoration(
-              labelText: 'Barcode / element string',
-            ),
-            maxLines: 4,
-            readOnly: loading,
-            validator: (v) => _requiredValidator(v, 'Barcode data'),
-          ),
-        ];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<Gs1ToolsCubit, Gs1ToolsState>(
@@ -448,7 +314,19 @@ class _BarcodeToolState extends State<BarcodeTool> with Gs1InitialModeMixin {
                   onChanged: (v) => setState(() => _mode = v),
                 ),
                 const SizedBox(height: TraqSpacing.lg),
-                ..._fieldsFor(loading),
+                BarcodeToolFields(
+                  mode: _mode,
+                  loading: loading,
+                  elementController: _elementController,
+                  gtinController: _gtinController,
+                  serialController: _serialController,
+                  expiryController: _expiryController,
+                  batchController: _batchController,
+                  ssccController: _ssccController,
+                  dataController: _dataController,
+                  verifyController: _verifyController,
+                  requiredValidator: _requiredValidator,
+                ),
                 const SizedBox(height: TraqSpacing.lg),
                 CustomElevatedButton(
                   label: _mode == 'verify' ? 'Verify' : 'Generate',

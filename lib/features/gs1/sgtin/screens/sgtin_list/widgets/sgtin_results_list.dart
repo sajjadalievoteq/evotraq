@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/constrained_section_content.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
@@ -33,21 +34,12 @@ class SgtinResultsList extends StatelessWidget {
   final ValueChanged<String> onTapSgtin;
   final VoidCallback onLoadMore;
 
-  Widget _constrainedCenter(Widget child) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: Constants.sectionMaxWidth),
-        child: child,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SGTINCubit, SGTINState>(
       listenWhen: (previous, current) =>
-          current.status == SGTINStatus.error && previous.status != SGTINStatus.error,
+          current.status == SGTINStatus.error &&
+          previous.status != SGTINStatus.error,
       listener: (context, state) {
         if (state.error != null) {
           context.showError(state.error!);
@@ -63,8 +55,8 @@ class SgtinResultsList extends StatelessWidget {
 
         final sgtins = state.sgtins;
         if (sgtins == null || sgtins.isEmpty) {
-          return _constrainedCenter(
-            AppEmptyState(
+          return ConstrainedSectionContent(
+            child: AppEmptyState(
               iconAsset: NavIcons.sgtin,
               title: SgtinUiConstants.emptyListTitle,
               subtitle: SgtinUiConstants.emptyListSubtitle,
@@ -73,10 +65,12 @@ class SgtinResultsList extends StatelessWidget {
               hasItems: hasActiveFilters,
               hasActiveFilters: hasActiveFilters,
               onClearFilters: onClearFilters,
-              primaryActionLabel:
-                  hasActiveFilters ? null : SgtinUiConstants.emptyAddAction,
-              primaryActionIconAsset:
-                  hasActiveFilters ? null : AppAssets.iconPlus,
+              primaryActionLabel: hasActiveFilters
+                  ? null
+                  : SgtinUiConstants.emptyAddAction,
+              primaryActionIconAsset: hasActiveFilters
+                  ? null
+                  : AppAssets.iconPlus,
               onPrimaryAction: hasActiveFilters ? null : onCreate,
             ),
           );
@@ -112,7 +106,8 @@ class SgtinResultsList extends StatelessWidget {
                   left: context.padding.left,
                   right: context.padding.left,
                 ),
-                itemCount: sgtins.length +
+                itemCount:
+                    sgtins.length +
                     (state.hasMoreData && isFetchingMore ? 1 : 0) +
                     1,
                 separatorBuilder: (_, __) =>
@@ -120,12 +115,13 @@ class SgtinResultsList extends StatelessWidget {
                 itemBuilder: (context, index) {
                   if (index < sgtins.length) {
                     final sgtin = sgtins[index];
-                    return _constrainedCenter(
-                      RepaintBoundary(
+                    return ConstrainedSectionContent(
+                      child: RepaintBoundary(
                         child: SgtinListItemCard(
                           sgtin: sgtin,
                           isSelected:
-                              (sgtin.id ?? sgtin.serialNumber) == selectedSgtinId,
+                              (sgtin.id ?? sgtin.serialNumber) ==
+                              selectedSgtinId,
                           onTap: () =>
                               onTapSgtin(sgtin.id ?? sgtin.serialNumber),
                         ),
@@ -135,10 +131,15 @@ class SgtinResultsList extends StatelessWidget {
 
                   final loaderIndex = sgtins.length;
                   final spacerIndex =
-                      sgtins.length + (state.hasMoreData && isFetchingMore ? 1 : 0);
+                      sgtins.length +
+                      (state.hasMoreData && isFetchingMore ? 1 : 0);
 
-                  if (index == loaderIndex && state.hasMoreData && isFetchingMore) {
-                    return _constrainedCenter(const Gs1ListLoadMoreIndicator());
+                  if (index == loaderIndex &&
+                      state.hasMoreData &&
+                      isFetchingMore) {
+                    return ConstrainedSectionContent(
+                      child: const Gs1ListLoadMoreIndicator(),
+                    );
                   }
 
                   if (index == spacerIndex) {

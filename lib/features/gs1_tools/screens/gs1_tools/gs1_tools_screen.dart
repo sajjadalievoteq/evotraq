@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/gs1_tools_view.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
@@ -20,6 +21,7 @@ import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/seria
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/serialize_export_tool.dart';
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/serialize_import_tool.dart';
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/validate_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/gs1_tool_panel.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_rail.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_scaffold.dart';
 
@@ -80,44 +82,7 @@ class Gs1ToolsScreen extends StatelessWidget {
         initialTool: initialTool ?? Gs1ToolKind.convert,
         initialMode: initialMode,
       ),
-      child: const _Gs1ToolsView(),
+      child: Gs1ToolsView(groups: railGroups),
     );
   }
-}
-
-class _Gs1ToolsView extends StatelessWidget {
-  const _Gs1ToolsView();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<Gs1ToolsCubit, Gs1ToolsState>(
-      buildWhen: (p, c) => p.selectedTool != c.selectedTool,
-      builder: (context, state) {
-        return WorkbenchScaffold(
-          title: 'GS1 Tools',
-          groups: Gs1ToolsScreen.railGroups,
-          selectedId: state.selectedTool.id,
-          onSelect: (id) {
-            String? mode;
-            final tool = Gs1ToolKindX.fromId(id, onMode: (m) => mode = m);
-            context.read<Gs1ToolsCubit>().selectTool(tool, mode: mode);
-          },
-          panelBuilder: (_, id) => _panelFor(Gs1ToolKindX.fromId(id)),
-        );
-      },
-    );
-  }
-
-  Widget _panelFor(Gs1ToolKind kind) => switch (kind) {
-    Gs1ToolKind.convert => const ConvertTool(),
-    Gs1ToolKind.validate => const ValidateTool(),
-    Gs1ToolKind.build => const BuildTool(),
-    Gs1ToolKind.barcode => const BarcodeTool(),
-    Gs1ToolKind.aiElement => const AiElementTool(),
-    Gs1ToolKind.ndc => const NdcTool(),
-    Gs1ToolKind.lookup => const LookupTool(),
-    Gs1ToolKind.serializeConvert => const SerializeConvertTool(),
-    Gs1ToolKind.serializeExport => const SerializeExportTool(),
-    Gs1ToolKind.serializeImport => const SerializeImportTool(),
-  };
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_help_widget.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/help_widgets/object_event_help_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';

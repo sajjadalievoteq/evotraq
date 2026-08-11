@@ -4,12 +4,14 @@ import '../../../../core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/epcis/widgets/validation_simple_error.dart';
+import 'package:traqtrace_app/features/epcis/widgets/validation_structured_error.dart';
 
 class ValidationErrorWidget extends StatelessWidget {
   final List<dynamic> validationErrors;
-  
+
   final String? title;
-  
+
   final VoidCallback? onDismiss;
 
   const ValidationErrorWidget({
@@ -58,70 +60,15 @@ class ValidationErrorWidget extends StatelessWidget {
             const Divider(),
             ...validationErrors.map((e) {
               if (e is Map<String, dynamic>) {
-                return _buildStructuredError(context, e);
+                return ValidationStructuredError(errorMap: e);
               } else if (e is String) {
-                return _buildSimpleError(context, e);
+                return ValidationSimpleError(message: e);
               } else {
-                return _buildSimpleError(context, e.toString());
+                return ValidationSimpleError(message: e.toString());
               }
             }).toList(),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSimpleError(BuildContext context, String message) {
-    final error = AppColorMapper.errorColor(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TraqIcon(AppAssets.iconChevronR, color: error, size: 20),
-          const SizedBox(width: 4.0),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(color: error),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStructuredError(BuildContext context, Map<String, dynamic> errorMap) {
-    final field = errorMap['field'] as String? ?? 'Unknown';
-    final message = errorMap['message'] as String? ?? 'Invalid value';
-    final error = AppColorMapper.errorColor(context);
-    
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              TraqIcon(AppAssets.iconChevronR, color: error, size: 20),
-              const SizedBox(width: 4.0),
-              Text(
-                field,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: error,
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 28.0),
-            child: Text(
-              message,
-              style: TextStyle(color: error),
-            ),
-          ),
-        ],
       ),
     );
   }

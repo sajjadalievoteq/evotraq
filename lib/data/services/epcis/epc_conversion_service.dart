@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/data/services/epcis/epc_conversion_error_parser.dart';
 
 class EPCConversionService {
   final DioService _dioService;
@@ -98,7 +100,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert SGTIN to EPC URI',
       );
     }
@@ -120,7 +122,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert SSCC to EPC URI',
       );
     }
@@ -142,7 +144,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert EPC URI to GTIN',
       );
     }
@@ -164,7 +166,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert EPC URI to SSCC',
       );
     }
@@ -191,7 +193,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert GLN to EPC URI',
       );
     }
@@ -213,7 +215,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert EPC URI to GLN',
       );
     }
@@ -235,7 +237,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to extract serial number from EPC URI',
       );
     }
@@ -257,7 +259,8 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ?? 'Failed to validate EPC URI',
+            EpcConversionErrorParser.parse(response.data) ??
+            'Failed to validate EPC URI',
       );
     }
   }
@@ -278,7 +281,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert GTIN to class-level EPC URI',
       );
     }
@@ -300,7 +303,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert GS1 element string to EPC URI',
       );
     }
@@ -322,7 +325,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert EPC URI to GS1 element string',
       );
     }
@@ -345,7 +348,9 @@ class EPCConversionService {
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: _parseErrorMessage(response.data) ?? 'Failed to get EPC type',
+        message:
+            EpcConversionErrorParser.parse(response.data) ??
+            'Failed to get EPC type',
       );
     }
   }
@@ -366,7 +371,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to check if EPC is class level',
       );
     }
@@ -388,7 +393,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to check if EPC is instance level',
       );
     }
@@ -421,7 +426,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert EPC list to SGTINs',
       );
     }
@@ -454,7 +459,7 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert SGTIN pairs to EPC list',
       );
     }
@@ -480,31 +485,9 @@ class EPCConversionService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            EpcConversionErrorParser.parse(response.data) ??
             'Failed to convert EPC URI to SGTIN',
       );
-    }
-  }
-
-  String? _parseErrorMessage(dynamic responseData) {
-    try {
-      if (responseData is String) {
-        final jsonBody = jsonDecode(responseData);
-        if (jsonBody['message'] != null) {
-          return jsonBody['message'];
-        } else if (jsonBody['error'] != null) {
-          return jsonBody['error'];
-        }
-      } else if (responseData is Map) {
-        if (responseData['message'] != null) {
-          return responseData['message'];
-        } else if (responseData['error'] != null) {
-          return responseData['error'];
-        }
-      }
-      return null;
-    } catch (_) {
-      return null;
     }
   }
 }

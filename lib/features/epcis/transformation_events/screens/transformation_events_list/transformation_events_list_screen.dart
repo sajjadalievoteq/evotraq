@@ -4,14 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/transformation_events_cubit.dart';
-import 'package:traqtrace_app/features/epcis/widgets/transformation_events_help.dart';
-import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/features/epcis/widgets/help_widgets/transformation_events_help.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/features/epcis/transformation_events/screens/transformation_events_list/widgets/transformation_events_list.dart';
+import 'package:traqtrace_app/features/epcis/transformation_events/screens/transformation_events_list/widgets/transformation_events_quick_info_card.dart';
+
+import '../../../../../core/utils/cbv_display_utils.dart';
+
+part 'transformation_events_list_actions.dart';
 
 class TransformationEventsListScreen extends StatefulWidget {
   const TransformationEventsListScreen({Key? key}) : super(key: key);
@@ -46,24 +49,6 @@ class _TransformationEventsListScreenState
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadTransformationEvents() async {
-    final cubit = context.read<TransformationEventsCubit>();
-
-    if (_filterTransformationId != null) {
-      await cubit.findByTransformationId(_filterTransformationId!);
-    } else if (_filterInputEPC != null) {
-      await cubit.findByInputEPC(_filterInputEPC!);
-    } else if (_filterOutputEPC != null) {
-      await cubit.findByOutputEPC(_filterOutputEPC!);
-    } else {
-      await cubit.loadTransformationEvents();
-    }
-  }
-
-  Future<void> _refreshData() async {
-    await _loadTransformationEvents();
   }
 
   void _showFilterDialog() {
@@ -163,28 +148,6 @@ class _TransformationEventsListScreenState
         child: SingleChildScrollView(child: TransformationEventsHelp()),
       ),
     );
-  }
-
-  void _navigateToEventDetails(TransformationEvent event) {
-    if (event.id != null) {
-      context
-          .push('/epcis/transformation-events/${event.id}', extra: event.id)
-          .then((result) {
-            if (result == true) {
-              _refreshData();
-            }
-          });
-    } else {
-      context.showInfo('Event ID is missing');
-    }
-  }
-
-  void _navigateToCreateEvent() {
-    context.push('/epcis/transformation-events/new').then((result) {
-      if (result == true) {
-        _refreshData();
-      }
-    });
   }
 
   Future<void> _showTrackEPCDialog() async {
@@ -502,168 +465,21 @@ class _TransformationEventsListScreenState
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildQuickInfoCard(),
-          Expanded(child: _buildEventsList()),
+          TransformationEventsQuickInfoCard(onLearnMore: _showHelpDialog),
+          Expanded(
+            child: TransformationEventsList(
+              scrollController: _scrollController,
+              onRefresh: _refreshData,
+              onCreateEvent: _navigateToCreateEvent,
+              onOpenEvent: _navigateToEventDetails,
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCreateEvent,
         tooltip: 'Create Transformation Event',
         child: TraqIcon(AppAssets.iconPlus),
-      ),
-    );
-  }
-
-  Widget _buildQuickInfoCard() {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                TraqIcon(AppAssets.iconTransform,
-                  color: AppColorMapper.eventTypeColor(
-                    context,
-                    'transformation',
-                    scheme: AppEventColorScheme.epcis,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'GS1 Transformation Events',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Track product transformations such as manufacturing, repackaging, or assembly processes.',
-            ),
-            const SizedBox(height: 4),
-            TextButton(
-              onPressed: _showHelpDialog,
-              child: const Text('Learn More'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventsList() {
-    return BlocBuilder<TransformationEventsCubit, TransformationEventsState>(
-      builder: (context, state) {
-        if (state.isLoading && state.transformationEvents.isEmpty) {
-          return const Center(child: AppLoadingIndicator());
-        }
-
-        if (state.errorMessage != null && state.transformationEvents.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TraqIcon(AppAssets.iconAlert,
-                  size: 48,
-                  color: AppColorMapper.errorColor(context),
-                ),
-                const SizedBox(height: 16),
-                Text('Error: ${state.errorMessage}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _refreshData,
-                  child: const Text('Try Again'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        if (state.transformationEvents.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TraqIcon(AppAssets.iconTransform, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                const Text('No transformation events found'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _navigateToCreateEvent,
-                  child: const Text('Create First Event'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: _refreshData,
-          child: ListView.separated(
-            controller: _scrollController,
-            itemCount:
-                state.transformationEvents.length + (state.isLoading ? 1 : 0),
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              if (index == state.transformationEvents.length) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: AppLoadingIndicator(),
-                  ),
-                );
-              }
-
-              final event = state.transformationEvents[index];
-              return _buildEventItem(event);
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildEventItem(TransformationEvent event) {
-    final inputCount = event.inputEPCList.length;
-    final outputCount = event.outputEPCList.length;
-    final formattedDate = DateFormat(
-      'yyyy-MM-dd HH:mm',
-    ).format(event.eventTime);
-    final transformColor = AppColorMapper.eventTypeColor(
-      context,
-      'transformation',
-      scheme: AppEventColorScheme.epcis,
-    );
-
-    return ListTile(
-      onTap: () => _navigateToEventDetails(event),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: transformColor.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: TraqIcon(AppAssets.iconTransform, color: transformColor),
-      ),
-      title: Text(
-        'ID: ${event.transformationID}',
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 4),
-          Text('Date: $formattedDate'),
-          Text('$inputCount input(s) → $outputCount output(s)'),
-          if (event.businessStep != null)
-            Text(
-              'Step: ${CbvDisplayUtils.displayBizStep(event.businessStep)}',
-            ),
-        ],
       ),
     );
   }

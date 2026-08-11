@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_events_list/widgets/aggregation_filter_section_label.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
@@ -51,12 +52,6 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
 
   static const _actions = ['ADD', 'OBSERVE', 'DELETE'];
 
-  Widget _sectionLabel(String text) => Padding(
-        padding: const EdgeInsets.only(top: 16, bottom: 8),
-        child: Text(text,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-      );
-
   String _capitalizeLabel(String label) {
     if (label.isEmpty) return label;
     return label[0].toUpperCase() + label.substring(1);
@@ -85,7 +80,7 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionLabel('Action'),
+        const AggregationFilterSectionLabel('Action'),
         DropdownButtonFormField<String>(
           value: selectedAction,
           decoration: const InputDecoration(
@@ -100,7 +95,7 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           onChanged: onActionChanged,
         ),
 
-        _sectionLabel('Business Step'),
+        const AggregationFilterSectionLabel('Business Step'),
         if (isVocabularyLoading)
           const Center(child: CircularProgressIndicator())
         else
@@ -113,15 +108,17 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
             ),
             items: [
               const DropdownMenuItem(value: null, child: Text('Any')),
-              ...availableBizSteps.map((item) => DropdownMenuItem(
-                    value: item.code,
-                    child: Text(_capitalizeLabel(item.label)),
-                  )),
+              ...availableBizSteps.map(
+                (item) => DropdownMenuItem(
+                  value: item.code,
+                  child: Text(_capitalizeLabel(item.label)),
+                ),
+              ),
             ],
             onChanged: onBizStepChanged,
           ),
 
-        _sectionLabel('Disposition'),
+        const AggregationFilterSectionLabel('Disposition'),
         if (isVocabularyLoading)
           const Center(child: CircularProgressIndicator())
         else
@@ -134,15 +131,17 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
             ),
             items: [
               const DropdownMenuItem(value: null, child: Text('Any')),
-              ...availableDispositions.map((item) => DropdownMenuItem(
-                    value: item.code,
-                    child: Text(_capitalizeLabel(item.label)),
-                  )),
+              ...availableDispositions.map(
+                (item) => DropdownMenuItem(
+                  value: item.code,
+                  child: Text(_capitalizeLabel(item.label)),
+                ),
+              ),
             ],
             onChanged: onDispositionChanged,
           ),
 
-        _sectionLabel('Parent EPC'),
+        const AggregationFilterSectionLabel('Parent EPC'),
         TextField(
           controller: parentEpcController,
           decoration: const InputDecoration(
@@ -153,7 +152,7 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           ),
         ),
 
-        _sectionLabel('Child EPC'),
+        const AggregationFilterSectionLabel('Child EPC'),
         TextField(
           controller: childEpcController,
           decoration: const InputDecoration(
@@ -164,7 +163,7 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           ),
         ),
 
-        _sectionLabel('Location GLN'),
+        const AggregationFilterSectionLabel('Location GLN'),
         TextField(
           controller: locationGlnController,
           decoration: const InputDecoration(
@@ -175,7 +174,7 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           ),
         ),
 
-        _sectionLabel('Event Time Range'),
+        const AggregationFilterSectionLabel('Event Time Range'),
         Row(
           children: [
             Expanded(

@@ -63,14 +63,14 @@ class JourneyState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        journey,
-        searchResults,
-        isSearching,
-        selectedStep,
-        errorMessage,
-        eventFilter,
-        recentEvents,
-        recentEventsLoading,
-      ];
+    status,
+    journey,
+    searchResults,
+    isSearching,
+    selectedStep,
+    errorMessage,
+    eventFilter,
+    recentEvents,
+    recentEventsLoading,
+  ];
 }

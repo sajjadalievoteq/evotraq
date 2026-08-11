@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_right_pane.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -33,9 +34,9 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
     this.isListLoading,
     this.showFloatingActionButton = true,
   }) : assert(
-          fabNavigateRoute != null || detailCreateBuilder != null,
-          'detailCreateBuilder is required when fabNavigateRoute is not set',
-        );
+         fabNavigateRoute != null || detailCreateBuilder != null,
+         'detailCreateBuilder is required when fabNavigateRoute is not set',
+       );
 
   final String appBarTitle;
 
@@ -60,20 +61,20 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
     required ValueChanged<String> onSelect,
     required void Function(VoidCallback fn) bindRefresh,
     required VoidCallback onRequestCreate,
-  }) listBuilder;
+  })
+  listBuilder;
 
   final Widget Function(BuildContext context, String id) detailViewBuilder;
 
-  final Widget Function(BuildContext context, VoidCallback onEmbeddedActionSuccess)?
-      detailCreateBuilder;
+  final Widget Function(
+    BuildContext context,
+    VoidCallback onEmbeddedActionSuccess,
+  )?
+  detailCreateBuilder;
 
-  
-  
   final Widget Function(BuildContext context, {required bool listLoading})
-      detailAwaitBuilder;
+  detailAwaitBuilder;
 
-  
-  
   final bool Function(TState state)? isListLoading;
   final bool showFloatingActionButton;
 
@@ -182,96 +183,23 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
             bindRefresh: (fn) => _refreshList = fn,
             onRequestCreate: _onRequestCreate,
           ),
-          detail: _rightPane(),
+          detail: Gs1SplitViewRightPane<TCubit, TState>(
+            selectedId: _selectedId,
+            useEmbeddedCreate: _useEmbeddedCreate,
+            isCreateMode: _isCreateMode,
+            isEmptyNoMatch: widget.isEmptyNoMatch,
+            idsFromState: widget.idsFromState,
+            detailViewBuilder: widget.detailViewBuilder,
+            detailAwaitBuilder: widget.detailAwaitBuilder,
+            detailCreateBuilder: widget.detailCreateBuilder,
+            isListLoading: widget.isListLoading,
+            createHeaderText: widget.createHeaderText,
+            closeCreateTooltip: widget.closeCreateTooltip,
+            onCloseCreate: () => setState(() => _isCreateMode = false),
+            onEmbeddedCreateSuccess: _onEmbeddedCreateSuccess,
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _rightPane() {
-    final viewPane = BlocBuilder<TCubit, TState>(
-      builder: (context, state) {
-        final listLoading = widget.isListLoading?.call(state) ?? false;
-        if (listLoading) {
-          return widget.detailAwaitBuilder(context, listLoading: true);
-        }
-
-        if (widget.isEmptyNoMatch(state)) {
-          
-          
-          return widget.detailAwaitBuilder(context, listLoading: false);
-        }
-
-        final ids = widget.idsFromState(state)?.toList(growable: false);
-        final effective =
-            _selectedId ?? (ids != null && ids.isNotEmpty ? ids.first : null);
-        if (effective == null) {
-          return widget.detailAwaitBuilder(context, listLoading: false);
-        }
-        return widget.detailViewBuilder(context, effective);
-      },
-    );
-
-    if (!_useEmbeddedCreate) {
-      return viewPane;
-    }
-
-    final createBuilder = widget.detailCreateBuilder!;
-    final c = context.colors;
-    final webTopInset = kIsWeb ? 12.0 : 0.0;
-    final createPane = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Material(
-          elevation: 2,
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(2),
-            bottomRight: Radius.circular(2),
-          ),
-          color: c.primary,
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: webTopInset,
-              left: context.gutter,
-              right: context.gutter,
-              bottom: 8,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    widget.createHeaderText,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.white),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                IconButton(
-                  tooltip: widget.closeCreateTooltip,
-                  color: Colors.white,
-                  onPressed: () => setState(() => _isCreateMode = false),
-                  icon: TraqIcon(AppAssets.iconX),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const Divider(height: 1),
-        Expanded(
-          child: createBuilder(context, _onEmbeddedCreateSuccess),
-        ),
-      ],
-    );
-
-    return IndexedStack(
-      index: _isCreateMode ? 1 : 0,
-      children: [
-        viewPane,
-        createPane,
-      ],
     );
   }
 }

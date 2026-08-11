@@ -22,10 +22,9 @@ class ApprovalsListContent extends StatelessWidget {
       return Center(
         child: Text(
           UserApprovalConstants.noPendingApprovals,
-          style: Theme.of(context)
-              .textTheme
-              .bodyLarge
-              ?.copyWith(color: Colors.grey[700]),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: Colors.grey[700]),
           textAlign: TextAlign.center,
         ),
       );

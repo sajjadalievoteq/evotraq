@@ -21,9 +21,7 @@ class PartitionSummaryCard extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Total Records (in partitions): ${statistics.totalRecords}',
-            ),
+            Text('Total Records (in partitions): ${statistics.totalRecords}'),
             Text('Total Size Bytes: ${statistics.totalSizeBytes}'),
             Text(
               'Total Size MB: ${statistics.totalSizeMb?.toStringAsFixed(2) ?? 'null'}',

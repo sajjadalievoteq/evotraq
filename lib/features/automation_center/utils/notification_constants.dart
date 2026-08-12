@@ -22,6 +22,59 @@ class NotificationConstants {
     },
   ];
 
+  static const List<Map<String, String>> operationTypes = [
+    {
+      'value': 'SHIPPING',
+      'label': 'Shipping',
+      'description': 'Items being shipped out',
+    },
+    {
+      'value': 'RECEIVING',
+      'label': 'Receiving',
+      'description': 'Items being received',
+    },
+    {
+      'value': 'RETURN_SHIPPING',
+      'label': 'Return Shipping',
+      'description': 'Items shipped back to a supplier',
+    },
+    {
+      'value': 'RETURN_RECEIVING',
+      'label': 'Return Receiving',
+      'description': 'Returned items being received back',
+    },
+    {
+      'value': 'CANCEL_SHIPPING',
+      'label': 'Cancel Shipping',
+      'description': 'A shipping operation being voided',
+    },
+    {
+      'value': 'CANCEL_RECEIVING',
+      'label': 'Cancel Receiving',
+      'description': 'A receiving operation being voided',
+    },
+    {
+      'value': 'ACCEPTING',
+      'label': 'Accepting',
+      'description': 'Items being accepted into inventory',
+    },
+    {
+      'value': 'DECOMMISSIONING',
+      'label': 'Decommissioning',
+      'description': 'Items being taken out of service',
+    },
+    {
+      'value': 'PACKING',
+      'label': 'Packing',
+      'description': 'Items being packed into a container',
+    },
+    {
+      'value': 'UNPACKING',
+      'label': 'Unpacking',
+      'description': 'Items being removed from a container',
+    },
+  ];
+
   static const List<Map<String, String>> subscriptionTypes = [
     {
       'value': 'REALTIME',
@@ -43,7 +96,7 @@ class NotificationConstants {
   static const List<Map<String, String>> deliveryMethods = [
     {
       'value': 'WEBHOOK',
-      'label': 'Webhook',
+      'label': 'API',
       'description': 'Send to HTTP endpoint (for developers)',
     },
     {
@@ -94,9 +147,10 @@ class NotificationConstants {
       'description': 'Simplified text summary',
     },
     {
-      'value': 'EMAIL_HTML',
-      'label': 'Email HTML',
-      'description': 'Rich HTML email format (email only)',
+      'value': 'EXCEL',
+      'label': 'CSV',
+      'description':
+          'CSV attachment containing the complete operation hierarchy',
     },
   ];
 }

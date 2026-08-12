@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_navigation.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/config/router_not_found_screen.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
@@ -244,6 +245,7 @@ class AppRouter {
   }
 
   late final GoRouter router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     refreshListenable: GoRouterRefreshStream(authCubit.stream),
     debugLogDiagnostics: _enableRouterDiagnostics,
     initialLocation: Constants.splashRoute,

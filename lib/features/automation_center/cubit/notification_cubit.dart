@@ -161,6 +161,8 @@ class NotificationCubit extends Cubit<NotificationState> {
     int? preferredHour,
     int? preferredMinute,
     Map<String, dynamic>? queryParameters,
+    String? webhookAuthUsername,
+    String? webhookAuthPassword,
   }) async {
     try {
       if (!isClosed) {
@@ -177,6 +179,8 @@ class NotificationCubit extends Cubit<NotificationState> {
         preferredHour: preferredHour,
         preferredMinute: preferredMinute,
         queryParameters: queryParameters,
+        webhookAuthUsername: webhookAuthUsername,
+        webhookAuthPassword: webhookAuthPassword,
       );
 
       final subscription = await _apiService.createSubscription(request);
@@ -213,6 +217,8 @@ class NotificationCubit extends Cubit<NotificationState> {
     int? preferredHour,
     int? preferredMinute,
     Map<String, dynamic>? queryParameters,
+    String? webhookAuthUsername,
+    String? webhookAuthPassword,
   }) async {
     try {
       if (!isClosed) {
@@ -229,6 +235,8 @@ class NotificationCubit extends Cubit<NotificationState> {
         preferredHour: preferredHour,
         preferredMinute: preferredMinute,
         queryParameters: queryParameters,
+        webhookAuthUsername: webhookAuthUsername,
+        webhookAuthPassword: webhookAuthPassword,
       );
 
       final subscription = await _apiService.updateSubscription(id, request);

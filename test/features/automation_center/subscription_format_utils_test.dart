@@ -3,6 +3,24 @@ import 'package:traqtrace_app/features/automation_center/utils/subscription_form
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 
 void main() {
+  group('SubscriptionFormatUtils.availableFormats', () {
+    test('email offers summary or complete hierarchy Excel only', () {
+      final values = SubscriptionFormatUtils.availableFormats(
+        'EMAIL',
+      ).map((format) => format['value']).toList();
+
+      expect(values, ['SUMMARY', 'EXCEL']);
+    });
+
+    test('webhook does not offer the email-only Excel attachment', () {
+      final values = SubscriptionFormatUtils.availableFormats(
+        'WEBHOOK',
+      ).map((format) => format['value']);
+
+      expect(values, isNot(contains('EXCEL')));
+    });
+  });
+
   group('SubscriptionFormatUtils.successRatePercent', () {
     test('formats backend 0–100 percentages without multiplying again', () {
       expect(
@@ -14,11 +32,7 @@ void main() {
         '100%',
       );
       expect(
-        SubscriptionFormatUtils.successRatePercent(
-          50,
-          delivered: 1,
-          failed: 1,
-        ),
+        SubscriptionFormatUtils.successRatePercent(50, delivered: 1, failed: 1),
         '50%',
       );
     });

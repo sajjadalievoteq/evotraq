@@ -7,7 +7,7 @@ abstract final class SubscriptionDeliveryUtils {
   }
 
   static String labelForEndpoint(String webhookUrl) {
-    return isEmailEndpoint(webhookUrl) ? 'Email' : 'Webhook';
+    return isEmailEndpoint(webhookUrl) ? 'Email' : 'API';
   }
 
   static String iconForEndpoint(String webhookUrl) {

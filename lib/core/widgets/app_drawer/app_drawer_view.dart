@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer/app_drawer_account_header.dart';
-import 'package:traqtrace_app/core/widgets/app_drawer/app_drawer_postman_tile.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer/app_drawer_logout_tile.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -254,7 +253,7 @@ class AppDrawerView extends StatelessWidget {
                         leading: AppDrawerNavigationIcon(NavIcons.toolbox),
                         title: const Text('Toolbox'),
                         subtitle: const Text(
-                          'Validation Ã‚Â· Conversion Ã‚Â· Utilities',
+                          'Validation · Conversion · Utilities',
                           style: TextStyle(fontSize: 11),
                         ),
 
@@ -437,8 +436,6 @@ class AppDrawerView extends StatelessWidget {
                         ),
                       ],
 
-                      const Divider(),
-                      AppDrawerPostmanTile(isAdmin: isAdmin),
                       const Divider(),
                       ListTile(
                         leading: AppDrawerNavigationIcon(NavIcons.helpSupport),

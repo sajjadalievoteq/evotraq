@@ -11,6 +11,7 @@ import 'package:traqtrace_app/features/automation_center/cubit/job_queue_cubit.d
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_system_health_panel.dart';
+import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_inbound_panel.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_center_tab_content.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/notification_center_screen.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/subscription_management_screen.dart';
@@ -35,11 +36,15 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
 
   JobQueueCubit? _jobQueueCubit;
   late String _selectedTab;
+  late String _selectedSection;
 
   @override
   void initState() {
     super.initState();
     final isAdmin = context.read<AuthCubit>().state.isAdmin;
+    _selectedSection = AutomationCenterSections.normalize(
+      widget.initialSection,
+    );
     _selectedTab = AutomationCenterSections.normalizeTab(
       widget.initialSection,
       isAdmin: isAdmin,
@@ -56,6 +61,9 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
     final next = AutomationCenterSections.normalizeTab(
       widget.initialSection,
       isAdmin: isAdmin,
+    );
+    _selectedSection = AutomationCenterSections.normalize(
+      widget.initialSection,
     );
     if (next != _selectedTab) setState(() => _selectedTab = next);
   }
@@ -112,137 +120,142 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
     Widget body = WorkbenchScaffold(
       title: 'Automation Center',
       groups: AutomationCenterSections.groupsFor(isAdmin: isAdmin),
-      selectedId: AutomationCenterSections.notifications,
-      onSelect: (_) => _selectTab(AutomationCenterSections.alertSubscriptions),
-      panelBuilder: (context, _) => AutomationWorkbenchPanel(
-        title: 'Notifications',
-        fillBody: true,
-        actions: switch (selected) {
-          AutomationCenterSections.alertSubscriptions => [
-            IconButton(
-              tooltip: 'Help',
-              onPressed: () => _subscriptionsKey.currentState?.showHelp(),
-              icon: const TraqIcon(AppAssets.iconInfo),
-            ),
-            OutlinedButton.icon(
-              onPressed: () => _subscriptionsKey.currentState?.refresh(),
-              icon: const TraqIcon(AppAssets.iconRefresh, size: 14),
-              label: const Text('Refresh'),
-            ),
-            FilledButton.icon(
-              onPressed: () => _subscriptionsKey.currentState?.showCreate(),
-              icon: const TraqIcon(AppAssets.iconPlus, size: 14),
-              label: const Text('New Subscription'),
-            ),
-          ],
-          AutomationCenterSections.backgroundJobs => [
-            OutlinedButton.icon(
-              onPressed: () => _jobsKey.currentState?.showControlPanel(),
-              icon: const TraqIcon(AppAssets.iconTune, size: 14),
-              label: const Text('Queue Controls'),
-            ),
-            IconButton(
-              tooltip: 'Refresh job operations',
-              onPressed: () => _jobsKey.currentState?.refreshCurrentTab(),
-              icon: const TraqIcon(AppAssets.iconRefresh),
-            ),
-            FilledButton.icon(
-              onPressed: () => _jobsKey.currentState?.showScheduleJobDialog(),
-              icon: const TraqIcon(AppAssets.iconClock, size: 14),
-              label: const Text('Run Job'),
-            ),
-          ],
-          AutomationCenterSections.notificationActivity => [
-            IconButton(
-              tooltip: 'Toggle live updates',
-              onPressed: () => _activityKey.currentState?.toggleLive(),
-              icon: const TraqIcon(AppAssets.iconWifi),
-            ),
-            IconButton(
-              tooltip: 'Refresh activity',
-              onPressed: () => _activityKey.currentState?.refresh(),
-              icon: const TraqIcon(AppAssets.iconRefresh),
-            ),
-          ],
-          _ => [
-            IconButton(
-              tooltip: 'Refresh system health',
-              onPressed: () {
-                context.read<NotificationCubit>().loadSubscriptions(
-                  force: true,
-                );
-                _jobQueueCubit?.refresh();
+      selectedId: _selectedSection,
+      onSelect: (section) => setState(() => _selectedSection = section),
+      panelBuilder: (context, section) =>
+          section == AutomationCenterSections.inbound
+          ? const AutomationInboundPanel()
+          : AutomationWorkbenchPanel(
+              title: 'Outbound',
+              fillBody: true,
+              actions: switch (selected) {
+                AutomationCenterSections.alertSubscriptions => [
+                  IconButton(
+                    tooltip: 'Help',
+                    onPressed: () => _subscriptionsKey.currentState?.showHelp(),
+                    icon: const TraqIcon(AppAssets.iconInfo),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => _subscriptionsKey.currentState?.refresh(),
+                    icon: const TraqIcon(AppAssets.iconRefresh, size: 14),
+                    label: const Text('Refresh'),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () =>
+                        _subscriptionsKey.currentState?.showCreate(),
+                    icon: const TraqIcon(AppAssets.iconPlus, size: 14),
+                    label: const Text('New Subscription'),
+                  ),
+                ],
+                AutomationCenterSections.backgroundJobs => [
+                  OutlinedButton.icon(
+                    onPressed: () => _jobsKey.currentState?.showControlPanel(),
+                    icon: const TraqIcon(AppAssets.iconTune, size: 14),
+                    label: const Text('Queue Controls'),
+                  ),
+                  IconButton(
+                    tooltip: 'Refresh job operations',
+                    onPressed: () => _jobsKey.currentState?.refreshCurrentTab(),
+                    icon: const TraqIcon(AppAssets.iconRefresh),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () =>
+                        _jobsKey.currentState?.showScheduleJobDialog(),
+                    icon: const TraqIcon(AppAssets.iconClock, size: 14),
+                    label: const Text('Run Job'),
+                  ),
+                ],
+                AutomationCenterSections.notificationActivity => [
+                  IconButton(
+                    tooltip: 'Toggle live updates',
+                    onPressed: () => _activityKey.currentState?.toggleLive(),
+                    icon: const TraqIcon(AppAssets.iconWifi),
+                  ),
+                  IconButton(
+                    tooltip: 'Refresh activity',
+                    onPressed: () => _activityKey.currentState?.refresh(),
+                    icon: const TraqIcon(AppAssets.iconRefresh),
+                  ),
+                ],
+                _ => [
+                  IconButton(
+                    tooltip: 'Refresh system health',
+                    onPressed: () {
+                      context.read<NotificationCubit>().loadSubscriptions(
+                        force: true,
+                      );
+                      _jobQueueCubit?.refresh();
+                    },
+                    icon: const TraqIcon(AppAssets.iconRefresh),
+                  ),
+                ],
               },
-              icon: const TraqIcon(AppAssets.iconRefresh),
-            ),
-          ],
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Manage subscriptions, monitor deliveries, and track '
-              'notification system health.',
-              style: context.text.body.copyWith(
-                color: context.colors.textMuted,
-              ),
-            ),
-            const SizedBox(height: TraqSpacing.md),
-            WorkspaceTabs(
-              tabs: tabs,
-              selectedId: selected,
-              onSelected: _selectTab,
-            ),
-            Divider(height: 1, color: context.colors.border),
-            const SizedBox(height: TraqSpacing.md),
-            Expanded(
-              child: LazyIndexedStack(
-                index: selectedIndex,
-                sizing: StackFit.expand,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (final tab in tabs)
-                    AutomationCenterTabContent(
-                      tab: tab.id,
-                      subscriptions: SubscriptionManagementScreen(
-                        key: _subscriptionsKey,
-                        onViewAllActivity: () => _selectTab(
-                          AutomationCenterSections.notificationActivity,
-                        ),
-                      ),
-                      activity: NotificationCenterScreen(
-                        key: _activityKey,
-                        onManageSubscriptions: () => _selectTab(
-                          AutomationCenterSections.alertSubscriptions,
-                        ),
-                      ),
-                      jobs: SingleChildScrollView(
-                        child: JobQueuePanel(
-                          key: _jobsKey,
-                          embedded: true,
-                          cubit: _jobQueueCubit,
-                        ),
-                      ),
-                      systemHealth: AutomationSystemHealthPanel(
-                        jobQueueCubit: _jobQueueCubit,
-                        onOpenSubscriptions: () => _selectTab(
-                          AutomationCenterSections.alertSubscriptions,
-                        ),
-                        onOpenActivity: () => _selectTab(
-                          AutomationCenterSections.notificationActivity,
-                        ),
-                        onOpenJobOperations: isAdmin
-                            ? () => _selectTab(
-                                AutomationCenterSections.backgroundJobs,
-                              )
-                            : null,
-                      ),
+                  Text(
+                    'Manage subscriptions, monitor deliveries, and track '
+                    'notification system health.',
+                    style: context.text.body.copyWith(
+                      color: context.colors.textMuted,
                     ),
+                  ),
+                  const SizedBox(height: TraqSpacing.md),
+                  WorkspaceTabs(
+                    tabs: tabs,
+                    selectedId: selected,
+                    onSelected: _selectTab,
+                  ),
+                  Divider(height: 1, color: context.colors.border),
+                  const SizedBox(height: TraqSpacing.md),
+                  Expanded(
+                    child: LazyIndexedStack(
+                      index: selectedIndex,
+                      sizing: StackFit.expand,
+                      children: [
+                        for (final tab in tabs)
+                          AutomationCenterTabContent(
+                            tab: tab.id,
+                            subscriptions: SubscriptionManagementScreen(
+                              key: _subscriptionsKey,
+                              onViewAllActivity: () => _selectTab(
+                                AutomationCenterSections.notificationActivity,
+                              ),
+                            ),
+                            activity: NotificationCenterScreen(
+                              key: _activityKey,
+                              onManageSubscriptions: () => _selectTab(
+                                AutomationCenterSections.alertSubscriptions,
+                              ),
+                            ),
+                            jobs: SingleChildScrollView(
+                              child: JobQueuePanel(
+                                key: _jobsKey,
+                                embedded: true,
+                                cubit: _jobQueueCubit,
+                              ),
+                            ),
+                            systemHealth: AutomationSystemHealthPanel(
+                              jobQueueCubit: _jobQueueCubit,
+                              onOpenSubscriptions: () => _selectTab(
+                                AutomationCenterSections.alertSubscriptions,
+                              ),
+                              onOpenActivity: () => _selectTab(
+                                AutomationCenterSections.notificationActivity,
+                              ),
+                              onOpenJobOperations: isAdmin
+                                  ? () => _selectTab(
+                                      AutomationCenterSections.backgroundJobs,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
 
     final jobCubit = _jobQueueCubit;

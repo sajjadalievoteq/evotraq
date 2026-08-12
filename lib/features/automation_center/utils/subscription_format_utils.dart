@@ -6,12 +6,12 @@ abstract final class SubscriptionFormatUtils {
       return NotificationConstants.notificationFormats
           .where(
             (format) =>
-                format['value'] == 'SUMMARY' || format['value'] == 'EMAIL_HTML',
+                format['value'] == 'SUMMARY' || format['value'] == 'EXCEL',
           )
           .toList();
     }
     return NotificationConstants.notificationFormats
-        .where((format) => format['value'] != 'EMAIL_HTML')
+        .where((format) => format['value'] != 'EXCEL')
         .toList();
   }
 

@@ -45,13 +45,13 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                   HelpItem(
                     title: 'Delivery Method',
                     description:
-                        '''• Webhook: Send to HTTP endpoint (for developers/systems)
+                        '''• API: Send to HTTP endpoint (for developers/systems)
 • Email: Send to email address (user-friendly option)''',
                   ),
                   HelpItem(
-                    title: 'Webhook Endpoint URL',
+                    title: 'API Endpoint URL',
                     description:
-                        'The HTTPS endpoint where webhook notifications will be sent. Must be a valid URL that can receive POST requests with JSON/XML payloads. (Only for webhook delivery)',
+                        'The HTTPS endpoint where API notifications will be sent. Must be a valid URL that can receive POST requests with JSON/XML payloads. (Only for API delivery)',
                   ),
                   HelpItem(
                     title: 'Email Address',
@@ -67,8 +67,8 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                   ),
                   HelpItem(
                     title: 'Notification Format',
-                    description: '''• JSON: Standard JSON format (webhooks only)
-• XML: EPCIS XML format (webhooks only)
+                    description: '''• JSON: Standard JSON format (API only)
+• XML: EPCIS XML format (API only)
 • Summary: Simplified text summary (both)
 • Email HTML: Rich HTML format (emails only)''',
                   ),
@@ -87,22 +87,13 @@ class NotificationSubscriptionHelp extends StatelessWidget {
 • Transformation Event: Item transformations''',
                   ),
                   HelpItem(
-                    title: 'Business Step',
-                    description: '''Filter by business process steps:
-• Receiving: Items being received
-• Shipping: Items being shipped
-• Inspecting: Quality control checks
-• Storing: Moving to storage
-• Commissioning: Putting into service''',
-                  ),
-                  HelpItem(
-                    title: 'Disposition',
-                    description: '''Filter by item status/condition:
-• Active: Items in active use
-• In Progress: Items being processed
-• Damaged: Items with damage
-• Expired: Items past expiration
-• Recalled: Items under recall''',
+                    title: 'Operations',
+                    description: '''Filter by which supply-chain operation produced the event:
+• Shipping / Return Shipping / Cancel Shipping
+• Receiving / Return Receiving / Cancel Receiving
+• Accepting: Items being accepted into inventory
+• Packing / Unpacking: Container grouping and ungrouping
+• Decommissioning: Items taken out of service''',
                   ),
                   HelpItem(
                     title: 'Read Point',
@@ -125,24 +116,24 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                     description:
                         '''Monitor all items being received at warehouse:
 • Event Types: Object Event
-• Business Step: Receiving
+• Operations: Receiving
 • Read Point: Your warehouse GLN
-• Webhook: https://yourapp.com/webhooks/receiving''',
+• API: https://yourapp.com/api/receiving''',
                   ),
                   HelpExampleCard(
                     title: 'Product Recall Monitoring',
                     description: '''Track recalled products:
 • Event Types: Object Event
-• Disposition: Recalled
+• Operations: Decommissioning
 • EPC Pattern: Specific product range
-• Webhook: https://yourapp.com/webhooks/recalls''',
+• API: https://yourapp.com/api/recalls''',
                   ),
                   HelpExampleCard(
                     title: 'Shipment Tracking',
                     description: '''Monitor shipping events:
 • Event Types: Object Event, Aggregation Event
-• Business Step: Shipping
-• Webhook: https://yourapp.com/webhooks/shipping''',
+• Operations: Shipping
+• API: https://yourapp.com/api/shipping''',
                   ),
                 ],
               ),
@@ -156,7 +147,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                   ),
                   HelpTip(
                     tip:
-                        'Test your webhook endpoint before creating subscriptions',
+                        'Test your API endpoint before creating subscriptions',
                   ),
                   HelpTip(
                     tip:
@@ -164,11 +155,11 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                   ),
                   HelpTip(
                     tip:
-                        'Monitor webhook delivery rates in subscription statistics',
+                        'Monitor API delivery rates in subscription statistics',
                   ),
                   HelpTip(
                     tip:
-                        'Set up proper error handling in your webhook endpoint',
+                        'Set up proper error handling in your API endpoint',
                   ),
                 ],
               ),

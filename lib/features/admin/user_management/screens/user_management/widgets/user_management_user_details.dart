@@ -79,7 +79,7 @@ class UserManagementUserDetails extends StatelessWidget {
           children: [
             UserManagementUserInfoBadge(
               label: 'Role',
-              value: user.role,
+              value: UserManagementConstants.roleDisplayLabel(user.role),
               valueColor: roleColor,
             ),
             UserManagementUserInfoBadge(

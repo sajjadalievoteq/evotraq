@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -5,9 +7,14 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/web/web_download_stub.dart'
+    if (dart.library.html) 'package:traqtrace_app/core/web/web_download_web.dart'
+    if (dart.library.io) 'package:traqtrace_app/core/web/web_download_io.dart'
+    as web_download;
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
+import 'package:traqtrace_app/features/automation_center/utils/subscription_sample_payloads.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/create_subscription_form_fields.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/help_widgets/notification_subscription_help.dart';
 import 'package:traqtrace_app/features/automation_center/utils/subscription_delivery_utils.dart';
@@ -82,9 +89,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       else
         'webhookUrl': subscription.webhookUrl,
       'subscriptionType': subscription.subscriptionType,
-      'notificationFormat':
-          subscription.notificationFormat ??
-          (_selectedDeliveryMethod == 'EMAIL' ? 'EMAIL_HTML' : 'SUMMARY'),
+      'notificationFormat': subscription.notificationFormat ?? 'SUMMARY',
       'notificationFrequency':
           subscription.notificationFrequency ??
           _typeDefaultFrequency[subscription.subscriptionType],
@@ -96,8 +101,10 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         ),
       if (eventTypes is List)
         'eventTypes': eventTypes.map((value) => '$value').toList(),
-      'bizStep': firstString('businessSteps'),
-      'disposition': firstString('dispositions'),
+      if (query['operationTypes'] is List)
+        'operationTypes': (query['operationTypes'] as List)
+            .map((value) => '$value')
+            .toList(),
       'readPoint': firstString('readPoints'),
       'epcPattern': firstString('epcs'),
     };
@@ -159,24 +166,19 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           child: FormBuilder(
             key: _formKey,
             initialValue: _initialValue,
-            onChanged: () {
-              final formData = _formKey.currentState?.value;
-              if (formData != null && formData['deliveryMethod'] != null) {
-                final newDeliveryMethod = formData['deliveryMethod'] as String;
-                if (_selectedDeliveryMethod != newDeliveryMethod) {
-                  setState(() {
-                    _selectedDeliveryMethod = newDeliveryMethod;
-                  });
-                }
-              }
-            },
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 16),
               child: Column(
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
                 children: [
                   CreateSubscriptionFormFields(
+                    isEditing: _isEditing,
                     selectedDeliveryMethod: _selectedDeliveryMethod,
                     onDeliveryMethodChanged: (value) {
+                      _formKey.currentState?.patchValue({
+                        'notificationFormat': 'SUMMARY',
+                      });
                       setState(() {
                         _selectedDeliveryMethod = value;
                         _testSucceeded = null;
@@ -205,6 +207,21 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                       setState(() => _selectedNotificationFrequency = value);
                     },
                   ),
+                  if (_selectedDeliveryMethod == 'WEBHOOK') ...[
+                    const SizedBox(height: TraqSpacing.md),
+                    _SamplePayloadDownloads(
+                      onDownloadJson: () => _downloadSamplePayload(
+                        content: SubscriptionSamplePayloads.jsonSample,
+                        filename: SubscriptionSamplePayloads.jsonFilename,
+                        mimeType: SubscriptionSamplePayloads.jsonMimeType,
+                      ),
+                      onDownloadXml: () => _downloadSamplePayload(
+                        content: SubscriptionSamplePayloads.xmlSample,
+                        filename: SubscriptionSamplePayloads.xmlFilename,
+                        mimeType: SubscriptionSamplePayloads.xmlMimeType,
+                      ),
+                    ),
+                  ],
                   if (_isTesting || _testMessage != null) ...[
                     const SizedBox(height: TraqSpacing.md),
                     DeliveryTestFeedback(
@@ -219,6 +236,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           ),
         ),
         actions: [
+
           TextButton(
             onPressed: _isLoading
                 ? null
@@ -240,11 +258,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : TraqIcon(AppAssets.iconFlask),
-                  label: Text(
-                    _selectedDeliveryMethod == 'EMAIL'
-                        ? 'Test Email'
-                        : 'Test Webhook',
-                  ),
+                  label: const Text('Test Subscription'),
                 ),
               ],
               FilledButton(
@@ -271,6 +285,18 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
     );
   }
 
+  void _downloadSamplePayload({
+    required String content,
+    required String filename,
+    required String mimeType,
+  }) {
+    web_download.downloadBytes(
+      bytes: utf8.encode(content),
+      filename: filename,
+      mimeType: mimeType,
+    );
+  }
+
   void _testDelivery() {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final formData = _formKey.currentState!.value;
@@ -287,7 +313,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           context.read<NotificationCubit>().testWebhook(webhookUrl);
         } else {
           setState(() => _isTesting = false);
-          context.showError('Please enter a valid webhook URL');
+          context.showError('Please enter a valid API URL');
           return;
         }
       } else if (deliveryMethod == 'EMAIL') {
@@ -319,14 +345,9 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         queryParameters['eventTypes'] = formData['eventTypes'];
       }
 
-      if (formData['bizStep'] != null &&
-          (formData['bizStep'] as String).isNotEmpty) {
-        queryParameters['businessSteps'] = [formData['bizStep']];
-      }
-
-      if (formData['disposition'] != null &&
-          (formData['disposition'] as String).isNotEmpty) {
-        queryParameters['dispositions'] = [formData['disposition']];
+      if (formData['operationTypes'] != null &&
+          (formData['operationTypes'] as List<String>).isNotEmpty) {
+        queryParameters['operationTypes'] = formData['operationTypes'];
       }
 
       if (formData['readPoint'] != null &&
@@ -343,9 +364,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           ? formData['webhookUrl']
           : formData['emailAddress'];
 
-      final String? notificationFormat = deliveryMethod == 'EMAIL'
-          ? null
-          : formData['notificationFormat'];
+      final String? notificationFormat = formData['notificationFormat'];
 
       final String subscriptionType = formData['subscriptionType'];
       final bool usesCadence =
@@ -363,6 +382,16 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           ? formData['preferredTime'] as TimeOfDay?
           : null;
 
+      // Only meaningful for WEBHOOK/API delivery. On edit, leaving these blank
+      // means "don't change" for the password (see UpdateSubscriptionRequest);
+      // an empty username is sent as-is since there's no saved value to protect.
+      final String? webhookAuthUsername = deliveryMethod == 'WEBHOOK'
+          ? (formData['webhookAuthUsername'] as String?)
+          : null;
+      final String? webhookAuthPassword = deliveryMethod == 'WEBHOOK'
+          ? (formData['webhookAuthPassword'] as String?)
+          : null;
+
       if (_isEditing) {
         context.read<NotificationCubit>().updateSubscription(
           id: widget.subscription!.id,
@@ -375,6 +404,12 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           preferredHour: preferredTime?.hour,
           preferredMinute: preferredTime?.minute,
           queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+          webhookAuthUsername: (webhookAuthUsername?.isEmpty ?? true)
+              ? null
+              : webhookAuthUsername,
+          webhookAuthPassword: (webhookAuthPassword?.isEmpty ?? true)
+              ? null
+              : webhookAuthPassword,
         );
       } else {
         context.read<NotificationCubit>().createSubscription(
@@ -387,8 +422,53 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           preferredHour: preferredTime?.hour,
           preferredMinute: preferredTime?.minute,
           queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+          webhookAuthUsername: webhookAuthUsername,
+          webhookAuthPassword: webhookAuthPassword,
         );
       }
     }
+  }
+}
+
+/// "Download Sample JSON/XML" buttons shown for API/webhook subscriptions so
+/// a third-party developer can build their receiving endpoint against the
+/// exact payload shape TraqTrace sends.
+class _SamplePayloadDownloads extends StatelessWidget {
+  const _SamplePayloadDownloads({
+    required this.onDownloadJson,
+    required this.onDownloadXml,
+  });
+
+  final VoidCallback onDownloadJson;
+  final VoidCallback onDownloadXml;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Sample payload for the receiving system',
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: onDownloadJson,
+              icon: const Icon(Icons.download, size: 18),
+              label: const Text('Download Sample JSON'),
+            ),
+            OutlinedButton.icon(
+              onPressed: onDownloadXml,
+              icon: const Icon(Icons.download, size: 18),
+              label: const Text('Download Sample XML'),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

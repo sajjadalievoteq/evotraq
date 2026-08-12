@@ -79,8 +79,8 @@ class SubscriptionMultiSelectField extends StatelessWidget {
                   icon: TraqIcon(AppAssets.iconPlus),
                   label: Text(
                     field.value == null || field.value!.isEmpty
-                        ? 'Select Event Types'
-                        : 'Add More Event Types',
+                        ? 'Select $label'
+                        : 'Add More $label',
                   ),
                   onPressed: () => _showMultiSelectDialog(
                     context,

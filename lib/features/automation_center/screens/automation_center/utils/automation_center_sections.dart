@@ -4,12 +4,13 @@ import 'package:traqtrace_app/features/shared/workbench/workbench_rail.dart';
 
 abstract final class AutomationCenterSections {
   static const notifications = 'notifications';
+  static const inbound = 'inbound';
   static const alertSubscriptions = 'alert-subscriptions';
   static const notificationActivity = 'notification-activity';
   static const backgroundJobs = 'background-jobs';
   static const systemHealth = 'system-health';
 
-  static const ordered = [notifications];
+  static const ordered = [notifications, inbound];
 
   static const adminOnlyTabs = {backgroundJobs};
 
@@ -17,18 +18,24 @@ abstract final class AutomationCenterSections {
 
   static const groups = [
     WorkbenchRailGroup(
-      title: 'Notifications',
+      title: 'Integrations',
       items: [
         WorkbenchRailItem(
           id: notifications,
           iconAsset: NavIcons.manageSubscriptions,
-          label: 'Alerts & Subscriptions',
+          label: 'Outbound',
+        ),
+        WorkbenchRailItem(
+          id: inbound,
+          iconAsset: NavIcons.integrationValidation,
+          label: 'Inbound',
         ),
       ],
     ),
   ];
 
-  static String normalize(String? section) => notifications;
+  static String normalize(String? section) =>
+      section == inbound ? inbound : notifications;
 
   static String normalizeTab(String? section, {bool isAdmin = true}) {
     final tab = switch (section) {

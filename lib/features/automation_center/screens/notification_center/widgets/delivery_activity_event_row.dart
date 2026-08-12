@@ -37,7 +37,7 @@ class DeliveryActivityEventRow extends StatelessWidget {
     final isEmail =
         notification.webhookUrl.contains('@') &&
         !notification.webhookUrl.toLowerCase().startsWith('http');
-    return isEmail ? 'Email' : 'Webhook';
+    return isEmail ? 'Email' : 'API';
   }
 
   static String _title(DeliveryActivityOutcome outcome, String channel) =>

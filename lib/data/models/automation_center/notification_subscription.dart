@@ -154,6 +154,10 @@ class CreateSubscriptionRequest extends Equatable {
   @JsonKey(includeIfNull: false)
   final int? preferredMinute;
   final Map<String, dynamic>? queryParameters;
+  @JsonKey(includeIfNull: false)
+  final String? webhookAuthUsername;
+  @JsonKey(includeIfNull: false)
+  final String? webhookAuthPassword;
 
   const CreateSubscriptionRequest({
     required this.subscriptionName,
@@ -166,6 +170,8 @@ class CreateSubscriptionRequest extends Equatable {
     this.preferredHour,
     this.preferredMinute,
     this.queryParameters,
+    this.webhookAuthUsername,
+    this.webhookAuthPassword,
   });
 
   factory CreateSubscriptionRequest.fromJson(Map<String, dynamic> json) =>
@@ -185,6 +191,8 @@ class CreateSubscriptionRequest extends Equatable {
         preferredHour,
         preferredMinute,
         queryParameters,
+        webhookAuthUsername,
+        webhookAuthPassword,
       ];
 }
 

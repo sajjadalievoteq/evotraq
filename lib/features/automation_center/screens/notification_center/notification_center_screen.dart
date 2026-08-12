@@ -119,7 +119,7 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
           body: NotificationCenterBody(
             state: state,
             selectedFilter: _selectedFilter,
-            shrinkWrap: true,
+            shrinkWrap: false,
             onRefresh: refresh,
             onClearFilters: () => setState(() => _selectedFilter = 'all'),
             onPrimaryAction: goManageSubscriptions,

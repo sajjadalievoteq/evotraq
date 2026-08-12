@@ -3,9 +3,14 @@ import 'package:traqtrace_app/features/automation_center/utils/notification_cons
 
 /// Reads the event-filter fields out of a subscription's raw
 /// `queryParameters` map (as sent by [CreateSubscriptionDialog]'s advanced
-/// section: `eventTypes`, `businessSteps`, `dispositions`, `readPoints`,
-/// `epcs`) and renders each as a human-readable value, so the details page
-/// can show the actual configured filters instead of a raw key:value dump.
+/// section: `eventTypes`, `operationTypes`, `readPoints`, `epcs`) and renders
+/// each as a human-readable value, so the details page can show the actual
+/// configured filters instead of a raw key:value dump.
+///
+/// `businessSteps`/`dispositions` are read too, but only for **display** of
+/// subscriptions created before the Operations selector replaced the raw CBV
+/// business-step/disposition dropdowns — the create/edit dialog no longer
+/// writes these keys, but older subscriptions may still have them stored.
 abstract final class SubscriptionQueryFilterUtils {
   static List<String> eventTypeLabels(Map<String, dynamic>? queryParameters) {
     final raw = _stringList(queryParameters, 'eventTypes');
@@ -17,9 +22,25 @@ abstract final class SubscriptionQueryFilterUtils {
     }).toList();
   }
 
+  static List<String> operationTypeLabels(
+    Map<String, dynamic>? queryParameters,
+  ) {
+    final raw = _stringList(queryParameters, 'operationTypes');
+    return raw.map((value) {
+      for (final option in NotificationConstants.operationTypes) {
+        if (option['value'] == value) return option['label'] ?? value;
+      }
+      return value;
+    }).toList();
+  }
+
+  /// Legacy display-only: business step, if this subscription predates the
+  /// Operations selector.
   static String? businessStep(Map<String, dynamic>? queryParameters) =>
       _firstShortName(queryParameters, 'businessSteps');
 
+  /// Legacy display-only: disposition, if this subscription predates the
+  /// Operations selector.
   static String? disposition(Map<String, dynamic>? queryParameters) =>
       _firstShortName(queryParameters, 'dispositions');
 
@@ -34,6 +55,7 @@ abstract final class SubscriptionQueryFilterUtils {
   static bool hasAnyFilter(Map<String, dynamic>? queryParameters) {
     if (queryParameters == null || queryParameters.isEmpty) return false;
     return eventTypeLabels(queryParameters).isNotEmpty ||
+        operationTypeLabels(queryParameters).isNotEmpty ||
         businessStep(queryParameters) != null ||
         disposition(queryParameters) != null ||
         readPoint(queryParameters) != null ||

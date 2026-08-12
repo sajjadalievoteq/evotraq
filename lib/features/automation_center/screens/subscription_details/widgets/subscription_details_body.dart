@@ -59,6 +59,10 @@ class SubscriptionDetailsBody extends StatelessWidget {
     final eventTypeLabels = SubscriptionQueryFilterUtils.eventTypeLabels(
       queryParameters,
     );
+    final operationTypeLabels =
+        SubscriptionQueryFilterUtils.operationTypeLabels(queryParameters);
+    // Legacy-only: subscriptions created before the Operations selector may
+    // still have raw CBV business-step/disposition filters stored.
     final bizStep = SubscriptionQueryFilterUtils.businessStep(queryParameters);
     final disposition = SubscriptionQueryFilterUtils.disposition(
       queryParameters,
@@ -98,7 +102,7 @@ class SubscriptionDetailsBody extends StatelessWidget {
           title: 'Delivery',
           children: [
             SubscriptionDetailRow(
-              label: isEmailDelivery ? 'Email' : 'Webhook URL',
+              label: isEmailDelivery ? 'Email' : 'API URL',
               value: subscription.webhookUrl.isNotEmpty
                   ? subscription.webhookUrl
                   : 'Not configured',
@@ -123,13 +127,21 @@ class SubscriptionDetailsBody extends StatelessWidget {
                       value: eventTypeLabels.join(', '),
                     ),
                   SubscriptionDetailRow(
-                    label: 'Business Step',
-                    value: bizStep ?? 'Any',
+                    label: 'Operations',
+                    value: operationTypeLabels.isNotEmpty
+                        ? operationTypeLabels.join(', ')
+                        : 'Any',
                   ),
-                  SubscriptionDetailRow(
-                    label: 'Disposition',
-                    value: disposition ?? 'Any',
-                  ),
+                  if (bizStep != null)
+                    SubscriptionDetailRow(
+                      label: 'Business Step',
+                      value: bizStep,
+                    ),
+                  if (disposition != null)
+                    SubscriptionDetailRow(
+                      label: 'Disposition',
+                      value: disposition,
+                    ),
                   SubscriptionDetailRow(
                     label: 'Read Point (GLN)',
                     value: readPoint ?? 'Any',

@@ -83,6 +83,8 @@ CreateSubscriptionRequest _$CreateSubscriptionRequestFromJson(
   preferredHour: (json['preferredHour'] as num?)?.toInt(),
   preferredMinute: (json['preferredMinute'] as num?)?.toInt(),
   queryParameters: json['queryParameters'] as Map<String, dynamic>?,
+  webhookAuthUsername: json['webhookAuthUsername'] as String?,
+  webhookAuthPassword: json['webhookAuthPassword'] as String?,
 );
 
 Map<String, dynamic> _$CreateSubscriptionRequestToJson(
@@ -98,6 +100,8 @@ Map<String, dynamic> _$CreateSubscriptionRequestToJson(
   'preferredHour': ?instance.preferredHour,
   'preferredMinute': ?instance.preferredMinute,
   'queryParameters': ?instance.queryParameters,
+  'webhookAuthUsername': ?instance.webhookAuthUsername,
+  'webhookAuthPassword': ?instance.webhookAuthPassword,
 };
 
 WebhookNotification _$WebhookNotificationFromJson(Map<String, dynamic> json) =>

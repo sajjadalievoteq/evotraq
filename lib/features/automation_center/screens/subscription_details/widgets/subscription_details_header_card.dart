@@ -63,7 +63,7 @@ class SubscriptionDetailsHeaderCard extends StatelessWidget {
             runSpacing: TraqSpacing.sm,
             children: [
               SubscriptionMetaChip(
-                label: _isEmailDelivery ? 'Email' : 'Webhook',
+                label: _isEmailDelivery ? 'Email' : 'API',
                 icon: _isEmailDelivery ? AppAssets.iconMail : AppAssets.iconWebhook,
               ),
               SubscriptionMetaChip(label: typeLabel, icon: AppAssets.iconClock),

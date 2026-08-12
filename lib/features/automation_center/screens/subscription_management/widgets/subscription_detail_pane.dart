@@ -97,7 +97,7 @@ class SubscriptionDetailPane extends StatelessWidget {
                             ),
                             const SizedBox(height: TraqSpacing.xs),
                             Text(
-                              'Endpoint: ${subscription.webhookUrl}',
+                              "$deliveryLabel: ${subscription.webhookUrl}",
                               style: context.text.bodySm.copyWith(
                                 color: c.textMuted,
                               ),
@@ -124,7 +124,7 @@ class SubscriptionDetailPane extends StatelessWidget {
                   ),
                   SubscriptionConfigRow(
                     label: 'Format',
-                    value: subscription.notificationFormat ?? 'â€”',
+                    value: subscription.notificationFormat ?? '—',
                   ),
                   const SizedBox(height: TraqSpacing.lg),
                   Text(

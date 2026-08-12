@@ -6,6 +6,7 @@ class UserResponse {
   final String lastName;
   final String role;
   final bool enabled;
+  final String? partyGln;
   final bool emailVerified;
   final String approvalStatus;
   final String createdAt;
@@ -19,6 +20,7 @@ class UserResponse {
     required this.lastName,
     required this.role,
     required this.enabled,
+    this.partyGln,
     required this.emailVerified,
     required this.approvalStatus,
     required this.createdAt,
@@ -34,6 +36,7 @@ class UserResponse {
       lastName: json['lastName'] ?? '',
       role: json['role'] ?? '',
       enabled: json['enabled'] ?? false,
+      partyGln: json['partyGln'] as String?,
       emailVerified: json['emailVerified'] ?? false,
       approvalStatus: json['approvalStatus'] ?? 'PENDING',
       createdAt: json['createdAt'] ?? '',
@@ -85,8 +88,9 @@ class UserListResponse {
 
   factory UserListResponse.fromJson(Map<String, dynamic> json) {
     final List<dynamic> usersJson = json['users'] ?? [];
-    final List<UserResponse> users =
-        usersJson.map((user) => UserResponse.fromJson(user)).toList();
+    final List<UserResponse> users = usersJson
+        .map((user) => UserResponse.fromJson(user))
+        .toList();
 
     return UserListResponse(
       users: users,
@@ -105,6 +109,7 @@ class CreateUserRequest {
   final String lastName;
   final String role;
   final bool enabled;
+  final String? partyGln;
 
   CreateUserRequest({
     required this.username,
@@ -114,6 +119,7 @@ class CreateUserRequest {
     required this.lastName,
     required this.role,
     required this.enabled,
+    this.partyGln,
   });
 
   Map<String, dynamic> toJson() {
@@ -125,6 +131,7 @@ class CreateUserRequest {
       'lastName': lastName,
       'role': role,
       'enabled': enabled,
+      if (partyGln != null && partyGln!.isNotEmpty) 'partyGln': partyGln,
     };
   }
 }
@@ -135,12 +142,7 @@ class UpdateUserRequest {
   final String? email;
   final String? password;
 
-  UpdateUserRequest({
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.password,
-  });
+  UpdateUserRequest({this.firstName, this.lastName, this.email, this.password});
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};

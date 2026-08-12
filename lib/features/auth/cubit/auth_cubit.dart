@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/config/app_navigation.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
@@ -83,6 +85,7 @@ class AuthCubit extends Cubit<AuthState> {
         _authCheckTimeout,
       );
       await _awaitMinSplash(startedAt, minSplashDelay);
+      if (await _rejectIfFrontendBlockedRole(user)) return;
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -121,6 +124,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final response = await _authService.login(request).timeout(_loginTimeout);
       final user = await _authService.getCurrentUser().timeout(_loginTimeout);
+      if (await _rejectIfFrontendBlockedRole(user)) return;
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -218,6 +222,7 @@ class AuthCubit extends Cubit<AuthState> {
     _cancelTokenExpiration();
     _disconnectSharedWebSocket();
     _clearSessionCaches();
+    _closeAnyOpenDialogs();
     emit(
       const AuthState(
         status: AuthStatus.unauthenticated,

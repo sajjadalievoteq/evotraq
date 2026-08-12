@@ -15,6 +15,7 @@ abstract final class UserManagementConstants {
   static const String cancelLabel = 'Cancel';
   static const String allFilter = 'All';
   static const String defaultRole = 'USER';
+  static const String b2bServiceRole = 'B2B_SERVICE';
   static const String pendingStatus = 'PENDING';
   static const String activeStatus = 'ACTIVE';
   static const String inactiveStatus = 'INACTIVE';
@@ -26,6 +27,7 @@ abstract final class UserManagementConstants {
     'DISTRIBUTOR',
     'RETAILER',
     'USER',
+    b2bServiceRole,
   ];
 
   static const List<String> assignableRoles = <String>[
@@ -34,7 +36,18 @@ abstract final class UserManagementConstants {
     'DISTRIBUTOR',
     'RETAILER',
     'USER',
+    b2bServiceRole,
   ];
+
+  static String roleDisplayLabel(String role) => switch (role) {
+    b2bServiceRole => 'B2B Service',
+    _ =>
+      role
+          .toLowerCase()
+          .split('_')
+          .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
+          .join(' '),
+  };
 
   static const List<String> filterStatuses = <String>[
     allFilter,

@@ -89,7 +89,13 @@ class UserManagementFilterSection extends StatelessWidget {
                             .map(
                               (role) => DropdownMenuItem<String>(
                                 value: role,
-                                child: Text(role),
+                                child: Text(
+                                  role == UserManagementConstants.allFilter
+                                      ? role
+                                      : UserManagementConstants.roleDisplayLabel(
+                                          role,
+                                        ),
+                                ),
                               ),
                             )
                             .toList(),

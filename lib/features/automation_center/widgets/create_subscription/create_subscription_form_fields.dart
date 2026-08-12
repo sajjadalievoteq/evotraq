@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/automation_center/utils/subscription_form
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_advanced_section.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_dropdown_section.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/preferred_time_field.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_auth_password_field.dart';
 
 class CreateSubscriptionFormFields extends StatelessWidget {
   const CreateSubscriptionFormFields({
@@ -16,10 +17,16 @@ class CreateSubscriptionFormFields extends StatelessWidget {
     required this.onSubscriptionTypeChanged,
     required this.selectedNotificationFrequency,
     required this.onNotificationFrequencyChanged,
+    this.isEditing = false,
   });
 
   final String selectedDeliveryMethod;
   final ValueChanged<String> onDeliveryMethodChanged;
+
+  /// True when editing an existing subscription — used to adjust the API
+  /// password field's copy (leaving it blank on edit keeps the saved
+  /// credential rather than clearing it).
+  final bool isEditing;
 
   /// Tracked so the batch-cadence dropdown can be shown/hidden and given a
   /// sensible type-based default without needing a separate form rebuild.
@@ -71,13 +78,13 @@ class CreateSubscriptionFormFields extends StatelessWidget {
           },
         ),
         const SizedBox(height: 12),
-        if (selectedDeliveryMethod == 'WEBHOOK')
+        if (selectedDeliveryMethod == 'WEBHOOK') ...[
           FormBuilderTextField(
             key: const ValueKey('webhookUrl'),
             name: 'webhookUrl',
             decoration: const InputDecoration(
-              labelText: 'Webhook Endpoint URL',
-              hintText: 'https://your-api.com/webhooks/notifications',
+              labelText: 'API Endpoint URL',
+              hintText: 'https://your-api.com/api/notifications',
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               helperText: 'HTTP endpoint that will receive POST requests',
@@ -87,8 +94,33 @@ class CreateSubscriptionFormFields extends StatelessWidget {
               FormBuilderValidators.required(),
               FormBuilderValidators.url(),
             ]),
-          )
-        else
+          ),
+          const SizedBox(height: 12),
+          FormBuilderTextField(
+            key: const ValueKey('webhookAuthUsername'),
+            name: 'webhookAuthUsername',
+            decoration: const InputDecoration(
+              labelText: 'API Username (optional)',
+              hintText: 'Leave blank if the API needs no authentication',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              helperText:
+                  'Sent as HTTP Basic Auth if the destination API requires it',
+              helperStyle: TextStyle(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SubscriptionAuthPasswordField(
+            name: 'webhookAuthPassword',
+            labelText: 'API Password (optional)',
+            hintText: isEditing
+                ? 'Leave blank to keep the saved password'
+                : 'Leave blank if the API needs no authentication',
+            helperText: isEditing
+                ? 'Only fill in to set a new password'
+                : 'Sent as HTTP Basic Auth if the destination API requires it',
+          ),
+        ] else
           FormBuilderTextField(
             key: const ValueKey('emailAddress'),
             name: 'emailAddress',
@@ -143,9 +175,7 @@ class CreateSubscriptionFormFields extends StatelessWidget {
           ),
           validator: FormBuilderValidators.required(),
           isDense: true,
-          initialValue: selectedDeliveryMethod == 'EMAIL'
-              ? 'EMAIL_HTML'
-              : 'SUMMARY',
+          initialValue: 'SUMMARY',
           items:
               SubscriptionFormatUtils.availableFormats(selectedDeliveryMethod)
                   .map(

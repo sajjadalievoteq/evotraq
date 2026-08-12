@@ -195,7 +195,9 @@ class _UserManagementFormDialogState extends State<UserManagementFormDialog> {
                         .map(
                           (role) => DropdownMenuItem<String>(
                             value: role,
-                            child: Text(role),
+                            child: Text(
+                              UserManagementConstants.roleDisplayLabel(role),
+                            ),
                           ),
                         )
                         .toList(),

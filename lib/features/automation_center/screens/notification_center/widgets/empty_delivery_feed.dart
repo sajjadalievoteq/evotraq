@@ -33,7 +33,7 @@ class EmptyDeliveryFeed extends StatelessWidget {
               'empty — counters update even when no durable history row was '
               'stored (older deliveries, or retention cleanup). New deliveries '
               'after history persistence will appear here.'
-        : 'When email or webhook deliveries run, each attempt shows up here.';
+        : 'When email or API deliveries run, each attempt shows up here.';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

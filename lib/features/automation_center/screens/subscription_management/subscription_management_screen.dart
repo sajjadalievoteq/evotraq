@@ -17,7 +17,7 @@ import 'package:traqtrace_app/features/automation_center/screens/subscription_ma
 /// in [SubscriptionFilterUtils.filterManagement]).
 const List<SubscriptionFilterOption> kSubscriptionManagementFilterOptions = [
   SubscriptionFilterOption(label: 'All', value: 'all'),
-  SubscriptionFilterOption(label: 'Webhook', value: 'webhook'),
+  SubscriptionFilterOption(label: 'API', value: 'webhook'),
   SubscriptionFilterOption(label: 'Email', value: 'email'),
 ];
 

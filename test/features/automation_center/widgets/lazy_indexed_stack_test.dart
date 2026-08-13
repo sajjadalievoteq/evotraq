@@ -70,4 +70,42 @@ void main() {
     expect(firstCreates, 1);
     expect(secondCreates, 1);
   });
+
+  testWidgets(
+    'resizing children (e.g. admin tab removed on session expiry) does not throw',
+    (tester) async {
+      var index = 0;
+      var childCount = 4;
+      late StateSetter setHostState;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              setHostState = setState;
+              return LazyIndexedStack(
+                index: index.clamp(0, childCount - 1),
+                children: [
+                  for (var i = 0; i < childCount; i++)
+                    Text('tab-$i', key: ValueKey('tab-$i')),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      expect(find.text('tab-0'), findsOneWidget);
+
+      // Simulate auth expiry: admin-only Job Operations tab disappears.
+      setHostState(() {
+        childCount = 3;
+        index = 0;
+      });
+      await tester.pump();
+
+      expect(find.text('tab-0'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

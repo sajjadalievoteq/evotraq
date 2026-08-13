@@ -103,6 +103,47 @@ void main() {
       expect(result.epc, contains('/21/71585936751779'));
     });
 
+    test('bare 18 digits with valid GTIN prefer SGTIN over SSCC', () {
+      // GTIN 46292000441965 + serial 4152 — also happens to be a valid SSCC
+      // check digit; must NOT become https://id.gs1.org/00/462920004419654152.
+      const bare = '462920004419654152';
+      final result = parseToEPC(bare);
+
+      expect(result.type, EPCType.sgtin);
+      expect(result.gtin, '46292000441965');
+      expect(result.serial, '4152');
+      expect(result.epc, 'https://id.gs1.org/01/46292000441965/21/4152');
+      expect(result.epc, isNot(contains('/00/')));
+    });
+
+    test('bare 18-digit SSCC when first 14 are not a valid GTIN', () {
+      const bare = '006141411234567890';
+      final result = parseToEPC(bare);
+
+      expect(result.type, EPCType.sscc);
+      expect(result.sscc, bare);
+      expect(result.epc, 'https://id.gs1.org/00/$bare');
+    });
+
+    test('explicit AI (00) keeps SSCC even when digits look like GTIN+serial', () {
+      const ai = '(00)462920004419654152';
+      final result = parseToEPC(ai);
+
+      expect(result.type, EPCType.sscc);
+      expect(result.sscc, '462920004419654152');
+      expect(result.epc, 'https://id.gs1.org/00/462920004419654152');
+    });
+
+    test('preserves typed SGTIN Digital Link', () {
+      const dl = 'https://id.gs1.org/01/46292000441965/21/4152';
+      final result = parseToEPC(dl);
+
+      expect(result.type, EPCType.sgtin);
+      expect(result.epc, dl);
+      expect(result.gtin, '46292000441965');
+      expect(result.serial, '4152');
+    });
+
     test('throws EPCParseException for invalid input', () {
       expect(
         () => parseToEPC('NOTABARCODE'),

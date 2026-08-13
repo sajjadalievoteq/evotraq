@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/home/dashboard_stats.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/home/system_health_status.dart';
+import 'package:traqtrace_app/data/models/home/throughput_window.dart';
 
 enum HomeLoadStatus { initial, loading, success, failure }
 
@@ -14,6 +15,7 @@ class HomeState extends Equatable {
     this.lastDataRefreshAt,
     this.errorMessage,
     this.throughputHours = 24,
+    this.throughputByHours = const {},
     this.throughputLoading = false,
     this.healthLoading = false,
     this.refreshFailed = false,
@@ -27,6 +29,9 @@ class HomeState extends Equatable {
   final DateTime? lastDataRefreshAt;
   final String? errorMessage;
   final int throughputHours;
+
+  /// Prefetched commissioning windows keyed by hours (1 / 24 / 168).
+  final Map<int, ThroughputWindow> throughputByHours;
   final bool throughputLoading;
   final bool healthLoading;
 
@@ -46,6 +51,7 @@ class HomeState extends Equatable {
     String? errorMessage,
     bool clearError = false,
     int? throughputHours,
+    Map<int, ThroughputWindow>? throughputByHours,
     bool? throughputLoading,
     bool? healthLoading,
     bool? refreshFailed,
@@ -59,6 +65,7 @@ class HomeState extends Equatable {
       lastDataRefreshAt: lastDataRefreshAt ?? this.lastDataRefreshAt,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       throughputHours: throughputHours ?? this.throughputHours,
+      throughputByHours: throughputByHours ?? this.throughputByHours,
       throughputLoading: throughputLoading ?? this.throughputLoading,
       healthLoading: healthLoading ?? this.healthLoading,
       refreshFailed: refreshFailed ?? this.refreshFailed,
@@ -75,6 +82,7 @@ class HomeState extends Equatable {
     lastDataRefreshAt,
     errorMessage,
     throughputHours,
+    throughputByHours,
     throughputLoading,
     healthLoading,
     refreshFailed,

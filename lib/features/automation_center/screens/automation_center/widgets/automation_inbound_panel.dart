@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/automation_workbench_panel.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/inbound/inbound_api_catalog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/inbound/system_users_card.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// Inbound Automation Center panel.
+///
+/// Expects an [InboundCatalogCubit] from an ancestor (workspace-scoped) so the
+/// catalog survives Outbound ↔ Inbound section switches without a skeleton flash.
 class AutomationInboundPanel extends StatelessWidget {
   const AutomationInboundPanel({super.key});
 

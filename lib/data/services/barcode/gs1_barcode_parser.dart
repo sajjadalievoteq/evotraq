@@ -164,6 +164,12 @@ class GS1BarcodeParser {
       normalized = normalized.substring(4);
     }
 
+    // Bare 18 digits are ambiguous (SSCC vs GTIN+serial). Do not invent AI
+    // (01)/(10)/(21) wrappers — leave for EPCURIConverter / bare-digit parsers.
+    if (RegExp(r'^\d{18}$').hasMatch(normalized)) {
+      return barcode;
+    }
+
     if (normalized.length >= 16 && normalized.startsWith("01") && RegExp(r'^\d{16}').hasMatch(normalized.substring(0, 16))) {
       int position = 16;
       String result = '(01)${normalized.substring(2, 16)}';

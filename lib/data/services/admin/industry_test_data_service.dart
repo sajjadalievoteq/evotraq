@@ -212,7 +212,6 @@ class IndustryTestDataService {
     // Dio: Duration.zero disables the limit (null would fall back to BaseOptions).
     final body = await _postAdminJson(
       '/admin/industry-demo-data/pharma/supply-chain/full',
-      queryParameters: const {'reset': 'true'},
       connectTimeout: Duration.zero,
       receiveTimeout: Duration.zero,
       sendTimeout: Duration.zero,

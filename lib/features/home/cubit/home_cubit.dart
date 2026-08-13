@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/models/home/dashboard_stats.dart';
+import 'package:traqtrace_app/data/models/home/throughput_window.dart';
 import 'package:traqtrace_app/data/services/home/dashboard_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
@@ -44,10 +46,13 @@ class HomeCubit extends Cubit<HomeState> {
   // If the user has selected a different one, a push must not clobber their selected view.
   static const int _broadcastThroughputHours = 24;
 
+  static const List<int> _prefetchThroughputHours = [1, 168];
+
   StreamSubscription? _dashboardSubscription;
   StreamSubscription? _connectionSubscription;
 
   int _healthLoadGeneration = 0;
+  int _throughputPrefetchGeneration = 0;
   Timer? _pollTimer;
   Duration _currentPollInterval;
   String? _pollAccountEmail;
@@ -57,6 +62,8 @@ class HomeCubit extends Cubit<HomeState> {
   bool get _canReadDashboard => _authCubit.state.canReadDashboard;
 
   bool get _canReadHealth => _authCubit.state.canReadSystemHealth;
+
+  bool get _canReadThroughput => _authCubit.state.canReadThroughput;
 
   bool get isWebSocketConnected => _webSocketService.isConnected;
 
@@ -79,6 +86,8 @@ class HomeCubit extends Cubit<HomeState> {
             lastDataRefreshAt: cached.lastDataRefreshAt,
             healthLoading: _canReadHealth,
             liveUpdatesConnected: state.liveUpdatesConnected,
+            throughputHours: state.throughputHours,
+            throughputByHours: state.throughputByHours,
           ),
         );
 
@@ -94,6 +103,14 @@ class HomeCubit extends Cubit<HomeState> {
         );
         return;
       }
+    } else if (state.throughputByHours.isNotEmpty) {
+      // Force refresh: keep the live 24h window if present, refetch 1H/7D once.
+      final kept = <int, ThroughputWindow>{
+        if (state.throughputByHours.containsKey(_broadcastThroughputHours))
+          _broadcastThroughputHours:
+              state.throughputByHours[_broadcastThroughputHours]!,
+      };
+      emit(state.copyWith(throughputByHours: kept));
     }
 
     emit(state.copyWith(status: HomeLoadStatus.loading, clearError: true));
@@ -225,17 +242,11 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       final parsed = DashboardService.parseSummaryPayload(payload);
       final refreshedAt = DateTime.now();
-
-      // The broadcast always uses the default throughput window; if the user picked a
-      // different one, keep their existing throughput data and only refresh the rest.
-      final stats =
-          (state.throughputHours == _broadcastThroughputHours ||
-              state.stats == null)
-          ? parsed.stats
-          : parsed.stats.copyWithThroughput(
-              buckets: state.stats!.throughputBuckets,
-              total: state.stats!.throughputTotal,
-            );
+      final cache = _cacheWithBroadcastWindow(
+        state.throughputByHours,
+        parsed.stats,
+      );
+      final stats = _statsForSelectedWindow(parsed.stats, cache);
 
       emit(
         state.copyWith(
@@ -243,6 +254,7 @@ class HomeCubit extends Cubit<HomeState> {
           stats: stats,
           recentEvents: parsed.recentEvents,
           lastDataRefreshAt: refreshedAt,
+          throughputByHours: cache,
           clearError: true,
           refreshFailed: false,
         ),
@@ -293,20 +305,29 @@ class HomeCubit extends Cubit<HomeState> {
       _isRevalidating = true;
     }
     try {
+      // Summary / heartbeat always uses the broadcast window. Other ranges are
+      // prefetched once and switched locally via [selectThroughputHours].
       final overview = await _dashboardService.getSummary(
         recentLimit: 5,
-        throughputHours: state.throughputHours,
+        throughputHours: _broadcastThroughputHours,
       );
       final refreshedAt = DateTime.now();
 
       if (isClosed) return;
 
+      final cache = _cacheWithBroadcastWindow(
+        state.throughputByHours,
+        overview.stats,
+      );
+      final stats = _statsForSelectedWindow(overview.stats, cache);
+
       emit(
         state.copyWith(
           status: HomeLoadStatus.success,
-          stats: overview.stats,
+          stats: stats,
           recentEvents: overview.recentEvents,
           lastDataRefreshAt: refreshedAt,
+          throughputByHours: cache,
           clearError: true,
           refreshFailed: false,
         ),
@@ -314,7 +335,7 @@ class HomeCubit extends Cubit<HomeState> {
 
       await _sessionStore.save(
         HomeOverviewBundle(
-          stats: overview.stats,
+          stats: stats,
           recentEvents: overview.recentEvents,
           healthStatus: state.healthStatus,
           lastDataRefreshAt: refreshedAt,
@@ -325,6 +346,8 @@ class HomeCubit extends Cubit<HomeState> {
       if (adjustPollBackoff) {
         _restorePollInterval();
       }
+
+      unawaited(_prefetchThroughputRanges());
     } catch (e) {
       if (isClosed) return;
       if (adjustPollBackoff) {
@@ -339,11 +362,98 @@ class HomeCubit extends Cubit<HomeState> {
           status: HomeLoadStatus.failure,
           errorMessage: e.toString(),
           liveUpdatesConnected: state.liveUpdatesConnected,
+          throughputHours: state.throughputHours,
+          throughputByHours: state.throughputByHours,
         ),
       );
     } finally {
       _isRevalidating = false;
     }
+  }
+
+  /// Prefetch 1H / 7D once after startup (24H comes from summary). Range toggles
+  /// only read [HomeState.throughputByHours] — they do not hit the network.
+  Future<void> _prefetchThroughputRanges() async {
+    if (isClosed || !_canReadThroughput || state.stats == null) return;
+
+    final missing = _prefetchThroughputHours
+        .where((hours) => !state.throughputByHours.containsKey(hours))
+        .toList(growable: false);
+    if (missing.isEmpty) return;
+
+    final generation = ++_throughputPrefetchGeneration;
+    final fetched = <int, ThroughputWindow>{};
+    await Future.wait(
+      missing.map((hours) async {
+        try {
+          final result = await _dashboardService.fetchThroughput(hours);
+          fetched[hours] = ThroughputWindow(
+            buckets: result.buckets,
+            total: result.total,
+          );
+        } catch (_) {
+          // Leave the window absent; a later force refresh can retry.
+        }
+      }),
+    );
+
+    if (isClosed || generation != _throughputPrefetchGeneration) return;
+    if (fetched.isEmpty) return;
+
+    final cache = Map<int, ThroughputWindow>.from(state.throughputByHours)
+      ..addAll(fetched);
+    if (state.stats != null) {
+      cache[_broadcastThroughputHours] = ThroughputWindow(
+        buckets: Map<int, int>.from(
+          cache[_broadcastThroughputHours]?.buckets ??
+              state.stats!.throughputBuckets,
+        ),
+        total:
+            cache[_broadcastThroughputHours]?.total ??
+            state.stats!.throughputTotal,
+      );
+    }
+
+    final selected = state.throughputHours;
+    final selectedWindow = cache[selected];
+    emit(
+      state.copyWith(
+        throughputByHours: cache,
+        stats: selectedWindow == null || state.stats == null
+            ? state.stats
+            : state.stats!.copyWithThroughput(
+                buckets: selectedWindow.buckets,
+                total: selectedWindow.total,
+              ),
+        throughputLoading: false,
+      ),
+    );
+  }
+
+  Map<int, ThroughputWindow> _cacheWithBroadcastWindow(
+    Map<int, ThroughputWindow> existing,
+    DashboardStats broadcastStats,
+  ) {
+    return Map<int, ThroughputWindow>.from(existing)
+      ..[_broadcastThroughputHours] = ThroughputWindow(
+        buckets: Map<int, int>.from(broadcastStats.throughputBuckets),
+        total: broadcastStats.throughputTotal,
+      );
+  }
+
+  DashboardStats _statsForSelectedWindow(
+    DashboardStats broadcastStats,
+    Map<int, ThroughputWindow> cache,
+  ) {
+    if (state.throughputHours == _broadcastThroughputHours) {
+      return broadcastStats;
+    }
+    final selected = cache[state.throughputHours];
+    if (selected == null) return broadcastStats;
+    return broadcastStats.copyWithThroughput(
+      buckets: selected.buckets,
+      total: selected.total,
+    );
   }
 
   void _restorePollInterval() {
@@ -404,27 +514,27 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  Future<void> loadThroughput(int hours) async {
-    if (!_authCubit.state.canReadThroughput) return;
-    emit(state.copyWith(throughputHours: hours, throughputLoading: true));
-    try {
-      final result = await _dashboardService.fetchThroughput(hours);
-      if (state.stats == null) {
-        emit(state.copyWith(throughputLoading: false));
-        return;
-      }
-      emit(
-        state.copyWith(
-          stats: state.stats!.copyWithThroughput(
-            buckets: result.buckets,
-            total: result.total,
-          ),
-          throughputLoading: false,
-        ),
-      );
-    } catch (_) {
-      emit(state.copyWith(throughputLoading: false));
+  /// Switch the visible throughput range using startup-prefetched windows only.
+  void selectThroughputHours(int hours) {
+    if (!_canReadThroughput || state.stats == null) return;
+    if (hours == state.throughputHours) return;
+
+    final cached = state.throughputByHours[hours];
+    if (cached == null) {
+      emit(state.copyWith(throughputHours: hours));
+      return;
     }
+
+    emit(
+      state.copyWith(
+        throughputHours: hours,
+        stats: state.stats!.copyWithThroughput(
+          buckets: cached.buckets,
+          total: cached.total,
+        ),
+        throughputLoading: false,
+      ),
+    );
   }
 
   @override

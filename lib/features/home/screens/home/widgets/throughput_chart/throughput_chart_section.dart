@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_section_title.dart';
-import 'package:traqtrace_app/features/home/screens/home/widgets/throughput_chart/widgets/throughput_dummy_bar_chart.dart';
+import 'package:traqtrace_app/features/home/screens/home/widgets/throughput_chart/widgets/throughput_bar_chart.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 
 class ThroughputChartSection extends StatelessWidget {
@@ -9,7 +9,6 @@ class ThroughputChartSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-
       clipBehavior: Clip.antiAlias,
 
       child: Padding(
@@ -20,7 +19,7 @@ class ThroughputChartSection extends StatelessWidget {
           children: [
             const TraqSectionTitle(label: HomeStrings.sectionThroughput24h),
             const SizedBox(height: 12),
-            const Expanded(child: ThroughputDummyBarChart()),
+            const Expanded(child: ThroughputBarChart()),
           ],
         ),
       ),

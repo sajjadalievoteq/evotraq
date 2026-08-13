@@ -111,4 +111,10 @@ abstract final class TraqAnimationConstants {
 
   static Duration get swap => formDuration;
   static Duration get stagger => staggerDelay;
+
+  /// Throughput bars morphing placeholder → data (and later data → data).
+  static const int throughputMorphMs = formDurationMs;
+
+  static Duration get throughputMorph =>
+      const Duration(milliseconds: throughputMorphMs);
 }

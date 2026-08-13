@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_title_block_skeleton_card.dart';
 
 /// Skeleton placeholder shapes used by subscription lists and the job queue.
@@ -10,8 +12,12 @@ enum SubscriptionSkeletonShape {
   /// Job queue: title bar + content block (content height 48).
   jobQueueCard,
 
-  /// Subscription Management: title + two text lines.
+  /// Subscription Management: title + two text lines (legacy list-only).
   managementCard,
+
+  /// Subscription Management master/detail: mirrors the real side-by-side /
+  /// stacked layout used by [SubscriptionManagementBody].
+  managementMasterDetail,
 }
 
 class SubscriptionLoadingSkeleton extends StatelessWidget {
@@ -34,6 +40,10 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (shape == SubscriptionSkeletonShape.managementMasterDetail) {
+      return const _ManagementMasterDetailSkeleton();
+    }
+
     final c = context.colors;
     final cards = List.generate(itemCount, (_) {
       switch (shape) {
@@ -53,35 +63,32 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                AppSkeletonBox(
                   height: TraqSpacing.xl,
                   width: 180,
-                  decoration: BoxDecoration(
-                    color: c.surfaceMuted,
-                    borderRadius: TraqRadius.chip,
-                  ),
+                  radius: 8,
+                  color: c.surfaceMuted,
                 ),
                 const SizedBox(height: TraqSpacing.sm),
-                Container(
+                AppSkeletonBox(
                   height: TraqSpacing.md,
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: c.surfaceMuted,
-                    borderRadius: TraqRadius.chip,
-                  ),
+                  radius: 8,
+                  color: c.surfaceMuted,
                 ),
                 const SizedBox(height: TraqSpacing.xs),
-                Container(
+                AppSkeletonBox(
                   height: TraqSpacing.md,
                   width: 220,
-                  decoration: BoxDecoration(
-                    color: c.surfaceMuted,
-                    borderRadius: TraqRadius.chip,
-                  ),
+                  radius: 8,
+                  color: c.surfaceMuted,
                 ),
               ],
             ),
           );
+        case SubscriptionSkeletonShape.managementMasterDetail:
+          // Handled above.
+          return const SizedBox.shrink();
       }
     });
 
@@ -110,6 +117,208 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
       itemCount: cards.length,
       separatorBuilder: (_, __) => const SizedBox(height: TraqSpacing.md),
       itemBuilder: (_, i) => cards[i],
+    );
+  }
+}
+
+/// Mirrors [SubscriptionManagementBody]'s LayoutBuilder breakpoint (`maxWidth < 900`
+/// or mobile → stacked; otherwise list + detail side-by-side).
+class _ManagementMasterDetailSkeleton extends StatelessWidget {
+  const _ManagementMasterDetailSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stacked = constraints.maxWidth < 900 || context.isMobile;
+        final list = _MasterListSkeleton(rowCount: stacked ? 3 : 5);
+        final detail = const _DetailPaneSkeleton();
+
+        if (stacked) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 220, child: list),
+              const SizedBox(height: TraqSpacing.md),
+              Expanded(child: detail),
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(width: constraints.maxWidth * 0.34, child: list),
+            const SizedBox(width: TraqSpacing.md),
+            Expanded(child: detail),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _MasterListSkeleton extends StatelessWidget {
+  const _MasterListSkeleton({required this.rowCount});
+
+  final int rowCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return ListView.separated(
+      padding: EdgeInsets.zero,
+      itemCount: rowCount,
+      separatorBuilder: (_, __) => const SizedBox(height: TraqSpacing.sm),
+      itemBuilder: (_, index) {
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: TraqSpacing.md,
+            vertical: TraqSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: TraqRadius.card,
+            border: Border.all(
+              color: index == 0
+                  ? c.primary.withValues(alpha: 0.5)
+                  : c.border,
+              width: index == 0 ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              AppSkeletonBox(
+                width: 22,
+                height: 22,
+                radius: 6,
+                color: c.surfaceMuted,
+              ),
+              const SizedBox(width: TraqSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppSkeletonBox(
+                      width: index == 0 ? 140 : 110,
+                      height: 14,
+                      radius: 4,
+                      color: c.surfaceMuted,
+                    ),
+                    const SizedBox(height: TraqSpacing.xs),
+                    AppSkeletonBox(
+                      width: 88,
+                      height: 11,
+                      radius: 4,
+                      color: c.surfaceMuted,
+                    ),
+                  ],
+                ),
+              ),
+              AppSkeletonBox(
+                width: 56,
+                height: 22,
+                radius: 999,
+                color: c.surfaceMuted,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _DetailPaneSkeleton extends StatelessWidget {
+  const _DetailPaneSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: TraqRadius.card,
+        border: Border.all(color: c.border),
+      ),
+      child: Padding(
+        padding: TraqSpacing.surfacePad,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppSkeletonBox(
+                  width: 22,
+                  height: 22,
+                  radius: 6,
+                  color: c.surfaceMuted,
+                ),
+                const SizedBox(width: TraqSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppSkeletonBox(
+                        width: 180,
+                        height: 18,
+                        radius: 4,
+                        color: c.surfaceMuted,
+                      ),
+                      const SizedBox(height: TraqSpacing.sm),
+                      AppSkeletonBox(
+                        width: 72,
+                        height: 22,
+                        radius: 999,
+                        color: c.surfaceMuted,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: TraqSpacing.lg),
+            AppSkeletonBox(
+              width: double.infinity,
+              height: 12,
+              radius: 4,
+              color: c.surfaceMuted,
+            ),
+            const SizedBox(height: TraqSpacing.sm),
+            AppSkeletonBox(
+              width: double.infinity,
+              height: 12,
+              radius: 4,
+              color: c.surfaceMuted,
+            ),
+            const SizedBox(height: TraqSpacing.sm),
+            AppSkeletonBox(
+              width: 160,
+              height: 12,
+              radius: 4,
+              color: c.surfaceMuted,
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                AppSkeletonBox(
+                  width: 88,
+                  height: 36,
+                  radius: 8,
+                  color: c.surfaceMuted,
+                ),
+                const SizedBox(width: TraqSpacing.sm),
+                AppSkeletonBox(
+                  width: 88,
+                  height: 36,
+                  radius: 8,
+                  color: c.surfaceMuted,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

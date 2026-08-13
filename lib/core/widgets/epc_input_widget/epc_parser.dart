@@ -79,6 +79,13 @@ EPCParseResult parseToEPC(String input) {
     }
   }
 
+  // Resolve bare 18-digit ambiguity before element-string heuristics that can
+  // invent AI (01)/(10) wrappers and misclassify GTIN+serial as lot-level.
+  final bareCandidate = _tryParseBareSsccOrGtinSerial(raw);
+  if (bareCandidate != null) {
+    return bareCandidate;
+  }
+
   final parsed = Gs1Parser.parseBarcode(raw);
   if (parsed['valid'] == true) {
     final epc = Gs1Converter.barcodeToEpc(raw);
@@ -90,13 +97,6 @@ EPCParseResult parseToEPC(String input) {
         parsed: parsed,
       );
     }
-  }
-
-  
-  
-  final ssccCandidate = _tryParseBareSsccOrGtinSerial(raw);
-  if (ssccCandidate != null) {
-    return ssccCandidate;
   }
 
   throw EPCParseException('Unrecognized barcode format: $raw');
@@ -118,6 +118,8 @@ EPCParseResult? _tryParseBareSsccOrGtinSerial(String raw) {
   if (stripped.length == 18) {
     final gtin14 = stripped.substring(0, 14);
     final serial = stripped.substring(14);
+    // Prefer SGTIN when both a valid GTIN-14 + serial and a valid SSCC are
+    // possible. Emit SSCC only when the GTIN path does not apply.
     if (GtinFormat.isValidGtin(gtin14) && serial.isNotEmpty) {
       final epc = Gs1Converter.gtinSerialToEpc(gtin14, serial);
       if (epc != null) {

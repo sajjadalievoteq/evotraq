@@ -8,6 +8,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/job_queue_cubit.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/inbound_catalog_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_system_health_panel.dart';
@@ -21,7 +22,7 @@ import 'package:traqtrace_app/features/automation_center/widgets/lazy_indexed_st
 import 'package:traqtrace_app/features/shared/workbench/workbench_scaffold.dart';
 
 class NotificationsWorkspace extends StatefulWidget {
-  const NotificationsWorkspace({this.initialSection});
+  const NotificationsWorkspace({super.key, this.initialSection});
 
   final String? initialSection;
 
@@ -35,6 +36,7 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
   final _jobsKey = GlobalKey<JobQueuePanelState>();
 
   JobQueueCubit? _jobQueueCubit;
+  late final InboundCatalogCubit _inboundCatalogCubit;
   late String _selectedTab;
   late String _selectedSection;
 
@@ -49,6 +51,7 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
       widget.initialSection,
       isAdmin: isAdmin,
     );
+    _inboundCatalogCubit = getIt<InboundCatalogCubit>();
     if (isAdmin) {
       _jobQueueCubit = getIt<JobQueueCubit>()..connectWebSocket();
     }
@@ -70,6 +73,7 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
 
   @override
   void dispose() {
+    _inboundCatalogCubit.close();
     _jobQueueCubit?.close();
     super.dispose();
   }
@@ -124,7 +128,10 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
       onSelect: (section) => setState(() => _selectedSection = section),
       panelBuilder: (context, section) =>
           section == AutomationCenterSections.inbound
-          ? const AutomationInboundPanel()
+          ? BlocProvider<InboundCatalogCubit>.value(
+              value: _inboundCatalogCubit,
+              child: const AutomationInboundPanel(),
+            )
           : AutomationWorkbenchPanel(
               title: 'Outbound',
               fillBody: true,

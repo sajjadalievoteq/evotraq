@@ -11,7 +11,7 @@ abstract final class HomeStrings {
   static const sectionKeyMetrics = 'KEY METRICS';
   static const sectionQuickActions = 'QUICK ACTIONS';
   static const sectionCompliancePosture = 'COMPLIANCE POSTURE';
-  static const sectionThroughput24h = 'COMMISSIONING THROUGHPUT — 24H';
+  static const sectionThroughput24h = 'COMMISSIONING THROUGHPUT';
 
   static const metricGtin = 'GTIN';
   static const metricGln = 'GLN';

@@ -113,10 +113,15 @@ class ProductJourneyService {
     return getJourneyByEpc(canonical);
   }
 
-  
   Future<ProductJourney?> getJourneyByIdentifier(String input) async {
     final trimmed = input.trim();
     if (trimmed.isEmpty) return null;
+
+    // Preserve already-typed Digital Links / URNs end-to-end. Do not re-run
+    // bare-barcode heuristics that can rewrite /01/…/21/… into /00/….
+    if (_isTypedEpcUri(trimmed)) {
+      return getJourneyByEpc(trimmed);
+    }
 
     try {
       final parsed = parseToEPC(trimmed);
@@ -130,19 +135,29 @@ class ProductJourneyService {
   Future<ProductJourney?> _journeyForParsed(EPCParseResult parsed) async {
     switch (parsed.type) {
       case EPCType.sgtin:
+        // Prefer the typed / constructed Digital Link on the parse result.
+        final direct = await getJourneyByEpc(parsed.epc);
+        if (direct != null) return direct;
+
         final gtin = parsed.gtin;
         final serial = parsed.serial;
         if (gtin != null && serial != null && serial.isNotEmpty) {
-          final viaGtinSerial = await getJourneyByGtinSerial(gtin, serial);
-          if (viaGtinSerial != null) return viaGtinSerial;
+          return getJourneyByGtinSerial(gtin, serial);
         }
-        return getJourneyByEpc(parsed.epc);
+        return null;
       case EPCType.sscc:
         return getJourneyBySscc(parsed.sscc ?? parsed.epc);
       case EPCType.gtin:
       case EPCType.unknown:
         return getJourneyByEpc(parsed.epc);
     }
+  }
+
+  static bool _isTypedEpcUri(String value) {
+    final lower = value.toLowerCase();
+    return lower.startsWith('https://id.gs1.org/') ||
+        lower.startsWith('http://id.gs1.org/') ||
+        lower.startsWith('urn:epc:');
   }
 
   Future<ProductJourney?> _journeyForUnparsed(String trimmed) async {

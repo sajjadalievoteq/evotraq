@@ -117,6 +117,9 @@ void main() {
     when(mockWs.isConnected).thenReturn(false);
     when(mockWs.connect()).thenReturn(null);
     when(mockWs.disconnect()).thenReturn(null);
+    when(mockService.fetchThroughput(any)).thenAnswer(
+      (_) async => (buckets: <int, int>{}, total: 0),
+    );
   });
 
   tearDown(() async {
@@ -175,8 +178,64 @@ void main() {
     authCubit = authCubitFor('RETAILER');
 
     final cubit = buildCubit();
-    await cubit.loadThroughput(168);
+    cubit.selectThroughputHours(168);
 
+    verifyNever(mockService.fetchThroughput(any));
+
+    await cubit.close();
+  });
+
+  test('admin prefetches 1H and 7D once; range switch is local only', () async {
+    when(mockService.getSummary(
+      recentLimit: anyNamed('recentLimit'),
+      throughputHours: anyNamed('throughputHours'),
+    )).thenAnswer(
+      (_) async => (
+        stats: DashboardStats(
+          gtinCount: 1,
+          glnCount: 0,
+          sgtinCount: 0,
+          ssccCount: 0,
+          totalEvents: 0,
+          eventsByType: const {},
+          throughputBuckets: {0: 3, 1: 4},
+          throughputTotal: 7,
+        ),
+        recentEvents: events('a'),
+      ),
+    );
+    when(mockService.getSystemHealth()).thenAnswer((_) async => health(up: true));
+    when(mockService.fetchThroughput(1)).thenAnswer(
+      (_) async => (buckets: {0: 2}, total: 2),
+    );
+    when(mockService.fetchThroughput(168)).thenAnswer(
+      (_) async => (buckets: {5: 10}, total: 10),
+    );
+
+    final cubit = buildCubit();
+    await cubit.load(accountEmail: 'admin@example.com');
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+
+    verify(mockService.fetchThroughput(1)).called(1);
+    verify(mockService.fetchThroughput(168)).called(1);
+    expect(cubit.state.throughputByHours.containsKey(1), isTrue);
+    expect(cubit.state.throughputByHours.containsKey(24), isTrue);
+    expect(cubit.state.throughputByHours.containsKey(168), isTrue);
+
+    clearInteractions(mockService);
+    cubit.selectThroughputHours(168);
+    expect(cubit.state.throughputHours, 168);
+    expect(cubit.state.stats?.throughputBuckets, {5: 10});
+    expect(cubit.state.stats?.throughputTotal, 10);
+    verifyNever(mockService.fetchThroughput(any));
+    verifyNever(mockService.getSummary(
+      recentLimit: anyNamed('recentLimit'),
+      throughputHours: anyNamed('throughputHours'),
+    ));
+
+    cubit.selectThroughputHours(1);
+    expect(cubit.state.throughputHours, 1);
+    expect(cubit.state.stats?.throughputBuckets, {0: 2});
     verifyNever(mockService.fetchThroughput(any));
 
     await cubit.close();
@@ -515,10 +574,13 @@ void main() {
         (_) async => (stats: stats(gtin: 1), recentEvents: events('initial')),
       );
       when(mockService.getSystemHealth()).thenAnswer((_) async => health(up: true));
+      when(mockService.fetchThroughput(any)).thenAnswer(
+        (_) async => (buckets: <int, int>{}, total: 0),
+      );
 
       final cubit = buildCubit();
       await cubit.load(accountEmail: 'user@example.com');
-      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await Future<void>.delayed(const Duration(milliseconds: 40));
       expect(cubit.state.status, HomeLoadStatus.success);
       return cubit;
     }
@@ -597,11 +659,24 @@ void main() {
     });
 
     test('a push preserves a non-default throughput selection', () async {
-      final cubit = await seedReadyCubit();
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer(
+        (_) async => (stats: stats(gtin: 1), recentEvents: events('initial')),
+      );
+      when(mockService.getSystemHealth()).thenAnswer((_) async => health(up: true));
+      when(mockService.fetchThroughput(1)).thenAnswer(
+        (_) async => (buckets: <int, int>{}, total: 0),
+      );
       when(mockService.fetchThroughput(168)).thenAnswer(
         (_) async => (buckets: {5: 10}, total: 10),
       );
-      await cubit.loadThroughput(168);
+
+      final cubit = buildCubit();
+      await cubit.load(accountEmail: 'user@example.com');
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      cubit.selectThroughputHours(168);
       expect(cubit.state.throughputHours, 168);
       expect(cubit.state.stats?.throughputBuckets, {5: 10});
 

@@ -96,10 +96,9 @@ class _SubscriptionManagementBodyState
         if (state.status == NotificationStatus.initial ||
             (state.status == NotificationStatus.loading &&
                 state.subscriptions.isEmpty)) {
-          return SubscriptionLoadingSkeleton(
-            shrinkWrap: widget.shrinkWrap,
-            itemCount: 4,
-            shape: SubscriptionSkeletonShape.managementCard,
+          return const SubscriptionLoadingSkeleton(
+            shrinkWrap: true,
+            shape: SubscriptionSkeletonShape.managementMasterDetail,
           );
         }
         if (state.status == NotificationStatus.error &&

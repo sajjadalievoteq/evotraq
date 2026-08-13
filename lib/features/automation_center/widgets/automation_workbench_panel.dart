@@ -71,12 +71,13 @@ class AutomationWorkbenchPanel extends StatelessWidget {
       // card gets a bounded height and its body can stretch to the bottom.
       return SelectionArea(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(context.gutter,context.gutter,context.gutter, 0),
+          padding: EdgeInsets.fromLTRB(context.gutter,context.gutter,context.gutter, context.gutter),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ...header,
               Expanded(child: card),
+
 
             ],
           ),

@@ -21,12 +21,12 @@ class LazyIndexedStack extends StatefulWidget {
 }
 
 class _LazyIndexedStackState extends State<LazyIndexedStack> {
-  late final List<bool> _activated;
+  late List<bool> _activated;
 
   @override
   void initState() {
     super.initState();
-    _activated = List<bool>.filled(widget.children.length, false);
+    _activated = List<bool>.filled(widget.children.length, false, growable: true);
     _activate(widget.index);
   }
 
@@ -34,13 +34,13 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
   void didUpdateWidget(LazyIndexedStack oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.children.length != _activated.length) {
-      final next = List<bool>.filled(widget.children.length, false);
+      // Replace the list — never [List.clear] a [List.filled] fixed-length list
+      // (throws UnsupportedError: set length on web/JS).
+      final next = List<bool>.filled(widget.children.length, false, growable: true);
       for (var i = 0; i < next.length && i < _activated.length; i++) {
         next[i] = _activated[i];
       }
-      _activated
-        ..clear()
-        ..addAll(next);
+      _activated = next;
     }
     _activate(widget.index);
   }

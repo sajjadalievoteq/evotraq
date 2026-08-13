@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/inbound/create_system_user_dialog.dart';
+
+/// Survives Outbound ↔ Inbound panel remounts within the same app session.
+List<UserResponse> _sessionB2bUsers = const [];
 
 class SystemUsersCard extends StatefulWidget {
   const SystemUsersCard({super.key});
@@ -14,20 +19,24 @@ class SystemUsersCard extends StatefulWidget {
 }
 
 class _SystemUsersCardState extends State<SystemUsersCard> {
-  final _service = UserManagementService();
-  List<UserResponse> _users = const [];
-  bool _loading = true;
+  late final UserManagementService _service;
+  List<UserResponse> _users = _sessionB2bUsers;
+  bool _loading = _sessionB2bUsers.isEmpty;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _service = getIt<UserManagementService>();
+    _load(force: _sessionB2bUsers.isEmpty);
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool force = true}) async {
+    // Keep the existing list visible on remount / soft refresh.
+    if (!force && _users.isNotEmpty) return;
+
     setState(() {
-      _loading = true;
+      _loading = _users.isEmpty;
       _error = null;
     });
     try {
@@ -35,11 +44,19 @@ class _SystemUsersCardState extends State<SystemUsersCard> {
       final b2bUsers = response.users
           .where((user) => user.role == 'B2B_SERVICE')
           .toList(growable: false);
-      if (mounted) setState(() => _users = b2bUsers);
+      _sessionB2bUsers = b2bUsers;
+      if (!mounted) return;
+      setState(() {
+        _users = b2bUsers;
+        _loading = false;
+        _error = null;
+      });
     } catch (error) {
-      if (mounted) setState(() => _error = error.toString());
-    } finally {
-      if (mounted) setState(() => _loading = false);
+      if (!mounted) return;
+      setState(() {
+        _error = error.toString().replaceFirst('Exception: ', '');
+        _loading = false;
+      });
     }
   }
 
@@ -81,13 +98,13 @@ class _SystemUsersCardState extends State<SystemUsersCard> {
         ],
       ),
     );
-    await _load();
+    await _load(force: true);
   }
 
   Future<void> _toggle(UserResponse user) async {
     try {
       await _service.changeUserStatus(user.id, !user.enabled);
-      await _load();
+      await _load(force: true);
     } catch (error) {
       if (mounted) {
         context.showError(error.toString().replaceFirst('Exception: ', ''));
@@ -124,10 +141,10 @@ class _SystemUsersCardState extends State<SystemUsersCard> {
             ),
             const SizedBox(height: TraqSpacing.md),
             if (_loading)
-              const Center(child: CircularProgressIndicator())
+              const _B2bUsersListSkeleton()
             else if (_error != null)
               TextButton.icon(
-                onPressed: _load,
+                onPressed: () => _load(force: true),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Retry loading B2B service users'),
               )
@@ -154,6 +171,52 @@ class _SystemUsersCardState extends State<SystemUsersCard> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _B2bUsersListSkeleton extends StatelessWidget {
+  const _B2bUsersListSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = context.colors.surfaceMuted;
+    return Column(
+      children: [
+        for (var i = 0; i < 3; i++) ...[
+          if (i > 0) const SizedBox(height: TraqSpacing.sm),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: TraqSpacing.sm),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppSkeletonBox(
+                        width: 120 + (i * 24),
+                        height: 14,
+                        radius: 4,
+                        color: muted,
+                      ),
+                      const SizedBox(height: TraqSpacing.xs),
+                      AppSkeletonBox(
+                        width: 200,
+                        height: 12,
+                        radius: 4,
+                        color: muted,
+                      ),
+                    ],
+                  ),
+                ),
+                AppSkeletonBox(width: 56, height: 12, radius: 4, color: muted),
+                const SizedBox(width: TraqSpacing.md),
+                AppSkeletonBox(width: 40, height: 24, radius: 12, color: muted),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

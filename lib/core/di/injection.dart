@@ -27,6 +27,8 @@ import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/data/services/automation_center/job_queue_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/job_queue_cubit.dart';
+import 'package:traqtrace_app/data/services/automation_center/inbound_catalog_service.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/inbound_catalog_cubit.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
 import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
@@ -91,6 +93,9 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerLazySingleton<DioService>(() => dioService);
   getIt.registerLazySingleton<JobQueueService>(
     () => JobQueueService(dioService: getIt<DioService>()),
+  );
+  getIt.registerLazySingleton<InboundCatalogService>(
+    () => InboundCatalogService(dioService: getIt<DioService>()),
   );
   getIt.registerLazySingleton<TokenManager>(() => TokenManager());
   getIt.registerLazySingleton<Dio>(
@@ -393,5 +398,8 @@ Future<void> initDependencies(AppConfig appConfig) async {
       service: getIt<JobQueueService>(),
       webSocketService: getIt<WebSocketService>(),
     ),
+  );
+  getIt.registerFactory<InboundCatalogCubit>(
+    () => InboundCatalogCubit(service: getIt<InboundCatalogService>()),
   );
 }

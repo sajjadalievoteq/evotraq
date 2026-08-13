@@ -29,15 +29,20 @@ class EPCURIConverter {
       return _urnToDigitalLink(barcode);
     }
 
+    // Bare 18 digits are ambiguous (SSCC vs GTIN-14 + numeric serial). Prefer
+    // SGTIN when the first 14 digits are a valid GTIN; only emit SSCC when the
+    // full 18-digit string is a valid SSCC. Never invent /00/ without a valid
+    // check digit (and never prefer SSCC when GTIN+serial is also valid).
     if (RegExp(r'^\d{18}$').hasMatch(barcode)) {
       final gtin14 = barcode.substring(0, 14);
       final serial = barcode.substring(14);
-      
-      
       if (CheckDigitUtils.isValidMod10(gtin14) && serial.isNotEmpty) {
         return convertGTINSerialToEPCUri(gtin14, serial);
       }
-      return convertSSCCToEPCUri(barcode);
+      if (CheckDigitUtils.isValidSscc(barcode)) {
+        return convertSSCCToEPCUri(barcode);
+      }
+      return null;
     }
 
     final parsed = GS1BarcodeParser.parseGS1Barcode(barcode);

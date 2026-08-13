@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
-import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart';
+import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart'
+    hide NotificationBatch;
 
 /// Subscription list / detail load operations (independent of socket + mutations).
 enum NotificationStatus {
@@ -43,6 +44,11 @@ class NotificationState extends Equatable {
   final bool deliveryActivityLoading;
   final String? deliveryActivityError;
 
+  /// Exhausted batches awaiting manual retry (FAILED with deliveryAttempts >= 3).
+  final List<NotificationBatch> failedBatches;
+  final bool failedBatchesLoading;
+  final String? failedBatchesError;
+
   final NotificationStats? lastLoadedStats;
   final String? lastLoadedStatsSubscriptionId;
   final RealtimeNotification? lastRealtimeNotification;
@@ -62,6 +68,9 @@ class NotificationState extends Equatable {
     this.deliveryActivity = const [],
     this.deliveryActivityLoading = false,
     this.deliveryActivityError,
+    this.failedBatches = const [],
+    this.failedBatchesLoading = false,
+    this.failedBatchesError,
     this.lastLoadedStats,
     this.lastLoadedStatsSubscriptionId,
     this.lastRealtimeNotification,
@@ -82,6 +91,9 @@ class NotificationState extends Equatable {
     List<WebhookNotification>? deliveryActivity,
     bool? deliveryActivityLoading,
     String? deliveryActivityError,
+    List<NotificationBatch>? failedBatches,
+    bool? failedBatchesLoading,
+    String? failedBatchesError,
     NotificationStats? lastLoadedStats,
     String? lastLoadedStatsSubscriptionId,
     RealtimeNotification? lastRealtimeNotification,
@@ -106,6 +118,9 @@ class NotificationState extends Equatable {
       deliveryActivityLoading:
           deliveryActivityLoading ?? this.deliveryActivityLoading,
       deliveryActivityError: deliveryActivityError,
+      failedBatches: failedBatches ?? this.failedBatches,
+      failedBatchesLoading: failedBatchesLoading ?? this.failedBatchesLoading,
+      failedBatchesError: failedBatchesError,
       lastLoadedStats: lastLoadedStats ?? this.lastLoadedStats,
       lastLoadedStatsSubscriptionId:
           lastLoadedStatsSubscriptionId ?? this.lastLoadedStatsSubscriptionId,
@@ -130,6 +145,9 @@ class NotificationState extends Equatable {
     deliveryActivity,
     deliveryActivityLoading,
     deliveryActivityError,
+    failedBatches,
+    failedBatchesLoading,
+    failedBatchesError,
     lastLoadedStats,
     lastLoadedStatsSubscriptionId,
     lastRealtimeNotification,

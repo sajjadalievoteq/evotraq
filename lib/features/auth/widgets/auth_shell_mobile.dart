@@ -24,48 +24,43 @@ class AuthShellMobile extends StatelessWidget {
       isPrimary: false,
       child: SizedBox(
         height: MediaQuery.sizeOf(context).height,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            context.padding.bottom,
-            0,
-            context.padding.bottom,
-            context.padding.bottom,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AuthBrandingSection(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding:  EdgeInsets.all(context.padding.bottom,),
+              child: AuthBrandingSection(
                 layout: layout,
                 primary: c.primary,
                 textSecondary: c.textMuted,
               ),
-              Expanded(child: child),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'GS1 EPCIS 2.0',
-                      style: t.body.copyWith(color: c.textMuted),
+            ),
+            Expanded(child: child),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'GS1 EPCIS 2.0',
+                    style: t.body.copyWith(color: c.textMuted),
+                  ),
+                  const SizedBox(width: 20),
+                  Container(
+                    height: 5,
+                    width: 5,
+                    decoration: BoxDecoration(
+                      color: c.textMuted,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(width: 20),
-                    Container(
-                      height: 5,
-                      width: 5,
-                      decoration: BoxDecoration(
-                        color: c.textMuted,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Text('CBV 2.0', style: t.body.copyWith(color: c.textMuted)),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 20),
+                  Text('CBV 2.0', style: t.body.copyWith(color: c.textMuted)),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

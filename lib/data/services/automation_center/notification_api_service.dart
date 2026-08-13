@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart'
     as domain;
@@ -8,9 +9,8 @@ import 'package:traqtrace_app/data/models/automation_center/notification_subscri
 class NotificationApiService {
   final DioService _dioService;
 
-  NotificationApiService({
-    required DioService dioService,
-  }) : _dioService = dioService;
+  NotificationApiService({required DioService dioService})
+    : _dioService = dioService;
 
   Future<Map<String, String>> _getAuthHeaders() async {
     final token = await _dioService.getAuthToken();
@@ -58,7 +58,8 @@ class NotificationApiService {
   }
 
   Future<domain.NotificationSubscription> createSubscription(
-      domain.CreateSubscriptionRequest request) async {
+    domain.CreateSubscriptionRequest request,
+  ) async {
     try {
       final headers = await _getAuthHeaders();
       final response = await _dioService.post(
@@ -70,7 +71,9 @@ class NotificationApiService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return domain.NotificationSubscription.fromJson(json.decode(response.data));
+        return domain.NotificationSubscription.fromJson(
+          json.decode(response.data),
+        );
       } else {
         throw ApiException(
           message: 'Failed to create subscription',
@@ -94,7 +97,9 @@ class NotificationApiService {
       );
 
       if (response.statusCode == 200) {
-        return domain.NotificationSubscription.fromJson(json.decode(response.data));
+        return domain.NotificationSubscription.fromJson(
+          json.decode(response.data),
+        );
       } else {
         throw ApiException(
           message: 'Failed to fetch subscription',
@@ -122,7 +127,9 @@ class NotificationApiService {
       );
 
       if (response.statusCode == 200) {
-        return domain.NotificationSubscription.fromJson(json.decode(response.data));
+        return domain.NotificationSubscription.fromJson(
+          json.decode(response.data),
+        );
       } else {
         throw ApiException(
           message: 'Failed to update subscription',
@@ -277,9 +284,7 @@ class NotificationApiService {
       final response = await _dioService.post(
         '${_dioService.baseUrl}/notifications/emails/test',
         headers: headers,
-        data: jsonEncode({
-          'emailAddress': emailAddress,
-        }),
+        data: jsonEncode({'emailAddress': emailAddress}),
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
       );
@@ -308,15 +313,91 @@ class NotificationApiService {
         acceptAllStatusCodes: true,
       );
 
-      if (response.statusCode != 200 && response.statusCode != 204) {
+      if (response.statusCode != 200 &&
+          response.statusCode != 202 &&
+          response.statusCode != 204) {
+        throw ApiExceptionMapper.fromHttpResponse(
+          response,
+          fallbackMessage: "Couldn't retry this delivery. Please try again.",
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(
+        message: "Couldn't retry this delivery. Please try again.",
+      );
+    }
+  }
+
+  /// Loads batch history for a subscription (last [limit] rows).
+  Future<List<domain.NotificationBatch>> getBatchHistory(
+    String subscriptionId, {
+    int limit = 50,
+  }) async {
+    try {
+      final headers = await _getAuthHeaders();
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/notifications/subscriptions/$subscriptionId/batches?limit=$limit',
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.data);
+        if (responseData is List) {
+          final history = <domain.NotificationBatch>[];
+          for (final item in responseData) {
+            if (item is! Map) continue;
+            try {
+              history.add(
+                domain.NotificationBatch.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              );
+            } catch (_) {
+              // Skip malformed rows rather than failing the whole panel.
+            }
+          }
+          return history;
+        }
+        return [];
+      } else {
         throw ApiException(
-          message: 'Failed to retry webhook',
+          message: 'Failed to fetch batch history',
           statusCode: response.statusCode,
         );
       }
     } catch (e) {
       if (e is ApiException) rethrow;
-      throw ApiException(message: 'Failed to retry webhook: $e');
+      throw ApiException(message: 'Failed to fetch batch history: $e');
+    }
+  }
+
+  /// Triggers a manual retry for an exhausted batch.
+  Future<void> retryBatch(String batchId) async {
+    try {
+      final headers = await _getAuthHeaders();
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/notifications/batches/$batchId/retry',
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode != 200 &&
+          response.statusCode != 202 &&
+          response.statusCode != 204) {
+        throw ApiExceptionMapper.fromHttpResponse(
+          response,
+          fallbackMessage: "Couldn't retry this batch. Please try again.",
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(
+        message: "Couldn't retry this batch. Please try again.",
+      );
     }
   }
 

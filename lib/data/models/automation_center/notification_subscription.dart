@@ -47,21 +47,21 @@ class NotificationSubscription extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        subscriptionName,
-        webhookUrl,
-        status,
-        subscriptionType,
-        notificationFormat,
-        notificationFrequency,
-        maxEventsPerNotification,
-        preferredHour,
-        preferredMinute,
-        createdAt,
-        updatedAt,
-        queryParameters,
-        stats,
-      ];
+    id,
+    subscriptionName,
+    webhookUrl,
+    status,
+    subscriptionType,
+    notificationFormat,
+    notificationFrequency,
+    maxEventsPerNotification,
+    preferredHour,
+    preferredMinute,
+    createdAt,
+    updatedAt,
+    queryParameters,
+    stats,
+  ];
 
   NotificationSubscription copyWith({
     String? id,
@@ -86,7 +86,8 @@ class NotificationSubscription extends Equatable {
       status: status ?? this.status,
       subscriptionType: subscriptionType ?? this.subscriptionType,
       notificationFormat: notificationFormat ?? this.notificationFormat,
-      notificationFrequency: notificationFrequency ?? this.notificationFrequency,
+      notificationFrequency:
+          notificationFrequency ?? this.notificationFrequency,
       maxEventsPerNotification:
           maxEventsPerNotification ?? this.maxEventsPerNotification,
       preferredHour: preferredHour ?? this.preferredHour,
@@ -127,13 +128,13 @@ class NotificationStats extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalNotifications,
-        successfulNotifications,
-        failedNotifications,
-        successRate,
-        lastNotificationSent,
-        avgDeliveryTime,
-      ];
+    totalNotifications,
+    successfulNotifications,
+    failedNotifications,
+    successRate,
+    lastNotificationSent,
+    avgDeliveryTime,
+  ];
 }
 
 @JsonSerializable(includeIfNull: false)
@@ -181,19 +182,19 @@ class CreateSubscriptionRequest extends Equatable {
 
   @override
   List<Object?> get props => [
-        subscriptionName,
-        webhookUrl,
-        subscriptionType,
-        deliveryMethod,
-        notificationFormat,
-        notificationFrequency,
-        maxEventsPerNotification,
-        preferredHour,
-        preferredMinute,
-        queryParameters,
-        webhookAuthUsername,
-        webhookAuthPassword,
-      ];
+    subscriptionName,
+    webhookUrl,
+    subscriptionType,
+    deliveryMethod,
+    notificationFormat,
+    notificationFrequency,
+    maxEventsPerNotification,
+    preferredHour,
+    preferredMinute,
+    queryParameters,
+    webhookAuthUsername,
+    webhookAuthPassword,
+  ];
 }
 
 @JsonSerializable(createFactory: false)
@@ -251,7 +252,8 @@ class WebhookNotification extends Equatable {
       status: json['status']?.toString() ?? '',
       webhookUrl: json['webhookUrl']?.toString() ?? '',
       createdAt:
-          parseTime(json['createdAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
+          parseTime(json['createdAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
       deliveredAt: parseTime(json['deliveryTime'] ?? json['deliveredAt']),
       retryCount:
           (json['attemptCount'] as num?)?.toInt() ??
@@ -262,19 +264,86 @@ class WebhookNotification extends Equatable {
     );
   }
 
+  bool get isEmail {
+    final url = webhookUrl.trim();
+    final lower = url.toLowerCase();
+    if (lower.startsWith('mailto:')) return true;
+    if (lower.startsWith('http://') || lower.startsWith('https://')) {
+      return false;
+    }
+    return url.contains('@');
+  }
+
   Map<String, dynamic> toJson() => _$WebhookNotificationToJson(this);
 
   @override
   List<Object?> get props => [
-        id,
-        subscriptionId,
-        eventId,
-        status,
-        webhookUrl,
-        createdAt,
-        deliveredAt,
-        retryCount,
-        errorMessage,
-        response,
-      ];
+    id,
+    subscriptionId,
+    eventId,
+    status,
+    webhookUrl,
+    createdAt,
+    deliveredAt,
+    retryCount,
+    errorMessage,
+    response,
+  ];
+}
+
+class NotificationBatch extends Equatable {
+  final String id;
+  final String subscriptionId;
+  final String? subscriptionName;
+  final int? batchSize;
+  final String
+  status; // PENDING | PROCESSING | SENT | DELIVERED | FAILED | CANCELLED
+  final int? deliveryAttempts;
+  final String? lastError;
+  final DateTime? scheduledTime;
+  final DateTime? processingEndTime;
+  final DateTime createdAt;
+
+  const NotificationBatch({
+    required this.id,
+    required this.subscriptionId,
+    this.subscriptionName,
+    this.batchSize,
+    required this.status,
+    this.deliveryAttempts,
+    this.lastError,
+    this.scheduledTime,
+    this.processingEndTime,
+    required this.createdAt,
+  });
+
+  factory NotificationBatch.fromJson(Map<String, dynamic> json) {
+    DateTime? parseTime(Object? v) =>
+        v == null ? null : DateTime.tryParse(v.toString());
+    return NotificationBatch(
+      id: json['id']?.toString() ?? '',
+      subscriptionId: json['subscriptionId']?.toString() ?? '',
+      subscriptionName: json['subscriptionName'] as String?,
+      batchSize: (json['batchSize'] as num?)?.toInt(),
+      status: json['status']?.toString() ?? 'PENDING',
+      deliveryAttempts: (json['deliveryAttempts'] as num?)?.toInt(),
+      lastError: json['lastError'] as String?,
+      scheduledTime: parseTime(json['scheduledTime']),
+      processingEndTime: parseTime(json['processingEndTime']),
+      createdAt:
+          parseTime(json['createdAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  }
+
+  bool get isExhausted => status == 'FAILED' && (deliveryAttempts ?? 0) >= 3;
+
+  @override
+  List<Object?> get props => [
+    id,
+    subscriptionId,
+    status,
+    deliveryAttempts,
+    lastError,
+  ];
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
+import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/batch_delivery_event_row.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/delivery_activity_event_row.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/empty_delivery_feed.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
@@ -26,7 +27,10 @@ class NotificationCenterBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loading =
-        state.deliveryActivityLoading && state.deliveryActivity.isEmpty;
+        (state.deliveryActivityLoading && state.deliveryActivity.isEmpty) ||
+        (state.failedBatchesLoading &&
+            state.failedBatches.isEmpty &&
+            state.deliveryActivity.isEmpty);
     if (loading ||
         (state.status == NotificationStatus.initial &&
             state.subscriptions.isEmpty)) {
@@ -36,7 +40,9 @@ class NotificationCenterBody extends StatelessWidget {
         shape: SubscriptionSkeletonShape.activityCard,
       );
     }
-    if (state.deliveryActivityError != null && state.deliveryActivity.isEmpty) {
+    if (state.deliveryActivityError != null &&
+        state.deliveryActivity.isEmpty &&
+        state.failedBatches.isEmpty) {
       return SubscriptionErrorView(
         title: 'Error loading delivery events',
         message: state.deliveryActivityError ?? 'Unknown error',
@@ -61,7 +67,7 @@ class NotificationCenterBody extends StatelessWidget {
               stats.failedNotifications > 0 ||
               stats.totalNotifications > 0);
     });
-    if (filtered.isEmpty) {
+    if (filtered.isEmpty && state.failedBatches.isEmpty) {
       return EmptyDeliveryFeed(
         hasAnyEvents: state.deliveryActivity.isNotEmpty,
         hasCounters: hasCounters,
@@ -70,20 +76,46 @@ class NotificationCenterBody extends StatelessWidget {
         onPrimaryAction: onPrimaryAction,
       );
     }
-    return ListView.separated(
+    return ListView(
       shrinkWrap: shrinkWrap,
       physics: shrinkWrap
           ? const NeverScrollableScrollPhysics()
           : const AlwaysScrollableScrollPhysics(),
-      itemCount: filtered.length,
-      separatorBuilder: (_, _) => const SizedBox(height: TraqSpacing.sm),
-      itemBuilder: (context, index) {
-        final event = filtered[index];
-        return DeliveryActivityEventRow(
-          notification: event,
-          subscriptionName: nameById[event.subscriptionId],
-        );
-      },
+      children: [
+        if (state.failedBatches.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
+            child: Text(
+              'Awaiting Manual Retry',
+              style: context.text.bodySm.copyWith(
+                color: context.colors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ...state.failedBatches.map(
+            (batch) => Padding(
+              padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
+              child: BatchDeliveryEventRow(
+                batch: batch,
+                subscriptionName: nameById[batch.subscriptionId],
+              ),
+            ),
+          ),
+          if (filtered.isNotEmpty) const Divider(height: TraqSpacing.lg),
+        ],
+        ...filtered.asMap().entries.map((entry) {
+          final event = entry.value;
+          final isLast = entry.key == filtered.length - 1;
+          return Padding(
+            padding: EdgeInsets.only(bottom: isLast ? 0 : TraqSpacing.sm),
+            child: DeliveryActivityEventRow(
+              notification: event,
+              subscriptionName: nameById[event.subscriptionId],
+            ),
+          );
+        }),
+      ],
     );
   }
 }

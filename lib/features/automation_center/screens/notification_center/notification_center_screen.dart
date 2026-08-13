@@ -36,7 +36,9 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<NotificationCubit>().loadDeliveryActivity();
+    final cubit = context.read<NotificationCubit>();
+    cubit.loadDeliveryActivity();
+    cubit.loadFailedBatches();
   }
 
   bool _isLive(NotificationState state) {
@@ -45,9 +47,9 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
   }
 
   void refresh() {
-    context.read<NotificationCubit>().loadDeliveryActivity(
-      forceSubscriptions: true,
-    );
+    final cubit = context.read<NotificationCubit>();
+    cubit.loadDeliveryActivity(forceSubscriptions: true);
+    cubit.loadFailedBatches();
   }
 
   void toggleLive() {
@@ -82,10 +84,15 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
       listenWhen: (prev, next) =>
           prev.connectionStatus != next.connectionStatus ||
           (prev.deliveryActivityError != next.deliveryActivityError &&
-              next.deliveryActivityError != null),
+              next.deliveryActivityError != null) ||
+          (prev.failedBatchesError != next.failedBatchesError &&
+              next.failedBatchesError != null),
       listener: (context, state) {
         if (state.deliveryActivityError != null) {
           context.showError(state.deliveryActivityError!);
+        }
+        if (state.failedBatchesError != null) {
+          context.showError(state.failedBatchesError!);
         }
       },
       builder: (context, state) {

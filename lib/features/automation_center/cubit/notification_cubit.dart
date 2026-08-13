@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/services/automation_center/notification_api_service.dart'
     as api;
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
-import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart';
+import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart'
+    hide NotificationBatch;
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 
 part 'notification_cubit_realtime.dart';
@@ -422,6 +424,77 @@ class NotificationCubit extends Cubit<NotificationState> {
           deliveryActivityError: 'Failed to load delivery events: $e',
         ),
       );
+    }
+  }
+
+  Future<void> loadFailedBatches() async {
+    if (isClosed) return;
+    emit(state.copyWith(failedBatchesLoading: true, failedBatchesError: null));
+    try {
+      await loadSubscriptions();
+      var spins = 0;
+      while (_loadInFlight && !isClosed && spins < 40) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        spins++;
+      }
+      if (isClosed) return;
+
+      final chunks = await Future.wait(
+        state.subscriptions.map((sub) => _apiService.getBatchHistory(sub.id)),
+      );
+      final failed =
+          chunks.expand((e) => e).where((b) => b.isExhausted).toList()
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      if (isClosed) return;
+      emit(state.copyWith(failedBatches: failed, failedBatchesLoading: false));
+    } catch (e) {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          failedBatchesLoading: false,
+          failedBatchesError: 'Failed to load failed batches: $e',
+        ),
+      );
+    }
+  }
+
+  Future<void> retryBatch(String batchId) async {
+    try {
+      await _apiService.retryBatch(batchId);
+      // Refresh both activity and failed batches
+      await loadDeliveryActivity(forceSubscriptions: false);
+      await loadFailedBatches();
+    } catch (e) {
+      if (!isClosed) {
+        emit(
+          state.copyWith(
+            status: NotificationStatus.error,
+            error: e is ApiException
+                ? e.getUserFriendlyMessage()
+                : "Couldn't retry this batch. Please try again.",
+          ),
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> retryWebhook(String notificationId) async {
+    try {
+      await _apiService.retryWebhook(notificationId);
+      await loadDeliveryActivity(forceSubscriptions: false);
+    } catch (e) {
+      if (!isClosed) {
+        emit(
+          state.copyWith(
+            status: NotificationStatus.error,
+            error: e is ApiException
+                ? e.getUserFriendlyMessage()
+                : "Couldn't retry this delivery. Please try again.",
+          ),
+        );
+      }
+      rethrow;
     }
   }
 

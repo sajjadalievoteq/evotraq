@@ -11,13 +11,11 @@ import 'package:traqtrace_app/core/utils/barcode_utils.dart';
 import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_batch.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
-import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_batch_lookup_status.dart';
 import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
 import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_operation_state.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
@@ -68,7 +66,6 @@ class _CommissioningOperationViewState
   int _currentStep = 0;
 
   final _batchLotController = TextEditingController();
-  final _registrationQuantityController = TextEditingController();
   final _referenceController = TextEditingController();
   final _readPointGlnController = TextEditingController();
 
@@ -139,7 +136,6 @@ class _CommissioningOperationViewState
   void dispose() {
     _pageController.dispose();
     _batchLotController.dispose();
-    _registrationQuantityController.dispose();
     _referenceController.dispose();
     _readPointGlnController.dispose();
     _countryOfOriginController.dispose();
@@ -154,26 +150,19 @@ class _CommissioningOperationViewState
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<
+    return BlocBuilder<
       CommissioningOperationCubit,
       CommissioningOperationState
     >(
-      listenWhen: (previous, current) =>
-          previous.resolvedBatch != current.resolvedBatch,
-      listener: (context, state) {
-        final batch = state.resolvedBatch;
-        if (batch != null) _applyBatchDatesFromResolved(batch);
-      },
-      builder: (context, batchState) {
+      builder: (context, state) {
         final submitLabel = 'Commission ${_commissionItems.length} Items';
-        final isBusy = _isLoading || batchState.loading;
+        final isBusy = _isLoading || state.loading;
 
         return AppLayoutBuilder(
           builder: (context, layout) {
             final isDesktop = layout.isDesktopUp;
-            final step1 = _buildStep1(batchState, embeddedInPanel: isDesktop);
+            final step1 = _buildStep1(embeddedInPanel: isDesktop);
             final step2 = _buildStep2(
-              batchState,
               embeddedInPanel: isDesktop,
               fillHeight: !isDesktop,
             );
@@ -187,8 +176,7 @@ class _CommissioningOperationViewState
                     step1Title: 'Details',
                     step2Title: 'Items',
                     step1Complete: _isDetailsStepValid,
-                    step2Complete:
-                        _isStep2Valid && _isPharmaBatchReady(batchState),
+                    step2Complete: _isStep2Valid,
                     detailsStep: step1,
                     itemsStep: step2,
                     reviewStep: step3,

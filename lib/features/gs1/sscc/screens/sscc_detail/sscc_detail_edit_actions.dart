@@ -97,7 +97,7 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
       }
       final code = sscc.ssccCode;
       if (code.isNotEmpty) {
-        context.go(SsccRouteConstants.pathForSsccCode(code));
+        context.push(SsccRouteConstants.pathForSsccCode(code));
       }
     });
   }

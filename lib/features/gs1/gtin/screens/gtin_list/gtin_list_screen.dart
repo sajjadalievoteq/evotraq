@@ -233,7 +233,7 @@ class _GTINListScreenState extends State<GTINListScreen> {
       widget.onSelectGtin!(gtinCode);
       return;
     }
-    context.go('${Constants.gs1GtinsRoute}/$gtinCode');
+    context.push('${Constants.gs1GtinsRoute}/$gtinCode');
     _searchImmediate();
   }
 
@@ -242,7 +242,7 @@ class _GTINListScreenState extends State<GTINListScreen> {
       widget.onEmbeddedCreate!();
       return;
     }
-    context.go(Constants.gs1GtinNewRoute);
+    context.push(Constants.gs1GtinNewRoute);
     _searchImmediate();
   }
 

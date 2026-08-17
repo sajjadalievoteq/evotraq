@@ -1,8 +1,5 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
-
-import '../../../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
 
 enum SGTINStatus { initial, loading, success, error }
 

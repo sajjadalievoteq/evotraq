@@ -1,114 +1,6 @@
 part of 'commissioning_operation_view.dart';
 
 extension CommissioningWorkflowActions on _CommissioningOperationViewState {
-  void _triggerBatchLookupNow() {
-    context.read<CommissioningOperationCubit>().triggerBatchLookupNow(
-      gtinCode: _resolvedGtinCode(),
-      isPharmaGtin: _isPharmaGtin,
-      batchLot: _batchLotController.text,
-    );
-  }
-
-  DateTime? _parseBatchDate(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    return DateTime.tryParse(value.trim());
-  }
-
-  void _applyBatchDatesFromResolved(GtinBatch batch) {
-    final expiry = _parseBatchDate(batch.expiryDate);
-    final manufacture = _parseBatchDate(batch.manufactureDate);
-    setState(() {
-      if (expiry != null && !_expiryManuallySet) _expiryDate = expiry;
-      if (manufacture != null && !_productionDateManuallySet) {
-        _productionDate = manufacture;
-      }
-    });
-  }
-
-  Future<void> _registerBatch() async {
-    final cubit = context.read<CommissioningOperationCubit>();
-    final gtinCode = _resolvedGtinCode();
-    final dbId = cubit.state.gtinDbId;
-    if (gtinCode == null || dbId == null) return;
-
-    final qtyText = _registrationQuantityController.text.trim();
-    cubit.setRegistrationQuantityManufactured(
-      qtyText.isEmpty ? null : int.tryParse(qtyText),
-    );
-
-    final ok = await cubit.registerBatch(
-      gtinDbId: dbId,
-      gtinCode: gtinCode,
-      batchLot: _batchLotController.text,
-    );
-    if (!mounted) return;
-    if (ok) {
-      context.showSuccess('Batch registered successfully');
-      final batch = cubit.state.resolvedBatch;
-      if (batch != null) _applyBatchDatesFromResolved(batch);
-    }
-  }
-
-  Future<void> _selectRegistrationDate(String dateType) async {
-    final cubit = context.read<CommissioningOperationCubit>();
-    final now = DateTime.now();
-    final initialDate = switch (dateType) {
-      'registrationExpiry' =>
-        cubit.state.registrationExpiryDate ??
-            now.add(const Duration(days: 365)),
-      _ => cubit.state.registrationManufactureDate ?? now,
-    };
-    final label = switch (dateType) {
-      'registrationExpiry' => 'Expiry',
-      _ => 'Manufacture',
-    };
-
-    final selected = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: dateType == 'registrationExpiry'
-          ? now
-          : DateTime(now.year - 2),
-      lastDate: DateTime(now.year + 10),
-      helpText: 'Select $label Date',
-    );
-    if (selected == null || !mounted) return;
-
-    switch (dateType) {
-      case 'registrationExpiry':
-        cubit.setRegistrationExpiryDate(selected);
-      case 'registrationManufacture':
-        cubit.setRegistrationManufactureDate(selected);
-    }
-  }
-
-  void _clearRegistrationDate(String dateType) {
-    final cubit = context.read<CommissioningOperationCubit>();
-    switch (dateType) {
-      case 'registrationExpiry':
-        cubit.setRegistrationExpiryDate(null);
-      case 'registrationManufacture':
-        cubit.setRegistrationManufactureDate(null);
-    }
-  }
-
-  bool _isPharmaBatchReady(CommissioningOperationState batchState) {
-    if (!_isPharmaSgtin) return true;
-    if (batchState.isBatchBusy) return false;
-    if (batchState.requiresBatchRegistration) return false;
-    if (_batchLotController.text.trim().isEmpty) return false;
-
-    return switch (batchState.batchLookupStatus) {
-      CommissioningBatchLookupStatus.found ||
-      CommissioningBatchLookupStatus.registered => true,
-      CommissioningBatchLookupStatus.error => true,
-      CommissioningBatchLookupStatus.idle ||
-      CommissioningBatchLookupStatus.lookingUp ||
-      CommissioningBatchLookupStatus.notFound ||
-      CommissioningBatchLookupStatus.registering => false,
-    };
-  }
-
   Future<void> _nextStep() async {
     if (_currentStep < 2 && await _validateCurrentStep()) {
       await _pageController.nextPage(
@@ -185,29 +77,6 @@ extension CommissioningWorkflowActions on _CommissioningOperationViewState {
         return false;
       }
     }
-    final batchCubit = context.read<CommissioningOperationCubit>();
-    final batchState = batchCubit.state;
-    if (_isPharmaSgtin) {
-      if (batchState.isBatchBusy) {
-        context.showWarning('Wait for batch lookup or registration to finish.');
-        return false;
-      }
-      if (batchState.requiresBatchRegistration) {
-        context.showError(
-          'Register the batch in Batch Master before continuing.',
-        );
-        return false;
-      }
-      if (batchState.batchLookupStatus == CommissioningBatchLookupStatus.idle) {
-        context.showInfo('Verifying batch in Batch Master…');
-        batchCubit.triggerBatchLookupNow(
-          gtinCode: _resolvedGtinCode(),
-          isPharmaGtin: _isPharmaGtin,
-          batchLot: _batchLotController.text,
-        );
-        return false;
-      }
-    }
     return true;
   }
 
@@ -243,7 +112,6 @@ extension CommissioningWorkflowActions on _CommissioningOperationViewState {
     _pharmaGtinIdentifiedFor = null;
     _poolCheckCache.clear();
     _commissionItems.clear();
-    context.read<CommissioningOperationCubit>().clearBatchState();
   }
 
   Future<void> _clearAllItems() async {

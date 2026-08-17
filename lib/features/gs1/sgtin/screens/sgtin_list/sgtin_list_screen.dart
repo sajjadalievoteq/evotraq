@@ -96,8 +96,9 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
       gtinCode: criteria.gtinCode,
       serialNumber: criteria.serialNumber,
       epcUri: criteria.epcUri,
-      batchLotNumber:
-          _batchLotController.text.isNotEmpty ? _batchLotController.text : null,
+      batchLotNumber: _batchLotController.text.isNotEmpty
+          ? _batchLotController.text
+          : null,
       status: gs1ValueUnlessAll(_selectedStatus),
       page: 0,
       size: _pageSize,
@@ -123,8 +124,9 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
     context.read<SGTINCubit>().fetchSGTINList(
       gtinCode: criteria.gtinCode,
       serialNumber: criteria.serialNumber,
-      batchLotNumber:
-          _batchLotController.text.isNotEmpty ? _batchLotController.text : null,
+      batchLotNumber: _batchLotController.text.isNotEmpty
+          ? _batchLotController.text
+          : null,
       status: gs1ValueUnlessAll(_selectedStatus),
       page: cubitState.currentPage + 1,
       size: _pageSize,
@@ -134,12 +136,8 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
     );
   }
 
-  ({
-    String? gtinCode,
-    String? serialNumber,
-    String? epcUri,
-    String? parseError,
-  }) _searchCriteria() {
+  ({String? gtinCode, String? serialNumber, String? epcUri, String? parseError})
+  _searchCriteria() {
     var gtinCode = _gtinCodeController.text.trim().isEmpty
         ? null
         : _gtinCodeController.text.trim();
@@ -192,10 +190,9 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
   }
 
   void _showFilterDialog() {
-    SgtinQuickFilterDialog.open(
-      context,
-      selectedStatus: _selectedStatus,
-    ).then((result) {
+    SgtinQuickFilterDialog.open(context, selectedStatus: _selectedStatus).then((
+      result,
+    ) {
       if (result == null) return;
       if (result.cleared) {
         setState(() => _selectedStatus = null);
@@ -247,7 +244,7 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
       widget.onSelectSgtin!(id);
       return;
     }
-    context.go('${Constants.gs1SgtinsRoute}/$id');
+    context.push('${Constants.gs1SgtinsRoute}/$id');
   }
 
   void _navigateToCreate() {
@@ -255,7 +252,7 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
       widget.onEmbeddedCreate!();
       return;
     }
-    context.go(Constants.gs1SgtinNewRoute);
+    context.push(Constants.gs1SgtinNewRoute);
   }
 
   bool get _hasActiveFilters {
@@ -342,10 +339,12 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
   }
 
   String _sortLabel() {
-    final fieldLabel = SgtinUiConstants.sortFieldLabels[_selectedSortBy] ??
+    final fieldLabel =
+        SgtinUiConstants.sortFieldLabels[_selectedSortBy] ??
         SgtinUiConstants.sortFieldFallback;
-    final orderLabel =
-        _sortDirection == 'ASC' ? 'A–Z / Oldest' : 'Z–A / Newest';
+    final orderLabel = _sortDirection == 'ASC'
+        ? 'A–Z / Oldest'
+        : 'Z–A / Newest';
     return 'Sort by $fieldLabel ($orderLabel)';
   }
 }

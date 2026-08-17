@@ -22,22 +22,13 @@ class SgtinLocationCustodyCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SgtinInfoRow(
-            'Current Location GLN',
-            sgtin.currentLocation?.glnCode,
-          ),
+          SgtinInfoRow('Current Location GLN', sgtin.currentLocation?.glnCode),
           if (sgtin.currentLocation?.locationName != null) ...[
             const SizedBox(height: 12),
-            SgtinInfoRow(
-              'Location Name',
-              sgtin.currentLocation!.locationName,
-            ),
+            SgtinInfoRow('Location Name', sgtin.currentLocation!.locationName),
           ],
           const SizedBox(height: 12),
-          SgtinInfoRow(
-            'Current Custodian GLN',
-            sgtin.currentCustodianGln,
-          ),
+          SgtinInfoRow('Current Custodian GLN', sgtin.currentCustodianGln),
           if (sgtin.currentSsccCode != null || sgtin.currentSSCC != null) ...[
             const SizedBox(height: 12),
             SgtinInfoRow(
@@ -55,10 +46,7 @@ class SgtinLocationCustodyCard extends StatelessWidget {
           ],
           if (sgtin.aggregatedAt != null) ...[
             const SizedBox(height: 12),
-            SgtinInfoRow(
-              'Aggregated At',
-              sgtinFormatDt(sgtin.aggregatedAt),
-            ),
+            SgtinInfoRow('Aggregated At', sgtinFormatDt(sgtin.aggregatedAt)),
           ],
         ],
       ),

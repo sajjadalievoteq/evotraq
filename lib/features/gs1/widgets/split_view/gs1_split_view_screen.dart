@@ -98,7 +98,7 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
   void _onFabPressed() {
     final route = widget.fabNavigateRoute;
     if (route != null) {
-      context.go(route);
+      context.push(route);
       return;
     }
     _toggleFab();
@@ -107,7 +107,7 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
   void _onRequestCreate() {
     final route = widget.fabNavigateRoute;
     if (route != null) {
-      context.go(route);
+      context.push(route);
       return;
     }
     setState(() => _isCreateMode = true);

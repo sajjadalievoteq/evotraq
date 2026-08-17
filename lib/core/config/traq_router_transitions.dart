@@ -26,7 +26,7 @@ enum TraqNavigationTransitionType {
 
 /// Slide-first router motion. All timings/offsets come from
 /// [TraqAnimationConstants]. Reduced-motion is gated by
-/// [TraqAnimationManager.reduceMotion] (currently always-on).
+/// [TraqAnimationManager.reduceMotion].
 abstract final class TraqRouterTransitions {
   static Page<T> page<T extends Object?>({
     required LocalKey key,
@@ -73,6 +73,17 @@ abstract final class TraqRouterTransitions {
           ),
     );
   }
+
+  /// Parent-navigator page for a feature [ShellRoute].
+  ///
+  /// A `builder`-only [ShellRoute] is wrapped in a platform [MaterialPage],
+  /// which has no horizontal slide on desktop/web. Use this so Home → feature
+  /// matches other drill-downs. Pass [GoRouterState.pageKey] (stable for a
+  /// given shell across child routes).
+  static Page<T> featureShellPage<T extends Object?>({
+    required LocalKey key,
+    required Widget child,
+  }) => sharedAxisHorizontalPage(key: key, child: child);
 
   /// List → detail: horizontal slide (primary cue) + light fade.
   static Page<T> sharedAxisHorizontalPage<T extends Object?>({

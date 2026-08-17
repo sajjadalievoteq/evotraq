@@ -19,9 +19,9 @@ class CommissioningOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.operationReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.operationReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.gtinCode?.toLowerCase().contains(normalizedQuery) ??
               false) ||

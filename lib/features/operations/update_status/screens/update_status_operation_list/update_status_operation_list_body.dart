@@ -175,7 +175,7 @@ class UpdateStatusOperationListBodyState
     if (widget.embedded && widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
-      context.go('${Constants.opUpdateStatusRoute}/$id');
+      context.push('${Constants.opUpdateStatusRoute}/$id');
     }
   }
 
@@ -315,7 +315,7 @@ class UpdateStatusOperationListBodyState
               ? null
               : FloatingActionButton.extended(
                   onPressed: () =>
-                      context.go(Constants.opUpdateStatusCreateRoute),
+                      context.push(Constants.opUpdateStatusCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

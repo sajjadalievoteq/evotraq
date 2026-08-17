@@ -1,5 +1,6 @@
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
+
 abstract final class CommissioningFieldValidators {
   static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
 
@@ -10,8 +11,10 @@ abstract final class CommissioningFieldValidators {
   }) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    if (v.length > maxLen) return '$fieldName must be at most $maxLen characters';
-    if (_controlChars.hasMatch(v)) return '$fieldName contains invalid control characters';
+    if (v.length > maxLen)
+      return '$fieldName must be at most $maxLen characters';
+    if (_controlChars.hasMatch(v))
+      return '$fieldName contains invalid control characters';
     return null;
   }
 

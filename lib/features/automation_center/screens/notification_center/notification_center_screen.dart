@@ -120,15 +120,24 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
           filterChips: SubscriptionFilterChips(
             options: kDeliveryActivityFilterOptions,
             selectedFilter: _selectedFilter,
-            onFilterSelected: (filter) =>
-                setState(() => _selectedFilter = filter),
+            onFilterSelected: (filter) {
+              setState(() => _selectedFilter = filter);
+              context.read<NotificationCubit>().loadDeliveryActivity(
+                outcome: filter,
+              );
+            },
           ),
           body: NotificationCenterBody(
             state: state,
             selectedFilter: _selectedFilter,
             shrinkWrap: false,
             onRefresh: refresh,
-            onClearFilters: () => setState(() => _selectedFilter = 'all'),
+            onClearFilters: () {
+              setState(() => _selectedFilter = 'all');
+              context.read<NotificationCubit>().loadDeliveryActivity(
+                outcome: 'all',
+              );
+            },
             onPrimaryAction: goManageSubscriptions,
           ),
         );

@@ -30,15 +30,14 @@ class CommissioningEpcResolveAmbiguous extends CommissioningEpcResolveOutcome {
   final List<CommissioningPoolMatch> matches;
 }
 
-
 class CommissioningEpcResolver {
   const CommissioningEpcResolver({
     required SGTINService sgtinService,
     required SSCCService ssccService,
     required CommissioningSerialPoolChecker poolChecker,
-  })  : _sgtinService = sgtinService,
-        _ssccService = ssccService,
-        _poolChecker = poolChecker;
+  }) : _sgtinService = sgtinService,
+       _ssccService = ssccService,
+       _poolChecker = poolChecker;
 
   final SGTINService _sgtinService;
   final SSCCService _ssccService;
@@ -80,20 +79,14 @@ class CommissioningEpcResolver {
     final sgtinMatches = results[0] as List<CommissioningPoolMatch>;
     final ssccMatch = results[1] as CommissioningPoolMatch?;
 
-    final matches = <CommissioningPoolMatch>[
-      ...sgtinMatches,
-      ?ssccMatch,
-    ];
+    final matches = <CommissioningPoolMatch>[...sgtinMatches, ?ssccMatch];
 
     if (matches.isEmpty) {
       return CommissioningEpcResolveError('Serial not pre-allocated');
     }
     if (matches.length == 1) {
       final match = matches.first;
-      return CommissioningEpcResolved(
-        match.parsed,
-        poolCheck: match.poolCheck,
-      );
+      return CommissioningEpcResolved(match.parsed, poolCheck: match.poolCheck);
     }
     return CommissioningEpcResolveAmbiguous(matches);
   }
@@ -108,10 +101,11 @@ class CommissioningEpcResolver {
     );
     final content =
         (result['content'] as List?)?.whereType<SGTIN>().toList() ??
-            const <SGTIN>[];
+        const <SGTIN>[];
 
     return content.map((sgtin) {
-      final epc = sgtin.canonicalIdentifier ??
+      final epc =
+          sgtin.canonicalIdentifier ??
           Gs1Converter.gtinSerialToEpc(sgtin.gtinCode, sgtin.serialNumber) ??
           'https://id.gs1.org/01/${sgtin.gtinCode.padLeft(14, '0')}/21/${sgtin.serialNumber}';
       final parsed = EPCParseResult(
@@ -140,7 +134,8 @@ class CommissioningEpcResolver {
     }
     try {
       final sscc = await _ssccService.getSSCCByCode(stripped);
-      final epc = sscc.canonicalIdentifier ??
+      final epc =
+          sscc.canonicalIdentifier ??
           Gs1Converter.ssccToEpc(stripped) ??
           'https://id.gs1.org/00/$stripped';
       final parsed = EPCParseResult(

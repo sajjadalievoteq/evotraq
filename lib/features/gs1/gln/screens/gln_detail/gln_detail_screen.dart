@@ -206,7 +206,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
             } else if (context.mounted) {
               final code = state.selectedGLN?.glnCode ?? widget.glnId;
               if (code != null && code.isNotEmpty) {
-                context.go(GlnRouteConstants.pathForGlnCode(code));
+                context.push(GlnRouteConstants.pathForGlnCode(code));
               } else {
                 context.go(Constants.gs1GlnsRoute);
               }

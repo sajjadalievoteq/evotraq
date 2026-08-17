@@ -86,7 +86,7 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
             icon: TraqIcon(AppAssets.iconInfo),
             tooltip: 'Help',
             onPressed: () {
-              context.go('/epcis/transaction-documents/help');
+              context.push('/epcis/transaction-documents/help');
             },
           ),
         ],

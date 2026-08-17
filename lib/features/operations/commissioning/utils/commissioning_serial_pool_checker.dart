@@ -22,13 +22,12 @@ class CommissioningPoolCheckResult {
   final String? blockReason;
 }
 
-
 class CommissioningSerialPoolChecker {
   const CommissioningSerialPoolChecker({
     required SGTINService sgtinService,
     required SSCCService ssccService,
-  })  : _sgtinService = sgtinService,
-        _ssccService = ssccService;
+  }) : _sgtinService = sgtinService,
+       _ssccService = ssccService;
 
   final SGTINService _sgtinService;
   final SSCCService _ssccService;
@@ -45,9 +44,9 @@ class CommissioningSerialPoolChecker {
         EPCType.sgtin => await _checkSgtin(parsed),
         EPCType.sscc => await _checkSscc(parsed),
         _ => const CommissioningPoolCheckResult(
-            status: CommissioningSerialPoolStatus.notTransitionable,
-            blockReason: 'Only SGTIN and SSCC identifiers can be commissioned',
-          ),
+          status: CommissioningSerialPoolStatus.notTransitionable,
+          blockReason: 'Only SGTIN and SSCC identifiers can be commissioned',
+        ),
       };
     } catch (_) {
       return const CommissioningPoolCheckResult(
@@ -57,7 +56,9 @@ class CommissioningSerialPoolChecker {
     }
   }
 
-  Future<CommissioningPoolCheckResult> _checkSgtin(EPCParseResult parsed) async {
+  Future<CommissioningPoolCheckResult> _checkSgtin(
+    EPCParseResult parsed,
+  ) async {
     final serial = parsed.serial;
     final gtin = parsed.gtin;
     if (serial == null || serial.isEmpty) {
@@ -67,7 +68,6 @@ class CommissioningSerialPoolChecker {
       );
     }
 
-    
     final byEpc = await _tryGetByEpc(parsed.epc);
     if (byEpc != null) return _sgtinStatusResult(byEpc);
 
@@ -80,7 +80,8 @@ class CommissioningSerialPoolChecker {
       page: 0,
       size: 5,
     );
-    final content = (result['content'] as List?)?.whereType<SGTIN>().toList() ??
+    final content =
+        (result['content'] as List?)?.whereType<SGTIN>().toList() ??
         const <SGTIN>[];
 
     if (content.isEmpty) {
@@ -116,10 +117,7 @@ class CommissioningSerialPoolChecker {
     }
   }
 
-  Future<SGTIN?> _tryGetBySerial(
-    String serial, {
-    String? expectedGtin,
-  }) async {
+  Future<SGTIN?> _tryGetBySerial(String serial, {String? expectedGtin}) async {
     try {
       final sgtin = await _sgtinService.getSGTINBySerialNumber(serial);
       if (expectedGtin == null || expectedGtin.isEmpty) return sgtin;
@@ -147,8 +145,7 @@ class CommissioningSerialPoolChecker {
       return CommissioningPoolCheckResult(
         status: CommissioningSerialPoolStatus.alreadyCommissioned,
         sourceStatus: status.name,
-        blockReason:
-            'Already commissioned (status ${status.name})',
+        blockReason: 'Already commissioned (status ${status.name})',
       );
     }
 
@@ -182,8 +179,7 @@ class CommissioningSerialPoolChecker {
       return CommissioningPoolCheckResult(
         status: CommissioningSerialPoolStatus.notTransitionable,
         sourceStatus: status.name,
-        blockReason:
-            'Cannot transition from ${status.name} to ACTIVE',
+        blockReason: 'Cannot transition from ${status.name} to ACTIVE',
       );
     }
 
@@ -234,8 +230,7 @@ class CommissioningSerialPoolChecker {
       );
     }
 
-    if (status == LogisticUnitStatus.ACTIVE &&
-        sscc.commissionedAt != null) {
+    if (status == LogisticUnitStatus.ACTIVE && sscc.commissionedAt != null) {
       return CommissioningPoolCheckResult(
         status: CommissioningSerialPoolStatus.alreadyCommissioned,
         sourceStatus: status.name,

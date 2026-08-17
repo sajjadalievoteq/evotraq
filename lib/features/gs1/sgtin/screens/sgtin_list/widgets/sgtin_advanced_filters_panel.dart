@@ -36,7 +36,9 @@ class SgtinAdvancedFiltersPanel extends StatelessWidget {
       children: [
         Text(
           SgtinUiConstants.advancedFiltersHeader,
-          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 4),
         Text(

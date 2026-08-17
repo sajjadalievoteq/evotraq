@@ -55,6 +55,10 @@ class CommissioningDetailContent extends StatelessWidget {
         iconAsset: NavIcons.commissioning,
       );
     }
-    return CommissioningDetailBody(batch: batch!, items: items, itemStatuses: itemStatuses);
+    return CommissioningDetailBody(
+      batch: batch!,
+      items: items,
+      itemStatuses: itemStatuses,
+    );
   }
 }

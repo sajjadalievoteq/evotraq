@@ -4,10 +4,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
 
 class CommissioningDetailLocationCard extends StatelessWidget {
-  const CommissioningDetailLocationCard({
-    super.key,
-    required this.batch,
-  });
+  const CommissioningDetailLocationCard({super.key, required this.batch});
 
   final CommissioningBatch batch;
 
@@ -18,9 +15,7 @@ class CommissioningDetailLocationCard extends StatelessWidget {
 
     return OperationDetailGroupCard(
       title: 'Location',
-      children: [
-        OperationDetailInfoRowCopy(label: 'Location GLN', value: gln),
-      ],
+      children: [OperationDetailInfoRowCopy(label: 'Location GLN', value: gln)],
     );
   }
 }

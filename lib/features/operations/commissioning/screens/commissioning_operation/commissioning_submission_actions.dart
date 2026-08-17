@@ -109,10 +109,7 @@ extension CommissioningSubmissionActions on _CommissioningOperationViewState {
     }
   }
 
-  Form _buildStep1(
-    CommissioningOperationState batchState, {
-    bool embeddedInPanel = false,
-  }) => Form(
+  Form _buildStep1({bool embeddedInPanel = false}) => Form(
     key: _step1FormKey,
     child: CommissioningStep1ProductDetails(
       commissioningLocationGLN: _commissioningLocationGLN,
@@ -135,8 +132,7 @@ extension CommissioningSubmissionActions on _CommissioningOperationViewState {
     ),
   );
 
-  CommissioningStep2SerialNumbers _buildStep2(
-    CommissioningOperationState batchState, {
+  CommissioningStep2SerialNumbers _buildStep2({
     bool embeddedInPanel = false,
     bool fillHeight = false,
   }) => CommissioningStep2SerialNumbers(
@@ -155,25 +151,7 @@ extension CommissioningSubmissionActions on _CommissioningOperationViewState {
     bestBeforeDate: _bestBeforeDate,
     onSelectDate: _selectDate,
     onClearDate: _clearDate,
-    onBatchLotEditingComplete: _triggerBatchLookupNow,
-    onBatchLotFocusLost: _triggerBatchLookupNow,
-    showPharmaBatchLookup: _isPharmaSgtin,
-    batchLookupStatus: batchState.batchLookupStatus,
-    resolvedBatch: batchState.resolvedBatch,
-    batchLookupError: batchState.batchLookupError,
-    registrationPanelExpanded: batchState.registrationPanelExpanded,
-    registrationExpiryDate: batchState.registrationExpiryDate,
-    registrationManufactureDate: batchState.registrationManufactureDate,
-    registrationQuantityController: _registrationQuantityController,
-    onSelectRegistrationDate: _selectRegistrationDate,
-    onClearRegistrationDate: _clearRegistrationDate,
-    onRegisterBatch: _registerBatch,
-    onToggleRegistrationPanel: (expanded) => context
-        .read<CommissioningOperationCubit>()
-        .setRegistrationPanelExpanded(expanded),
-    isBatchRegistering:
-        batchState.batchLookupStatus ==
-        CommissioningBatchLookupStatus.registering,
+    requireExpiry: _isPharmaSgtin,
     itemProductNames: _itemProductNames,
   );
 

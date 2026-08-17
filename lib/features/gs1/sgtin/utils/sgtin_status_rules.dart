@@ -5,16 +5,9 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 
 const Map<ItemStatus, Set<ItemStatus>> allowedTransitionsMap = {
-  ItemStatus.RESERVED: {
-    ItemStatus.ALLOCATED,
-  },
-  ItemStatus.ALLOCATED: {
-    ItemStatus.COMMISSIONED,
-    ItemStatus.ACTIVE,
-  },
-  ItemStatus.COMMISSIONED: {
-    ItemStatus.ACTIVE,
-  },
+  ItemStatus.RESERVED: {ItemStatus.ALLOCATED},
+  ItemStatus.ALLOCATED: {ItemStatus.COMMISSIONED, ItemStatus.ACTIVE},
+  ItemStatus.COMMISSIONED: {ItemStatus.ACTIVE},
   ItemStatus.ACTIVE: {
     ItemStatus.IN_TRANSIT,
     ItemStatus.DISPENSED,
@@ -39,24 +32,11 @@ const Map<ItemStatus, Set<ItemStatus>> allowedTransitionsMap = {
     ItemStatus.RECALLED,
     ItemStatus.EXCEPTION,
   },
-  ItemStatus.DISPENSED: {
-    ItemStatus.RETURNED,
-  },
-  ItemStatus.RETURNED: {
-    ItemStatus.ACTIVE,
-    ItemStatus.DESTROYED,
-  },
-  ItemStatus.RECALLED: {
-    ItemStatus.DESTROYED,
-    ItemStatus.EXCEPTION,
-  },
-  ItemStatus.EXCEPTION: {
-    ItemStatus.ACTIVE,
-    ItemStatus.DESTROYED,
-  },
-  ItemStatus.EXPIRED: {
-    ItemStatus.DESTROYED,
-  },
+  ItemStatus.DISPENSED: {ItemStatus.RETURNED},
+  ItemStatus.RETURNED: {ItemStatus.ACTIVE, ItemStatus.DESTROYED},
+  ItemStatus.RECALLED: {ItemStatus.DESTROYED, ItemStatus.EXCEPTION},
+  ItemStatus.EXCEPTION: {ItemStatus.ACTIVE, ItemStatus.DESTROYED},
+  ItemStatus.EXPIRED: {ItemStatus.DESTROYED},
   ItemStatus.DESTROYED: {},
   ItemStatus.STOLEN: {},
 };
@@ -90,23 +70,22 @@ String? validateTransition(ItemStatus from, ItemStatus to) {
 }
 
 const Map<ItemStatus, String> statusLabels = {
-  ItemStatus.RESERVED:    'Reserved',
-  ItemStatus.ALLOCATED:   'Allocated',
-  ItemStatus.COMMISSIONED:'Commissioned',
-  ItemStatus.ACTIVE:      'Active',
-  ItemStatus.IN_TRANSIT:  'In Transit',
-  ItemStatus.RECEIVED:    'Received',
-  ItemStatus.DISPENSED:   'Dispensed',
-  ItemStatus.RETURNED:    'Returned',
-  ItemStatus.DESTROYED:   'Destroyed',
-  ItemStatus.RECALLED:    'Recalled',
-  ItemStatus.STOLEN:      'Stolen',
-  ItemStatus.EXPIRED:     'Expired',
-  ItemStatus.EXCEPTION:   'Exception',
+  ItemStatus.RESERVED: 'Reserved',
+  ItemStatus.ALLOCATED: 'Allocated',
+  ItemStatus.COMMISSIONED: 'Commissioned',
+  ItemStatus.ACTIVE: 'Active',
+  ItemStatus.IN_TRANSIT: 'In Transit',
+  ItemStatus.RECEIVED: 'Received',
+  ItemStatus.DISPENSED: 'Dispensed',
+  ItemStatus.RETURNED: 'Returned',
+  ItemStatus.DESTROYED: 'Destroyed',
+  ItemStatus.RECALLED: 'Recalled',
+  ItemStatus.STOLEN: 'Stolen',
+  ItemStatus.EXPIRED: 'Expired',
+  ItemStatus.EXCEPTION: 'Exception',
 };
 
-String friendlyLabel(ItemStatus status) =>
-    statusLabels[status] ?? status.name;
+String friendlyLabel(ItemStatus status) => statusLabels[status] ?? status.name;
 
 Color statusColor(BuildContext context, ItemStatus status) {
   return AppColorMapper.itemStatusColor(context, status);

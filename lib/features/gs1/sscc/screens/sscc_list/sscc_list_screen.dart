@@ -270,12 +270,12 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
       widget.onSelectSscc!(ssccCode);
       return;
     }
-    context.go(SsccRouteConstants.pathForSsccCode(ssccCode));
+    context.push(SsccRouteConstants.pathForSsccCode(ssccCode));
     _searchImmediate();
   }
 
   void _navigateToEdit(String ssccCode) {
-    context.go(SsccRouteConstants.pathForSsccCodeEdit(ssccCode));
+    context.push(SsccRouteConstants.pathForSsccCodeEdit(ssccCode));
     _searchImmediate();
   }
 
@@ -284,7 +284,7 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
       widget.onEmbeddedCreate!();
       return;
     }
-    context.go(Constants.gs1SsccNewRoute);
+    context.push(Constants.gs1SsccNewRoute);
     _searchImmediate();
   }
 

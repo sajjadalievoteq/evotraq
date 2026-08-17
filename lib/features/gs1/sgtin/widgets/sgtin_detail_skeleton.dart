@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 
 class SgtinDetailSkeleton extends StatelessWidget {
@@ -22,13 +22,13 @@ class SgtinDetailSkeleton extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 28, width: double.infinity, ),
+              SizedBox(height: 28, width: double.infinity),
               const SizedBox(height: 6),
-              SizedBox(height: 16, width: 160, ),
+              SizedBox(height: 16, width: 160),
               const Spacer(),
               Align(
                 alignment: Alignment.bottomRight,
-                child: SizedBox(height: 14, width: 80, ),
+                child: SizedBox(height: 14, width: 80),
               ),
             ],
           ),

@@ -29,7 +29,7 @@ class GtinPackedIntoRow extends StatelessWidget {
           ),
           Expanded(
             child: InkWell(
-              onTap: route != null ? () => context.go(route) : null,
+              onTap: route != null ? () => context.push(route) : null,
               borderRadius: BorderRadius.circular(4),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),

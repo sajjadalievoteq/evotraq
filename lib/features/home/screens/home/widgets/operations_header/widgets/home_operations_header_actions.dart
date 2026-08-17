@@ -13,7 +13,7 @@ class HomeOperationsHeaderActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return TraqElevatedIconButton(
-      onPressed: () => context.go(HomeNavigation.epcisObjectEventNew),
+      onPressed: () => context.push(HomeNavigation.epcisObjectEventNew),
       icon: SvgPicture.asset(
         AppAssets.iconPlus,
         width: 20,

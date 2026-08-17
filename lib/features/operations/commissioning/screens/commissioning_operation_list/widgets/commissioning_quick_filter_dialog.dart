@@ -9,12 +9,11 @@ class CommissioningQuickFilterDialog {
   static Future<OperationQuickFilterResult?> open(
     BuildContext context, {
     required String? selectedStatus,
-  }) =>
-      OperationQuickFilterDialog.open(
-        context,
-        selectedStatus: selectedStatus,
-        statusFilterOptions: CommissioningUiConstants.statusFilterOptions,
-        statusFilterLabel: CommissioningUiConstants.statusFilterLabel,
-        footerHint: CommissioningUiConstants.quickFiltersFooterHint,
-      );
+  }) => OperationQuickFilterDialog.open(
+    context,
+    selectedStatus: selectedStatus,
+    statusFilterOptions: CommissioningUiConstants.statusFilterOptions,
+    statusFilterLabel: CommissioningUiConstants.statusFilterLabel,
+    footerHint: CommissioningUiConstants.quickFiltersFooterHint,
+  );
 }

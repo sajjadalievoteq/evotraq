@@ -33,7 +33,7 @@ class CommissioningPartialSuccessDialog extends StatefulWidget {
 class _CommissioningPartialSuccessDialogState
     extends State<CommissioningPartialSuccessDialog> {
   late final Map<CommissioningFailureCategory, List<CommissioningItemResult>>
-      _grouped;
+  _grouped;
   late final Set<String> _serialsMarkedForRemoval;
 
   @override
@@ -52,10 +52,12 @@ class _CommissioningPartialSuccessDialogState
     }
   }
 
-  int get _failedCount => widget.response.failedCount ??
+  int get _failedCount =>
+      widget.response.failedCount ??
       (widget.response.itemResults?.where((r) => !r.success).length ?? 0);
 
-  int get _successCount => widget.response.commissionedCount ??
+  int get _successCount =>
+      widget.response.commissionedCount ??
       (widget.response.itemResults?.where((r) => r.success).length ?? 0);
 
   void _toggleSerial(String serial, bool selected) {
@@ -168,10 +170,8 @@ class _CommissioningPartialSuccessDialogState
                                   ? true
                                   : (someSelected ? null : false),
                               tristate: true,
-                              onChanged: (v) => _toggleCategory(
-                                entry.key,
-                                v ?? false,
-                              ),
+                              onChanged: (v) =>
+                                  _toggleCategory(entry.key, v ?? false),
                             ),
                             Expanded(
                               child: Column(
@@ -202,8 +202,9 @@ class _CommissioningPartialSuccessDialogState
                             dense: true,
                             contentPadding: const EdgeInsets.only(left: 16),
                             controlAffinity: ListTileControlAffinity.leading,
-                            value: _serialsMarkedForRemoval
-                                .contains(item.serialNumber),
+                            value: _serialsMarkedForRemoval.contains(
+                              item.serialNumber,
+                            ),
                             onChanged: (v) =>
                                 _toggleSerial(item.serialNumber, v ?? false),
                             title: Text(
@@ -215,10 +216,7 @@ class _CommissioningPartialSuccessDialogState
                             ),
                             subtitle: Text(
                               item.errorMessage ?? 'Unknown error',
-                              style: TextStyle(
-                                color: c.error,
-                                fontSize: 12,
-                              ),
+                              style: TextStyle(color: c.error, fontSize: 12),
                             ),
                           ),
                         ),

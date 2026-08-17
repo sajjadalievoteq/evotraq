@@ -29,9 +29,7 @@ class SgtinCommissioningCard extends StatelessWidget {
           if (!_isCommissioned)
             Text(
               'Not yet commissioned',
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             )
           else ...[
             if (sgtin?.currentLocation != null)

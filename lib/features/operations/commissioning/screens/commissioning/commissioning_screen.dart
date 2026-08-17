@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
@@ -11,21 +11,21 @@ class CommissioningScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
-        showFloatingActionButton:
-            context.canPerform(OperationSteps.commission),
-        appBarTitle: 'Commissioning',
-        fabHeroTag: 'commissioning_fab',
-        fabAddTooltip: 'New commissioning operation',
-        createHeaderText: 'New Commissioning Operation',
-        emptyNoMatchText: 'No commissioning operations match your search.',
-        fabNavigateRoute: Constants.opCommissioningNewRoute,
-        listBuilder: (context, {
+    showFloatingActionButton: context.canPerform(OperationSteps.commission),
+    appBarTitle: 'Commissioning',
+    fabHeroTag: 'commissioning_fab',
+    fabAddTooltip: 'New commissioning operation',
+    createHeaderText: 'New Commissioning Operation',
+    emptyNoMatchText: 'No commissioning operations match your search.',
+    fabNavigateRoute: Constants.opCommissioningNewRoute,
+    listBuilder:
+        (
+          context, {
           required selectedId,
           required onSelect,
           required bindRefresh,
           required onRequestCreate,
-        }) =>
-            CommissioningOperationListScreen(
+        }) => CommissioningOperationListScreen(
           embedded: true,
           selectedBatchId: selectedId,
           onSelectOperation: onSelect,
@@ -34,18 +34,18 @@ class CommissioningScreen extends StatelessWidget {
               ? onRequestCreate
               : null,
         ),
-        detailViewBuilder: (context, id) => CommissioningOperationDetailScreen(
-          key: ValueKey(id),
-          batchId: id,
-          embedded: true,
-        ),
-        detailAwaitBuilder: (context, {required listLoading}) =>
-            CommissioningOperationDetailScreen(
+    detailViewBuilder: (context, id) => CommissioningOperationDetailScreen(
+      key: ValueKey(id),
+      batchId: id,
+      embedded: true,
+    ),
+    detailAwaitBuilder: (context, {required listLoading}) =>
+        CommissioningOperationDetailScreen(
           key: const ValueKey('__commissioning_split_await__'),
           embedded: true,
           awaitingSelection: true,
           listLoading: listLoading,
         ),
-        fallbackList: const CommissioningOperationListScreen(),
-      );
+    fallbackList: const CommissioningOperationListScreen(),
+  );
 }

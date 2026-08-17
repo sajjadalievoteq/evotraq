@@ -182,7 +182,7 @@ class UnpackingOperationListBodyState
     if (widget.embedded && widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
-      context.go('${Constants.opUnpackingRoute}/$id');
+      context.push('${Constants.opUnpackingRoute}/$id');
     }
   }
 
@@ -308,7 +308,7 @@ class UnpackingOperationListBodyState
           floatingActionButton: !context.canPerform(OperationSteps.unpack)
               ? null
               : FloatingActionButton.extended(
-                  onPressed: () => context.go(Constants.opUnpackingCreateRoute),
+                  onPressed: () => context.push(Constants.opUnpackingCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

@@ -181,7 +181,7 @@ class ShippingOperationListBodyState extends State<ShippingOperationListBody> {
     if (widget.embedded && widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
-      context.go('${Constants.opShippingRoute}/$id');
+      context.push('${Constants.opShippingRoute}/$id');
     }
   }
 
@@ -322,7 +322,7 @@ class ShippingOperationListBodyState extends State<ShippingOperationListBody> {
                   !context.canPerform(OperationSteps.ship)
               ? null
               : FloatingActionButton.extended(
-                  onPressed: () => context.go(Constants.opShippingCreateRoute),
+                  onPressed: () => context.push(Constants.opShippingCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

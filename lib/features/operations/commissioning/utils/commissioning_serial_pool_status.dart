@@ -1,21 +1,14 @@
-
 enum CommissioningSerialPoolStatus {
-  
   checking,
 
-  
   preReserved,
 
-  
   alreadyCommissioned,
 
-  
   notPreAllocated,
 
-  
   notTransitionable,
 
-  
   unknown,
 }
 

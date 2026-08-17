@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class CommissioningBatchStatusContainer extends StatelessWidget {
-  const CommissioningBatchStatusContainer({
+class SgtinBatchStatusContainer extends StatelessWidget {
+  const SgtinBatchStatusContainer({
     required this.outline,
     required this.icon,
     required this.title,

@@ -11,40 +11,40 @@ import 'package:traqtrace_app/features/operations/shared/screens/operation_detai
 
 final _commissioningDetailConfig =
     OperationDetailScreenConfig<CommissioningDetailData>(
-  createCubit: (fallbackErrorMessage) => CommissioningDetailCubit(
-    commissioningService: getIt<CommissioningOperationService>(),
-    sgtinService: getIt<SGTINService>(),
-    fallbackErrorMessage: fallbackErrorMessage,
-  ),
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      CommissioningDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    batch: operation?.batch,
-    items: operation?.items ?? const [],
-    itemStatuses: operation?.itemStatuses ?? const {},
-    onRetry: onRetry,
-  ),
-  titleBuilder: (data) =>
-      data.batch?.commissioningReference ?? 'Commissioning Detail',
-  listRoute: Constants.opCommissioningRoute,
-  defaultTitle: 'Commissioning Detail',
-  fallbackErrorMessage:
-      'Unable to load this commissioning batch. '
-      'Check your connection and tap Retry.',
-  drawer: const AppDrawer(),
-);
+      createCubit: (fallbackErrorMessage) => CommissioningDetailCubit(
+        commissioningService: getIt<CommissioningOperationService>(),
+        sgtinService: getIt<SGTINService>(),
+        fallbackErrorMessage: fallbackErrorMessage,
+      ),
+      contentBuilder:
+          (
+            context, {
+            required awaitingSelection,
+            required listLoading,
+            required isLoading,
+            required errorMessage,
+            required operation,
+            required onRetry,
+            onOperationUpdated,
+          }) => CommissioningDetailContent(
+            awaitingSelection: awaitingSelection,
+            listLoading: listLoading,
+            isLoading: isLoading,
+            errorMessage: errorMessage,
+            batch: operation?.batch,
+            items: operation?.items ?? const [],
+            itemStatuses: operation?.itemStatuses ?? const {},
+            onRetry: onRetry,
+          ),
+      titleBuilder: (data) =>
+          data.batch?.commissioningReference ?? 'Commissioning Detail',
+      listRoute: Constants.opCommissioningRoute,
+      defaultTitle: 'Commissioning Detail',
+      fallbackErrorMessage:
+          'Unable to load this commissioning batch. '
+          'Check your connection and tap Retry.',
+      drawer: const AppDrawer(),
+    );
 
 class CommissioningOperationDetailScreen
     extends GenericOperationDetailScreen<CommissioningDetailData> {
@@ -56,7 +56,7 @@ class CommissioningOperationDetailScreen
     super.awaitingSelection = false,
     super.listLoading = false,
   }) : super(
-          operationId: batchId ?? operationId,
-          config: _commissioningDetailConfig,
-        );
+         operationId: batchId ?? operationId,
+         config: _commissioningDetailConfig,
+       );
 }

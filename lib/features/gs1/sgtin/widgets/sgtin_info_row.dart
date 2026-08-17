@@ -23,8 +23,9 @@ class SgtinInfoRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: theme.textTheme.bodySmall
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 3),
         Text(

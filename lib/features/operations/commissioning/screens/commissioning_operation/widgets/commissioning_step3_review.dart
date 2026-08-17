@@ -164,7 +164,7 @@ class CommissioningStep3Review extends StatelessWidget {
                       return SgtinInfoRow(
                         '${index + 1}',
                         '${item.epc}\n'
-                        '${item.sourceStatus ?? '?'} → ${item.targetStatus ?? 'ACTIVE'}',
+                            '${item.sourceStatus ?? '?'} → ${item.targetStatus ?? 'ACTIVE'}',
                         monospace: true,
                       );
                     },
@@ -175,8 +175,8 @@ class CommissioningStep3Review extends StatelessWidget {
             Text(
               '$poolCount pre-allocated from pool',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
           const SizedBox(height: 16),
@@ -207,8 +207,8 @@ class CommissioningStep3Review extends StatelessWidget {
                         'one GS1 EPCIS 2.0 ObjectEvent (action ADD, '
                         'bizStep commissioning).',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColorMapper.infoColor(context),
-                            ),
+                          color: AppColorMapper.infoColor(context),
+                        ),
                       ),
                     ),
                   ],

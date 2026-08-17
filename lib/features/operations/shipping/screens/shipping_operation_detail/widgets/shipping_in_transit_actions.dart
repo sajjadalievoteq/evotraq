@@ -79,7 +79,7 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
     final source = await _resolveGln(sourceCode);
     final dest = await _resolveGln(destCode);
     if (!mounted) return;
-    context.go(
+    context.push(
       Constants.opReceivingCreateRoute,
       extra: <String, dynamic>{
         'epcs': op.epcList ?? const <String>[],
@@ -104,7 +104,7 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
     final source = await _resolveGln(sourceCode);
     final dest = await _resolveGln(destCode);
     if (!mounted) return;
-    context.go(
+    context.push(
       Constants.opCancelShippingCreateRoute,
       extra: <String, dynamic>{
         'epcs': op.epcList ?? const <String>[],

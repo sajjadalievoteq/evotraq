@@ -161,8 +161,12 @@ void main() {
     ).thenAnswer((_) async => [subscription()]);
     when(() => api.getBatchHistory('sub-1')).thenAnswer((_) async => []);
     when(
-      () => api.getWebhookHistory(any(), size: any(named: 'size')),
-    ).thenAnswer((_) async => []);
+      () => api.getDeliveryActivity(
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+        outcome: any(named: 'outcome'),
+      ),
+    ).thenAnswer((_) async => (items: <WebhookNotification>[], hasMore: false, page: 0));
     when(() => api.retryBatch('batch-1')).thenAnswer((_) async {});
 
     final cubit = NotificationCubit(apiService: api, webSocketService: socket);
@@ -171,7 +175,11 @@ void main() {
     verify(() => api.retryBatch('batch-1')).called(1);
     verify(() => api.getBatchHistory('sub-1')).called(1);
     verify(
-      () => api.getWebhookHistory('sub-1', size: any(named: 'size')),
+      () => api.getDeliveryActivity(
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+        outcome: any(named: 'outcome'),
+      ),
     ).called(1);
     await cubit.close();
   });
@@ -181,8 +189,12 @@ void main() {
       () => api.getSubscriptions(),
     ).thenAnswer((_) async => [subscription()]);
     when(
-      () => api.getWebhookHistory(any(), size: any(named: 'size')),
-    ).thenAnswer((_) async => []);
+      () => api.getDeliveryActivity(
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+        outcome: any(named: 'outcome'),
+      ),
+    ).thenAnswer((_) async => (items: <WebhookNotification>[], hasMore: false, page: 0));
     when(() => api.retryWebhook('note-1')).thenAnswer((_) async {});
 
     final cubit = NotificationCubit(apiService: api, webSocketService: socket);
@@ -190,8 +202,77 @@ void main() {
 
     verify(() => api.retryWebhook('note-1')).called(1);
     verify(
-      () => api.getWebhookHistory('sub-1', size: any(named: 'size')),
+      () => api.getDeliveryActivity(
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+        outcome: any(named: 'outcome'),
+      ),
     ).called(1);
+    await cubit.close();
+  });
+
+  test('loadDeliveryActivity pages from the activity API', () async {
+    when(
+      () => api.getSubscriptions(),
+    ).thenAnswer((_) async => [subscription()]);
+    when(
+      () => api.getDeliveryActivity(
+        page: 0,
+        size: any(named: 'size'),
+        outcome: any(named: 'outcome'),
+      ),
+    ).thenAnswer(
+      (_) async => (
+        items: [
+          WebhookNotification(
+            id: 'n1',
+            subscriptionId: 'sub-1',
+            eventId: 'e1',
+            status: 'DELIVERED',
+            webhookUrl: 'https://example.com/hook',
+            createdAt: DateTime.utc(2026, 1, 2),
+            retryCount: 1,
+          ),
+        ],
+        hasMore: true,
+        page: 0,
+      ),
+    );
+    when(
+      () => api.getDeliveryActivity(
+        page: 1,
+        size: any(named: 'size'),
+        outcome: any(named: 'outcome'),
+      ),
+    ).thenAnswer(
+      (_) async => (
+        items: [
+          WebhookNotification(
+            id: 'n2',
+            subscriptionId: 'sub-1',
+            eventId: 'e2',
+            status: 'FAILED',
+            webhookUrl: 'https://example.com/hook',
+            createdAt: DateTime.utc(2026, 1, 1),
+            retryCount: 3,
+          ),
+        ],
+        hasMore: false,
+        page: 1,
+      ),
+    );
+
+    final cubit = NotificationCubit(apiService: api, webSocketService: socket);
+    await cubit.loadDeliveryActivity(outcome: 'failed');
+
+    expect(cubit.state.deliveryActivity, hasLength(1));
+    expect(cubit.state.deliveryActivityHasMore, isTrue);
+    expect(cubit.state.deliveryActivityOutcome, 'failed');
+
+    await cubit.loadMoreDeliveryActivity();
+    expect(cubit.state.deliveryActivity.map((e) => e.id), ['n1', 'n2']);
+    expect(cubit.state.deliveryActivityHasMore, isFalse);
+    expect(cubit.state.deliveryActivityPage, 1);
     await cubit.close();
   });
 }

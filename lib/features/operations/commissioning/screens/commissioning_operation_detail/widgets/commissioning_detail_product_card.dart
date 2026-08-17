@@ -6,10 +6,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
 
 class CommissioningDetailProductCard extends StatelessWidget {
-  const CommissioningDetailProductCard({
-    super.key,
-    required this.batch,
-  });
+  const CommissioningDetailProductCard({super.key, required this.batch});
 
   final CommissioningBatch batch;
 

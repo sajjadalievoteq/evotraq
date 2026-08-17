@@ -181,7 +181,7 @@ class CancelShippingOperationListBodyState
     if (widget.embedded && widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
-      context.go('${Constants.opCancelShippingRoute}/$id');
+      context.push('${Constants.opCancelShippingRoute}/$id');
     }
   }
 
@@ -323,7 +323,7 @@ class CancelShippingOperationListBodyState
               ? null
               : FloatingActionButton.extended(
                   onPressed: () =>
-                      context.go(Constants.opCancelShippingCreateRoute),
+                      context.push(Constants.opCancelShippingCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

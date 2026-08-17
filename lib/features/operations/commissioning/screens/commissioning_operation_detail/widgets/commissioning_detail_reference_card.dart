@@ -6,10 +6,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
 
 class CommissioningDetailReferenceCard extends StatelessWidget {
-  const CommissioningDetailReferenceCard({
-    super.key,
-    required this.batch,
-  });
+  const CommissioningDetailReferenceCard({super.key, required this.batch});
 
   final CommissioningBatch batch;
 
@@ -37,13 +34,17 @@ class CommissioningDetailReferenceCard extends StatelessWidget {
         if (batch.completedAt != null)
           OperationDetailInfoRow(
             label: 'Completed At',
-            value:
-                DateFormat('MMM dd, yyyy HH:mm:ss').format(batch.completedAt!),
+            value: DateFormat(
+              'MMM dd, yyyy HH:mm:ss',
+            ).format(batch.completedAt!),
           ),
         if (batch.createdBy != null)
           OperationDetailInfoRow(label: 'Created By', value: batch.createdBy!),
         if (batch.operatorId != null)
-          OperationDetailInfoRow(label: 'Operator ID', value: batch.operatorId!),
+          OperationDetailInfoRow(
+            label: 'Operator ID',
+            value: batch.operatorId!,
+          ),
       ],
     );
   }

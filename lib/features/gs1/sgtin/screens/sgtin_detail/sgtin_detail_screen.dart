@@ -3,18 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_lookup_status.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_state.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_form_bloc_body.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_scaffold.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_body.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_detail_skeleton.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart'
     as gtin_model;
@@ -75,6 +74,10 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
   String? _loadedSgtinId;
 
   SGTIN? _loadedSgtin;
+  SGTINCubit? _sgtinCubit;
+  SgtinBatchCubit? _batchCubit;
+
+  SGTINCubit get _cubit => _sgtinCubit ?? context.read<SGTINCubit>();
 
   void _setFieldError(String fieldName, String? error) {
     if (_validationCubit.getFieldError(fieldName) == error) {
@@ -98,6 +101,14 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
     _regulatoryMarketController = TextEditingController();
     _regulatoryStatusController = TextEditingController();
     _expiryDateController = TextEditingController();
+
+    if (!widget.embedded) {
+      _sgtinCubit = getIt<SGTINCubit>();
+    }
+    if (widget.isCreating) {
+      _batchCubit = getIt<SgtinBatchCubit>();
+      _batchLotNumberController.addListener(_onBatchLotTextChanged);
+    }
 
     if (widget.sgtinId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -126,7 +137,19 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.embedded) {
+      _sgtinCubit = context.read<SGTINCubit>();
+    }
+  }
+
+  @override
   void dispose() {
+    if (!widget.embedded) {
+      _sgtinCubit?.close();
+    }
+    _batchCubit?.close();
     _serialNumberController.dispose();
     _batchLotNumberController.dispose();
     _gtinController.dispose();
@@ -142,7 +165,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
       _isLocalLoading = true;
       _formFieldsHydrated = false;
     });
-    context.read<SGTINCubit>().fetchSGTINById(id);
+    _cubit.fetchSGTINById(id);
   }
 
   void _loadByEpc(String epcUri) {
@@ -150,7 +173,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
       _isLocalLoading = true;
       _formFieldsHydrated = false;
     });
-    context.read<SGTINCubit>().fetchSGTINByEPC(epcUri);
+    _cubit.fetchSGTINByEPC(epcUri);
   }
 
   void _clearForm() {
@@ -170,6 +193,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
       _loadedSgtinId = null;
       _loadedSgtin = null;
     });
+    _batchCubit?.clear();
   }
 
   void _populateForm(SGTIN sgtin) {
@@ -209,11 +233,77 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
     if (picked != null && mounted) onPicked(picked);
   }
 
+  void _onBatchLotTextChanged() {
+    _batchCubit?.onBatchLotInputChanged(_batchLotNumberController.text);
+    setState(() {});
+  }
+
+  DateTime? _parseBatchDate(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    return DateTime.tryParse(value.trim());
+  }
+
+  void _applyResolvedBatchDates(SgtinBatchState state) {
+    final batch = state.resolvedBatch;
+    if (batch == null || !state.status.isResolved) return;
+    setState(() {
+      _expiryDate = _parseBatchDate(batch.expiryDate) ?? _expiryDate;
+      _productionDate =
+          _parseBatchDate(batch.manufactureDate) ?? _productionDate;
+    });
+  }
+
   Future<void> _submit() async {
+    if (_isLocalLoading) return;
     if (!_formKey.currentState!.validate()) return;
     if (widget.isCreating && _selectedGtin == null) {
       context.showWarning('A GTIN must be selected for new SGTINs');
       return;
+    }
+    if (widget.isCreating &&
+        (_selectedGtin?.id == null || _selectedGtin!.id! <= 0)) {
+      context.showWarning('Select a saved GTIN before creating an SGTIN');
+      return;
+    }
+
+    if (widget.isCreating) {
+      final batchCubit = _batchCubit;
+      if (batchCubit == null) return;
+      if (batchCubit.state.isBusy) {
+        context.showWarning('Wait for batch lookup or registration to finish.');
+        return;
+      }
+      if (!batchCubit.state.canSubmitSgtin) {
+        if (batchCubit.state.status == SgtinBatchLookupStatus.notFound) {
+          context.showError(
+            'Register the batch in Batch Master before creating the SGTIN.',
+          );
+          return;
+        }
+        if (batchCubit.state.status == SgtinBatchLookupStatus.error) {
+          context.showError(
+            batchCubit.state.error ??
+                'Batch lookup failed. Resolve the batch before creating the SGTIN.',
+          );
+          return;
+        }
+        if (batchCubit.state.status == SgtinBatchLookupStatus.idle) {
+          batchCubit.triggerLookupNow(_batchLotNumberController.text);
+          context.showInfo('Verifying batch in Batch Master…');
+          return;
+        }
+        context.showError(
+          'Resolve the batch in Batch Master before creating the SGTIN.',
+        );
+        return;
+      }
+
+      final batch = batchCubit.state.resolvedBatch;
+      if (batch != null) {
+        _expiryDate = _parseBatchDate(batch.expiryDate) ?? _expiryDate;
+        _productionDate =
+            _parseBatchDate(batch.manufactureDate) ?? _productionDate;
+      }
     }
 
     setState(() => _isLocalLoading = true);
@@ -241,9 +331,9 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
     );
 
     if (_loadedSgtinId != null) {
-      context.read<SGTINCubit>().updateSGTIN(_loadedSgtinId!, sgtin);
+      _cubit.updateSGTIN(_loadedSgtinId!, sgtin);
     } else {
-      context.read<SGTINCubit>().createSGTIN(sgtin);
+      _cubit.createSGTIN(sgtin);
     }
   }
 
@@ -281,7 +371,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
               if (reason.isNotEmpty) {
                 Navigator.pop(ctx);
                 final serial = _serialNumberController.text;
-                context.read<SGTINCubit>().decommission(serial, reason);
+                _cubit.decommission(serial, reason);
               }
             },
             child: const Text('Decommission'),
@@ -293,26 +383,49 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget body = SgtinDetailBody(
+      awaitingListSelection: widget.awaitingListSelection,
+      embedded: widget.embedded,
+      onStateChanged: _handleSgtinState,
+      content: widget.embedded
+          ? _formBlocBody()
+          : SgtinDetailScaffold(
+              appBarTitle: _appBarTitle,
+              showEditAction: !widget.isCreating && !_isEditing,
+              showCloseEditAction: !widget.isCreating && _isEditing,
+              onEdit: () => setState(() => _isEditing = true),
+              onCloseEdit: () => setState(() => _isEditing = false),
+              body: _formBlocBody(),
+              showSaveFab: _isEditing || widget.isCreating,
+              isSaving: _isLocalLoading,
+              onSave: _submit,
+            ),
+    );
+
+    if (!widget.embedded) {
+      final cubit = _sgtinCubit;
+      if (cubit != null) {
+        body = BlocProvider<SGTINCubit>.value(value: cubit, child: body);
+      }
+    }
+
+    final batchCubit = _batchCubit;
+    if (batchCubit != null) {
+      body = BlocProvider<SgtinBatchCubit>.value(
+        value: batchCubit,
+        child: BlocListener<SgtinBatchCubit, SgtinBatchState>(
+          listenWhen: (previous, current) =>
+              previous.resolvedBatch != current.resolvedBatch ||
+              previous.status != current.status,
+          listener: (context, state) => _applyResolvedBatchDates(state),
+          child: body,
+        ),
+      );
+    }
+
     return BlocProvider<ValidationCubit>.value(
       value: _validationCubit,
-      child: SgtinDetailBody(
-        awaitingListSelection: widget.awaitingListSelection,
-        embedded: widget.embedded,
-        onStateChanged: _handleSgtinState,
-        content: widget.embedded
-            ? _formBlocBody()
-            : SgtinDetailScaffold(
-                appBarTitle: _appBarTitle,
-                showEditAction: !widget.isCreating && !_isEditing,
-                showCloseEditAction: !widget.isCreating && _isEditing,
-                onEdit: () => setState(() => _isEditing = true),
-                onCloseEdit: () => setState(() => _isEditing = false),
-                body: _formBlocBody(),
-                showSaveFab: _isEditing || widget.isCreating,
-                isSaving: _isLocalLoading,
-                onSave: _submit,
-              ),
-      ),
+      child: body,
     );
   }
 
@@ -380,7 +493,15 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
         setState(() {
           _selectedGtin = gtin;
           _gtinController.text = gtin?.gtinCode ?? '';
+          _expiryDate = null;
+          _productionDate = null;
         });
+        _batchCubit?.onGtinChanged(gtinId: gtin?.id, gtinCode: gtin?.gtinCode);
+        if (widget.isCreating &&
+            gtin?.id != null &&
+            _batchLotNumberController.text.trim().isNotEmpty) {
+          _batchCubit?.onBatchLotInputChanged(_batchLotNumberController.text);
+        }
       },
       onStatusChanged: (s) => setState(() => _selectedStatus = s),
       onTransitionError: (msg) => context.showError(msg),
@@ -392,6 +513,10 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
       setFieldError: _setFieldError,
       onDecommission: _decommission,
       onSubmit: _submit,
+      onBatchLotEditingComplete: () =>
+          _batchCubit?.triggerLookupNow(_batchLotNumberController.text),
+      onBatchLotFocusLost: () =>
+          _batchCubit?.triggerLookupNow(_batchLotNumberController.text),
     );
   }
 

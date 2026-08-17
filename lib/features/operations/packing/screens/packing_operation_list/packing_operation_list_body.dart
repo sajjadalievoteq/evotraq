@@ -181,7 +181,7 @@ class PackingOperationListBodyState extends State<PackingOperationListBody> {
     if (widget.embedded && widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
-      context.go('${Constants.opPackingRoute}/$id');
+      context.push('${Constants.opPackingRoute}/$id');
     }
   }
 
@@ -307,7 +307,7 @@ class PackingOperationListBodyState extends State<PackingOperationListBody> {
           floatingActionButton: !context.canPerform(OperationSteps.pack)
               ? null
               : FloatingActionButton.extended(
-                  onPressed: () => context.go(Constants.opPackingCreateRoute),
+                  onPressed: () => context.push(Constants.opPackingCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

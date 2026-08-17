@@ -22,10 +22,7 @@ class SgtinSerialGovernanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SgtinInfoRow(
-            'Generation Strategy',
-            sgtin.serialGenerationStrategy,
-          ),
+          SgtinInfoRow('Generation Strategy', sgtin.serialGenerationStrategy),
           if (sgtin.serialOrigin != null) ...[
             const SizedBox(height: 12),
             SgtinInfoRow('Serial Origin', sgtin.serialOrigin),

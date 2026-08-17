@@ -273,7 +273,7 @@ class _GLNListScreenState extends State<GLNListScreen> {
       widget.onEmbeddedCreate!();
       return;
     }
-    context.go(Constants.gs1GlnNewRoute);
+    context.push(Constants.gs1GlnNewRoute);
     _searchImmediate();
   }
 
@@ -282,12 +282,12 @@ class _GLNListScreenState extends State<GLNListScreen> {
       widget.onSelectGln!(glnCode);
       return;
     }
-    context.go(GlnRouteConstants.pathForGlnCode(glnCode));
+    context.push(GlnRouteConstants.pathForGlnCode(glnCode));
     _searchImmediate();
   }
 
   void _openGlnEdit(String glnCode) {
-    context.go(GlnRouteConstants.pathForGlnCodeEdit(glnCode));
+    context.push(GlnRouteConstants.pathForGlnCodeEdit(glnCode));
     _searchImmediate();
   }
 

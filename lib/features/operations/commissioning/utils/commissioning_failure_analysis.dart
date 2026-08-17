@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_failure_category.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_failure_category_info.dart';
 
@@ -98,7 +98,8 @@ CommissioningFailureCategoryInfo categoryInfo(
 Map<CommissioningFailureCategory, List<CommissioningItemResult>>
 groupFailedCommissioningResults(List<CommissioningItemResult> results) {
   final failed = results.where((r) => !r.success).toList();
-  final grouped = <CommissioningFailureCategory, List<CommissioningItemResult>>{};
+  final grouped =
+      <CommissioningFailureCategory, List<CommissioningItemResult>>{};
   for (final item in failed) {
     final category = categorizeCommissioningError(item.errorMessage);
     grouped.putIfAbsent(category, () => []).add(item);

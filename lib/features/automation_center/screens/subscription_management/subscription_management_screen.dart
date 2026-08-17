@@ -145,7 +145,7 @@ class SubscriptionManagementScreenState
   }
 
   void _editSubscription(String subscriptionId) {
-    context.go(
+    context.push(
       Constants.notificationDetailRoute.replaceFirst(
         ':subscriptionId',
         subscriptionId,

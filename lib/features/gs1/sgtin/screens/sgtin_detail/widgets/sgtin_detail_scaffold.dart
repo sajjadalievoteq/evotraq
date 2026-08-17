@@ -36,15 +36,9 @@ class SgtinDetailScaffold extends StatelessWidget {
         title: Text(appBarTitle),
         actions: [
           if (showEditAction)
-            IconButton(
-              icon: TraqIcon(AppAssets.iconEdit),
-              onPressed: onEdit,
-            ),
+            IconButton(icon: TraqIcon(AppAssets.iconEdit), onPressed: onEdit),
           if (showCloseEditAction)
-            IconButton(
-              icon: TraqIcon(AppAssets.iconX),
-              onPressed: onCloseEdit,
-            ),
+            IconButton(icon: TraqIcon(AppAssets.iconX), onPressed: onCloseEdit),
         ],
       ),
       drawer: const AppDrawer(),

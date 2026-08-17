@@ -14,10 +14,11 @@ List<RouteBase> _appRoutes4(AppRouter appRouter) => [
     path: Constants.opPackingCreateRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.pack),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: PackingOperationScreen(),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: PackingOperationScreen(),
+        ),
   ),
   GoRoute(
     path: Constants.hierarchyRoute,
@@ -56,10 +57,11 @@ List<RouteBase> _appRoutes4(AppRouter appRouter) => [
     path: Constants.opUnpackingCreateRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.unpack),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: const UnpackingOperationScreen(),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: const UnpackingOperationScreen(),
+        ),
   ),
   GoRoute(
     path: Constants.opUnpackingDetailRoute,
@@ -87,10 +89,11 @@ List<RouteBase> _appRoutes4(AppRouter appRouter) => [
     path: Constants.opUpdateStatusCreateRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.updateStatus),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: const UpdateStatusOperationScreen(),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: const UpdateStatusOperationScreen(),
+        ),
   ),
   GoRoute(
     path: Constants.opUpdateStatusDetailRoute,
@@ -118,10 +121,11 @@ List<RouteBase> _appRoutes4(AppRouter appRouter) => [
     path: Constants.opCommissioningNewRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.commission),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: const CommissioningOperationScreen(),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: const CommissioningOperationScreen(),
+        ),
   ),
   GoRoute(
     path: Constants.opCommissioningDetailRoute,
@@ -149,7 +153,11 @@ List<RouteBase> _appRoutes4(AppRouter appRouter) => [
     ),
   ),
   ShellRoute(
-    builder: (context, state, child) => NotificationsShell(child: child),
+    pageBuilder: (context, state, child) =>
+        TraqRouterTransitions.featureShellPage(
+          key: state.pageKey,
+          child: NotificationsShell(child: child),
+        ),
     routes: [
       GoRoute(
         path: Constants.notificationDetailRoute,

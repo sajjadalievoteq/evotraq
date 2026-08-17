@@ -182,7 +182,7 @@ class ReturnReceivingOperationListBodyState
     if (widget.embedded && widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
-      context.go('${Constants.opReturnReceivingRoute}/$id');
+      context.push('${Constants.opReturnReceivingRoute}/$id');
     }
   }
 
@@ -325,7 +325,7 @@ class ReturnReceivingOperationListBodyState
               ? null
               : FloatingActionButton.extended(
                   onPressed: () =>
-                      context.go(Constants.opReturnReceivingCreateRoute),
+                      context.push(Constants.opReturnReceivingCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart'
+    as gtin_model;
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_form_body.dart';
@@ -35,6 +36,8 @@ class SgtinDetailFormBlocBody extends StatelessWidget {
     required this.setFieldError,
     required this.onDecommission,
     required this.onSubmit,
+    this.onBatchLotEditingComplete,
+    this.onBatchLotFocusLost,
   });
 
   final String? sgtinId;
@@ -67,6 +70,8 @@ class SgtinDetailFormBlocBody extends StatelessWidget {
   final void Function(String fieldName, String? error) setFieldError;
   final VoidCallback onDecommission;
   final VoidCallback onSubmit;
+  final VoidCallback? onBatchLotEditingComplete;
+  final VoidCallback? onBatchLotFocusLost;
 
   bool _fieldSkeletonsActive(SGTINState state) {
     if (state.status == SGTINStatus.error) return false;
@@ -109,6 +114,8 @@ class SgtinDetailFormBlocBody extends StatelessWidget {
           setFieldError: setFieldError,
           onDecommission: onDecommission,
           onSubmit: onSubmit,
+          onBatchLotEditingComplete: onBatchLotEditingComplete,
+          onBatchLotFocusLost: onBatchLotFocusLost,
         );
       },
     );

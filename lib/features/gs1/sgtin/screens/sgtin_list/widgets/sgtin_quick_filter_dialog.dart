@@ -7,23 +7,18 @@ import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 @immutable
 class SgtinQuickFilterResult {
-  const SgtinQuickFilterResult.cleared()
-      : cleared = true,
-        status = null;
+  const SgtinQuickFilterResult.cleared() : cleared = true, status = null;
 
   const SgtinQuickFilterResult.applied(String? statusValue)
-      : cleared = false,
-        status = statusValue;
+    : cleared = false,
+      status = statusValue;
 
   final bool cleared;
   final String? status;
 }
 
 class SgtinQuickFilterDialog extends StatefulWidget {
-  const SgtinQuickFilterDialog({
-    super.key,
-    required this.initialStatus,
-  });
+  const SgtinQuickFilterDialog({super.key, required this.initialStatus});
 
   final String? initialStatus;
 
@@ -82,8 +77,8 @@ class _SgtinQuickFilterDialogState extends State<SgtinQuickFilterDialog> {
               Text(
                 SgtinUiConstants.quickFiltersFooterHint,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -114,9 +109,7 @@ class _SgtinQuickFilterDialogState extends State<SgtinQuickFilterDialog> {
   String _statusLabel(String value) {
     if (value == SgtinUiConstants.filterAll) return 'All';
     try {
-      final status = ItemStatus.values.firstWhere(
-        (s) => s.name == value,
-      );
+      final status = ItemStatus.values.firstWhere((s) => s.name == value);
       return _friendlyName(status);
     } catch (_) {
       return value;

@@ -182,7 +182,7 @@ class ReceivingOperationListBodyState
     if (widget.embedded && widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
-      context.go('${Constants.opReceivingRoute}/$id');
+      context.push('${Constants.opReceivingRoute}/$id');
     }
   }
 
@@ -323,7 +323,7 @@ class ReceivingOperationListBodyState
                   !context.canPerform(OperationSteps.receive)
               ? null
               : FloatingActionButton.extended(
-                  onPressed: () => context.go(Constants.opReceivingCreateRoute),
+                  onPressed: () => context.push(Constants.opReceivingCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

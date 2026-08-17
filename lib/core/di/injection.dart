@@ -26,6 +26,8 @@ import 'package:traqtrace_app/features/admin/cbv_vocabulary/cubit/admin_cbv_voca
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/data/services/automation_center/job_queue_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/job_queue_cubit.dart';
 import 'package:traqtrace_app/data/services/automation_center/inbound_catalog_service.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/inbound_catalog_cubit.dart';
@@ -264,7 +266,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerFactory<CommissioningOperationCubit>(
     () => CommissioningOperationCubit(
       commissioningService: getIt<CommissioningOperationService>(),
-      pharmaService: getIt<PharmaService>(),
       pharmaceuticalService: getIt<PharmaceuticalService>(),
     ),
   );
@@ -391,6 +392,12 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
   getIt.registerFactory<GTINCubit>(
     () => GTINCubit(gtinService: getIt<GTINService>()),
+  );
+  getIt.registerFactory<SGTINCubit>(
+    () => SGTINCubit(sgtinService: getIt<SGTINService>()),
+  );
+  getIt.registerFactory<SgtinBatchCubit>(
+    () => SgtinBatchCubit(pharmaService: getIt<PharmaService>()),
   );
 
   getIt.registerFactory<JobQueueCubit>(

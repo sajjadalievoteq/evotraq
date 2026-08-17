@@ -138,22 +138,65 @@ class MockNotificationApiService extends _i1.Mock
           as _i4.Future<void>);
 
   @override
-  _i4.Future<List<_i2.WebhookNotification>> getWebhookHistory(
+  _i4.Future<
+    ({List<_i2.WebhookNotification> items, bool hasMore, int page})
+  >
+  getWebhookHistory(
     String? subscriptionId, {
     int? page = 0,
     int? size = 20,
+    String? outcome,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #getWebhookHistory,
               [subscriptionId],
-              {#page: page, #size: size},
+              {#page: page, #size: size, #outcome: outcome},
             ),
-            returnValue: _i4.Future<List<_i2.WebhookNotification>>.value(
-              <_i2.WebhookNotification>[],
-            ),
+            returnValue:
+                _i4.Future<
+                  ({
+                    List<_i2.WebhookNotification> items,
+                    bool hasMore,
+                    int page,
+                  })
+                >.value((
+                  items: <_i2.WebhookNotification>[],
+                  hasMore: false,
+                  page: 0,
+                )),
           )
-          as _i4.Future<List<_i2.WebhookNotification>>);
+          as _i4.Future<
+            ({List<_i2.WebhookNotification> items, bool hasMore, int page})
+          >);
+
+  @override
+  _i4.Future<
+    ({List<_i2.WebhookNotification> items, bool hasMore, int page})
+  >
+  getDeliveryActivity({int? page = 0, int? size = 20, String? outcome}) =>
+      (super.noSuchMethod(
+            Invocation.method(#getDeliveryActivity, [], {
+              #page: page,
+              #size: size,
+              #outcome: outcome,
+            }),
+            returnValue:
+                _i4.Future<
+                  ({
+                    List<_i2.WebhookNotification> items,
+                    bool hasMore,
+                    int page,
+                  })
+                >.value((
+                  items: <_i2.WebhookNotification>[],
+                  hasMore: false,
+                  page: 0,
+                )),
+          )
+          as _i4.Future<
+            ({List<_i2.WebhookNotification> items, bool hasMore, int page})
+          >);
 
   @override
   _i4.Future<Map<String, dynamic>> testWebhook(String? webhookUrl) =>

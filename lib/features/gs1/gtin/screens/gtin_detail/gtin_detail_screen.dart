@@ -373,7 +373,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
             if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
               widget.onEmbeddedActionSuccess!();
             } else if (context.mounted) {
-              context.go('${Constants.gs1GtinsRoute}/$gtinCode');
+              context.push('${Constants.gs1GtinsRoute}/$gtinCode');
             }
           } else if (widget.gtinCode != null &&
               state.gtin != null &&

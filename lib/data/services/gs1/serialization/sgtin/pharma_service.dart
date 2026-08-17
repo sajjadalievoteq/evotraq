@@ -11,48 +11,63 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_emvo_upload.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_repackaging_link.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_reporting_regime.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_tatmeen_submission.dart';
+
 abstract final class _P {
   static String base(String sgtinId) => '/identifiers/sgtins/$sgtinId/pharma';
 
-  static String regimes(String id)                => '${base(id)}/regimes';
-  static String regime(String id, String type)    => '${base(id)}/regimes/$type';
+  static String regimes(String id) => '${base(id)}/regimes';
+  static String regime(String id, String type) => '${base(id)}/regimes/$type';
 
-  static String emvo(String id)                   => '${base(id)}/emvo';
-  static String emvoLatest(String id)             => '${base(id)}/emvo/latest';
-  static String emvoInitiate(String id)           => '${base(id)}/emvo/initiate';
-  static String emvoCommission(String id)         => '${base(id)}/emvo/commission';
-  static String emvoDecommission(String id)       => '${base(id)}/emvo/decommission';
-  static String emvoAck(String uploadId)          => '/identifiers/sgtins/pharma/emvo/$uploadId/acknowledge';
-  static String emvoFail(String uploadId)         => '/identifiers/sgtins/pharma/emvo/$uploadId/fail';
-  static String emvoRetry(String uploadId)        => '/identifiers/sgtins/pharma/emvo/$uploadId/retry';
+  static String emvo(String id) => '${base(id)}/emvo';
+  static String emvoLatest(String id) => '${base(id)}/emvo/latest';
+  static String emvoInitiate(String id) => '${base(id)}/emvo/initiate';
+  static String emvoCommission(String id) => '${base(id)}/emvo/commission';
+  static String emvoDecommission(String id) => '${base(id)}/emvo/decommission';
+  static String emvoAck(String uploadId) =>
+      '/identifiers/sgtins/pharma/emvo/$uploadId/acknowledge';
+  static String emvoFail(String uploadId) =>
+      '/identifiers/sgtins/pharma/emvo/$uploadId/fail';
+  static String emvoRetry(String uploadId) =>
+      '/identifiers/sgtins/pharma/emvo/$uploadId/retry';
 
-  static String tatmeen(String id)                => '${base(id)}/tatmeen';
-  static String tatmeenAccept(String subId)       => '/identifiers/sgtins/pharma/tatmeen/$subId/accept';
-  static String tatmeenReject(String subId)       => '/identifiers/sgtins/pharma/tatmeen/$subId/reject';
+  static String tatmeen(String id) => '${base(id)}/tatmeen';
+  static String tatmeenAccept(String subId) =>
+      '/identifiers/sgtins/pharma/tatmeen/$subId/accept';
+  static String tatmeenReject(String subId) =>
+      '/identifiers/sgtins/pharma/tatmeen/$subId/reject';
 
-  static String dscsa(String id)                  => '${base(id)}/dscsa';
+  static String dscsa(String id) => '${base(id)}/dscsa';
 
-  static String coldChain(String id)              => '${base(id)}/cold-chain';
-  static String coldChainReading(String id)       => '${base(id)}/cold-chain/reading';
+  static String coldChain(String id) => '${base(id)}/cold-chain';
+  static String coldChainReading(String id) => '${base(id)}/cold-chain/reading';
 
-  static String duplicates(String id)             => '${base(id)}/duplicates';
-  static String duplicateResolve(String evidId)   => '/identifiers/sgtins/pharma/duplicates/$evidId/resolve';
+  static String duplicates(String id) => '${base(id)}/duplicates';
+  static String duplicateResolve(String evidId) =>
+      '/identifiers/sgtins/pharma/duplicates/$evidId/resolve';
 
-  static String repackaging(String id)            => '${base(id)}/repackaging';
-  static const String repackagingCreate           = '/identifiers/sgtins/pharma/repackaging';
+  static String repackaging(String id) => '${base(id)}/repackaging';
+  static const String repackagingCreate =
+      '/identifiers/sgtins/pharma/repackaging';
 
-  static String alerts(String id)                 => '${base(id)}/alerts';
-  static String alertsOpen(String id)             => '${base(id)}/alerts/open';
-  static String alertAck(String alertId)          => '/identifiers/sgtins/pharma/alerts/$alertId/acknowledge';
-  static String alertResolve(String alertId)      => '/identifiers/sgtins/pharma/alerts/$alertId/resolve';
+  static String alerts(String id) => '${base(id)}/alerts';
+  static String alertsOpen(String id) => '${base(id)}/alerts/open';
+  static String alertAck(String alertId) =>
+      '/identifiers/sgtins/pharma/alerts/$alertId/acknowledge';
+  static String alertResolve(String alertId) =>
+      '/identifiers/sgtins/pharma/alerts/$alertId/resolve';
 
-  static String dispatchCommission(String id)       => '${base(id)}/dispatch/commission';
-  static String dispatchDecommission(String id)     => '${base(id)}/dispatch/decommission';
-  static String dispatchOwnershipTransfer(String id) => '${base(id)}/dispatch/ownership-transfer';
+  static String dispatchCommission(String id) =>
+      '${base(id)}/dispatch/commission';
+  static String dispatchDecommission(String id) =>
+      '${base(id)}/dispatch/decommission';
+  static String dispatchOwnershipTransfer(String id) =>
+      '${base(id)}/dispatch/ownership-transfer';
 
-  static String batches(String gtinId)              => '/identifiers/gtins/$gtinId/batches';
-  static String batchByLot(String gtinId, String lot) => '/identifiers/gtins/$gtinId/batches/$lot';
-  static String batchById(String gtinId, String batchId) => '/identifiers/gtins/$gtinId/batches/$batchId';
+  static String batches(String gtinId) => '/identifiers/gtins/$gtinId/batches';
+  static String batchByLot(String gtinId, String lot) =>
+      '/identifiers/gtins/$gtinId/batches/${Uri.encodeComponent(lot)}';
+  static String batchById(String gtinId, String batchId) =>
+      '/identifiers/gtins/$gtinId/batches/$batchId';
 }
 
 class PharmaService {
@@ -67,13 +82,16 @@ class PharmaService {
   }
 
   Map<String, String> _headers(String token) => {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      };
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
 
   String _url(String path) => '${_dio.baseUrl}$path';
 
-  List<T> _decodeList<T>(dynamic data, T Function(Map<String, dynamic>) fromJson) {
+  List<T> _decodeList<T>(
+    dynamic data,
+    T Function(Map<String, dynamic>) fromJson,
+  ) {
     final list = json.decode(data as String) as List<dynamic>;
     return list.map((e) => fromJson(e as Map<String, dynamic>)).toList();
   }
@@ -81,27 +99,43 @@ class PharmaService {
   T _decode<T>(dynamic data, T Function(Map<String, dynamic>) fromJson) =>
       fromJson(json.decode(data as String) as Map<String, dynamic>);
 
-  Future<Response> _get(String path, String token) =>
-      _dio.get(_url(path), headers: _headers(token),
-          responseType: ResponseType.plain, acceptAllStatusCodes: true);
+  Future<Response> _get(String path, String token) => _dio.get(
+    _url(path),
+    headers: _headers(token),
+    responseType: ResponseType.plain,
+    acceptAllStatusCodes: true,
+  );
 
   Future<Response> _post(String path, String token, [Object? body]) =>
-      _dio.post(_url(path), headers: _headers(token),
-          data: body != null ? json.encode(body) : null,
-          responseType: ResponseType.plain, acceptAllStatusCodes: true);
+      _dio.post(
+        _url(path),
+        headers: _headers(token),
+        data: body != null ? json.encode(body) : null,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
 
   Future<Response> _patch(String path, String token, [Object? body]) =>
-      _dio.patch(_url(path), headers: _headers(token),
-          data: body != null ? json.encode(body) : null,
-          responseType: ResponseType.plain, acceptAllStatusCodes: true);
+      _dio.patch(
+        _url(path),
+        headers: _headers(token),
+        data: body != null ? json.encode(body) : null,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
 
-  Future<Response> _delete(String path, String token) =>
-      _dio.delete(_url(path), headers: _headers(token),
-          responseType: ResponseType.plain, acceptAllStatusCodes: true);
+  Future<Response> _delete(String path, String token) => _dio.delete(
+    _url(path),
+    headers: _headers(token),
+    responseType: ResponseType.plain,
+    acceptAllStatusCodes: true,
+  );
 
   void _assertOk(Response r, [List<int> ok = const [200, 201]]) {
     if (!ok.contains(r.statusCode)) {
-      throw ApiException(message: 'Request failed (${r.statusCode}): ${r.data}');
+      throw ApiException(
+        message: 'Request failed (${r.statusCode}): ${r.data}',
+      );
     }
   }
 
@@ -112,14 +146,20 @@ class PharmaService {
     return _decodeList(r.data, SGTINReportingRegime.fromJson);
   }
 
-  Future<SGTINReportingRegime> enrolRegime(String sgtinId, SGTINReportingRegime regime) async {
+  Future<SGTINReportingRegime> enrolRegime(
+    String sgtinId,
+    SGTINReportingRegime regime,
+  ) async {
     final t = await _token();
     final r = await _post(_P.regimes(sgtinId), t, regime.toJson());
     _assertOk(r, [200, 201]);
     return _decode(r.data, SGTINReportingRegime.fromJson);
   }
 
-  Future<SGTINReportingRegime> unenrolRegime(String sgtinId, String regimeType) async {
+  Future<SGTINReportingRegime> unenrolRegime(
+    String sgtinId,
+    String regimeType,
+  ) async {
     final t = await _token();
     final r = await _delete(_P.regime(sgtinId, regimeType), t);
     _assertOk(r);
@@ -154,7 +194,10 @@ class PharmaService {
     return _decode(r.data, SGTINEmvoUpload.fromJson);
   }
 
-  Future<SGTINEmvoUpload> submitEmvoDecommissioning(String sgtinId, {String? reason}) async {
+  Future<SGTINEmvoUpload> submitEmvoDecommissioning(
+    String sgtinId, {
+    String? reason,
+  }) async {
     final t = await _token();
     final path = reason != null
         ? '${_P.emvoDecommission(sgtinId)}?reason=${Uri.encodeComponent(reason)}'
@@ -164,18 +207,28 @@ class PharmaService {
     return _decode(r.data, SGTINEmvoUpload.fromJson);
   }
 
-  Future<SGTINEmvoUpload> acknowledgeEmvoUpload(String uploadId, String emvoReferenceId) async {
+  Future<SGTINEmvoUpload> acknowledgeEmvoUpload(
+    String uploadId,
+    String emvoReferenceId,
+  ) async {
     final t = await _token();
     final r = await _patch(
-        '${_P.emvoAck(uploadId)}?emvoReferenceId=${Uri.encodeComponent(emvoReferenceId)}', t);
+      '${_P.emvoAck(uploadId)}?emvoReferenceId=${Uri.encodeComponent(emvoReferenceId)}',
+      t,
+    );
     _assertOk(r);
     return _decode(r.data, SGTINEmvoUpload.fromJson);
   }
 
-  Future<SGTINEmvoUpload> recordEmvoFailure(String uploadId, String errorMessage) async {
+  Future<SGTINEmvoUpload> recordEmvoFailure(
+    String uploadId,
+    String errorMessage,
+  ) async {
     final t = await _token();
     final r = await _patch(
-        '${_P.emvoFail(uploadId)}?errorMessage=${Uri.encodeComponent(errorMessage)}', t);
+      '${_P.emvoFail(uploadId)}?errorMessage=${Uri.encodeComponent(errorMessage)}',
+      t,
+    );
     _assertOk(r);
     return _decode(r.data, SGTINEmvoUpload.fromJson);
   }
@@ -187,33 +240,50 @@ class PharmaService {
     return _decode(r.data, SGTINEmvoUpload.fromJson);
   }
 
-  Future<List<SGTINTatmeenSubmission>> getTatmeenSubmissions(String sgtinId) async {
+  Future<List<SGTINTatmeenSubmission>> getTatmeenSubmissions(
+    String sgtinId,
+  ) async {
     final t = await _token();
     final r = await _get(_P.tatmeen(sgtinId), t);
     _assertOk(r);
     return _decodeList(r.data, SGTINTatmeenSubmission.fromJson);
   }
 
-  Future<SGTINTatmeenSubmission> submitToTatmeen(String sgtinId, String submissionType) async {
+  Future<SGTINTatmeenSubmission> submitToTatmeen(
+    String sgtinId,
+    String submissionType,
+  ) async {
     final t = await _token();
     final r = await _post(
-        '${_P.tatmeen(sgtinId)}?submissionType=${Uri.encodeComponent(submissionType)}', t);
+      '${_P.tatmeen(sgtinId)}?submissionType=${Uri.encodeComponent(submissionType)}',
+      t,
+    );
     _assertOk(r, [200, 201]);
     return _decode(r.data, SGTINTatmeenSubmission.fromJson);
   }
 
-  Future<SGTINTatmeenSubmission> acknowledgeTatmeen(String submissionId, String tatmeenRef) async {
+  Future<SGTINTatmeenSubmission> acknowledgeTatmeen(
+    String submissionId,
+    String tatmeenRef,
+  ) async {
     final t = await _token();
     final r = await _patch(
-        '${_P.tatmeenAccept(submissionId)}?tatmeenRef=${Uri.encodeComponent(tatmeenRef)}', t);
+      '${_P.tatmeenAccept(submissionId)}?tatmeenRef=${Uri.encodeComponent(tatmeenRef)}',
+      t,
+    );
     _assertOk(r);
     return _decode(r.data, SGTINTatmeenSubmission.fromJson);
   }
 
-  Future<SGTINTatmeenSubmission> rejectTatmeen(String submissionId, String reason) async {
+  Future<SGTINTatmeenSubmission> rejectTatmeen(
+    String submissionId,
+    String reason,
+  ) async {
     final t = await _token();
     final r = await _patch(
-        '${_P.tatmeenReject(submissionId)}?reason=${Uri.encodeComponent(reason)}', t);
+      '${_P.tatmeenReject(submissionId)}?reason=${Uri.encodeComponent(reason)}',
+      t,
+    );
     _assertOk(r);
     return _decode(r.data, SGTINTatmeenSubmission.fromJson);
   }
@@ -226,7 +296,9 @@ class PharmaService {
   }
 
   Future<SGTINDscsaOwnership> recordOwnershipTransfer(
-      String sgtinId, SGTINDscsaOwnership dto) async {
+    String sgtinId,
+    SGTINDscsaOwnership dto,
+  ) async {
     final t = await _token();
     final r = await _post(_P.dscsa(sgtinId), t, dto.toJson());
     _assertOk(r, [200, 201]);
@@ -241,18 +313,26 @@ class PharmaService {
   }
 
   Future<SGTINControlledChain> recordSensorReading(
-      String sgtinId, double tempMin, double tempMax,
-      {String? sensorEventId, String chainType = 'COLD'}) async {
+    String sgtinId,
+    double tempMin,
+    double tempMax, {
+    String? sensorEventId,
+    String chainType = 'COLD',
+  }) async {
     final t = await _token();
-    var path = '${_P.coldChainReading(sgtinId)}'
+    var path =
+        '${_P.coldChainReading(sgtinId)}'
         '?tempMin=$tempMin&tempMax=$tempMax&chainType=${Uri.encodeComponent(chainType)}';
-    if (sensorEventId != null) path += '&sensorEventId=${Uri.encodeComponent(sensorEventId)}';
+    if (sensorEventId != null)
+      path += '&sensorEventId=${Uri.encodeComponent(sensorEventId)}';
     final r = await _post(path, t);
     _assertOk(r, [200, 201]);
     return _decode(r.data, SGTINControlledChain.fromJson);
   }
 
-  Future<List<SGTINDuplicateEvidence>> getDuplicateEvidence(String sgtinId) async {
+  Future<List<SGTINDuplicateEvidence>> getDuplicateEvidence(
+    String sgtinId,
+  ) async {
     final t = await _token();
     final r = await _get(_P.duplicates(sgtinId), t);
     _assertOk(r);
@@ -260,7 +340,9 @@ class PharmaService {
   }
 
   Future<SGTINDuplicateEvidence> recordDuplicateDetection(
-      String sgtinId, SGTINDuplicateEvidence dto) async {
+    String sgtinId,
+    SGTINDuplicateEvidence dto,
+  ) async {
     final t = await _token();
     final r = await _post(_P.duplicates(sgtinId), t, dto.toJson());
     _assertOk(r, [200, 201]);
@@ -268,7 +350,9 @@ class PharmaService {
   }
 
   Future<SGTINDuplicateEvidence> resolveDuplicateEvidence(
-      String evidenceId, {String? notes}) async {
+    String evidenceId, {
+    String? notes,
+  }) async {
     final t = await _token();
     final path = notes != null
         ? '${_P.duplicateResolve(evidenceId)}?notes=${Uri.encodeComponent(notes)}'
@@ -285,7 +369,9 @@ class PharmaService {
     return _decodeList(r.data, SGTINRepackagingLink.fromJson);
   }
 
-  Future<SGTINRepackagingLink> createRepackagingLink(SGTINRepackagingLink dto) async {
+  Future<SGTINRepackagingLink> createRepackagingLink(
+    SGTINRepackagingLink dto,
+  ) async {
     final t = await _token();
     final r = await _post(_P.repackagingCreate, t, dto.toJson());
     _assertOk(r, [200, 201]);
@@ -306,11 +392,13 @@ class PharmaService {
     return _decodeList(r.data, SGTINAlert.fromJson);
   }
 
-  Future<SGTINAlert> raiseAlert(String sgtinId,
-      {required String alertType,
-      String severity = 'MEDIUM',
-      required String message,
-      String? regimeContext}) async {
+  Future<SGTINAlert> raiseAlert(
+    String sgtinId, {
+    required String alertType,
+    String severity = 'MEDIUM',
+    required String message,
+    String? regimeContext,
+  }) async {
     final t = await _token();
     final r = await _post(_P.alerts(sgtinId), t, {
       'alertType': alertType,
@@ -322,7 +410,10 @@ class PharmaService {
     return _decode(r.data, SGTINAlert.fromJson);
   }
 
-  Future<SGTINAlert> acknowledgeAlert(String alertId, {String? acknowledgedBy}) async {
+  Future<SGTINAlert> acknowledgeAlert(
+    String alertId, {
+    String? acknowledgedBy,
+  }) async {
     final t = await _token();
     final path = acknowledgedBy != null
         ? '${_P.alertAck(alertId)}?acknowledgedBy=${Uri.encodeComponent(acknowledgedBy)}'
@@ -332,12 +423,16 @@ class PharmaService {
     return _decode(r.data, SGTINAlert.fromJson);
   }
 
-  Future<SGTINAlert> resolveAlert(String alertId,
-      {String? resolvedBy, String? notes}) async {
+  Future<SGTINAlert> resolveAlert(
+    String alertId, {
+    String? resolvedBy,
+    String? notes,
+  }) async {
     final t = await _token();
     var path = _P.alertResolve(alertId);
     final params = <String>[];
-    if (resolvedBy != null) params.add('resolvedBy=${Uri.encodeComponent(resolvedBy)}');
+    if (resolvedBy != null)
+      params.add('resolvedBy=${Uri.encodeComponent(resolvedBy)}');
     if (notes != null) params.add('notes=${Uri.encodeComponent(notes)}');
     if (params.isNotEmpty) path += '?${params.join('&')}';
     final r = await _patch(path, t);
@@ -361,12 +456,16 @@ class PharmaService {
   }
 
   Future<void> dispatchOwnershipTransfer(
-      String sgtinId, String fromGln, String toGln) async {
+    String sgtinId,
+    String fromGln,
+    String toGln,
+  ) async {
     final t = await _token();
     final r = await _post(
-        '${_P.dispatchOwnershipTransfer(sgtinId)}'
-        '?fromGln=${Uri.encodeComponent(fromGln)}&toGln=${Uri.encodeComponent(toGln)}',
-        t);
+      '${_P.dispatchOwnershipTransfer(sgtinId)}'
+      '?fromGln=${Uri.encodeComponent(fromGln)}&toGln=${Uri.encodeComponent(toGln)}',
+      t,
+    );
     _assertOk(r);
   }
 
@@ -384,7 +483,6 @@ class PharmaService {
     return _decode(r.data, GtinBatch.fromJson);
   }
 
-  
   Future<GtinBatch?> tryGetBatchByLot(int gtinId, String batchLot) async {
     final t = await _token();
     final r = await _get(_P.batchByLot('$gtinId', batchLot), t);
@@ -412,7 +510,11 @@ class PharmaService {
     );
   }
 
-  Future<GtinBatch> updateBatch(String gtinId, String batchId, GtinBatch batch) async {
+  Future<GtinBatch> updateBatch(
+    String gtinId,
+    String batchId,
+    GtinBatch batch,
+  ) async {
     final t = await _token();
     final r = await _patch(_P.batchById(gtinId, batchId), t, batch.toJson());
     _assertOk(r);

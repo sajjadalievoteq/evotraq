@@ -42,6 +42,10 @@ class NotificationState extends Equatable {
   /// Cross-subscription delivery event feed for the Activity tab.
   final List<WebhookNotification> deliveryActivity;
   final bool deliveryActivityLoading;
+  final bool deliveryActivityLoadingMore;
+  final bool deliveryActivityHasMore;
+  final int deliveryActivityPage;
+  final String deliveryActivityOutcome;
   final String? deliveryActivityError;
 
   /// Exhausted batches awaiting manual retry (FAILED with deliveryAttempts >= 3).
@@ -67,6 +71,10 @@ class NotificationState extends Equatable {
     this.emailTestResult,
     this.deliveryActivity = const [],
     this.deliveryActivityLoading = false,
+    this.deliveryActivityLoadingMore = false,
+    this.deliveryActivityHasMore = false,
+    this.deliveryActivityPage = 0,
+    this.deliveryActivityOutcome = 'all',
     this.deliveryActivityError,
     this.failedBatches = const [],
     this.failedBatchesLoading = false,
@@ -90,6 +98,10 @@ class NotificationState extends Equatable {
     Map<String, dynamic>? emailTestResult,
     List<WebhookNotification>? deliveryActivity,
     bool? deliveryActivityLoading,
+    bool? deliveryActivityLoadingMore,
+    bool? deliveryActivityHasMore,
+    int? deliveryActivityPage,
+    String? deliveryActivityOutcome,
     String? deliveryActivityError,
     List<NotificationBatch>? failedBatches,
     bool? failedBatchesLoading,
@@ -117,6 +129,13 @@ class NotificationState extends Equatable {
       deliveryActivity: deliveryActivity ?? this.deliveryActivity,
       deliveryActivityLoading:
           deliveryActivityLoading ?? this.deliveryActivityLoading,
+      deliveryActivityLoadingMore:
+          deliveryActivityLoadingMore ?? this.deliveryActivityLoadingMore,
+      deliveryActivityHasMore:
+          deliveryActivityHasMore ?? this.deliveryActivityHasMore,
+      deliveryActivityPage: deliveryActivityPage ?? this.deliveryActivityPage,
+      deliveryActivityOutcome:
+          deliveryActivityOutcome ?? this.deliveryActivityOutcome,
       deliveryActivityError: deliveryActivityError,
       failedBatches: failedBatches ?? this.failedBatches,
       failedBatchesLoading: failedBatchesLoading ?? this.failedBatchesLoading,
@@ -144,6 +163,10 @@ class NotificationState extends Equatable {
     emailTestResult,
     deliveryActivity,
     deliveryActivityLoading,
+    deliveryActivityLoadingMore,
+    deliveryActivityHasMore,
+    deliveryActivityPage,
+    deliveryActivityOutcome,
     deliveryActivityError,
     failedBatches,
     failedBatchesLoading,

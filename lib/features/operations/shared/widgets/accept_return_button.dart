@@ -91,7 +91,7 @@ class _AcceptReturnButtonState extends State<AcceptReturnButton> {
 
   Future<void> _onPressed() async {
     if (_context == null) return;
-    context.go(
+    context.push(
       Constants.opReturnReceivingCreateRoute,
       extra: _context!.toExtra(),
     );

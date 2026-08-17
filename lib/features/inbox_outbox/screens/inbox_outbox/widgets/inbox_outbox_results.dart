@@ -77,7 +77,7 @@ class InboxOutboxResults extends StatelessWidget {
           if (embedded && onSelectOperation != null) {
             onSelectOperation!(id);
           } else {
-            context.go('${Constants.opShippingRoute}/$id');
+            context.push('${Constants.opShippingRoute}/$id');
           }
         },
       ),

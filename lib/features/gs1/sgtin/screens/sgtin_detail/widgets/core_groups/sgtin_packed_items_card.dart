@@ -22,12 +22,17 @@ class SgtinPackedItemsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ...sgtin.childEpcs.take(20).map(
+          ...sgtin.childEpcs
+              .take(20)
+              .map(
                 (epc) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
                     epc,
-                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),

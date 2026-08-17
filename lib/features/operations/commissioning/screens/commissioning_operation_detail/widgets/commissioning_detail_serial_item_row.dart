@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart' as status_rules;
+import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart'
+    as status_rules;
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
@@ -96,7 +97,10 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                backgroundColor: status_rules.statusColor(context, currentStatus!),
+                backgroundColor: status_rules.statusColor(
+                  context,
+                  currentStatus!,
+                ),
                 padding: EdgeInsets.zero,
                 labelPadding: const EdgeInsets.symmetric(horizontal: 6),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

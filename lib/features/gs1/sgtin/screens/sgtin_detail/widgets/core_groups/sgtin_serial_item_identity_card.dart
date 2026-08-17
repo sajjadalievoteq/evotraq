@@ -6,7 +6,6 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart'
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
 class SgtinSerialItemIdentityCard extends StatelessWidget {
   const SgtinSerialItemIdentityCard({
@@ -16,7 +15,6 @@ class SgtinSerialItemIdentityCard extends StatelessWidget {
     required this.isCreating,
     required this.gtinController,
     required this.serialNumberController,
-    required this.batchLotNumberController,
     required this.onGtinChanged,
     required this.setFieldError,
     this.selectedGtin,
@@ -27,7 +25,6 @@ class SgtinSerialItemIdentityCard extends StatelessWidget {
   final bool isCreating;
   final TextEditingController gtinController;
   final TextEditingController serialNumberController;
-  final TextEditingController batchLotNumberController;
   final ValueChanged<gtin_model.GTIN?> onGtinChanged;
   final void Function(String, String?) setFieldError;
   final gtin_model.GTIN? selectedGtin;
@@ -58,15 +55,6 @@ class SgtinSerialItemIdentityCard extends StatelessWidget {
             label: 'Serial Number *',
             enabled: isEditing && isCreating,
             validator: sgtin_validators.validateSerialNumber,
-            setFieldError: setFieldError,
-          ),
-          const SizedBox(height: 12),
-          Gs1ValidatedField(
-            controller: batchLotNumberController,
-            fieldName: 'batchLotNumber',
-            label: 'Batch / Lot Number *',
-            readOnly: !isCreating,
-            validator: sgtin_validators.validateBatchLotNumber,
             setFieldError: setFieldError,
           ),
         ],

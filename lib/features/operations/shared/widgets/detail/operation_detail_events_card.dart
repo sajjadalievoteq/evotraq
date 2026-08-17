@@ -30,7 +30,7 @@ class OperationDetailEventsCard extends StatelessWidget {
                     ),
                   ),
                   onPressed: () =>
-                      context.go('${Constants.epcisObjectEventsRoute}/$id'),
+                      context.push('${Constants.epcisObjectEventsRoute}/$id'),
                   tooltip: id,
                 ),
               )

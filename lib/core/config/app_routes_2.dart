@@ -48,10 +48,11 @@ List<RouteBase> _appRoutes2(AppRouter appRouter) => [
   ),
   GoRoute(
     path: Constants.gs1GtinNewRoute,
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: const GTINDetailScreen(isEditing: true),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: const GTINDetailScreen(isEditing: true),
+        ),
   ),
   GoRoute(
     path: Constants.gs1GtinDetailRoute,
@@ -82,10 +83,11 @@ List<RouteBase> _appRoutes2(AppRouter appRouter) => [
   ),
   GoRoute(
     path: Constants.gs1GlnNewRoute,
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: const GLNDetailScreen(isEditing: true),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: const GLNDetailScreen(isEditing: true),
+        ),
   ),
   GoRoute(
     path: Constants.gs1GlnDetailRoute,
@@ -118,10 +120,11 @@ List<RouteBase> _appRoutes2(AppRouter appRouter) => [
   ),
   GoRoute(
     path: Constants.gs1SsccNewRoute,
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: const SSCCDetailScreen(isEditing: true),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: const SSCCDetailScreen(isEditing: true),
+        ),
   ),
   GoRoute(
     path: Constants.gs1SsccDetailRoute,
@@ -150,57 +153,53 @@ List<RouteBase> _appRoutes2(AppRouter appRouter) => [
     },
   ),
 
-  ShellRoute(
-    builder: (context, state, child) => SgtinShell(child: child),
-    routes: [
-      GoRoute(
-        path: Constants.gs1SgtinsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-          key: state.pageKey,
-          child: const SGTINScreen(),
-        ),
-      ),
-      GoRoute(
-        path: Constants.gs1SgtinNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
+  GoRoute(
+    path: Constants.gs1SgtinsRoute,
+    pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+      key: state.pageKey,
+      child: const SGTINScreen(),
+    ),
+  ),
+  GoRoute(
+    path: Constants.gs1SgtinNewRoute,
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
           key: state.pageKey,
           child: const SGTINDetailScreen(isEditing: true),
         ),
-      ),
-      GoRoute(
-        path: Constants.gs1SgtinByEpcRoute,
-        pageBuilder: (context, state) {
-          final epcUri = state.extra as String? ?? '';
-          return TraqRouterTransitions.sharedAxisHorizontalPage(
-            key: state.pageKey,
-            child: SGTINDetailScreen(
-              epcUri: epcUri.isNotEmpty ? epcUri : null,
-              isEditing: false,
-            ),
-          );
-        },
-      ),
-      GoRoute(
-        path: Constants.gs1SgtinDetailRoute,
-        pageBuilder: (context, state) {
-          final id = state.pathParameters['id'] ?? '';
-          return TraqRouterTransitions.sharedAxisHorizontalPage(
-            key: state.pageKey,
-            child: SGTINDetailScreen(sgtinId: id, isEditing: false),
-          );
-        },
-      ),
-      GoRoute(
-        path: Constants.gs1SgtinEditRoute,
-        pageBuilder: (context, state) {
-          final id = state.pathParameters['id'] ?? '';
-          return TraqRouterTransitions.sharedAxisHorizontalPage(
-            key: state.pageKey,
-            child: SGTINDetailScreen(sgtinId: id, isEditing: true),
-          );
-        },
-      ),
-    ],
+  ),
+  GoRoute(
+    path: Constants.gs1SgtinByEpcRoute,
+    pageBuilder: (context, state) {
+      final epcUri = state.extra as String? ?? '';
+      return TraqRouterTransitions.sharedAxisHorizontalPage(
+        key: state.pageKey,
+        child: SGTINDetailScreen(
+          epcUri: epcUri.isNotEmpty ? epcUri : null,
+          isEditing: false,
+        ),
+      );
+    },
+  ),
+  GoRoute(
+    path: Constants.gs1SgtinDetailRoute,
+    pageBuilder: (context, state) {
+      final id = state.pathParameters['id'] ?? '';
+      return TraqRouterTransitions.sharedAxisHorizontalPage(
+        key: state.pageKey,
+        child: SGTINDetailScreen(sgtinId: id, isEditing: false),
+      );
+    },
+  ),
+  GoRoute(
+    path: Constants.gs1SgtinEditRoute,
+    pageBuilder: (context, state) {
+      final id = state.pathParameters['id'] ?? '';
+      return TraqRouterTransitions.sharedAxisHorizontalPage(
+        key: state.pageKey,
+        child: SGTINDetailScreen(sgtinId: id, isEditing: true),
+      );
+    },
   ),
   GoRoute(
     path: Constants.gs1ToolsRoute,

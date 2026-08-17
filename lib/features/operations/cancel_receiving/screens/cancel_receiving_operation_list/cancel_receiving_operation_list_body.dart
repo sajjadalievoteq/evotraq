@@ -181,7 +181,7 @@ class CancelReceivingOperationListBodyState
     if (widget.embedded && widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
-      context.go('${Constants.opCancelReceivingRoute}/$id');
+      context.push('${Constants.opCancelReceivingRoute}/$id');
     }
   }
 
@@ -324,7 +324,7 @@ class CancelReceivingOperationListBodyState
               ? null
               : FloatingActionButton.extended(
                   onPressed: () =>
-                      context.go(Constants.opCancelReceivingCreateRoute),
+                      context.push(Constants.opCancelReceivingCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

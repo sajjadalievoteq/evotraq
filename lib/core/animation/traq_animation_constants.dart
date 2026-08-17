@@ -56,8 +56,8 @@ abstract final class TraqAnimationConstants {
   static const Offset slideRight = Offset(slideRightDx, 0);
 
   // Router / navigation motion language — slide-first, snappy decelerations.
-  static const int navForwardMs = 800;
-  static const int navReverseMs = 720;
+  static const int navForwardMs = 600;
+  static const int navReverseMs = 420;
   static const Curve navCurve = Curves.easeOutCubic;
   static const Curve navReverseCurve = Curves.easeInCubic;
 

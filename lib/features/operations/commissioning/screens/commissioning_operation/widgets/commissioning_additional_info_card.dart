@@ -91,13 +91,16 @@ class CommissioningAdditionalInfoCard extends StatelessWidget {
               border: OutlineInputBorder(),
               helperText: 'Optional regulatory approval state',
             ),
-            items: (CommissioningFieldValidators.regulatoryStatusCodes.toList()
-                  ..sort())
-                .map((code) => DropdownMenuItem<String>(
-                      value: code,
-                      child: Text(code),
-                    ))
-                .toList(),
+            items:
+                (CommissioningFieldValidators.regulatoryStatusCodes.toList()
+                      ..sort())
+                    .map(
+                      (code) => DropdownMenuItem<String>(
+                        value: code,
+                        child: Text(code),
+                      ),
+                    )
+                    .toList(),
             onChanged: (v) => regulatoryStatusController.text = v ?? '',
           ),
           const SizedBox(height: 16),

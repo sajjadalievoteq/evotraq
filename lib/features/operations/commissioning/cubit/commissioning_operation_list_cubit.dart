@@ -8,24 +8,24 @@ class CommissioningOperationListCubit extends OperationsCubit<Operation> {
   CommissioningOperationListCubit({
     required CommissioningOperationService service,
     int pageSize = 25,
-  })  : _service = service,
-        super(
-          pageSize: pageSize,
-          loadErrorMessage:
-              'Failed to load commissioning operations. Check your connection and tap Retry.',
-          loadMoreErrorMessage:
-              'Could not load more operations. Check your connection and try again.',
-          fetchList: ({required int page, required int size}) async {
-            return const OperationPage<Operation>(
-              operations: [],
-              page: 0,
-              size: 25,
-              count: 0,
-              total: 0,
-              totalPages: 0,
-            );
-          },
-        );
+  }) : _service = service,
+       super(
+         pageSize: pageSize,
+         loadErrorMessage:
+             'Failed to load commissioning operations. Check your connection and tap Retry.',
+         loadMoreErrorMessage:
+             'Could not load more operations. Check your connection and try again.',
+         fetchList: ({required int page, required int size}) async {
+           return const OperationPage<Operation>(
+             operations: [],
+             page: 0,
+             size: 25,
+             count: 0,
+             total: 0,
+             totalPages: 0,
+           );
+         },
+       );
 
   final CommissioningOperationService _service;
   String _gtin = '';
@@ -66,29 +66,37 @@ class CommissioningOperationListCubit extends OperationsCubit<Operation> {
         sortDir: _sortDir,
       );
       final mapped = OperationPage<Operation>(
-        operations: result.batches.map(OperationMapper.fromCommissioningBatch).toList(),
+        operations: result.batches
+            .map(OperationMapper.fromCommissioningBatch)
+            .toList(),
         page: page,
         size: pageSize,
         count: result.batches.length,
         total: result.batches.length,
         totalPages: result.isLast ? page + 1 : page + 2,
       );
-      emit(state.copyWith(
-        isLoading: false,
-        isLoadingMore: false,
-        items: append ? [...state.items, ...mapped.operations] : mapped.operations,
-        currentPage: mapped.page,
-        total: mapped.total,
-        totalPages: mapped.totalPages,
-        hasMore: mapped.hasMore,
-        errorMessage: null,
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isLoadingMore: false,
+          items: append
+              ? [...state.items, ...mapped.operations]
+              : mapped.operations,
+          currentPage: mapped.page,
+          total: mapped.total,
+          totalPages: mapped.totalPages,
+          hasMore: mapped.hasMore,
+          errorMessage: null,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(
-        isLoading: false,
-        isLoadingMore: false,
-        errorMessage: append ? loadMoreErrorMessage : loadErrorMessage,
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isLoadingMore: false,
+          errorMessage: append ? loadMoreErrorMessage : loadErrorMessage,
+        ),
+      );
     }
   }
 }

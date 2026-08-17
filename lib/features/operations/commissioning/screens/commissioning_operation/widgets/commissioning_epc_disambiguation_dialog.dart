@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/operations/commissioning/models/commissioning_pool_match.dart';
 
-
 class CommissioningEpcDisambiguationDialog extends StatelessWidget {
   const CommissioningEpcDisambiguationDialog({
     super.key,
@@ -52,7 +51,10 @@ class CommissioningEpcDisambiguationDialog extends StatelessWidget {
                     title: Text(match.label),
                     subtitle: Text(
                       match.parsed.epc,
-                      style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                      ),
                     ),
                     onTap: () => Navigator.of(context).pop(match),
                   );

@@ -109,7 +109,7 @@ class _InitiateReturnShippingButtonState
 
   Future<void> _onPressed() async {
     if (_context == null || !_context!.isValid) return;
-    context.go(
+    context.push(
       Constants.opReturnShippingCreateRoute,
       extra: _context!.toExtra(),
     );

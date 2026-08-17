@@ -89,12 +89,11 @@ class _CommissioningDetailSerialNumbersCardState
           ),
         ...displayItems.map(
           (item) => CommissioningDetailSerialItemRow(
-              item: item,
-              currentStatus: widget.itemStatuses[item.serialNumber],
-            ),
+            item: item,
+            currentStatus: widget.itemStatuses[item.serialNumber],
+          ),
         ),
-        if (!_showAllItems &&
-            widget.items.length > widget.initialDisplayCount)
+        if (!_showAllItems && widget.items.length > widget.initialDisplayCount)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: TextButton.icon(

@@ -25,11 +25,6 @@ extension CommissioningIdentificationActions
 
   void _onBatchLotTextChanged() {
     if (!mounted) return;
-    context.read<CommissioningOperationCubit>().onBatchLotInputChanged(
-      gtinCode: _resolvedGtinCode(),
-      isPharmaGtin: _isPharmaGtin,
-      batchLot: _batchLotController.text,
-    );
     setState(() {});
   }
 
@@ -179,7 +174,6 @@ extension CommissioningIdentificationActions
 
     if (parsed.type == EPCType.sscc) {
       _isPharmaGtin = false;
-      context.read<CommissioningOperationCubit>().clearBatchState();
     }
 
     if (!mounted) return;
@@ -199,13 +193,6 @@ extension CommissioningIdentificationActions
     final isPharma = await cubit.onPharmaGtinIdentified(gtinCode);
     if (!mounted) return;
     setState(() => _isPharmaGtin = isPharma);
-    if (isPharma && _batchLotController.text.trim().isNotEmpty) {
-      cubit.triggerBatchLookupNow(
-        gtinCode: gtinCode,
-        isPharmaGtin: true,
-        batchLot: _batchLotController.text,
-      );
-    }
   }
 
   Future<void> _loadGtinForCode(String gtinCode) async {

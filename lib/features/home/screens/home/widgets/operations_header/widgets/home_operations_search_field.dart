@@ -14,7 +14,7 @@ class HomeOperationsSearchField extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return TextField(
       readOnly: true,
-      onTap: () => context.go(HomeNavigation.epcisObjectEvents),
+      onTap: () => context.push(HomeNavigation.epcisObjectEvents),
       style: context.text.body.copyWith(
         color: context.colors.textPrimary,
       ),

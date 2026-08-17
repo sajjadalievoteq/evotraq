@@ -2,7 +2,11 @@ part of 'app_router.dart';
 
 List<RouteBase> _appRoutes3(AppRouter appRouter) => [
   ShellRoute(
-    builder: (context, state, child) => EpcisShell(child: child),
+    pageBuilder: (context, state, child) =>
+        TraqRouterTransitions.featureShellPage(
+          key: state.pageKey,
+          child: EpcisShell(child: child),
+        ),
     routes: [
       GoRoute(
         path: Constants.epcisObjectEventsRoute,
@@ -35,31 +39,35 @@ List<RouteBase> _appRoutes3(AppRouter appRouter) => [
 
       GoRoute(
         path: Constants.epcisObjectEventNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-          key: state.pageKey,
-          child: const ObjectEventFormScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: const ObjectEventFormScreen(),
+            ),
       ),
       GoRoute(
         path: Constants.epcisObjectEventBatchImportRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-          key: state.pageKey,
-          child: const ObjectEventBatchImportScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: const ObjectEventBatchImportScreen(),
+            ),
       ),
       GoRoute(
         path: Constants.epcisAggregationEventNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-          key: state.pageKey,
-          child: const AggregationEventFormScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: const AggregationEventFormScreen(),
+            ),
       ),
       GoRoute(
         path: Constants.epcisTransactionEventNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-          key: state.pageKey,
-          child: const TransactionEventFormScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: const TransactionEventFormScreen(),
+            ),
       ),
       GoRoute(
         path: Constants.epcisTransactionEventHelpRoute,
@@ -71,10 +79,11 @@ List<RouteBase> _appRoutes3(AppRouter appRouter) => [
       ),
       GoRoute(
         path: Constants.epcisTransformationEventNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-          key: state.pageKey,
-          child: const TransformationEventFormScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: const TransformationEventFormScreen(),
+            ),
       ),
 
       GoRoute(
@@ -185,10 +194,11 @@ List<RouteBase> _appRoutes3(AppRouter appRouter) => [
     path: Constants.opShippingCreateRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.ship),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: const ShippingOperationScreen(),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: const ShippingOperationScreen(),
+        ),
   ),
   GoRoute(
     path: Constants.opShippingDetailRoute,
@@ -215,14 +225,15 @@ List<RouteBase> _appRoutes3(AppRouter appRouter) => [
     path: Constants.opReceivingCreateRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.receive),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: ReceivingOperationScreen(
-        initialPrefill: state.extra is Map<String, dynamic>
-            ? state.extra as Map<String, dynamic>
-            : null,
-      ),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: ReceivingOperationScreen(
+            initialPrefill: state.extra is Map<String, dynamic>
+                ? state.extra as Map<String, dynamic>
+                : null,
+          ),
+        ),
   ),
   GoRoute(
     path: Constants.opReceivingDetailRoute,
@@ -250,12 +261,13 @@ List<RouteBase> _appRoutes3(AppRouter appRouter) => [
     path: Constants.opReturnShippingCreateRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.returnShip),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: ReturnShippingOperationScreen(
-        pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
-      ),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: ReturnShippingOperationScreen(
+            pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
+          ),
+        ),
   ),
   GoRoute(
     path: Constants.opReturnShippingDetailRoute,
@@ -283,14 +295,15 @@ List<RouteBase> _appRoutes3(AppRouter appRouter) => [
     path: Constants.opCancelShippingCreateRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.cancelShip),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: CancelShippingOperationScreen(
-        initialPrefill: state.extra is Map<String, dynamic>
-            ? state.extra as Map<String, dynamic>
-            : null,
-      ),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: CancelShippingOperationScreen(
+            initialPrefill: state.extra is Map<String, dynamic>
+                ? state.extra as Map<String, dynamic>
+                : null,
+          ),
+        ),
   ),
   GoRoute(
     path: Constants.opCancelShippingDetailRoute,
@@ -318,10 +331,11 @@ List<RouteBase> _appRoutes3(AppRouter appRouter) => [
     path: Constants.opCancelReceivingCreateRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.cancelReceive),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: const CancelReceivingOperationScreen(),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: const CancelReceivingOperationScreen(),
+        ),
   ),
   GoRoute(
     path: Constants.opCancelReceivingDetailRoute,
@@ -349,12 +363,13 @@ List<RouteBase> _appRoutes3(AppRouter appRouter) => [
     path: Constants.opReturnReceivingCreateRoute,
     redirect: (context, state) =>
         appRouter._requireOperationStep(OperationSteps.returnReceive),
-    pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
-      key: state.pageKey,
-      child: ReturnReceivingOperationScreen(
-        pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
-      ),
-    ),
+    pageBuilder: (context, state) =>
+        TraqRouterTransitions.sharedAxisHorizontalPage(
+          key: state.pageKey,
+          child: ReturnReceivingOperationScreen(
+            pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
+          ),
+        ),
   ),
   GoRoute(
     path: Constants.opReturnReceivingDetailRoute,

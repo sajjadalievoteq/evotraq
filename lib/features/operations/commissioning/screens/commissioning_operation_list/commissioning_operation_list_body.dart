@@ -182,7 +182,7 @@ class CommissioningOperationListBodyState
     if (widget.embedded) {
       widget.onSelectOperation?.call(id);
     } else {
-      context.go('${Constants.opCommissioningRoute}/$id');
+      context.push('${Constants.opCommissioningRoute}/$id');
     }
   }
 
@@ -316,7 +316,7 @@ class CommissioningOperationListBodyState
               ? null
               : FloatingActionButton.extended(
                   onPressed: () =>
-                      context.go(Constants.opCommissioningNewRoute),
+                      context.push(Constants.opCommissioningNewRoute),
                   icon: TraqIcon(AppAssets.iconPlus),
                   label: const Text('New Commissioning'),
                 ),

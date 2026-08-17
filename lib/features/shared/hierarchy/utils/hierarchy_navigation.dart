@@ -9,7 +9,7 @@ void openHierarchyScreen(
   required String title,
 }) {
   final normalized = normalizeHierarchyEpc(epc);
-  context.go(
+  context.push(
     '${Constants.hierarchyRoute}'
     '?rootEpc=${Uri.encodeComponent(normalized)}'
     '&title=${Uri.encodeComponent(title)}',

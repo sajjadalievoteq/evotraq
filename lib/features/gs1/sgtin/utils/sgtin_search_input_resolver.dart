@@ -2,7 +2,6 @@ import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 
-
 class SgtinSearchInputResolver {
   const SgtinSearchInputResolver({
     required this.raw,
@@ -42,7 +41,8 @@ class SgtinSearchInputResolver {
       return SgtinSearchInputResolver(
         raw: trimmed,
         gtinCode: parsed.gtin,
-        serialNumber: parsed.serial ?? Gs1CanonicalIdentifier.extractSerial(parsed.epc),
+        serialNumber:
+            parsed.serial ?? Gs1CanonicalIdentifier.extractSerial(parsed.epc),
         epcUri: parsed.type == EPCType.sgtin ? parsed.epc : null,
       );
     } on EPCParseException catch (e) {

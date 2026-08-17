@@ -19,7 +19,6 @@ import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/automation_center_screen.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/notifications_shell.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_shell.dart';
 import 'package:traqtrace_app/features/epcis/widgets/epcis_shell.dart';
 import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/gs1_tools_screen.dart';
@@ -162,7 +161,11 @@ class AppRouter {
 
   final AuthCubit authCubit;
 
-  AppRouter({required this.authCubit});
+  AppRouter({required this.authCubit}) {
+    // `push` keeps reverse animations; by default go_router does not put those
+    // pages in the browser URL. Enable this so drill-downs stay shareable/deeplinkable.
+    GoRouter.optionURLReflectsImperativeAPIs = true;
+  }
 
   bool _isAuthCheckPending() {
     return authCubit.state.status == AuthStatus.initial ||

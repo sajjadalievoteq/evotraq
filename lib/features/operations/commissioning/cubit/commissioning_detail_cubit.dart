@@ -5,32 +5,33 @@ import 'package:traqtrace_app/data/services/operations/commissioning/commissioni
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/models/commissioning_detail_data.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
 
-class CommissioningDetailCubit extends OperationDetailCubit<CommissioningDetailData> {
+class CommissioningDetailCubit
+    extends OperationDetailCubit<CommissioningDetailData> {
   CommissioningDetailCubit({
     required CommissioningOperationService commissioningService,
     required SGTINService sgtinService,
     required String fallbackErrorMessage,
   }) : super(
-          fallbackErrorMessage: fallbackErrorMessage,
-          fetchDetail: (id) async {
-            final results = await Future.wait([
-              commissioningService.getBatch(id),
-              commissioningService.getBatchItems(id),
-            ]);
-            final batch = results[0] as CommissioningBatch?;
-            final items = (results[1] as List<CommissioningBatchItem>?) ?? [];
-            final itemStatuses = await _fetchCommissioningItemStatuses(
-              sgtinService: sgtinService,
-              batch: batch,
-              items: items,
-            );
-            return CommissioningDetailData(
-              batch: batch,
-              items: items,
-              itemStatuses: itemStatuses,
-            );
-          },
-        );
+         fallbackErrorMessage: fallbackErrorMessage,
+         fetchDetail: (id) async {
+           final results = await Future.wait([
+             commissioningService.getBatch(id),
+             commissioningService.getBatchItems(id),
+           ]);
+           final batch = results[0] as CommissioningBatch?;
+           final items = (results[1] as List<CommissioningBatchItem>?) ?? [];
+           final itemStatuses = await _fetchCommissioningItemStatuses(
+             sgtinService: sgtinService,
+             batch: batch,
+             items: items,
+           );
+           return CommissioningDetailData(
+             batch: batch,
+             items: items,
+             itemStatuses: itemStatuses,
+           );
+         },
+       );
 }
 
 Future<Map<String, ItemStatus>> _fetchCommissioningItemStatuses({
@@ -38,7 +39,9 @@ Future<Map<String, ItemStatus>> _fetchCommissioningItemStatuses({
   required CommissioningBatch? batch,
   required List<CommissioningBatchItem> items,
 }) async {
-  final successItems = items.where((i) => i.success && i.serialNumber.isNotEmpty).toList();
+  final successItems = items
+      .where((i) => i.success && i.serialNumber.isNotEmpty)
+      .toList();
   if (successItems.isEmpty) return {};
 
   final result = <String, ItemStatus>{};
@@ -49,7 +52,9 @@ Future<Map<String, ItemStatus>> _fetchCommissioningItemStatuses({
     try {
       final sgtins = await sgtinService.findSGTINsByBatchLotNumber(lot);
       for (final sgtin in sgtins) {
-        if (gtinCode != null && gtinCode.isNotEmpty && sgtin.gtinCode != gtinCode) {
+        if (gtinCode != null &&
+            gtinCode.isNotEmpty &&
+            sgtin.gtinCode != gtinCode) {
           continue;
         }
         result[sgtin.serialNumber] = sgtin.status;
@@ -57,7 +62,9 @@ Future<Map<String, ItemStatus>> _fetchCommissioningItemStatuses({
     } catch (_) {}
   }
 
-  final missing = successItems.where((item) => !result.containsKey(item.serialNumber)).toList();
+  final missing = successItems
+      .where((item) => !result.containsKey(item.serialNumber))
+      .toList();
   if (missing.isEmpty) return result;
 
   const chunkSize = 8;
@@ -66,7 +73,9 @@ Future<Map<String, ItemStatus>> _fetchCommissioningItemStatuses({
     final entries = await Future.wait(
       chunk.map((item) async {
         try {
-          final sgtin = await sgtinService.getSGTINBySerialNumber(item.serialNumber);
+          final sgtin = await sgtinService.getSGTINBySerialNumber(
+            item.serialNumber,
+          );
           return MapEntry(item.serialNumber, sgtin.status);
         } catch (_) {
           return null;

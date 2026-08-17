@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 
 import '../../../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
@@ -195,6 +194,7 @@ class SGTINCubit extends Cubit<SGTINState> {
   }
 
   Future<void> createSGTIN(SGTIN sgtin) async {
+    if (state.status == SGTINStatus.loading) return;
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
       final sgtinToCreate = sgtin.copyWith(id: null);

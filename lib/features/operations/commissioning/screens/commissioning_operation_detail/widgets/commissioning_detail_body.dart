@@ -58,7 +58,9 @@ class CommissioningDetailBody extends StatelessWidget {
             OperationDetailEventsCard(eventIds: [batch.epcisEventId!]),
           ],
           OperationDetailProcessingStatsCard(
-            statusLabel: CommissioningBatchStatusUtils.detailLabel(batch.status),
+            statusLabel: CommissioningBatchStatusUtils.detailLabel(
+              batch.status,
+            ),
           ),
           const SizedBox(height: 32),
         ],

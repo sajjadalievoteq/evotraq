@@ -182,7 +182,7 @@ class ReturnShippingOperationListBodyState
     if (widget.embedded && widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
-      context.go('${Constants.opReturnShippingRoute}/$id');
+      context.push('${Constants.opReturnShippingRoute}/$id');
     }
   }
 
@@ -324,7 +324,7 @@ class ReturnShippingOperationListBodyState
               ? null
               : FloatingActionButton.extended(
                   onPressed: () =>
-                      context.go(Constants.opReturnShippingCreateRoute),
+                      context.push(Constants.opReturnShippingCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

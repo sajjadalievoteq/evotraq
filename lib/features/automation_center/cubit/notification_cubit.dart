@@ -361,15 +361,25 @@ class NotificationCubit extends Cubit<NotificationState> {
     }
   }
 
+  static const int _deliveryActivityPageSize = 20;
+
+  bool _deliveryActivityLoadInFlight = false;
+
   /// Loads per-event delivery history across all subscriptions for Activity.
+  ///
+  /// Pass [outcome] to match Activity filter chips (`all` | `delivered` |
+  /// `failed` | `pending`). Resets to page 0.
   Future<void> loadDeliveryActivity({
-    int perSubscription = 50,
+    String? outcome,
     bool forceSubscriptions = false,
   }) async {
+    final resolvedOutcome = outcome ?? state.deliveryActivityOutcome;
     emit(
       state.copyWith(
         deliveryActivityLoading: true,
+        deliveryActivityLoadingMore: false,
         deliveryActivityError: null,
+        deliveryActivityOutcome: resolvedOutcome,
       ),
     );
 
@@ -383,36 +393,21 @@ class NotificationCubit extends Cubit<NotificationState> {
       }
       if (isClosed) return;
 
-      final subscriptions = state.subscriptions;
-      if (subscriptions.isEmpty) {
-        emit(
-          state.copyWith(
-            deliveryActivity: const [],
-            deliveryActivityLoading: false,
-            deliveryActivityError: null,
-          ),
-        );
-        return;
-      }
-
-      final chunks = await Future.wait(
-        subscriptions.map(
-          (sub) => _apiService.getWebhookHistory(sub.id, size: perSubscription),
-        ),
+      _deliveryActivityLoadInFlight = true;
+      final page = await _apiService.getDeliveryActivity(
+        page: 0,
+        size: _deliveryActivityPageSize,
+        outcome: resolvedOutcome,
       );
-
-      final merged = chunks.expand((e) => e).toList()
-        ..sort((a, b) {
-          final aTime = a.deliveredAt ?? a.createdAt;
-          final bTime = b.deliveredAt ?? b.createdAt;
-          return bTime.compareTo(aTime);
-        });
-
       if (isClosed) return;
       emit(
         state.copyWith(
-          deliveryActivity: merged,
+          deliveryActivity: page.items,
           deliveryActivityLoading: false,
+          deliveryActivityLoadingMore: false,
+          deliveryActivityHasMore: page.hasMore,
+          deliveryActivityPage: page.page,
+          deliveryActivityOutcome: resolvedOutcome,
           deliveryActivityError: null,
         ),
       );
@@ -421,9 +416,62 @@ class NotificationCubit extends Cubit<NotificationState> {
       emit(
         state.copyWith(
           deliveryActivityLoading: false,
+          deliveryActivityLoadingMore: false,
           deliveryActivityError: 'Failed to load delivery events: $e',
         ),
       );
+    } finally {
+      _deliveryActivityLoadInFlight = false;
+    }
+  }
+
+  /// Appends the next Activity page when the user scrolls near the end.
+  Future<void> loadMoreDeliveryActivity() async {
+    if (isClosed ||
+        _deliveryActivityLoadInFlight ||
+        state.deliveryActivityLoading ||
+        state.deliveryActivityLoadingMore ||
+        !state.deliveryActivityHasMore) {
+      return;
+    }
+
+    _deliveryActivityLoadInFlight = true;
+    emit(state.copyWith(deliveryActivityLoadingMore: true));
+    try {
+      final nextPage = state.deliveryActivityPage + 1;
+      final page = await _apiService.getDeliveryActivity(
+        page: nextPage,
+        size: _deliveryActivityPageSize,
+        outcome: state.deliveryActivityOutcome,
+      );
+      if (isClosed) return;
+
+      final seen = state.deliveryActivity.map((e) => e.id).toSet();
+      final appended = [
+        ...state.deliveryActivity,
+        for (final item in page.items)
+          if (!seen.contains(item.id)) item,
+      ];
+
+      emit(
+        state.copyWith(
+          deliveryActivity: appended,
+          deliveryActivityLoadingMore: false,
+          deliveryActivityHasMore: page.hasMore,
+          deliveryActivityPage: page.page,
+          deliveryActivityError: null,
+        ),
+      );
+    } catch (e) {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          deliveryActivityLoadingMore: false,
+          deliveryActivityError: 'Failed to load more delivery events: $e',
+        ),
+      );
+    } finally {
+      _deliveryActivityLoadInFlight = false;
     }
   }
 

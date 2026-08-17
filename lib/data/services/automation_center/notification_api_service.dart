@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart'
     as domain;
 
@@ -208,39 +209,52 @@ class NotificationApiService {
     }
   }
 
-  Future<List<domain.WebhookNotification>> getWebhookHistory(
+  /// Paginated webhook history for one subscription.
+  Future<({List<domain.WebhookNotification> items, bool hasMore, int page})>
+      getWebhookHistory(
     String subscriptionId, {
     int page = 0,
     int size = 20,
+    String? outcome,
   }) async {
     try {
       final headers = await _getAuthHeaders();
+      final clamped = PageResponseUtils.clampSize(size);
+      final query = StringBuffer(
+        '${_dioService.baseUrl}/notifications/subscriptions/$subscriptionId/webhooks'
+        '?page=$page&size=$clamped',
+      );
+      if (outcome != null && outcome.isNotEmpty && outcome != 'all') {
+        query.write('&outcome=${Uri.encodeQueryComponent(outcome)}');
+      }
       final response = await _dioService.get(
-        '${_dioService.baseUrl}/notifications/subscriptions/$subscriptionId/webhooks?limit=$size',
+        query.toString(),
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.data);
-        if (responseData is List) {
-          final history = <domain.WebhookNotification>[];
-          for (final item in responseData) {
-            if (item is! Map) continue;
-            try {
-              history.add(
-                domain.WebhookNotification.fromJson(
-                  Map<String, dynamic>.from(item),
-                ),
-              );
-            } catch (_) {
-              // Skip malformed rows rather than failing the whole panel.
-            }
+        final decoded = json.decode(response.data);
+        final raw = PageResponseUtils.normalizeBody(decoded, fallbackSize: clamped);
+        final history = <domain.WebhookNotification>[];
+        for (final item in PageResponseUtils.contentList(raw)) {
+          if (item is! Map) continue;
+          try {
+            history.add(
+              domain.WebhookNotification.fromJson(
+                Map<String, dynamic>.from(item),
+              ),
+            );
+          } catch (_) {
+            // Skip malformed rows rather than failing the whole panel.
           }
-          return history;
         }
-        return [];
+        return (
+          items: history,
+          hasMore: !PageResponseUtils.isLast(raw),
+          page: PageResponseUtils.pageNumber(raw),
+        );
       } else {
         throw ApiException(
           message: 'Failed to fetch webhook history',
@@ -250,6 +264,62 @@ class NotificationApiService {
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(message: 'Failed to fetch webhook history: $e');
+    }
+  }
+
+  /// Cross-subscription Activity feed (newest first).
+  Future<({List<domain.WebhookNotification> items, bool hasMore, int page})>
+      getDeliveryActivity({
+    int page = 0,
+    int size = 20,
+    String? outcome,
+  }) async {
+    try {
+      final headers = await _getAuthHeaders();
+      final clamped = PageResponseUtils.clampSize(size);
+      final query = StringBuffer(
+        '${_dioService.baseUrl}/notifications/activity?page=$page&size=$clamped',
+      );
+      if (outcome != null && outcome.isNotEmpty && outcome != 'all') {
+        query.write('&outcome=${Uri.encodeQueryComponent(outcome)}');
+      }
+      final response = await _dioService.get(
+        query.toString(),
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.data);
+        final raw = PageResponseUtils.normalizeBody(decoded, fallbackSize: clamped);
+        final history = <domain.WebhookNotification>[];
+        for (final item in PageResponseUtils.contentList(raw)) {
+          if (item is! Map) continue;
+          try {
+            history.add(
+              domain.WebhookNotification.fromJson(
+                Map<String, dynamic>.from(item),
+              ),
+            );
+          } catch (_) {
+            // Skip malformed rows rather than failing the whole panel.
+          }
+        }
+        return (
+          items: history,
+          hasMore: !PageResponseUtils.isLast(raw),
+          page: PageResponseUtils.pageNumber(raw),
+        );
+      } else {
+        throw ApiException(
+          message: 'Failed to fetch delivery activity',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(message: 'Failed to fetch delivery activity: $e');
     }
   }
 

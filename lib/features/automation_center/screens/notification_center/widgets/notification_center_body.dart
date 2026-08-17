@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/batch_delivery_event_row.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/delivery_activity_event_row.dart';
+import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/delivery_activity_outcome.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/empty_delivery_feed.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_loading_skeleton.dart';
@@ -53,6 +56,7 @@ class NotificationCenterBody extends StatelessWidget {
       for (final subscription in state.subscriptions)
         subscription.id: subscription.subscriptionName,
     };
+    // Server already filters by outcome; keep a local match as a safety net.
     final filtered = state.deliveryActivity
         .where(
           (event) => DeliveryActivityOutcome.fromStatus(
@@ -69,53 +73,102 @@ class NotificationCenterBody extends StatelessWidget {
     });
     if (filtered.isEmpty && state.failedBatches.isEmpty) {
       return EmptyDeliveryFeed(
-        hasAnyEvents: state.deliveryActivity.isNotEmpty,
+        hasAnyEvents: state.deliveryActivity.isNotEmpty ||
+            state.deliveryActivityHasMore,
         hasCounters: hasCounters,
         selectedFilter: selectedFilter,
         onClearFilters: onClearFilters,
         onPrimaryAction: onPrimaryAction,
       );
     }
-    return ListView(
+
+    // Failed batches used to be pinned above the feed, which made old failures
+    // sit on top of newer deliveries. Merge everything into one newest-first
+    // timeline, and only include batches when the filter allows failures.
+    final showFailedBatches =
+        selectedFilter == 'all' || selectedFilter == 'failed';
+    final timeline = <({DateTime time, Widget child})>[
+      if (showFailedBatches)
+        for (final batch in state.failedBatches)
+          (
+            time: batch.createdAt,
+            child: BatchDeliveryEventRow(
+              batch: batch,
+              subscriptionName: nameById[batch.subscriptionId],
+            ),
+          ),
+      for (final event in filtered)
+        (
+          time: event.deliveredAt ?? event.createdAt,
+          child: DeliveryActivityEventRow(
+            notification: event,
+            subscriptionName: nameById[event.subscriptionId],
+          ),
+        ),
+    ]..sort((a, b) => b.time.compareTo(a.time));
+
+    if (timeline.isEmpty) {
+      return EmptyDeliveryFeed(
+        hasAnyEvents: state.deliveryActivity.isNotEmpty ||
+            state.deliveryActivityHasMore,
+        hasCounters: hasCounters,
+        selectedFilter: selectedFilter,
+        onClearFilters: onClearFilters,
+        onPrimaryAction: onPrimaryAction,
+      );
+    }
+
+    final showLoadMoreFooter =
+        state.deliveryActivityHasMore || state.deliveryActivityLoadingMore;
+    final itemCount = timeline.length + (showLoadMoreFooter ? 1 : 0);
+
+    final list = ListView.builder(
       shrinkWrap: shrinkWrap,
       physics: shrinkWrap
           ? const NeverScrollableScrollPhysics()
           : const AlwaysScrollableScrollPhysics(),
-      children: [
-        if (state.failedBatches.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
-            child: Text(
-              'Awaiting Manual Retry',
-              style: context.text.bodySm.copyWith(
-                color: context.colors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          ...state.failedBatches.map(
-            (batch) => Padding(
-              padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
-              child: BatchDeliveryEventRow(
-                batch: batch,
-                subscriptionName: nameById[batch.subscriptionId],
-              ),
-            ),
-          ),
-          if (filtered.isNotEmpty) const Divider(height: TraqSpacing.lg),
-        ],
-        ...filtered.asMap().entries.map((entry) {
-          final event = entry.value;
-          final isLast = entry.key == filtered.length - 1;
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        if (index >= timeline.length) {
           return Padding(
-            padding: EdgeInsets.only(bottom: isLast ? 0 : TraqSpacing.sm),
-            child: DeliveryActivityEventRow(
-              notification: event,
-              subscriptionName: nameById[event.subscriptionId],
+            padding: const EdgeInsets.symmetric(vertical: TraqSpacing.md),
+            child: Center(
+              child: state.deliveryActivityLoadingMore
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const SizedBox.shrink(),
             ),
           );
-        }),
-      ],
+        }
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: index == timeline.length - 1 && !showLoadMoreFooter
+                ? 0
+                : TraqSpacing.sm,
+          ),
+          child: timeline[index].child,
+        );
+      },
+    );
+
+    if (shrinkWrap) {
+      return list;
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.extentAfter < 400 &&
+            state.deliveryActivityHasMore &&
+            !state.deliveryActivityLoadingMore &&
+            !state.deliveryActivityLoading) {
+          context.read<NotificationCubit>().loadMoreDeliveryActivity();
+        }
+        return false;
+      },
+      child: list,
     );
   }
 }

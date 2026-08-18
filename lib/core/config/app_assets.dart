@@ -127,6 +127,8 @@ class AppAssets {
   static const String iconSwapVert = '$_traqIcons/swap-vert.svg';
   static const String iconTable = '$_traqIcons/table.svg';
   static const String iconTag = '$_traqIcons/tag.svg';
+  static const String iconTatmeenIntegration =
+      '$_traqIcons/tatmeen-integration.svg';
   static const String iconToolbox = '$_traqIcons/toolbox.svg';
   static const String iconTarget = '$_traqIcons/target.svg';
   static const String iconText = '$_traqIcons/text.svg';

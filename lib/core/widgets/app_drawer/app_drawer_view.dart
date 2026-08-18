@@ -14,6 +14,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer/utils/app_drawer_metrics.d
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_expansion_tile.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_brand_icon.dart';
 
 typedef AppDrawerNavigate =
     void Function(String route, {bool isDashboard, Object? extra});
@@ -260,6 +261,35 @@ class AppDrawerView extends StatelessWidget {
                         onTap: () => onNavigate(Constants.gs1ToolsRoute),
                       ),
 
+                      if (!isAdmin && state.canAccessTatmeenIntegration) ...[
+                        const Divider(),
+                        const Padding(
+                          padding: EdgeInsets.only(
+                            left: 16.0,
+                            top: 8.0,
+                            bottom: 8.0,
+                          ),
+                          child: Text(
+                            'INTEGRATIONS',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        ListTile(
+                          leading: const TatmeenBrandIcon(size: 16),
+                          title: const Text('Tatmeen Integration'),
+                          trailing: const AppDrawerNavigationIcon(
+                            NavIcons.chevronRight,
+                            size: 14,
+                          ),
+                          onTap: () =>
+                              onNavigate(Constants.tatmeenIntegrationRoute),
+                        ),
+                      ],
+
                       if (isAdmin) ...[
                         const Divider(),
                         const Padding(
@@ -421,6 +451,17 @@ class AppDrawerView extends StatelessWidget {
                           onTap: () =>
                               onNavigate(Constants.automationCenterRoute),
                         ),
+                        if (state.canAccessTatmeenIntegration)
+                          ListTile(
+                            leading: const TatmeenBrandIcon(size: 16),
+                            title: const Text('Tatmeen Integration'),
+                            trailing: const AppDrawerNavigationIcon(
+                              NavIcons.chevronRight,
+                              size: 14,
+                            ),
+                            onTap: () =>
+                                onNavigate(Constants.tatmeenIntegrationRoute),
+                          ),
                         ListTile(
                           trailing: const AppDrawerNavigationIcon(
                             NavIcons.chevronRight,

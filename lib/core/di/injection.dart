@@ -31,6 +31,8 @@ import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/job_queue_cubit.dart';
 import 'package:traqtrace_app/data/services/automation_center/inbound_catalog_service.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/inbound_catalog_cubit.dart';
+import 'package:traqtrace_app/data/services/tatmeen_integration/tatmeen_integration_service.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_cubit.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
 import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
@@ -98,6 +100,9 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
   getIt.registerLazySingleton<InboundCatalogService>(
     () => InboundCatalogService(dioService: getIt<DioService>()),
+  );
+  getIt.registerLazySingleton<TatmeenIntegrationService>(
+    () => TatmeenIntegrationService(dioService: getIt<DioService>()),
   );
   getIt.registerLazySingleton<TokenManager>(() => TokenManager());
   getIt.registerLazySingleton<Dio>(
@@ -408,5 +413,8 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
   getIt.registerFactory<InboundCatalogCubit>(
     () => InboundCatalogCubit(service: getIt<InboundCatalogService>()),
+  );
+  getIt.registerFactory<TatmeenIntegrationCubit>(
+    () => TatmeenIntegrationCubit(service: getIt<TatmeenIntegrationService>()),
   );
 }

@@ -12,18 +12,18 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 class _MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
 
 AuthState _authenticated() => AuthState(
-      status: AuthStatus.authenticated,
-      user: User(
-        id: 1,
-        username: 'u',
-        email: 'u@t.com',
-        firstName: 'U',
-        lastName: 'T',
-        role: 'USER',
-        enabled: true,
-      ),
-      token: 'tok',
-    );
+  status: AuthStatus.authenticated,
+  user: User(
+    id: 1,
+    username: 'u',
+    email: 'u@t.com',
+    firstName: 'U',
+    lastName: 'T',
+    role: 'USER',
+    enabled: true,
+  ),
+  token: 'tok',
+);
 
 void main() {
   group('resolvePendingLocationFrom', () {
@@ -85,9 +85,9 @@ void main() {
     });
 
     test('unauthenticated protected path → login?from=original', () {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.unauthenticated),
-      );
+      when(
+        () => authCubit.state,
+      ).thenReturn(const AuthState(status: AuthStatus.unauthenticated));
 
       final deep = '/gtins/00629200080027';
       final result = appRouter.computeRedirect(
@@ -101,9 +101,9 @@ void main() {
     });
 
     test('unauthenticated path with query → login preserves query in from', () {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.unauthenticated),
-      );
+      when(
+        () => authCubit.state,
+      ).thenReturn(const AuthState(status: AuthStatus.unauthenticated));
 
       const deep = '/events?page=3&type=shipping';
       final result = appRouter.computeRedirect(
@@ -120,10 +120,7 @@ void main() {
 
       const deep = '/gtins/00629200080027';
       expect(
-        appRouter.computeRedirect(
-          path: Constants.loginRoute,
-          fromQuery: deep,
-        ),
+        appRouter.computeRedirect(path: Constants.loginRoute, fromQuery: deep),
         deep,
       );
     });
@@ -148,9 +145,9 @@ void main() {
     });
 
     test('splash?from=deep + unauthenticated → login?from=deep', () {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.unauthenticated),
-      );
+      when(
+        () => authCubit.state,
+      ).thenReturn(const AuthState(status: AuthStatus.unauthenticated));
 
       const deep =
           '/epcis/aggregation-events/hierarchy/urn:epc:id:sscc:123?tab=children';
@@ -166,9 +163,9 @@ void main() {
     test(
       'full flow: protected → login?from → authenticated → restored once',
       () {
-        when(() => authCubit.state).thenReturn(
-          const AuthState(status: AuthStatus.unauthenticated),
-        );
+        when(
+          () => authCubit.state,
+        ).thenReturn(const AuthState(status: AuthStatus.unauthenticated));
 
         const deep = '/gtins/00629200080027';
         final toLogin = appRouter.computeRedirect(
@@ -186,7 +183,6 @@ void main() {
         );
         expect(restored, deep);
 
-        
         expect(
           appRouter.computeRedirect(path: deep, currentLocation: deep),
           isNull,

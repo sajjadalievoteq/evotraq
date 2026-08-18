@@ -97,18 +97,25 @@ class AuthState extends Equatable {
 
   /// Mirrors `DashboardSecurityExpressions.READ_ANY` on the backend, which
   /// guards `/dashboard/summary` (home stats, throughput, recent events).
-  bool get canReadDashboard => hasAnyRole(
-    const ['ADMIN', 'MANUFACTURER', 'DISTRIBUTOR', 'RETAILER'],
-  );
+  bool get canReadDashboard =>
+      hasAnyRole(const ['ADMIN', 'MANUFACTURER', 'DISTRIBUTOR', 'RETAILER']);
 
   /// Mirrors backend aggregate / manufacturer-distributor throughput access.
   /// Retailers are excluded.
-  bool get canReadThroughput => hasAnyRole(
-    const ['ADMIN', 'MANUFACTURER', 'DISTRIBUTOR'],
-  );
+  bool get canReadThroughput =>
+      hasAnyRole(const ['ADMIN', 'MANUFACTURER', 'DISTRIBUTOR']);
 
   /// `/internal/actuator/**` is admin-only in `SecurityConfig`.
   bool get canReadSystemHealth => isAdmin;
+
+  /// Mirrors backend `OperationSecurityExpressions.SUPPLY_CHAIN_PARTIES`.
+  bool get canAccessTatmeenIntegration => hasAnyRole(const [
+    'ADMIN',
+    'MANUFACTURER',
+    'DISTRIBUTOR',
+    'RETAILER',
+    'B2B_SERVICE',
+  ]);
 
   @override
   List<Object?> get props => [

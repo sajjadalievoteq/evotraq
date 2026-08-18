@@ -104,6 +104,7 @@ abstract final class NavIcons {
   static const String webhookConfiguration = AppAssets.iconWebhook;
 
   static const String batchProcessing = AppAssets.iconSpinner;
+  static const String tatmeenIntegration = AppAssets.iconTatmeenIntegration;
   static const String jobQueueManagement = AppAssets.iconQueue;
   static const String bulkExport = AppAssets.iconDownload;
 

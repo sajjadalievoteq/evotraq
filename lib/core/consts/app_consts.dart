@@ -164,6 +164,7 @@ class Constants {
       '/operations/commissioning/:operationId';
 
   static const String automationCenterRoute = '/automation';
+  static const String tatmeenIntegrationRoute = '/tatmeen-integration';
   static const String notificationsRoute = '/notifications';
   static const String notificationSubscriptionsRoute =
       '/notifications/subscriptions';

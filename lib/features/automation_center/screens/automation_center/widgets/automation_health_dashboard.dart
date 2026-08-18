@@ -35,49 +35,47 @@ class AutomationHealthDashboard extends StatelessWidget {
     final c = context.colors;
     final summary = _buildSummary(context);
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AutomationOverallHealthHero(summary: summary),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AutomationOverallHealthHero(summary: summary),
+        const SizedBox(height: TraqSpacing.lg),
+        AutomationHealthSignals(
+          summary: summary,
+          onOpenSubscriptions: onOpenSubscriptions,
+          onOpenActivity: onOpenActivity,
+          onOpenJobOperations: onOpenJobOperations,
+        ),
+        if (jobError != null) ...[
           const SizedBox(height: TraqSpacing.lg),
-          AutomationHealthSignals(
-            summary: summary,
-            onOpenSubscriptions: onOpenSubscriptions,
-            onOpenActivity: onOpenActivity,
-            onOpenJobOperations: onOpenJobOperations,
+          AutomationInlineAlert(
+            tone: JobQueueStatusTone.err,
+            title: 'Job queue unavailable',
+            message: jobError!,
           ),
-          if (jobError != null) ...[
-            const SizedBox(height: TraqSpacing.lg),
-            AutomationInlineAlert(
-              tone: JobQueueStatusTone.err,
-              title: 'Job queue unavailable',
-              message: jobError!,
-            ),
-          ] else if (jobLoading) ...[
-            const SizedBox(height: TraqSpacing.lg),
-            AutomationInlineAlert(
-              tone: JobQueueStatusTone.info,
-              title: 'Loading job queue',
-              message: 'Queue health will appear shortly.',
-            ),
-          ],
-          if (snapshot != null && snapshot!.issues.isNotEmpty) ...[
-            const SizedBox(height: TraqSpacing.lg),
-            AutomationInlineAlert(
-              tone: JobQueueStatusTone.warn,
-              title: 'Detected issues',
-              message: snapshot!.issues.join('\n'),
-            ),
-          ],
-          const SizedBox(height: TraqSpacing.md),
-          Text(
-            'Use Subscriptions to manage configs, Activity for delivery events, '
-            'and Job Operations for queue details.',
-            style: context.text.cap.copyWith(color: c.textMuted),
+        ] else if (jobLoading) ...[
+          const SizedBox(height: TraqSpacing.lg),
+          AutomationInlineAlert(
+            tone: JobQueueStatusTone.info,
+            title: 'Loading job queue',
+            message: 'Queue health will appear shortly.',
           ),
         ],
-      ),
+        if (snapshot != null && snapshot!.issues.isNotEmpty) ...[
+          const SizedBox(height: TraqSpacing.lg),
+          AutomationInlineAlert(
+            tone: JobQueueStatusTone.warn,
+            title: 'Detected issues',
+            message: snapshot!.issues.join('\n'),
+          ),
+        ],
+        const SizedBox(height: TraqSpacing.md),
+        Text(
+          'Use Subscriptions to manage configs, Activity for delivery events, '
+          'and Job Operations for queue details.',
+          style: context.text.cap.copyWith(color: c.textMuted),
+        ),
+      ],
     );
   }
 

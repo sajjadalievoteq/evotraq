@@ -164,11 +164,13 @@ class _SubscriptionManagementBodyState
               subscriptions: filtered,
               selectedId: selectedId,
               onSelected: _selectSubscription,
+              shrinkWrap: widget.shrinkWrap,
             );
             final detail = _showFullDetails && !stacked
                 ? EmbeddedFullDetailsPane(
                     subscription: selected,
                     stats: stats,
+                    shrinkWrap: widget.shrinkWrap,
                     onBack: () => setState(() => _showFullDetails = false),
                     onEdit: widget.onEdit,
                     onDelete: widget.onDelete,
@@ -177,6 +179,7 @@ class _SubscriptionManagementBodyState
                   )
                 : SubscriptionDetailPane(
                     subscription: selected,
+                    shrinkWrap: widget.shrinkWrap,
                     onEdit: widget.onEdit,
                     onDelete: widget.onDelete,
                     onPause: widget.onPause,
@@ -190,22 +193,28 @@ class _SubscriptionManagementBodyState
 
             if (stacked) {
               return Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 220, child: list),
+                  if (widget.shrinkWrap)
+                    list
+                  else
+                    SizedBox(height: 220, child: list),
                   const SizedBox(height: TraqSpacing.md),
-                  Expanded(child: detail),
+                  if (widget.shrinkWrap) detail else Expanded(child: detail),
                 ],
               );
             }
 
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(width: constraints.maxWidth * 0.34, child: list),
-                const SizedBox(width: TraqSpacing.md),
-                Expanded(child: detail),
-              ],
+            return IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(width: constraints.maxWidth * 0.34, child: list),
+                  const SizedBox(width: TraqSpacing.md),
+                  Expanded(child: detail),
+                ],
+              ),
             );
           },
         );

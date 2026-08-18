@@ -85,7 +85,8 @@ void main() {
     return TatmeenDetailPane(
       state: cubit.state,
       canUpdate: canUpdate,
-      selectedSection: TatmeenIntegrationSections.credentials,
+      selectedSection: TatmeenIntegrationSections.configurations,
+      onToggle: (_) {},
       onRetry: () {},
       onSaveCredentials: (_) async => true,
       onRemovePassword: () async {},
@@ -105,12 +106,13 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(wrap(buildDetailPane()));
+    await tester.pumpWidget(
+      wrap(SingleChildScrollView(child: buildDetailPane())),
+    );
 
     expect(find.text('Credentials'), findsOneWidget);
-    expect(find.text('Tatmeen Integration'), findsOneWidget);
-    expect(find.byType(Switch), findsNothing);
-    expect(find.text('Credentials'), findsOneWidget);
+    expect(find.text('Notifications'), findsOneWidget);
+    expect(find.byType(Switch), findsWidgets);
   });
 
   testWidgets('configured password shows indicator not prefilled value', (
@@ -130,7 +132,9 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(wrap(buildDetailPane()));
+    await tester.pumpWidget(
+      wrap(SingleChildScrollView(child: buildDetailPane())),
+    );
 
     expect(find.text('Password configured'), findsOneWidget);
     expect(find.text('••••1234'), findsOneWidget);
@@ -146,7 +150,9 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(wrap(buildDetailPane(canUpdate: false)));
+    await tester.pumpWidget(
+      wrap(SingleChildScrollView(child: buildDetailPane(canUpdate: false))),
+    );
 
     expect(
       find.text('Credential configuration is restricted to administrators.'),
@@ -171,10 +177,11 @@ void main() {
         const SizedBox(
           width: 1200,
           height: 700,
-          child: TatmeenIntegrationBody(
-            canUpdate: true,
-            selectedSection: TatmeenIntegrationSections.integration,
-            onSelectSection: _noopSelect,
+          child: SingleChildScrollView(
+            child: TatmeenIntegrationBody(
+              canUpdate: true,
+              selectedSection: TatmeenIntegrationSections.configurations,
+            ),
           ),
         ),
       ),
@@ -183,7 +190,6 @@ void main() {
     expect(find.byType(Row), findsWidgets);
     expect(find.text('Integration'), findsOneWidget);
     expect(find.text('Credentials'), findsOneWidget);
+    expect(find.text('Notifications'), findsOneWidget);
   });
 }
-
-void _noopSelect(String _) {}

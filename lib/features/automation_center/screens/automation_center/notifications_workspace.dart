@@ -18,7 +18,6 @@ import 'package:traqtrace_app/features/automation_center/screens/notification_ce
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/subscription_management_screen.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/automation_workbench_panel.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_panel.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/lazy_indexed_stack.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_scaffold.dart';
 
 class NotificationsWorkspace extends StatefulWidget {
@@ -134,7 +133,6 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
             )
           : AutomationWorkbenchPanel(
               title: 'Outbound',
-              fillBody: true,
               actions: switch (selected) {
                 AutomationCenterSections.alertSubscriptions => [
                   IconButton(
@@ -215,49 +213,38 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
                   ),
                   Divider(height: 1, color: context.colors.border),
                   const SizedBox(height: TraqSpacing.md),
-                  Expanded(
-                    child: LazyIndexedStack(
-                      index: selectedIndex,
-                      sizing: StackFit.expand,
-                      children: [
-                        for (final tab in tabs)
-                          AutomationCenterTabContent(
-                            tab: tab.id,
-                            subscriptions: SubscriptionManagementScreen(
-                              key: _subscriptionsKey,
-                              onViewAllActivity: () => _selectTab(
-                                AutomationCenterSections.notificationActivity,
-                              ),
-                            ),
-                            activity: NotificationCenterScreen(
-                              key: _activityKey,
-                              onManageSubscriptions: () => _selectTab(
-                                AutomationCenterSections.alertSubscriptions,
-                              ),
-                            ),
-                            jobs: SingleChildScrollView(
-                              child: JobQueuePanel(
-                                key: _jobsKey,
-                                embedded: true,
-                                cubit: _jobQueueCubit,
-                              ),
-                            ),
-                            systemHealth: AutomationSystemHealthPanel(
-                              jobQueueCubit: _jobQueueCubit,
-                              onOpenSubscriptions: () => _selectTab(
-                                AutomationCenterSections.alertSubscriptions,
-                              ),
-                              onOpenActivity: () => _selectTab(
-                                AutomationCenterSections.notificationActivity,
-                              ),
-                              onOpenJobOperations: isAdmin
-                                  ? () => _selectTab(
-                                      AutomationCenterSections.backgroundJobs,
-                                    )
-                                  : null,
-                            ),
-                          ),
-                      ],
+                  AutomationCenterTabContent(
+                    tab: tabs[selectedIndex].id,
+                    subscriptions: SubscriptionManagementScreen(
+                      key: _subscriptionsKey,
+                      onViewAllActivity: () => _selectTab(
+                        AutomationCenterSections.notificationActivity,
+                      ),
+                    ),
+                    activity: NotificationCenterScreen(
+                      key: _activityKey,
+                      onManageSubscriptions: () => _selectTab(
+                        AutomationCenterSections.alertSubscriptions,
+                      ),
+                    ),
+                    jobs: JobQueuePanel(
+                      key: _jobsKey,
+                      embedded: true,
+                      cubit: _jobQueueCubit,
+                    ),
+                    systemHealth: AutomationSystemHealthPanel(
+                      jobQueueCubit: _jobQueueCubit,
+                      onOpenSubscriptions: () => _selectTab(
+                        AutomationCenterSections.alertSubscriptions,
+                      ),
+                      onOpenActivity: () => _selectTab(
+                        AutomationCenterSections.notificationActivity,
+                      ),
+                      onOpenJobOperations: isAdmin
+                          ? () => _selectTab(
+                              AutomationCenterSections.backgroundJobs,
+                            )
+                          : null,
                     ),
                   ),
                 ],

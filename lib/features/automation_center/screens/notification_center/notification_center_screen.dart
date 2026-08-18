@@ -98,6 +98,7 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
       builder: (context, state) {
         final c = context.colors;
         return SubscriptionEmbeddedBody(
+          expandBody: false,
           description: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -130,7 +131,7 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
           body: NotificationCenterBody(
             state: state,
             selectedFilter: _selectedFilter,
-            shrinkWrap: false,
+            shrinkWrap: true,
             onRefresh: refresh,
             onClearFilters: () {
               setState(() => _selectedFilter = 'all');

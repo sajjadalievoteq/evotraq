@@ -66,6 +66,72 @@ void main() {
     );
   });
 
+  testWidgets(
+    'managementMasterDetail layouts in unbounded height when wide',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        wrap(
+          ListView(
+            children: const [
+              SubscriptionLoadingSkeleton(
+                shrinkWrap: true,
+                shape: SubscriptionSkeletonShape.managementMasterDetail,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'managementMasterDetail layouts in unbounded height when stacked',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(700, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        wrap(
+          ListView(
+            children: const [
+              SubscriptionLoadingSkeleton(
+                shrinkWrap: true,
+                shape: SubscriptionSkeletonShape.managementMasterDetail,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('activityCard layouts in unbounded height when shrinkWrap', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrap(
+        ListView(
+          children: const [
+            SubscriptionLoadingSkeleton(
+              shrinkWrap: true,
+              itemCount: 3,
+              shape: SubscriptionSkeletonShape.activityCard,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('inbound catalog skeleton renders a category grid', (
     tester,
   ) async {

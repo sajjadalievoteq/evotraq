@@ -8,17 +8,20 @@ class SubscriptionEmbeddedBody extends StatelessWidget {
     required this.description,
     required this.filterChips,
     required this.body,
+    this.expandBody = true,
   });
 
   /// Leading description text (and optional trailing widget such as live status).
   final Widget description;
   final Widget filterChips;
   final Widget body;
+  final bool expandBody;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     return Column(
+      mainAxisSize: expandBody ? MainAxisSize.max : MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         description,
@@ -27,8 +30,7 @@ class SubscriptionEmbeddedBody extends StatelessWidget {
         const SizedBox(height: TraqSpacing.lg),
         Divider(height: 1, color: c.border),
         const SizedBox(height: TraqSpacing.lg),
-        Expanded(child: body),
-
+        if (expandBody) Expanded(child: body) else body,
       ],
     );
   }

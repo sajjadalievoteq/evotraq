@@ -23,15 +23,19 @@ class SubscriptionMasterList extends StatelessWidget {
     required this.subscriptions,
     required this.selectedId,
     required this.onSelected,
+    this.shrinkWrap = false,
   });
 
   final List<NotificationSubscription> subscriptions;
   final String selectedId;
   final ValueChanged<NotificationSubscription> onSelected;
+  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      shrinkWrap: shrinkWrap,
+      physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
       padding: EdgeInsets.zero,
       itemCount: subscriptions.length,
       separatorBuilder: (_, _) => const SizedBox(height: TraqSpacing.sm),

@@ -26,6 +26,7 @@ class EmbeddedFullDetailsPane extends StatelessWidget {
     required this.onDelete,
     required this.onPause,
     required this.onResume,
+    this.shrinkWrap = false,
   });
 
   final NotificationSubscription subscription;
@@ -35,6 +36,7 @@ class EmbeddedFullDetailsPane extends StatelessWidget {
   final void Function(NotificationSubscription) onDelete;
   final void Function(NotificationSubscription) onPause;
   final void Function(NotificationSubscription) onResume;
+  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class EmbeddedFullDetailsPane extends StatelessWidget {
         border: Border.all(color: c.border),
       ),
       child: Column(
+        mainAxisSize: shrinkWrap ? MainAxisSize.min : MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
@@ -80,16 +83,26 @@ class EmbeddedFullDetailsPane extends StatelessWidget {
             ),
           ),
           Divider(height: 1, color: c.border),
-          Expanded(
-            child: Padding(
+          if (shrinkWrap)
+            Padding(
               padding: TraqSpacing.surfacePad,
               child: SubscriptionDetailsBody(
                 subscription: subscription,
                 stats: stats,
                 embedded: true,
               ),
+            )
+          else
+            Expanded(
+              child: Padding(
+                padding: TraqSpacing.surfacePad,
+                child: SubscriptionDetailsBody(
+                  subscription: subscription,
+                  stats: stats,
+                  embedded: true,
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );

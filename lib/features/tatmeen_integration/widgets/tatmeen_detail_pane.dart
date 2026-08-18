@@ -8,8 +8,10 @@ import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_integratio
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_state.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/utils/tatmeen_integration_sections.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_dashboard.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_credentials_form.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_disabled_state.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_notifications_settings.dart';
 
 class TatmeenDetailPane extends StatelessWidget {
   const TatmeenDetailPane({
@@ -17,6 +19,7 @@ class TatmeenDetailPane extends StatelessWidget {
     required this.state,
     required this.canUpdate,
     required this.selectedSection,
+    required this.onToggle,
     required this.onRetry,
     required this.onSaveCredentials,
     required this.onRemovePassword,
@@ -27,6 +30,7 @@ class TatmeenDetailPane extends StatelessWidget {
   final TatmeenIntegrationState state;
   final bool canUpdate;
   final String selectedSection;
+  final ValueChanged<bool> onToggle;
   final VoidCallback onRetry;
   final Future<bool> Function(UpdateTatmeenIntegrationSettingsRequest request)
   onSaveCredentials;
@@ -36,6 +40,12 @@ class TatmeenDetailPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final normalizedSection = TatmeenIntegrationSections.normalize(
+      selectedSection,
+    );
+    if (normalizedSection == TatmeenIntegrationSections.dashboard) {
+      return const TatmeenDashboard();
+    }
     return switch (state.status) {
       TatmeenIntegrationStatus.initial ||
       TatmeenIntegrationStatus.loading => const _TatmeenDetailSkeleton(),
@@ -50,7 +60,7 @@ class TatmeenDetailPane extends StatelessWidget {
       TatmeenIntegrationStatus.testingConnection => _TatmeenDetailContent(
         state: state,
         canUpdate: canUpdate,
-        selectedSection: selectedSection,
+        onToggle: onToggle,
         onSaveCredentials: onSaveCredentials,
         onRemovePassword: onRemovePassword,
         onRemoveApiKey: onRemoveApiKey,
@@ -64,7 +74,7 @@ class _TatmeenDetailContent extends StatelessWidget {
   const _TatmeenDetailContent({
     required this.state,
     required this.canUpdate,
-    required this.selectedSection,
+    required this.onToggle,
     required this.onSaveCredentials,
     required this.onRemovePassword,
     required this.onRemoveApiKey,
@@ -73,7 +83,7 @@ class _TatmeenDetailContent extends StatelessWidget {
 
   final TatmeenIntegrationState state;
   final bool canUpdate;
-  final String selectedSection;
+  final ValueChanged<bool> onToggle;
   final Future<bool> Function(UpdateTatmeenIntegrationSettingsRequest request)
   onSaveCredentials;
   final Future<void> Function() onRemovePassword;
@@ -83,7 +93,6 @@ class _TatmeenDetailContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final section = TatmeenIntegrationSections.normalize(selectedSection);
     final enabled = state.isEnabled;
     final settings = state.settings;
     final updatedAt = settings?.updatedAt;
@@ -105,61 +114,80 @@ class _TatmeenDetailContent extends StatelessWidget {
         side: BorderSide(color: colors.border),
       ),
       clipBehavior: Clip.antiAlias,
-      child: SingleChildScrollView(
+      child: Padding(
         padding: TraqSpacing.surfacePad,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Tatmeen Integration', style: context.text.h3),
-            const SizedBox(height: TraqSpacing.sm),
             Text(
               'Configure encrypted Tatmeen credentials, verify connectivity, '
-              'and control whether the integration is active.',
+              'control whether the integration is active, and choose alerts.',
               style: context.text.bodySm.copyWith(color: colors.textMuted),
             ),
-            const SizedBox(height: TraqSpacing.lg),
+            const SizedBox(height: TraqSpacing.md),
+            Row(
+              children: [
+                Text('Integration', style: context.text.body),
+                const Spacer(),
+                Text(
+                  enabled ? 'On' : 'Off',
+                  style: context.text.bodySm.copyWith(
+                    color: context.colors.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: TraqSpacing.xs),
+                Switch.adaptive(
+                  value: enabled,
+                  onChanged: canUpdate && !busy ? onToggle : null,
+                ),
+              ],
+            ),
+            if (!canUpdate)
+              Padding(
+                padding: const EdgeInsets.only(top: TraqSpacing.xs),
+                child: Text(
+                  'Integration status updates require admin access.',
+                  style: context.text.bodySm.copyWith(color: colors.textMuted),
+                ),
+              ),
+            const SizedBox(height: TraqSpacing.sm),
             _StatusChip(enabled: enabled),
-            if (section == TatmeenIntegrationSections.integration &&
-                !enabled) ...[
+            if (!enabled) ...[
               const SizedBox(height: TraqSpacing.md),
               const TatmeenDisabledState(),
             ],
-            const SizedBox(height: TraqSpacing.lg),
-            if (section == TatmeenIntegrationSections.credentials) ...[
-              TatmeenCredentialsForm(
-                settings: settings,
-                canUpdate: canUpdate,
-                busy: state.status == TatmeenIntegrationStatus.updating,
-                onSave: onSaveCredentials,
-                onRemovePassword: onRemovePassword,
-                onRemoveApiKey: onRemoveApiKey,
-              ),
-              if (canUpdate) ...[
-                const SizedBox(height: TraqSpacing.lg),
-                OutlinedButton.icon(
-                  onPressed: canTest ? onTestConnection : null,
-                  icon: testing
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const TraqIcon(AppAssets.iconLink, size: 18),
-                  label: Text(
-                    testing ? 'Testing connection…' : 'Test connection',
-                  ),
+            const SizedBox(height: TraqSpacing.md),
+            TatmeenCredentialsForm(
+              settings: settings,
+              canUpdate: canUpdate,
+              busy: state.status == TatmeenIntegrationStatus.updating,
+              onSave: onSaveCredentials,
+              onRemovePassword: onRemovePassword,
+              onRemoveApiKey: onRemoveApiKey,
+            ),
+            if (canUpdate) ...[
+              const SizedBox(height: TraqSpacing.lg),
+              OutlinedButton.icon(
+                onPressed: canTest ? onTestConnection : null,
+                icon: testing
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const TraqIcon(AppAssets.iconLink, size: 18),
+                label: Text(
+                  testing ? 'Testing connection…' : 'Test connection',
                 ),
-                if (state.connectionTestResult != null) ...[
-                  const SizedBox(height: TraqSpacing.sm),
-                  _ConnectionResultBanner(result: state.connectionTestResult!),
-                ],
-              ],
-            ] else ...[
-              Text(
-                'Use the left panel to open Credentials and manage Tatmeen authentication.',
-                style: context.text.body.copyWith(color: colors.textMuted),
               ),
+              if (state.connectionTestResult != null) ...[
+                const SizedBox(height: TraqSpacing.sm),
+                _ConnectionResultBanner(result: state.connectionTestResult!),
+              ],
             ],
+            const SizedBox(height: TraqSpacing.lg),
+            TatmeenNotificationsSettings(canUpdate: canUpdate),
             if (updatedAt != null || (updatedBy?.isNotEmpty ?? false)) ...[
               const SizedBox(height: TraqSpacing.lg),
               Text(

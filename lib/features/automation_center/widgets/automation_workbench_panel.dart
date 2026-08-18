@@ -20,10 +20,10 @@ class AutomationWorkbenchPanel extends StatelessWidget {
   final WorkbenchInstructions? instructions;
   final List<Widget> actions;
 
-  /// When true, the body card fills the remaining panel height instead of
-  /// sizing to its intrinsic content. Use for panels whose body should stretch
-  /// to the bottom (e.g. an empty state that centers in the available space).
-  /// The body is then responsible for scrolling its own overflowing content.
+  /// When true, the body card fills the remaining panel height. The header and
+  /// body participate in one coordinated right-pane scroll, so scrolling a
+  /// long body also scrolls the panel chrome instead of trapping the pointer
+  /// inside the card.
   final bool fillBody;
 
   @override
@@ -38,12 +38,15 @@ class AutomationWorkbenchPanel extends StatelessWidget {
           Expanded(child: Text(title, style: context.text.h2)),
           if (actions.isNotEmpty) ...[
             const SizedBox(width: TraqSpacing.sm),
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              alignment: WrapAlignment.end,
-              spacing: TraqSpacing.sm,
-              runSpacing: TraqSpacing.sm,
-              children: actions,
+            SizedBox(
+              height: 30,
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                alignment: WrapAlignment.end,
+                spacing: TraqSpacing.sm,
+                runSpacing: TraqSpacing.sm,
+                children: actions,
+              ),
             ),
           ],
         ],
@@ -66,20 +69,32 @@ class AutomationWorkbenchPanel extends StatelessWidget {
     );
 
     if (fillBody) {
-      // Pinned header + card that expands to fill the remaining height. The
-      // panel area is bounded (WorkbenchScaffold hands it an Expanded), so the
-      // card gets a bounded height and its body can stretch to the bottom.
       return SelectionArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(context.gutter,context.gutter,context.gutter, context.gutter),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ...header,
-              Expanded(child: card),
-
-
-            ],
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                context.gutter,
+                context.gutter,
+                context.gutter,
+                0,
+              ),
+              sliver: SliverList.list(children: header),
+            ),
+          ],
+          body: Padding(
+            padding: EdgeInsets.fromLTRB(
+              context.gutter,
+              0,
+              context.gutter,
+           0,
+            ),
+            child: Column(
+              children: [
+                Expanded(child: card),
+                SizedBox(height: context.gutter,)
+              ],
+            ),
           ),
         ),
       );

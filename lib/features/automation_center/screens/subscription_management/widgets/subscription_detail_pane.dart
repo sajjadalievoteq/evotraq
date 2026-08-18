@@ -26,6 +26,7 @@ class SubscriptionDetailPane extends StatelessWidget {
     required this.onPause,
     required this.onResume,
     required this.onViewDetails,
+    this.shrinkWrap = false,
     this.onViewAllActivity,
   });
 
@@ -35,6 +36,7 @@ class SubscriptionDetailPane extends StatelessWidget {
   final void Function(NotificationSubscription) onPause;
   final void Function(NotificationSubscription) onResume;
   final VoidCallback onViewDetails;
+  final bool shrinkWrap;
   final VoidCallback? onViewAllActivity;
 
   @override
@@ -53,10 +55,13 @@ class SubscriptionDetailPane extends StatelessWidget {
       child: Padding(
         padding: TraqSpacing.surfacePad,
         child: Column(
+          mainAxisSize: shrinkWrap ? MainAxisSize.min : MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: ListView(
+            if (shrinkWrap)
+              ListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,8 +138,88 @@ class SubscriptionDetailPane extends StatelessWidget {
                     style: context.text.bodySm.copyWith(color: c.textMuted),
                   ),
                 ],
+              )
+            else
+              Expanded(
+                child: ListView(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TraqIcon(
+                          SubscriptionDeliveryUtils.iconForEndpoint(
+                            subscription.webhookUrl,
+                          ),
+                          size: 22,
+                          color: c.primary,
+                        ),
+                        const SizedBox(width: TraqSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      subscription.subscriptionName,
+                                      style: context.text.h3.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  SubscriptionStatusChip(
+                                    status: subscription.status,
+                                  ),
+                                  SubscriptionActionMenu(
+                                    subscription: subscription,
+                                    onEdit: () => onEdit(subscription),
+                                    onPause: () => onPause(subscription),
+                                    onResume: () => onResume(subscription),
+                                    onDelete: () => onDelete(subscription),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: TraqSpacing.xs),
+                              Text(
+                                "$deliveryLabel: ${subscription.webhookUrl}",
+                                style: context.text.bodySm.copyWith(
+                                  color: c.textMuted,
+                                ),
+                              ),
+                              Text(
+                                'Created: $created',
+                                style: context.text.bodySm.copyWith(
+                                  color: c.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: TraqSpacing.lg),
+                    SubscriptionConfigRow(
+                      label: 'Delivery',
+                      value: deliveryLabel,
+                    ),
+                    SubscriptionConfigRow(
+                      label: 'Type',
+                      value: subscription.subscriptionType,
+                    ),
+                    SubscriptionConfigRow(
+                      label: 'Format',
+                      value: subscription.notificationFormat ?? '—',
+                    ),
+                    const SizedBox(height: TraqSpacing.lg),
+                    Text(
+                      'Delivery metrics and per-event history live on the '
+                      'Activity tab.',
+                      style: context.text.bodySm.copyWith(color: c.textMuted),
+                    ),
+                  ],
+                ),
               ),
-            ),
             const SizedBox(height: TraqSpacing.md),
             FilledButton(
               onPressed: onViewDetails,

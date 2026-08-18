@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_state.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/utils/tatmeen_integration_sections.dart';
 
@@ -42,9 +44,18 @@ class TatmeenMasterPane extends StatelessWidget {
             Text('Tatmeen Settings', style: context.text.h3),
             const SizedBox(height: TraqSpacing.md),
             _MasterItem(
+              label: 'Dashboard',
+              iconAsset: NavIcons.dashboard,
+              selected: selectedSection == TatmeenIntegrationSections.dashboard,
+              subtitle: 'Overview and sync metrics',
+              onTap: () => onSelectSection(TatmeenIntegrationSections.dashboard),
+            ),
+            const SizedBox(height: TraqSpacing.sm),
+            _MasterItem(
               label: 'Integration',
+              iconAsset: NavIcons.tatmeenIntegration,
               selected:
-                  selectedSection == TatmeenIntegrationSections.integration,
+                  selectedSection == TatmeenIntegrationSections.configurations,
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -63,17 +74,10 @@ class TatmeenMasterPane extends StatelessWidget {
                 ],
               ),
               onTap: () =>
-                  onSelectSection(TatmeenIntegrationSections.integration),
+                  onSelectSection(TatmeenIntegrationSections.configurations),
             ),
             const SizedBox(height: TraqSpacing.sm),
-            _MasterItem(
-              label: 'Credentials',
-              selected:
-                  selectedSection == TatmeenIntegrationSections.credentials,
-              subtitle: 'Configure username, password, and API key',
-              onTap: () =>
-                  onSelectSection(TatmeenIntegrationSections.credentials),
-            ),
+
             if (!canUpdate) ...[
               const SizedBox(height: TraqSpacing.md),
               Text(
@@ -93,6 +97,7 @@ class TatmeenMasterPane extends StatelessWidget {
 class _MasterItem extends StatelessWidget {
   const _MasterItem({
     required this.label,
+    required this.iconAsset,
     required this.selected,
     required this.onTap,
     this.subtitle,
@@ -100,6 +105,7 @@ class _MasterItem extends StatelessWidget {
   });
 
   final String label;
+  final String iconAsset;
   final bool selected;
   final VoidCallback onTap;
   final String? subtitle;
@@ -125,11 +131,17 @@ class _MasterItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: context.text.body.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Row(
+                    children: [
+                      TraqIcon(iconAsset, size: 16, color: selected ? colors.primary : colors.textMuted),
+                      const SizedBox(width: TraqSpacing.xs),
+                      Text(
+                        label,
+                        style: context.text.body.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: TraqSpacing.xs),

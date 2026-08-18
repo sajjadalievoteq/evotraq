@@ -69,6 +69,7 @@ class SubscriptionManagementScreenState
   @override
   Widget build(BuildContext context) {
     return SubscriptionEmbeddedBody(
+      expandBody: false,
       description: TextField(
         controller: _searchController,
         onChanged: (value) => setState(() => _searchQuery = value),
@@ -107,7 +108,7 @@ class SubscriptionManagementScreenState
         selectedDeliveryFilter: _selectedDeliveryFilter,
         selectedStatusFilter: _selectedStatusFilter,
         searchQuery: _searchQuery,
-        shrinkWrap: false,
+        shrinkWrap: true,
         onRefresh: refresh,
         onEdit: (sub) => _editSubscription(sub.id),
         onDelete: _deleteSubscription,

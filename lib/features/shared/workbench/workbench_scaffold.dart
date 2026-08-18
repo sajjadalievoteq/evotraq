@@ -80,7 +80,34 @@ class WorkbenchScaffold extends StatelessWidget {
                         for (final item in group.items)
                           DropdownMenuItem<String>(
                             value: item.id,
-                            child: Text(item.label),
+                            child: Row(
+                              children: [
+                                Flexible(child: Text(item.label)),
+                                if (item.badgeCount != null &&
+                                    item.badgeCount! > 0) ...[
+                                  const SizedBox(width: TraqSpacing.sm),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: TraqSpacing.sm,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colors.error,
+                                      borderRadius: TraqRadius.chip,
+                                    ),
+                                    child: Text(
+                                      item.badgeCount! > 99
+                                          ? '99+'
+                                          : '${item.badgeCount}',
+                                      style: context.text.cap.copyWith(
+                                        color: colors.textOnInverse,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                       ],
                     ],

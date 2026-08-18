@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/data/services/tatmeen_integration/tatmeen_integration_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/automation_workbench_panel.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/lazy_indexed_stack.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_scaffold.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_cubit.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_state.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/data/tatmeen_dummy_sync_data.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_dashboard.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/utils/tatmeen_integration_sections.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_dashboard.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_failed_queue_pane.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_integration_body.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_sync_logs_pane.dart';
 
 class TatmeenIntegrationScreen extends StatefulWidget {
   const TatmeenIntegrationScreen({super.key});
@@ -20,6 +27,7 @@ class TatmeenIntegrationScreen extends StatefulWidget {
 
 class _TatmeenIntegrationScreenState extends State<TatmeenIntegrationScreen> {
   late final TatmeenIntegrationCubit _cubit;
+  late final UseTatmeenDashboard _dashboard;
   late String _selectedSection;
   bool? _lastKnownEnabled;
 
@@ -27,11 +35,15 @@ class _TatmeenIntegrationScreenState extends State<TatmeenIntegrationScreen> {
   void initState() {
     super.initState();
     _cubit = getIt<TatmeenIntegrationCubit>()..load();
-    _selectedSection = TatmeenIntegrationSections.integration;
+    _dashboard = UseTatmeenDashboard(
+      service: getIt<TatmeenIntegrationService>(),
+    )..load();
+    _selectedSection = TatmeenIntegrationSections.dashboard;
   }
 
   @override
   void dispose() {
+    _dashboard.dispose();
     _cubit.close();
     super.dispose();
   }
@@ -107,24 +119,45 @@ class _TatmeenIntegrationScreenState extends State<TatmeenIntegrationScreen> {
           },
           child: WorkbenchScaffold(
             title: 'Tatmeen Integration',
-            groups: TatmeenIntegrationSections.groups,
+            groups: TatmeenIntegrationSections.groups(
+              failedQueueCount: TatmeenDummySyncData.failedQueue().length,
+            ),
             selectedId: _selectedSection,
             onSelect: (id) => setState(
               () => _selectedSection = TatmeenIntegrationSections.normalize(id),
             ),
-            panelBuilder: (context, _) => AutomationWorkbenchPanel(
-              title: 'Tatmeen Integration',
-              fillBody: true,
-              child: TatmeenIntegrationBody(
-                canUpdate: canUpdate,
-                selectedSection: _selectedSection,
-                onSelectSection: (id) => setState(
-                  () => _selectedSection = TatmeenIntegrationSections.normalize(
-                    id,
+            panelBuilder: (context, selectedId) {
+              final section = TatmeenIntegrationSections.normalize(selectedId);
+              return LazyIndexedStack(
+                index: TatmeenIntegrationSections.indexOf(section),
+                sizing: StackFit.expand,
+                children: [
+                  TatmeenDashboard(controller: _dashboard),
+                  AutomationWorkbenchPanel(
+                    title: TatmeenIntegrationSections.panelTitle(
+                      TatmeenIntegrationSections.configurations,
+                    ),
+                    child: TatmeenIntegrationBody(
+                      canUpdate: canUpdate,
+                      selectedSection:
+                          TatmeenIntegrationSections.configurations,
+                    ),
                   ),
-                ),
-              ),
-            ),
+                  AutomationWorkbenchPanel(
+                    title: TatmeenIntegrationSections.panelTitle(
+                      TatmeenIntegrationSections.failedQueue,
+                    ),
+                    child: const TatmeenFailedQueuePane(),
+                  ),
+                  AutomationWorkbenchPanel(
+                    title: TatmeenIntegrationSections.panelTitle(
+                      TatmeenIntegrationSections.syncLogs,
+                    ),
+                    child: const TatmeenSyncLogsPane(),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

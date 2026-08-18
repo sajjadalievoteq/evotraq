@@ -11,11 +11,13 @@ class WorkbenchRailItem {
     required this.id,
     required this.iconAsset,
     required this.label,
+    this.badgeCount,
   });
 
   final String id;
   final String iconAsset;
   final String label;
+  final int? badgeCount;
 }
 
 class WorkbenchRailGroup {
@@ -60,6 +62,7 @@ class WorkbenchRail extends StatelessWidget {
                 selected: item.id == selectedId,
                 onTap: () => onSelect(item.id),
                 colors: colors,
+                badgeCount: item.badgeCount,
               ),
           ],
           SizedBox(height: context.padding.top),

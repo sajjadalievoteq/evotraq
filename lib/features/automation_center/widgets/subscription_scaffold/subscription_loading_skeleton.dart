@@ -41,7 +41,7 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (shape == SubscriptionSkeletonShape.managementMasterDetail) {
-      return const _ManagementMasterDetailSkeleton();
+      return _ManagementMasterDetailSkeleton(shrinkWrap: shrinkWrap);
     }
 
     final c = context.colors;
@@ -104,11 +104,15 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
     }
 
     if (shrinkWrap) {
-      return ListView.separated(
-        padding: EdgeInsets.zero,
-        itemCount: cards.length,
-        separatorBuilder: (_, __) => const SizedBox(height: TraqSpacing.md),
-        itemBuilder: (_, i) => cards[i],
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < cards.length; i++) ...[
+            if (i > 0) const SizedBox(height: TraqSpacing.md),
+            cards[i],
+          ],
+        ],
       );
     }
 
@@ -124,34 +128,47 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
 /// Mirrors [SubscriptionManagementBody]'s LayoutBuilder breakpoint (`maxWidth < 900`
 /// or mobile → stacked; otherwise list + detail side-by-side).
 class _ManagementMasterDetailSkeleton extends StatelessWidget {
-  const _ManagementMasterDetailSkeleton();
+  const _ManagementMasterDetailSkeleton({required this.shrinkWrap});
+
+  /// Matches [SubscriptionManagementBody.shrinkWrap]: intrinsic size when
+  /// nested in a [ListView] (unbounded height). Flex children are only used
+  /// when the parent provides a bounded height.
+  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final stacked = constraints.maxWidth < 900 || context.isMobile;
-        final list = _MasterListSkeleton(rowCount: stacked ? 3 : 5);
-        final detail = const _DetailPaneSkeleton();
+        final list = _MasterListSkeleton(
+          rowCount: stacked ? 3 : 5,
+          shrinkWrap: shrinkWrap,
+        );
+        const detail = _DetailPaneSkeleton();
 
         if (stacked) {
           return Column(
+            mainAxisSize: shrinkWrap ? MainAxisSize.min : MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: 220, child: list),
               const SizedBox(height: TraqSpacing.md),
-              Expanded(child: detail),
+              if (shrinkWrap) detail else Expanded(child: detail),
             ],
           );
         }
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(width: constraints.maxWidth * 0.34, child: list),
-            const SizedBox(width: TraqSpacing.md),
-            Expanded(child: detail),
-          ],
+        // IntrinsicHeight lets the Row stretch in unbounded parents (workbench
+        // ListView) the same way SubscriptionManagementBody does.
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(width: constraints.maxWidth * 0.34, child: list),
+              const SizedBox(width: TraqSpacing.md),
+              const Expanded(child: detail),
+            ],
+          ),
         );
       },
     );
@@ -159,72 +176,100 @@ class _ManagementMasterDetailSkeleton extends StatelessWidget {
 }
 
 class _MasterListSkeleton extends StatelessWidget {
-  const _MasterListSkeleton({required this.rowCount});
+  const _MasterListSkeleton({
+    required this.rowCount,
+    required this.shrinkWrap,
+  });
 
   final int rowCount;
+  final bool shrinkWrap;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = List<Widget>.generate(rowCount, (index) {
+      return _MasterListSkeletonRow(index: index);
+    });
+
+    if (shrinkWrap) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0) const SizedBox(height: TraqSpacing.sm),
+            rows[i],
+          ],
+        ],
+      );
+    }
+
+    return ListView.separated(
+      padding: EdgeInsets.zero,
+      itemCount: rows.length,
+      separatorBuilder: (_, __) => const SizedBox(height: TraqSpacing.sm),
+      itemBuilder: (_, i) => rows[i],
+    );
+  }
+}
+
+class _MasterListSkeletonRow extends StatelessWidget {
+  const _MasterListSkeletonRow({required this.index});
+
+  final int index;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return ListView.separated(
-      padding: EdgeInsets.zero,
-      itemCount: rowCount,
-      separatorBuilder: (_, __) => const SizedBox(height: TraqSpacing.sm),
-      itemBuilder: (_, index) {
-        return Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: TraqSpacing.md,
-            vertical: TraqSpacing.md,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TraqSpacing.md,
+        vertical: TraqSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: TraqRadius.card,
+        border: Border.all(
+          color: index == 0 ? c.primary.withValues(alpha: 0.5) : c.border,
+          width: index == 0 ? 1.5 : 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          AppSkeletonBox(
+            width: 22,
+            height: 22,
+            radius: 6,
+            color: c.surfaceMuted,
           ),
-          decoration: BoxDecoration(
-            color: c.surface,
-            borderRadius: TraqRadius.card,
-            border: Border.all(
-              color: index == 0
-                  ? c.primary.withValues(alpha: 0.5)
-                  : c.border,
-              width: index == 0 ? 1.5 : 1,
+          const SizedBox(width: TraqSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppSkeletonBox(
+                  width: index == 0 ? 140 : 110,
+                  height: 14,
+                  radius: 4,
+                  color: c.surfaceMuted,
+                ),
+                const SizedBox(height: TraqSpacing.xs),
+                AppSkeletonBox(
+                  width: 88,
+                  height: 11,
+                  radius: 4,
+                  color: c.surfaceMuted,
+                ),
+              ],
             ),
           ),
-          child: Row(
-            children: [
-              AppSkeletonBox(
-                width: 22,
-                height: 22,
-                radius: 6,
-                color: c.surfaceMuted,
-              ),
-              const SizedBox(width: TraqSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AppSkeletonBox(
-                      width: index == 0 ? 140 : 110,
-                      height: 14,
-                      radius: 4,
-                      color: c.surfaceMuted,
-                    ),
-                    const SizedBox(height: TraqSpacing.xs),
-                    AppSkeletonBox(
-                      width: 88,
-                      height: 11,
-                      radius: 4,
-                      color: c.surfaceMuted,
-                    ),
-                  ],
-                ),
-              ),
-              AppSkeletonBox(
-                width: 56,
-                height: 22,
-                radius: 999,
-                color: c.surfaceMuted,
-              ),
-            ],
+          AppSkeletonBox(
+            width: 56,
+            height: 22,
+            radius: 999,
+            color: c.surfaceMuted,
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
@@ -243,6 +288,7 @@ class _DetailPaneSkeleton extends StatelessWidget {
       child: Padding(
         padding: TraqSpacing.surfacePad,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
@@ -298,7 +344,7 @@ class _DetailPaneSkeleton extends StatelessWidget {
               radius: 4,
               color: c.surfaceMuted,
             ),
-            const Spacer(),
+            const SizedBox(height: TraqSpacing.xl),
             Row(
               children: [
                 AppSkeletonBox(

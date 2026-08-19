@@ -108,8 +108,9 @@ class ApprovalsViewState extends State<ApprovalsView> {
             safeArea: false,
             scrollable: false,
             builder: (context, layout) {
-              if (state.status == UserApprovalStatus.loading &&
-                  state.pendingApprovals.isEmpty) {
+              if (state.pendingApprovals.isEmpty &&
+                  (state.status == UserApprovalStatus.initial ||
+                      state.status == UserApprovalStatus.loading)) {
                 return const UserApprovalsLoadingView();
               }
 

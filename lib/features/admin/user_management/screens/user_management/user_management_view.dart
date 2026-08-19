@@ -155,8 +155,9 @@ class UserManagementViewState extends State<UserManagementView> {
             safeArea: false,
             scrollable: false,
             builder: (context, layout) {
-              if (state.status == UserManagementStatus.loading &&
-                  state.users.isEmpty) {
+              if (state.users.isEmpty &&
+                  (state.status == UserManagementStatus.initial ||
+                      state.status == UserManagementStatus.loading)) {
                 return const UserManagementLoadingView();
               }
 

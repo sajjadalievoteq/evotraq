@@ -388,6 +388,55 @@ class AuthService {
     }
   }
 
+  Future<AuthResponse> refreshToken() async {
+    try {
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}${Constants.authRefreshEndpoint}',
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        final authResponse = AuthResponse.fromJson(data as Map<String, dynamic>);
+        await _dioService.saveAuthToken(authResponse.token);
+        return authResponse;
+      }
+
+      throw ApiException(
+        statusCode: response.statusCode,
+        message:
+            _parseErrorMessage(response.data) ?? 'Failed to refresh session',
+        responseBody: _stringifyResponseData(response.data),
+      );
+    } on DioException catch (e) {
+      throw ApiException(
+        statusCode: e.response?.statusCode,
+        message:
+            _parseErrorMessage(e.response?.data) ?? 'Failed to refresh session',
+        responseBody: _stringifyResponseData(e.response?.data),
+        originalException: e,
+      );
+    }
+  }
+
+  Future<void> pingActivity() async {
+    try {
+      await _dioService.post(
+        '${_dioService.baseUrl}${Constants.authActivityEndpoint}',
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+    } catch (_) {
+      // Best-effort: a failed ping must not take down an otherwise valid session.
+      // Idle expiry is still enforced by the backend on the next authenticated call.
+    }
+  }
+
   Future<void> logout() async {
     try {
       await _dioService.post(

@@ -18,6 +18,7 @@ import 'package:traqtrace_app/features/admin/screens/cache_management/cache_mana
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/data_consistency_integrity_dashboard_screen.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/automation_center_screen.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/screens/tatmeen_integration_screen.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/tatmeen_records_screen.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/notifications_shell.dart';
 import 'package:traqtrace_app/features/epcis/widgets/epcis_shell.dart';

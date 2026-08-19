@@ -14,24 +14,24 @@ class UserApprovalsLoadingView extends StatelessWidget {
     final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
     final g = context.gutter;
 
-    return AppShimmer(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          UserApprovalsHeaderSkeleton(baseColor: baseColor),
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.all(g),
-              physics: const ClampingScrollPhysics(),
-              itemCount: 6,
-              separatorBuilder: (_, __) => SizedBox(height: g),
-              itemBuilder: (context, _) =>
-                  UserApprovalTileSkeleton(baseColor: baseColor),
-            ),
+    return SizedBox.expand(
+      child: AppShimmer(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              UserApprovalsHeaderSkeleton(baseColor: baseColor),
+              const SizedBox(height: 20),
+              for (var i = 0; i < 4; i++) ...[
+                UserApprovalTileSkeleton(baseColor: baseColor),
+                SizedBox(height: i == 3 ? g : 20),
+              ],
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

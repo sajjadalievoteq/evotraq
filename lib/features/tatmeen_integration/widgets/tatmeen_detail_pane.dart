@@ -187,7 +187,16 @@ class _TatmeenDetailContent extends StatelessWidget {
               ],
             ],
             const SizedBox(height: TraqSpacing.lg),
-            TatmeenNotificationsSettings(canUpdate: canUpdate),
+            TatmeenNotificationsSettings(
+              canUpdate: canUpdate,
+              settings: settings,
+              busy: busy,
+              onSave: canUpdate
+                  ? (request) async {
+                      await onSaveCredentials(request);
+                    }
+                  : null,
+            ),
             if (updatedAt != null || (updatedBy?.isNotEmpty ?? false)) ...[
               const SizedBox(height: TraqSpacing.lg),
               Text(
@@ -308,44 +317,70 @@ class _TatmeenDetailSkeleton extends StatelessWidget {
       ),
       child: Padding(
         padding: TraqSpacing.surfacePad,
-        child: AppShimmer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppShimmer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppSkeletonBox(
-                          width: 220,
-                          height: 20,
-                          radius: 4,
-                          color: muted,
-                        ),
-                        const SizedBox(height: TraqSpacing.sm),
-                        AppSkeletonBox(
-                          width: double.infinity,
-                          height: 12,
-                          radius: 4,
-                          color: muted,
-                        ),
-                      ],
-                    ),
-                  ),
                   AppSkeletonBox(
-                    width: 52,
-                    height: 28,
-                    radius: 14,
+                    width: double.infinity,
+                    height: 12,
                     color: muted,
+                  ),
+                  const SizedBox(height: TraqSpacing.xs),
+                  AppSkeletonBox(width: 280, height: 12, color: muted),
+                  const SizedBox(height: TraqSpacing.md),
+                  Row(
+                    children: [
+                      AppSkeletonBox(width: 90, height: 16, color: muted),
+                      const Spacer(),
+                      AppSkeletonBox(width: 28, height: 14, color: muted),
+                      const SizedBox(width: TraqSpacing.xs),
+                      AppSkeletonBox(
+                        width: 52,
+                        height: 28,
+                        radius: 14,
+                        color: muted,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: TraqSpacing.sm),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AppSkeletonBox(
+                      width: 160,
+                      height: 28,
+                      radius: 14,
+                      color: muted,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: TraqSpacing.lg),
-              AppSkeletonBox(width: 160, height: 28, radius: 14, color: muted),
-            ],
-          ),
+            ),
+            const SizedBox(height: TraqSpacing.md),
+            TatmeenCredentialsForm(
+              settings: null,
+              canUpdate: false,
+              busy: false,
+              isLoading: true,
+              onSave: (_) async => false,
+              onRemovePassword: () async {},
+              onRemoveApiKey: () async {},
+            ),
+            const SizedBox(height: TraqSpacing.lg),
+            AppShimmer(
+              child: AppSkeletonBox(
+                width: double.infinity,
+                height: 40,
+                radius: 8,
+                color: muted,
+              ),
+            ),
+            const SizedBox(height: TraqSpacing.lg),
+            const TatmeenNotificationsSettings(canUpdate: false, isLoading: true),
+          ],
         ),
       ),
     );

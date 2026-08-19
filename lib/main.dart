@@ -11,7 +11,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:world_countries/world_countries.dart';
 
-import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/features/auth/widgets/session_activity_listener.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 
@@ -30,6 +30,8 @@ import 'package:traqtrace_app/features/splash/screens/Splash/splash_screen.dart'
 import 'package:traqtrace_app/data/services/admin/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/auth/auth_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
+
+import 'features/auth/cubit/auth_cubit.dart';
 
 void main() async {
   try {
@@ -131,16 +133,18 @@ class _TraqTraceAppState extends State<TraqTraceApp> {
                 TypedLocaleDelegate(),
               ],
               builder: (context, child) => SnackBarInteractionScope(
-                child: AppScreenUtilInit(
-                  child: AppLayoutBuilder(
-                    builder: (context, layout) =>
-                        BlocBuilder<AuthCubit, AuthState>(
-                          buildWhen: (p, n) =>
-                              p.bootstrapCompleted != n.bootstrapCompleted,
-                          builder: (context, auth) => auth.bootstrapCompleted
-                              ? (child ?? const SizedBox.shrink())
-                              : const SplashScreen(),
-                        ),
+                child: SessionActivityListener(
+                  child: AppScreenUtilInit(
+                    child: AppLayoutBuilder(
+                      builder: (context, layout) =>
+                          BlocBuilder<AuthCubit, AuthState>(
+                            buildWhen: (p, n) =>
+                                p.bootstrapCompleted != n.bootstrapCompleted,
+                            builder: (context, auth) => auth.bootstrapCompleted
+                                ? (child ?? const SizedBox.shrink())
+                                : const SplashScreen(),
+                          ),
+                    ),
                   ),
                 ),
               ),

@@ -11,6 +11,11 @@ import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integra
 import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_state.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/data/tatmeen_dummy_sync_data.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_dashboard.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_navigation.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/hooks/tatmeen_view_stack.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/hooks/tatmeen_view_stack_scope.dart';
+import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/tatmeen_records_screen.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/utils/tatmeen_integration_sections.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_dashboard.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_failed_queue_pane.dart';
@@ -28,6 +33,7 @@ class TatmeenIntegrationScreen extends StatefulWidget {
 class _TatmeenIntegrationScreenState extends State<TatmeenIntegrationScreen> {
   late final TatmeenIntegrationCubit _cubit;
   late final UseTatmeenDashboard _dashboard;
+  late final TatmeenViewStack _viewStack;
   late String _selectedSection;
   bool? _lastKnownEnabled;
 
@@ -38,12 +44,16 @@ class _TatmeenIntegrationScreenState extends State<TatmeenIntegrationScreen> {
     _dashboard = UseTatmeenDashboard(
       service: getIt<TatmeenIntegrationService>(),
     )..load();
+    _viewStack = TatmeenViewStack(
+      initialView: TatmeenIntegrationSections.dashboard,
+    );
     _selectedSection = TatmeenIntegrationSections.dashboard;
   }
 
   @override
   void dispose() {
     _dashboard.dispose();
+    _viewStack.dispose();
     _cubit.close();
     super.dispose();
   }
@@ -117,47 +127,77 @@ class _TatmeenIntegrationScreenState extends State<TatmeenIntegrationScreen> {
           listener: (context, state) {
             _lastKnownEnabled = state.confirmedEnabled;
           },
-          child: WorkbenchScaffold(
-            title: 'Tatmeen Integration',
-            groups: TatmeenIntegrationSections.groups(
-              failedQueueCount: TatmeenDummySyncData.failedQueue().length,
-            ),
-            selectedId: _selectedSection,
-            onSelect: (id) => setState(
-              () => _selectedSection = TatmeenIntegrationSections.normalize(id),
-            ),
-            panelBuilder: (context, selectedId) {
-              final section = TatmeenIntegrationSections.normalize(selectedId);
-              return LazyIndexedStack(
-                index: TatmeenIntegrationSections.indexOf(section),
-                sizing: StackFit.expand,
-                children: [
-                  TatmeenDashboard(controller: _dashboard),
-                  AutomationWorkbenchPanel(
-                    title: TatmeenIntegrationSections.panelTitle(
-                      TatmeenIntegrationSections.configurations,
-                    ),
-                    child: TatmeenIntegrationBody(
-                      canUpdate: canUpdate,
-                      selectedSection:
+          child: TatmeenViewStackScope(
+            stack: _viewStack,
+            child: WorkbenchScaffold(
+                title: 'Tatmeen Integration',
+                groups: TatmeenIntegrationSections.groups(
+                  failedQueueCount: TatmeenDummySyncData.failedQueue().length,
+                ),
+                selectedId: _selectedSection,
+                onSelect: (id) {
+                  final section = TatmeenIntegrationSections.normalize(id);
+                  setState(() => _selectedSection = section);
+                  _viewStack.resetTo(section);
+                },
+                panelBuilder: (context, selectedId) {
+                  final section = TatmeenIntegrationSections.normalize(
+                    selectedId,
+                  );
+                  return AnimatedBuilder(
+                    animation: _viewStack,
+                    builder: (context, _) {
+                      final showingRecords =
+                          _viewStack.current.view ==
+                          TatmeenNavigation.recordsView;
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Offstage(
+                            offstage: showingRecords,
+                            child: LazyIndexedStack(
+                    index: TatmeenIntegrationSections.indexOf(section),
+                    sizing: StackFit.expand,
+                    children: [
+                      TatmeenDashboard(controller: _dashboard),
+                      AutomationWorkbenchPanel(
+                        title: TatmeenIntegrationSections.panelTitle(
                           TatmeenIntegrationSections.configurations,
-                    ),
-                  ),
-                  AutomationWorkbenchPanel(
-                    title: TatmeenIntegrationSections.panelTitle(
-                      TatmeenIntegrationSections.failedQueue,
-                    ),
-                    child: const TatmeenFailedQueuePane(),
-                  ),
-                  AutomationWorkbenchPanel(
-                    title: TatmeenIntegrationSections.panelTitle(
-                      TatmeenIntegrationSections.syncLogs,
-                    ),
-                    child: const TatmeenSyncLogsPane(),
-                  ),
-                ],
-              );
-            },
+                        ),
+                        child: TatmeenIntegrationBody(
+                          canUpdate: canUpdate,
+                          selectedSection:
+                              TatmeenIntegrationSections.configurations,
+                        ),
+                      ),
+                      AutomationWorkbenchPanel(
+                        title: TatmeenIntegrationSections.panelTitle(
+                          TatmeenIntegrationSections.failedQueue,
+                        ),
+                        child: const TatmeenFailedQueuePane(),
+                      ),
+                      AutomationWorkbenchPanel(
+                        title: TatmeenIntegrationSections.panelTitle(
+                          TatmeenIntegrationSections.syncLogs,
+                        ),
+                        child: const TatmeenSyncLogsPane(),
+                      ),
+                    ],
+                            ),
+                          ),
+                          if (showingRecords)
+                            TatmeenRecordsScreen(
+                              filter: RecordsFilter.fromExtra(
+                                _viewStack.current.params['filter'],
+                              ),
+                              embedded: true,
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
           ),
         ),
       ),

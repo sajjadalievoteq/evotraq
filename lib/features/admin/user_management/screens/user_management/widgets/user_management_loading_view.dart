@@ -13,24 +13,24 @@ class UserManagementLoadingView extends StatelessWidget {
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
     final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
     final gutter = context.gutter;
-    return AppShimmer(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          UserManagementFilterSkeleton(baseColor: baseColor),
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.all(gutter),
-              physics: const ClampingScrollPhysics(),
-              itemCount: 8,
-              separatorBuilder: (_, __) => SizedBox(height: gutter),
-              itemBuilder: (context, _) =>
-                  UserManagementTileSkeleton(baseColor: baseColor),
-            ),
+    return SizedBox.expand(
+      child: AppShimmer(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              UserManagementFilterSkeleton(baseColor: baseColor),
+              const SizedBox(height: 20),
+              for (var i = 0; i < 6; i++) ...[
+                UserManagementTileSkeleton(baseColor: baseColor),
+                SizedBox(height: i == 5 ? gutter : 20),
+              ],
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

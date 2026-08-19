@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 
 class TatmeenSyncChart extends StatelessWidget {
   const TatmeenSyncChart({
@@ -28,8 +29,11 @@ class TatmeenSyncChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) return const _ChartSkeleton();
     if (error != null) {
-      return Center(
-        child: FilledButton(onPressed: onRetry, child: const Text('Retry')),
+      return SubscriptionErrorView(
+        title: 'Unable to load chart',
+        message: error!,
+        onRetry: onRetry,
+        padding: EdgeInsets.zero,
       );
     }
     if (data.isEmpty) {
@@ -222,14 +226,8 @@ class _ChartSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final muted = AppShimmer.defaultBaseColor(context);
     return AppShimmer(
-      child: Column(
-        children: [
-          Expanded(
-            child: AppSkeletonBox(height: double.infinity, color: muted),
-          ),
-          const SizedBox(height: TraqSpacing.sm),
-          AppSkeletonBox(width: 160, height: 12, color: muted),
-        ],
+      child: SizedBox.expand(
+        child: AppSkeletonBox(height: double.infinity, color: muted),
       ),
     );
   }

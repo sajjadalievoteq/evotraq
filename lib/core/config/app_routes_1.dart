@@ -397,4 +397,18 @@ List<RouteBase> _appRoutes1(AppRouter appRouter) => [
       return null;
     },
   ),
+  GoRoute(
+    path: Constants.tatmeenIntegrationRecordsRoute,
+    pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+      key: state.pageKey,
+      child: const TatmeenRecordsRouteScreen(),
+    ),
+    redirect: (context, state) {
+      if (!appRouter.authCubit.state.isAuthenticated) return null;
+      if (!appRouter.authCubit.state.canAccessTatmeenIntegration) {
+        return Constants.homeRoute;
+      }
+      return null;
+    },
+  ),
 ];

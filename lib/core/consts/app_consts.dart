@@ -165,6 +165,8 @@ class Constants {
 
   static const String automationCenterRoute = '/automation';
   static const String tatmeenIntegrationRoute = '/tatmeen-integration';
+  static const String tatmeenIntegrationRecordsRoute =
+      '/tatmeen-integration/records';
   static const String notificationsRoute = '/notifications';
   static const String notificationSubscriptionsRoute =
       '/notifications/subscriptions';
@@ -181,6 +183,8 @@ class Constants {
   static const String authResendVerificationEmailEndpoint =
       '/auth/resend-verification-email';
   static const String authLogoutEndpoint = '/auth/logout';
+  static const String authRefreshEndpoint = '/auth/refresh';
+  static const String authActivityEndpoint = '/auth/activity';
   static const String authSessionsEndpoint = '/auth/sessions';
   static const String authSessionsRevokeOthersEndpoint =
       '/auth/sessions/revoke-others';

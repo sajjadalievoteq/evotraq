@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:traqtrace_app/data/models/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
+import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
 import 'package:traqtrace_app/data/services/product_journey/product_journey_service.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_cubit.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_state.dart';
@@ -11,6 +12,8 @@ import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models
 class _MockHierarchyService extends Mock implements HierarchyService {}
 
 class _MockJourneyService extends Mock implements ProductJourneyService {}
+
+class _MockPackingService extends Mock implements PackingOperationService {}
 
 void main() {
   late _MockHierarchyService hierarchyService;
@@ -27,6 +30,7 @@ void main() {
     cubit = ProductHierarchyCubit(
       hierarchyService: hierarchyService,
       journeyService: journeyService,
+      packingService: _MockPackingService(),
     );
   });
 

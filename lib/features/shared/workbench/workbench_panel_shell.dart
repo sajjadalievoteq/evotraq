@@ -84,46 +84,42 @@ class WorkbenchPanelShell extends StatelessWidget {
     ];
 
     if (expandBody) {
-      return SelectionArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            context.padding.top,
-            context.padding.top,
-            context.padding.top,
-            0,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              titleBlock,
-              const SizedBox(height: TraqSpacing.md),
-              if (instructionsBlock != null) instructionsBlock,
-              Expanded(child: formCard),
-              ...statusBlocks,
-              SizedBox(height: context.padding.top),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return SelectionArea(
-      child: ListView(
+      return Padding(
         padding: EdgeInsets.fromLTRB(
           context.padding.top,
           context.padding.top,
           context.padding.top,
           0,
         ),
-        children: [
-          titleBlock,
-          const SizedBox(height: TraqSpacing.md),
-          if (instructionsBlock != null) instructionsBlock,
-          formCard,
-          ...statusBlocks,
-          SizedBox(height: context.padding.top),
-        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            titleBlock,
+            const SizedBox(height: TraqSpacing.md),
+            if (instructionsBlock != null) instructionsBlock,
+            Expanded(child: formCard),
+            ...statusBlocks,
+            SizedBox(height: context.padding.top),
+          ],
+        ),
+      );
+    }
+
+    return ListView(
+      padding: EdgeInsets.fromLTRB(
+        context.padding.top,
+        context.padding.top,
+        context.padding.top,
+        0,
       ),
+      children: [
+        titleBlock,
+        const SizedBox(height: TraqSpacing.md),
+        if (instructionsBlock != null) instructionsBlock,
+        formCard,
+        ...statusBlocks,
+        SizedBox(height: context.padding.top),
+      ],
     );
   }
 }

@@ -31,11 +31,20 @@ class AuthCubit extends Cubit<AuthState> {
   /// Serializes concurrent session-expiry notifications (many parallel 401s).
   bool _sessionExpiryInFlight = false;
 
-  /// One-shot JWT `exp` timer for the current authenticated session.
+  /// One-shot JWT refresh timer for the current authenticated session.
   Timer? _tokenExpiryTimer;
+
+  Timer? _idleTimer;
 
   /// Token identity associated with [_tokenExpiryTimer] (stale-timer guard).
   String? _scheduledExpiryToken;
+
+  DateTime? _lastUserActivityAt;
+  DateTime? _lastActivityPingAt;
+  bool _tokenRefreshInFlight = false;
+
+  final Duration _idleTimeout;
+  final Duration _activityPingThrottle;
 
   static const Duration authCheckTimeout = Duration(seconds: 10);
 
@@ -43,17 +52,27 @@ class AuthCubit extends Cubit<AuthState> {
 
   static const Duration verifyEmailTimeout = Duration(seconds: 15);
 
+  /// Matches `security.session.idle-timeout-ms` (15 minutes).
+  static const Duration idleTimeout = Duration(minutes: 15);
+
+  static const Duration activityPingThrottle = Duration(seconds: 60);
+
   AuthCubit({
     required AuthService authService,
     TokenManager? tokenManager,
     Duration? authCheckTimeout,
     Duration? loginTimeout,
     Duration? verifyEmailTimeout,
+    Duration? idleTimeout,
+    Duration? activityPingThrottle,
   }) : _authService = authService,
        _tokenManager = tokenManager ?? TokenManager(),
        _authCheckTimeout = authCheckTimeout ?? AuthCubit.authCheckTimeout,
        _loginTimeout = loginTimeout ?? AuthCubit.loginTimeout,
        _verifyEmailTimeout = verifyEmailTimeout ?? AuthCubit.verifyEmailTimeout,
+       _idleTimeout = idleTimeout ?? AuthCubit.idleTimeout,
+       _activityPingThrottle =
+           activityPingThrottle ?? AuthCubit.activityPingThrottle,
        super(const AuthState(status: AuthStatus.initial));
 
   @visibleForTesting
@@ -97,8 +116,7 @@ class AuthCubit extends Cubit<AuthState> {
           bootstrapCompleted: true,
         ),
       );
-      _scheduleTokenExpiration(token);
-      _onAuthenticatedSessionStarted();
+      _onAuthenticatedSessionStarted(token);
       _backfillOperationalGln(user);
     } on TimeoutException {
       await _awaitMinSplash(startedAt, minSplashDelay);
@@ -135,8 +153,7 @@ class AuthCubit extends Cubit<AuthState> {
           registeredEmail: null,
         ),
       );
-      _scheduleTokenExpiration(response.token);
-      _onAuthenticatedSessionStarted();
+      _onAuthenticatedSessionStarted(response.token);
       _backfillOperationalGln(user);
     } on TimeoutException {
       emit(
@@ -245,9 +262,8 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
       if (token != null && token.isNotEmpty) {
-        _scheduleTokenExpiration(token);
+        _onAuthenticatedSessionStarted(token);
       }
-      _onAuthenticatedSessionStarted();
       _backfillOperationalGln(user);
     } catch (e) {
       await _forceUnauthenticated();

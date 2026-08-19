@@ -6,6 +6,7 @@ import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 
 class TatmeenStatusBreakdownChart extends StatelessWidget {
   const TatmeenStatusBreakdownChart({
@@ -25,7 +26,12 @@ class TatmeenStatusBreakdownChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) return const _BreakdownSkeleton();
     if (error != null) {
-      return Center(child: FilledButton(onPressed: onRetry, child: const Text('Retry')));
+      return SubscriptionErrorView(
+        title: 'Unable to load status breakdown',
+        message: error!,
+        onRetry: onRetry,
+        padding: EdgeInsets.zero,
+      );
     }
     if (breakdown == null || breakdown!.total == 0) {
       return const AppEmptyState(
@@ -104,6 +110,62 @@ class _BreakdownSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final muted = AppShimmer.defaultBaseColor(context);
-    return AppShimmer(child: AppSkeletonBox(height: 220, color: muted));
+    return AppShimmer(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          final chart = AppSkeletonBox(
+            width: 200,
+            height: 200,
+            radius: 100,
+            color: muted,
+          );
+          final legend = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: List.generate(
+              3,
+              (_) => Padding(
+                padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
+                child: Row(
+                  children: [
+                    AppSkeletonBox(
+                      width: 10,
+                      height: 10,
+                      radius: 5,
+                      color: muted,
+                    ),
+                    const SizedBox(width: TraqSpacing.xs),
+                    Expanded(
+                      child: FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: 0.55,
+                        child: AppSkeletonBox(height: 12, color: muted),
+                      ),
+                    ),
+                    AppSkeletonBox(width: 40, height: 12, color: muted),
+                  ],
+                ),
+              ),
+            ),
+          );
+          if (compact) {
+            return Column(
+              children: [
+                chart,
+                const SizedBox(height: TraqSpacing.md),
+                legend,
+              ],
+            );
+          }
+          return Row(
+            children: [
+              chart,
+              const SizedBox(width: TraqSpacing.md),
+              Expanded(child: legend),
+            ],
+          );
+        },
+      ),
+    );
   }
 }

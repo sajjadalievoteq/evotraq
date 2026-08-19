@@ -22,9 +22,8 @@ class TraqFadeScaleEntrance extends StatefulWidget {
 }
 
 class _TraqFadeScaleEntranceState extends State<TraqFadeScaleEntrance>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, TraqDeferredPlay {
   late final AnimationController _controller;
-  bool _started = false;
 
   @override
   void initState() {
@@ -33,25 +32,32 @@ class _TraqFadeScaleEntranceState extends State<TraqFadeScaleEntrance>
       vsync: this,
       duration: widget.duration ?? TraqAnimationConstants.formDuration,
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _startIfNeeded());
+    traqSchedulePlay(_startIfNeeded);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!traqPlayStarted) traqSchedulePlay(_startIfNeeded);
   }
 
   @override
   void didUpdateWidget(covariant TraqFadeScaleEntrance oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!widget.playEntrance && !_started) {
+    if (!widget.playEntrance && !traqPlayStarted) {
       _controller.value = 1;
+      traqMarkPlayed();
     }
   }
 
   void _startIfNeeded() {
-    if (!mounted || _started) return;
+    if (!mounted || traqPlayStarted) return;
     if (!widget.playEntrance || TraqAnimationManager.reduceMotion(context)) {
       _controller.value = 1;
-      _started = true;
+      traqMarkPlayed();
       return;
     }
-    _started = true;
+    traqMarkPlayed();
     _controller.forward();
   }
 
@@ -64,7 +70,7 @@ class _TraqFadeScaleEntranceState extends State<TraqFadeScaleEntrance>
   @override
   Widget build(BuildContext context) {
     if (TraqAnimationManager.reduceMotion(context) ||
-        (!widget.playEntrance && !_started)) {
+        (!widget.playEntrance && !traqPlayStarted)) {
       return widget.child;
     }
     return TraqFadeScaleTransition(

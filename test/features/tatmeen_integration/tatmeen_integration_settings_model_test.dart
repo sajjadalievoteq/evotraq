@@ -27,12 +27,37 @@ void main() {
       expect(settings.credentialsComplete, isFalse);
     });
 
+    test('fromJson parses notification emails and flags', () {
+      final settings = TatmeenIntegrationSettings.fromJson({
+        'enabled': false,
+        'notificationEmails': ['ops@acme.com', ' alerts@acme.com '],
+        'notifyFailedSync': false,
+        'notifyDailyDigest': true,
+      });
+
+      expect(settings.notificationEmails, ['ops@acme.com', 'alerts@acme.com']);
+      expect(settings.notifyFailedSync, isFalse);
+      expect(settings.notifyConnectionErrors, isTrue);
+      expect(settings.notifyDailyDigest, isTrue);
+    });
+
     test('patch request omits null fields', () {
       const request = UpdateTatmeenIntegrationSettingsRequest(
         username: 'user',
         password: 'secret',
       );
       expect(request.toJson(), {'username': 'user', 'password': 'secret'});
+    });
+
+    test('patch request includes notification emails when set', () {
+      const request = UpdateTatmeenIntegrationSettingsRequest(
+        notificationEmails: ['ops@acme.com'],
+        notifyFailedSync: true,
+      );
+      expect(request.toJson(), {
+        'notificationEmails': ['ops@acme.com'],
+        'notifyFailedSync': true,
+      });
     });
   });
 }

@@ -4,10 +4,14 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/services/tatmeen_integration/tatmeen_integration_service.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_dashboard.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_navigation.dart';
+import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/widgets/dashboard/tatmeen_error_summary.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/widgets/dashboard/tatmeen_recent_activity.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/widgets/dashboard/tatmeen_stats_row.dart';
@@ -60,36 +64,77 @@ class _TatmeenDashboardState extends State<TatmeenDashboard> {
             padding: EdgeInsets.zero,
           );
         }
-        final lastSynced = _dashboard.stats?.lastSyncedAt;
+        final loading = _dashboard.isLoading;
+        final lastSynced = loading ? null : _dashboard.stats?.lastSyncedAt;
         return SingleChildScrollView(
-          padding:EdgeInsets.fromLTRB(context.gutter, context.gutter, context.gutter, context.gutter),
+          padding: EdgeInsets.fromLTRB(
+            context.gutter,
+            context.gutter,
+            context.gutter,
+            context.gutter,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: 30,
+              SizedBox(
+                height: 30,
                 child: Row(
                   children: [
-                    Text('Dashboard', style: context.text.h2),
+                    if (loading)
+                      AppShimmer(
+                        child: AppSkeletonBox(
+                          width: 140,
+                          height: 22,
+                          color: AppShimmer.defaultBaseColor(context),
+                        ),
+                      )
+                    else
+                      Text('Dashboard', style: context.text.h2),
                     const Spacer(),
-                    if (lastSynced != null)
+                    if (loading)
+                      AppShimmer(
+                        child: AppSkeletonBox(
+                          width: 160,
+                          height: 14,
+                          color: AppShimmer.defaultBaseColor(context),
+                        ),
+                      )
+                    else if (lastSynced != null)
                       Text(
                         'Last synced: ${DisplayDateUtils.dmyHm(lastSynced)}',
-                        style: context.text.bodySm.copyWith(color: context.colors.textMuted),
+                        style: context.text.bodySm.copyWith(
+                          color: context.colors.textMuted,
+                        ),
                       ),
                     const SizedBox(width: TraqSpacing.sm),
                     IconButton(
-                      onPressed: _dashboard.refetch,
+                      onPressed: loading ? null : _dashboard.refetch,
                       padding: EdgeInsets.zero,
                       tooltip: 'Refresh',
                       icon: _dashboard.isRefreshing
-                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
                           : const TraqIcon(AppAssets.iconRefresh, size: 16),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: TraqSpacing.md),
-              TatmeenStatsRow(stats: _dashboard.stats, isLoading: _dashboard.isLoading),
+              TatmeenStatsRow(
+                stats: loading ? null : _dashboard.stats,
+                isLoading: loading,
+                onSelectStatus: loading
+                    ? null
+                    : (status) {
+                        TatmeenNavigation.navigateToRecords(
+                          context,
+                          RecordsFilter.kpi(status),
+                        );
+                      },
+              ),
               const SizedBox(height: TraqSpacing.md),
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -97,11 +142,10 @@ class _TatmeenDashboardState extends State<TatmeenDashboard> {
                   final syncCard = SizedBox(
                     height: 320,
                     child: TraqCard(
-
                       child: TatmeenSyncChart(
-                        data: _dashboard.chartData,
-                        isLoading: _dashboard.isLoading,
-                        error: _dashboard.error,
+                        data: loading ? const [] : _dashboard.chartData,
+                        isLoading: loading,
+                        error: loading ? null : _dashboard.error,
                         onRetry: _dashboard.refetch,
                       ),
                     ),
@@ -110,15 +154,21 @@ class _TatmeenDashboardState extends State<TatmeenDashboard> {
                     height: 320,
                     child: TraqCard(
                       child: TatmeenStatusBreakdownChart(
-                        breakdown: _dashboard.breakdown,
-                        isLoading: _dashboard.isLoading,
-                        error: _dashboard.error,
+                        breakdown: loading ? null : _dashboard.breakdown,
+                        isLoading: loading,
+                        error: loading ? null : _dashboard.error,
                         onRetry: _dashboard.refetch,
                       ),
                     ),
                   );
                   if (stacked) {
-                    return Column(children: [syncCard, const SizedBox(height: TraqSpacing.md), breakdownCard]);
+                    return Column(
+                      children: [
+                        syncCard,
+                        const SizedBox(height: TraqSpacing.md),
+                        breakdownCard,
+                      ],
+                    );
                   }
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,13 +185,30 @@ class _TatmeenDashboardState extends State<TatmeenDashboard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Recent Activity', style: context.text.h3),
+                    if (loading)
+                      AppShimmer(
+                        child: AppSkeletonBox(
+                          width: 160,
+                          height: 22,
+                          color: AppShimmer.defaultBaseColor(context),
+                        ),
+                      )
+                    else
+                      Text('Recent Activity', style: context.text.h3),
                     const SizedBox(height: TraqSpacing.sm),
                     TatmeenRecentActivity(
-                      events: _dashboard.recentActivity,
-                      isLoading: _dashboard.isLoading,
-                      error: _dashboard.error,
+                      events: loading ? const [] : _dashboard.recentActivity,
+                      isLoading: loading,
+                      error: loading ? null : _dashboard.error,
                       onRetry: _dashboard.refetch,
+                      onViewAll: loading
+                          ? null
+                          : () {
+                              TatmeenNavigation.navigateToRecords(
+                                context,
+                                const RecordsFilter.recentActivity(),
+                              );
+                            },
                     ),
                   ],
                 ),
@@ -151,12 +218,21 @@ class _TatmeenDashboardState extends State<TatmeenDashboard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Top Errors This Month', style: context.text.h3),
+                    if (loading)
+                      AppShimmer(
+                        child: AppSkeletonBox(
+                          width: 200,
+                          height: 22,
+                          color: AppShimmer.defaultBaseColor(context),
+                        ),
+                      )
+                    else
+                      Text('Top Errors This Month', style: context.text.h3),
                     const SizedBox(height: TraqSpacing.sm),
                     TatmeenErrorSummary(
-                      items: _dashboard.errorSummary,
-                      isLoading: _dashboard.isLoading,
-                      error: _dashboard.error,
+                      items: loading ? const [] : _dashboard.errorSummary,
+                      isLoading: loading,
+                      error: loading ? null : _dashboard.error,
                       onRetry: _dashboard.refetch,
                     ),
                   ],

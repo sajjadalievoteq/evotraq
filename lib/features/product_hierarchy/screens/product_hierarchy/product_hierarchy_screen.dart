@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_cubit.dart';
+import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_state.dart';
+import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_compact_body.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_left_panel.dart';
-import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_stacked_body.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_tree_panel.dart';
 
 class ProductHierarchyScreen extends StatefulWidget {
@@ -36,6 +38,11 @@ class _ProductHierarchyScreenState extends State<ProductHierarchyScreen> {
     super.dispose();
   }
 
+  void _closeCompactDetail(BuildContext context) {
+    _searchController.clear();
+    context.read<ProductHierarchyCubit>().clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -49,22 +56,53 @@ class _ProductHierarchyScreenState extends State<ProductHierarchyScreen> {
         }
         return cubit;
       },
-      child: Scaffold(
-        appBar: TraqAppBar(context, title: const Text('Product Hierarchy')),
-        drawer: const AppDrawer(),
-        body: SplitOrListIndexedStack(
-          split: MasterDetailSplitLayout(
-            narrowListFlex: 22,
-            wideListFlex: 30,
-            list: ProductHierarchyLeftPanel(
-              searchController: _searchController,
-            ),
-            detail: const ProductHierarchyTreePanel(),
-          ),
-          fallback: ProductHierarchyStackedBody(
-            searchController: _searchController,
-          ),
-        ),
+      child: AppLayoutBuilder(
+        builder: (context, layout) {
+          return BlocBuilder<ProductHierarchyCubit, ProductHierarchyState>(
+            buildWhen: (previous, current) =>
+                previous.root != current.root ||
+                previous.isResolvingRoot != current.isResolvingRoot ||
+                previous.hierarchyError != current.hierarchyError,
+            builder: (context, state) {
+              final compactDetail =
+                  !layout.isDesktopUp &&
+                  productHierarchyShowsCompactDetail(state);
+              return PopScope(
+                canPop: !compactDetail,
+                onPopInvokedWithResult: (didPop, _) {
+                  if (didPop) return;
+                  _closeCompactDetail(context);
+                },
+                child: Scaffold(
+                  appBar: TraqAppBar(
+                    context,
+                    title: const Text('Product Hierarchy'),
+                    automaticallyImplyLeading: !compactDetail,
+                    leading: compactDetail
+                        ? BackButton(
+                            onPressed: () => _closeCompactDetail(context),
+                          )
+                        : null,
+                  ),
+                  drawer: compactDetail ? null : const AppDrawer(),
+                  body: SplitOrListIndexedStack(
+                    split: MasterDetailSplitLayout(
+                      narrowListFlex: 22,
+                      wideListFlex: 30,
+                      list: ProductHierarchyLeftPanel(
+                        searchController: _searchController,
+                      ),
+                      detail: const ProductHierarchyTreePanel(),
+                    ),
+                    fallback: ProductHierarchyCompactBody(
+                      searchController: _searchController,
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

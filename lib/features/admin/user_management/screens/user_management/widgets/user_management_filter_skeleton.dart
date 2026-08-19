@@ -16,14 +16,13 @@ class UserManagementFilterSkeleton extends StatelessWidget {
         padding: Constants.sectionPadding,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final widths = _FilterSkeletonWidths.fromWidth(
-              constraints.maxWidth,
-            );
+            final maxWidth = constraints.maxWidth.isFinite
+                ? constraints.maxWidth
+                : MediaQuery.sizeOf(context).width;
+            final widths = _FilterSkeletonWidths.fromWidth(maxWidth);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SkeletonBox(baseColor, width: 140, height: 28, radius: radius),
-                const SizedBox(height: Constants.spacing),
                 Wrap(
                   spacing: Constants.spacing,
                   runSpacing: Constants.spacing,

@@ -3,6 +3,8 @@ import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_integration_settings.dart';
+import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/data/tatmeen_records_mock_data.dart';
 
 class TatmeenIntegrationService {
   TatmeenIntegrationService({required DioService dioService})
@@ -12,6 +14,7 @@ class TatmeenIntegrationService {
 
   static const _settingsPath = '/tatmeen-integration/settings';
   static const _testConnectionPath = '/tatmeen-integration/test-connection';
+  static const _recordsPath = '/tatmeen-integration/records';
 
   Future<TatmeenIntegrationSettings> fetchSettings() async {
     try {
@@ -182,5 +185,56 @@ class TatmeenIntegrationService {
         count: 5,
       ),
     ];
+  }
+
+  Future<TatmeenSyncRecordsPage> getSyncRecords(
+    TatmeenRecordsQuery query,
+  ) async {
+    try {
+      final response = await _dioService.get(
+        _recordsPath,
+        queryParameters: {
+          if (query.status != TatmeenRecordsStatusFilter.all)
+            'status': query.status.name,
+          if (query.fromDate != null)
+            'fromDate': _dateParam(query.fromDate!),
+          if (query.toDate != null) 'toDate': _dateParam(query.toDate!),
+          if (query.search != null && query.search!.trim().isNotEmpty)
+            'search': query.search!.trim(),
+          'page': query.page,
+          'pageSize': query.pageSize,
+        },
+      );
+      if (response.data is! Map) {
+        return TatmeenRecordsMockData.page(query);
+      }
+      return TatmeenSyncRecordsPage.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    } on DioException {
+      return TatmeenRecordsMockData.page(query);
+    }
+  }
+
+  Future<void> retrySyncRecord(String id) async {
+    try {
+      await _dioService.post('/tatmeen-integration/failed-queue/$id/retry');
+    } on DioException {
+      return;
+    }
+  }
+
+  Future<void> dismissSyncRecord(String id) async {
+    try {
+      await _dioService.patch('/tatmeen-integration/failed-queue/$id/dismiss');
+    } on DioException {
+      return;
+    }
+  }
+
+  String _dateParam(DateTime date) {
+    return '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
   }
 }

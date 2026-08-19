@@ -80,6 +80,93 @@ extension AuthCubitSession on AuthCubit {
     _tokenExpiryTimer?.cancel();
     _tokenExpiryTimer = null;
     _scheduledExpiryToken = null;
+    _idleTimer?.cancel();
+    _idleTimer = null;
+  }
+
+  void _onAuthenticatedSessionStarted(String token) {
+    _lastUserActivityAt = DateTime.now();
+    _lastActivityPingAt = null;
+    _scheduleTokenRefresh(token);
+    _scheduleIdleLogout();
+    _preloadGlnPickerCatalog();
+    _startCbvVocabulary();
+    _ensureSharedWebSocketConnected();
+  }
+
+  /// Pointer / keyboard / scroll from the live UI. WebSocket traffic is ignored.
+  void noteUserActivity() {
+    if (state.status != AuthStatus.authenticated) return;
+    _lastUserActivityAt = DateTime.now();
+    _scheduleIdleLogout();
+    _pingActivityIfDue();
+  }
+
+  void _scheduleIdleLogout() {
+    _idleTimer?.cancel();
+    _idleTimer = Timer(_idleTimeout, () {
+      if (state.status != AuthStatus.authenticated) return;
+      unawaited(sessionExpired());
+    });
+  }
+
+  void _pingActivityIfDue() {
+    final now = DateTime.now();
+    final lastPing = _lastActivityPingAt;
+    if (lastPing != null && now.difference(lastPing) < _activityPingThrottle) {
+      return;
+    }
+    _lastActivityPingAt = now;
+    unawaited(_authService.pingActivity());
+  }
+
+  /// Refresh the JWT shortly before `exp` when the user is still active.
+  /// Idle users are logged out instead of silently extending the session.
+  void _scheduleTokenRefresh(String token) {
+    _tokenExpiryTimer?.cancel();
+    _tokenExpiryTimer = null;
+    _scheduledExpiryToken = null;
+
+    final remaining = _tokenManager.remainingLifetime(token);
+    if (remaining == null) {
+      return;
+    }
+    if (remaining <= Duration.zero) {
+      unawaited(_refreshOrExpire(token));
+      return;
+    }
+
+    _scheduledExpiryToken = token;
+    _tokenExpiryTimer = Timer(remaining, () {
+      if (_scheduledExpiryToken != token) return;
+      if (state.status != AuthStatus.authenticated) return;
+      unawaited(_refreshOrExpire(token));
+    });
+  }
+
+  bool _isUserIdle() {
+    final last = _lastUserActivityAt;
+    if (last == null) return true;
+    return DateTime.now().difference(last) >= _idleTimeout;
+  }
+
+  Future<void> _refreshOrExpire(String token) async {
+    if (_isUserIdle()) {
+      await sessionExpired();
+      return;
+    }
+    if (_tokenRefreshInFlight) return;
+    _tokenRefreshInFlight = true;
+    try {
+      final refreshed = await _authService.refreshToken();
+      if (state.status != AuthStatus.authenticated) return;
+      emit(state.copyWith(token: refreshed.token, error: null, message: null));
+      _scheduleTokenRefresh(refreshed.token);
+    } catch (_) {
+      await sessionExpired();
+    } finally {
+      _tokenRefreshInFlight = false;
+    }
   }
 
   /// Closes any dialog/bottom-sheet routes still on screen (e.g. the
@@ -101,34 +188,6 @@ extension AuthCubitSession on AuthCubit {
     final navigator = rootNavigatorKey.currentState;
     if (navigator == null) return;
     navigator.popUntil((route) => route is! PopupRoute);
-  }
-
-  /// Schedules a single one-shot logout at JWT `exp` (minus safety margin).
-  void _scheduleTokenExpiration(String token) {
-    _cancelTokenExpiration();
-
-    final remaining = _tokenManager.remainingLifetime(token);
-    if (remaining == null) {
-      // Undecodable token: no client timer; Dio/WS remain authoritative.
-      return;
-    }
-    if (remaining <= Duration.zero) {
-      unawaited(sessionExpired());
-      return;
-    }
-
-    _scheduledExpiryToken = token;
-    _tokenExpiryTimer = Timer(remaining, () {
-      if (_scheduledExpiryToken != token) return;
-      if (state.status != AuthStatus.authenticated) return;
-      unawaited(sessionExpired());
-    });
-  }
-
-  void _onAuthenticatedSessionStarted() {
-    _preloadGlnPickerCatalog();
-    _startCbvVocabulary();
-    _ensureSharedWebSocketConnected();
   }
 
   void _backfillOperationalGln(User user) {

@@ -5,6 +5,7 @@ import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 
 class TatmeenErrorSummary extends StatelessWidget {
   const TatmeenErrorSummary({
@@ -23,7 +24,14 @@ class TatmeenErrorSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const _ErrorSkeleton();
-    if (error != null) return Center(child: FilledButton(onPressed: onRetry, child: const Text('Retry')));
+    if (error != null) {
+      return SubscriptionErrorView(
+        title: 'Unable to load error summary',
+        message: error!,
+        onRetry: onRetry,
+        padding: EdgeInsets.zero,
+      );
+    }
     if (items.isEmpty) {
       return const AppEmptyState(
         iconAsset: AppAssets.iconCheckCircle,
@@ -71,7 +79,13 @@ class _ErrorSkeleton extends StatelessWidget {
           5,
           (_) => Padding(
             padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
-            child: AppSkeletonBox(height: 20, color: muted),
+            child: Row(
+              children: [
+                Expanded(child: AppSkeletonBox(height: 16, color: muted)),
+                const SizedBox(width: TraqSpacing.sm),
+                AppSkeletonBox(width: 36, height: 22, radius: 12, color: muted),
+              ],
+            ),
           ),
         ),
       ),

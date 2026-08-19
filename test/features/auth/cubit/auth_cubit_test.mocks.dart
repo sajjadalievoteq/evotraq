@@ -106,6 +106,28 @@ class MockAuthService extends _i1.Mock implements _i4.AuthService {
           as _i5.Future<_i3.User>);
 
   @override
+  _i5.Future<_i2.AuthResponse> refreshToken() =>
+      (super.noSuchMethod(
+            Invocation.method(#refreshToken, []),
+            returnValue: _i5.Future<_i2.AuthResponse>.value(
+              _FakeAuthResponse_0(
+                this,
+                Invocation.method(#refreshToken, []),
+              ),
+            ),
+          )
+          as _i5.Future<_i2.AuthResponse>);
+
+  @override
+  _i5.Future<void> pingActivity() =>
+      (super.noSuchMethod(
+            Invocation.method(#pingActivity, []),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
   _i5.Future<void> logout() =>
       (super.noSuchMethod(
             Invocation.method(#logout, []),

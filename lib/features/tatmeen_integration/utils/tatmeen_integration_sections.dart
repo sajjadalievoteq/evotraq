@@ -22,20 +22,8 @@ abstract final class TatmeenIntegrationSections {
         ),
         WorkbenchRailItem(
           id: configurations,
-          iconAsset: NavIcons.tatmeenIntegration,
+          iconAsset: NavIcons.systemTools,
           label: 'Configurations',
-        ),
-        WorkbenchRailItem(
-          id: failedQueue,
-          iconAsset: AppAssets.iconXCircle,
-          label: 'Failed Queue',
-          badgeCount:
-              failedQueueCount ?? TatmeenDummySyncData.failedQueue().length,
-        ),
-        WorkbenchRailItem(
-          id: syncLogs,
-          iconAsset: AppAssets.iconHistory,
-          label: 'Sync Logs',
         ),
       ],
     ),

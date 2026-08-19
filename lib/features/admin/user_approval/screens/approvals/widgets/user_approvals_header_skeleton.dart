@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/admin/user_approval/screens/approvals/widgets/user_approval_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/skeleton_box.dart';
 
 class UserApprovalsHeaderSkeleton extends StatelessWidget {
   const UserApprovalsHeaderSkeleton({super.key, required this.baseColor});
@@ -16,67 +16,65 @@ class UserApprovalsHeaderSkeleton extends StatelessWidget {
       elevation: 1,
       child: Padding(
         padding: Constants.sectionPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            UserApprovalSkeletonBox(
-              color: baseColor,
-              width: 250,
-              height: 28,
-              radius: r,
-            ),
-            const SizedBox(height: 10),
-            UserApprovalSkeletonBox(
-              color: baseColor,
-              width: 420,
-              height: 16,
-              radius: r,
-            ),
-            const SizedBox(height: 8),
-            UserApprovalSkeletonBox(
-              color: baseColor,
-              width: 340,
-              height: 16,
-              radius: r,
-            ),
-            const SizedBox(height: Constants.spacing),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isCompact = constraints.maxWidth < 600;
-                final search = UserApprovalSkeletonBox(
-                  color: baseColor,
-                  width: double.infinity,
-                  height: 50,
-                  radius: r,
-                );
-                final refresh = UserApprovalSkeletonBox(
-                  color: baseColor,
-                  width: 50,
-                  height: 50,
-                  radius: r,
-                );
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final maxWidth = constraints.maxWidth.isFinite
+                ? constraints.maxWidth
+                : MediaQuery.sizeOf(context).width;
+            final isCompact = maxWidth < 600;
+            final titleWidth = (maxWidth * 0.55).clamp(140.0, 250.0);
+            final subtitleWidth = maxWidth;
 
-                if (isCompact) {
-                  return Column(
+            final search = SkeletonBox(
+              baseColor,
+              width: isCompact ? maxWidth : null,
+              height: 50,
+              radius: r,
+            );
+            final refresh = SkeletonBox(
+              baseColor,
+              width: 50,
+              height: 50,
+              radius: r,
+            );
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SkeletonBox(
+                  baseColor,
+                  width: titleWidth,
+                  height: 28,
+                  radius: r,
+                ),
+                const SizedBox(height: 8),
+                SkeletonBox(
+                  baseColor,
+                  width: subtitleWidth,
+                  height: 16,
+                  radius: r,
+                ),
+                const SizedBox(height: Constants.spacing),
+                if (isCompact)
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       search,
                       const SizedBox(height: Constants.spacing),
                       Align(alignment: Alignment.centerRight, child: refresh),
                     ],
-                  );
-                }
-
-                return Row(
-                  children: [
-                    Expanded(child: search),
-                    const SizedBox(width: Constants.spacing),
-                    refresh,
-                  ],
-                );
-              },
-            ),
-          ],
+                  )
+                else
+                  Row(
+                    children: [
+                      Expanded(child: search),
+                      const SizedBox(width: Constants.spacing),
+                      refresh,
+                    ],
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );

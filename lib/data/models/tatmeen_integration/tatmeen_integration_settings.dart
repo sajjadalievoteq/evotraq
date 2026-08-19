@@ -9,6 +9,10 @@ class TatmeenIntegrationSettings extends Equatable {
     this.apiKeyHint,
     this.updatedAt,
     this.updatedBy,
+    this.notificationEmails = const [],
+    this.notifyFailedSync = true,
+    this.notifyConnectionErrors = true,
+    this.notifyDailyDigest = false,
   });
 
   final bool enabled;
@@ -18,6 +22,10 @@ class TatmeenIntegrationSettings extends Equatable {
   final String? apiKeyHint;
   final DateTime? updatedAt;
   final String? updatedBy;
+  final List<String> notificationEmails;
+  final bool notifyFailedSync;
+  final bool notifyConnectionErrors;
+  final bool notifyDailyDigest;
 
   bool get credentialsComplete =>
       (username?.trim().isNotEmpty ?? false) &&
@@ -36,7 +44,19 @@ class TatmeenIntegrationSettings extends Equatable {
           ? null
           : DateTime.tryParse(updatedAtRaw.toString())?.toLocal(),
       updatedBy: json['updatedBy'] as String?,
+      notificationEmails: _stringList(json['notificationEmails']),
+      notifyFailedSync: json['notifyFailedSync'] != false,
+      notifyConnectionErrors: json['notifyConnectionErrors'] != false,
+      notifyDailyDigest: json['notifyDailyDigest'] == true,
     );
+  }
+
+  static List<String> _stringList(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw
+        .map((e) => e.toString().trim())
+        .where((e) => e.isNotEmpty)
+        .toList(growable: false);
   }
 
   TatmeenIntegrationSettings copyWith({
@@ -47,6 +67,10 @@ class TatmeenIntegrationSettings extends Equatable {
     String? apiKeyHint,
     DateTime? updatedAt,
     String? updatedBy,
+    List<String>? notificationEmails,
+    bool? notifyFailedSync,
+    bool? notifyConnectionErrors,
+    bool? notifyDailyDigest,
   }) {
     return TatmeenIntegrationSettings(
       enabled: enabled ?? this.enabled,
@@ -56,6 +80,11 @@ class TatmeenIntegrationSettings extends Equatable {
       apiKeyHint: apiKeyHint ?? this.apiKeyHint,
       updatedAt: updatedAt ?? this.updatedAt,
       updatedBy: updatedBy ?? this.updatedBy,
+      notificationEmails: notificationEmails ?? this.notificationEmails,
+      notifyFailedSync: notifyFailedSync ?? this.notifyFailedSync,
+      notifyConnectionErrors:
+          notifyConnectionErrors ?? this.notifyConnectionErrors,
+      notifyDailyDigest: notifyDailyDigest ?? this.notifyDailyDigest,
     );
   }
 
@@ -68,6 +97,10 @@ class TatmeenIntegrationSettings extends Equatable {
     apiKeyHint,
     updatedAt,
     updatedBy,
+    notificationEmails,
+    notifyFailedSync,
+    notifyConnectionErrors,
+    notifyDailyDigest,
   ];
 }
 
@@ -79,6 +112,10 @@ class UpdateTatmeenIntegrationSettingsRequest extends Equatable {
     this.apiKey,
     this.clearPassword,
     this.clearApiKey,
+    this.notificationEmails,
+    this.notifyFailedSync,
+    this.notifyConnectionErrors,
+    this.notifyDailyDigest,
   });
 
   final bool? enabled;
@@ -87,6 +124,10 @@ class UpdateTatmeenIntegrationSettingsRequest extends Equatable {
   final String? apiKey;
   final bool? clearPassword;
   final bool? clearApiKey;
+  final List<String>? notificationEmails;
+  final bool? notifyFailedSync;
+  final bool? notifyConnectionErrors;
+  final bool? notifyDailyDigest;
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -96,6 +137,14 @@ class UpdateTatmeenIntegrationSettingsRequest extends Equatable {
     if (apiKey != null) json['apiKey'] = apiKey;
     if (clearPassword == true) json['clearPassword'] = true;
     if (clearApiKey == true) json['clearApiKey'] = true;
+    if (notificationEmails != null) {
+      json['notificationEmails'] = notificationEmails;
+    }
+    if (notifyFailedSync != null) json['notifyFailedSync'] = notifyFailedSync;
+    if (notifyConnectionErrors != null) {
+      json['notifyConnectionErrors'] = notifyConnectionErrors;
+    }
+    if (notifyDailyDigest != null) json['notifyDailyDigest'] = notifyDailyDigest;
     return json;
   }
 
@@ -107,6 +156,10 @@ class UpdateTatmeenIntegrationSettingsRequest extends Equatable {
     apiKey,
     clearPassword,
     clearApiKey,
+    notificationEmails,
+    notifyFailedSync,
+    notifyConnectionErrors,
+    notifyDailyDigest,
   ];
 }
 

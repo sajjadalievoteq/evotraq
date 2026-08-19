@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_integration_settings.dart';
 
 typedef TatmeenCredentialsSaveCallback =
@@ -15,11 +17,13 @@ class TatmeenCredentialsForm extends StatefulWidget {
     required this.onSave,
     required this.onRemovePassword,
     required this.onRemoveApiKey,
+    this.isLoading = false,
   });
 
   final TatmeenIntegrationSettings? settings;
   final bool canUpdate;
   final bool busy;
+  final bool isLoading;
   final TatmeenCredentialsSaveCallback onSave;
   final Future<void> Function() onRemovePassword;
   final Future<void> Function() onRemoveApiKey;
@@ -92,6 +96,7 @@ class _TatmeenCredentialsFormState extends State<TatmeenCredentialsForm> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isLoading) return const _CredentialsSkeleton();
     if (!widget.canUpdate) {
       return _readOnlySummary(context);
     }
@@ -326,4 +331,52 @@ class _TatmeenCredentialsFormState extends State<TatmeenCredentialsForm> {
 
   bool get _shouldSendApiKey =>
       _editingApiKey && _apiKeyController.text.isNotEmpty;
+}
+
+class _CredentialsSkeleton extends StatelessWidget {
+  const _CredentialsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = AppShimmer.defaultBaseColor(context);
+    return AppShimmer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppSkeletonBox(width: 120, height: 18, color: muted),
+          const SizedBox(height: TraqSpacing.sm),
+          AppSkeletonBox(width: double.infinity, height: 12, color: muted),
+          const SizedBox(height: TraqSpacing.md),
+          const _FieldSkeleton(),
+          const SizedBox(height: TraqSpacing.md),
+          const _FieldSkeleton(),
+          const SizedBox(height: TraqSpacing.md),
+          const _FieldSkeleton(),
+          const SizedBox(height: TraqSpacing.lg),
+          Align(
+            alignment: Alignment.centerRight,
+            child: AppSkeletonBox(
+              width: 150,
+              height: 40,
+              radius: 8,
+              color: muted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FieldSkeleton extends StatelessWidget {
+  const _FieldSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSkeletonBox(
+      height: 56,
+      radius: 4,
+      color: AppShimmer.defaultBaseColor(context),
+    );
+  }
 }

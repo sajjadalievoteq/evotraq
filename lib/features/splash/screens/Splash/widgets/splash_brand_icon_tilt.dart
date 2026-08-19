@@ -15,7 +15,7 @@ class SplashBrandIconTilt extends StatefulWidget {
 }
 
 class _SplashBrandIconTiltState extends State<SplashBrandIconTilt>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, TraqDeferredPlay {
   late final AnimationController _controller;
   late final Animation<double> _tilt;
 
@@ -50,15 +50,23 @@ class _SplashBrandIconTiltState extends State<SplashBrandIconTilt>
       ),
     ]).animate(_controller);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _startIfNeeded());
+    traqSchedulePlay(_startIfNeeded);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!traqPlayStarted) traqSchedulePlay(_startIfNeeded);
   }
 
   void _startIfNeeded() {
-    if (!mounted) return;
+    if (!mounted || traqPlayStarted) return;
     if (TraqAnimationManager.reduceMotion(context)) {
       _controller.value = 0;
+      traqMarkPlayed();
       return;
     }
+    traqMarkPlayed();
     _controller.repeat();
   }
 

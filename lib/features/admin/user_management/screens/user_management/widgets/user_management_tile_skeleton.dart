@@ -17,16 +17,19 @@ class UserManagementTileSkeleton extends StatelessWidget {
           builder: (context, constraints) {
             final compact = constraints.maxWidth < 760;
             final details = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SkeletonBox(baseColor, width: 160, height: 18, radius: radius),
-                const SizedBox(height: 6),
-                SkeletonBox(
-                  baseColor,
-                  width: double.infinity,
-                  height: 14,
-                  radius: radius,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SkeletonBox(
+                    baseColor,
+                    width: 160,
+                    height: 18,
+                    radius: radius,
+                  ),
                 ),
+                const SizedBox(height: 6),
+                SkeletonBox(baseColor, height: 14, radius: radius),
                 const SizedBox(height: 4),
                 SkeletonBox(baseColor, width: 140, height: 14, radius: radius),
                 const SizedBox(height: 12),

@@ -35,7 +35,7 @@ class EmptyStateVisualScaffold extends StatefulWidget {
 enum EmptyStateDensity { auto, compact, comfortable }
 
 class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, TraqDeferredPlay {
   late final AnimationController _breathController;
 
   @override
@@ -45,6 +45,7 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
       vsync: this,
       duration: const Duration(milliseconds: 2800),
     );
+    traqSchedulePlay(_startBreath);
   }
 
   @override
@@ -54,9 +55,20 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
     if (reduce) {
       _breathController.stop();
       _breathController.value = 0;
-    } else if (!_breathController.isAnimating) {
-      _breathController.repeat(reverse: true);
+      return;
     }
+    if (!traqPlayStarted) traqSchedulePlay(_startBreath);
+  }
+
+  void _startBreath() {
+    if (!mounted || traqPlayStarted) return;
+    if (TraqAnimationManager.reduceMotion(context)) {
+      _breathController.value = 0;
+      traqMarkPlayed();
+      return;
+    }
+    traqMarkPlayed();
+    _breathController.repeat(reverse: true);
   }
 
   @override

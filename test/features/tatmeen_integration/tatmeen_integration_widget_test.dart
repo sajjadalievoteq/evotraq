@@ -111,7 +111,9 @@ void main() {
     );
 
     expect(find.text('Credentials'), findsOneWidget);
-    expect(find.text('Notifications'), findsOneWidget);
+    expect(find.text('Email notifications'), findsOneWidget);
+    expect(find.text('In-app alerts'), findsNothing);
+    expect(find.text('Alert emails'), findsOneWidget);
     expect(find.byType(Switch), findsWidgets);
   });
 
@@ -190,6 +192,6 @@ void main() {
     expect(find.byType(Row), findsWidgets);
     expect(find.text('Integration'), findsOneWidget);
     expect(find.text('Credentials'), findsOneWidget);
-    expect(find.text('Notifications'), findsOneWidget);
+    expect(find.text('Email notifications'), findsOneWidget);
   });
 }

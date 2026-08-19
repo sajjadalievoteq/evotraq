@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 
 /// Shared Automation Center panel chrome: one outer scroll for title,
 /// instructions, and intrinsic-height body (no nested expand/scroll).
+///
+/// Text selection comes from the route-level [SelectionArea]. Nested
+/// [SelectionArea] widgets throw `_selectable == null`.
 class AutomationWorkbenchPanel extends StatelessWidget {
   const AutomationWorkbenchPanel({
     super.key,
@@ -31,26 +35,43 @@ class AutomationWorkbenchPanel extends StatelessWidget {
     final colors = context.colors;
     final pad = context.padding.top;
 
+    final titleText = Text(
+      title,
+      style: context.text.h2,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+    final actionWrap = Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      alignment: WrapAlignment.end,
+      spacing: TraqSpacing.sm,
+      runSpacing: TraqSpacing.sm,
+      children: actions,
+    );
+    final compact = !context.layout.isDesktopUp;
     final header = <Widget>[
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(child: Text(title, style: context.text.h2)),
-          if (actions.isNotEmpty) ...[
-            const SizedBox(width: TraqSpacing.sm),
-            SizedBox(
-              height: 30,
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                alignment: WrapAlignment.end,
-                spacing: TraqSpacing.sm,
-                runSpacing: TraqSpacing.sm,
-                children: actions,
-              ),
-            ),
+      if (compact)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            titleText,
+            if (actions.isNotEmpty) ...[
+              const SizedBox(height: TraqSpacing.sm),
+              Align(alignment: Alignment.centerRight, child: actionWrap),
+            ],
           ],
-        ],
-      ),
+        )
+      else
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(child: titleText),
+            if (actions.isNotEmpty) ...[
+              const SizedBox(width: TraqSpacing.sm),
+              Flexible(child: actionWrap),
+            ],
+          ],
+        ),
       const SizedBox(height: TraqSpacing.md),
       if (instructions != null) ...[
         WorkbenchInstructionsCard(instructions: instructions!),
@@ -69,42 +90,38 @@ class AutomationWorkbenchPanel extends StatelessWidget {
     );
 
     if (fillBody) {
-      return SelectionArea(
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(
-                context.gutter,
-                context.gutter,
-                context.gutter,
-                0,
-              ),
-              sliver: SliverList.list(children: header),
-            ),
-          ],
-          body: Padding(
+      return NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          SliverPadding(
             padding: EdgeInsets.fromLTRB(
               context.gutter,
-              0,
               context.gutter,
-           0,
+              context.gutter,
+              0,
             ),
-            child: Column(
-              children: [
-                Expanded(child: card),
-                SizedBox(height: context.gutter,)
-              ],
-            ),
+            sliver: SliverList.list(children: header),
+          ),
+        ],
+        body: Padding(
+          padding: EdgeInsets.fromLTRB(
+            context.gutter,
+            0,
+            context.gutter,
+            0,
+          ),
+          child: Column(
+            children: [
+              Expanded(child: card),
+              SizedBox(height: context.gutter),
+            ],
           ),
         ),
       );
     }
 
-    return SelectionArea(
-      child: ListView(
-        padding: EdgeInsets.all(pad),
-        children: [...header, card],
-      ),
+    return ListView(
+      padding: EdgeInsets.all(pad),
+      children: [...header, card],
     );
   }
 }

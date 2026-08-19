@@ -62,6 +62,7 @@ void main() {
     socket = _RecordingWebSocketService();
     getIt.registerSingleton<WebSocketService>(socket);
     when(mockAuthService.logout()).thenAnswer((_) async {});
+    when(mockAuthService.pingActivity()).thenAnswer((_) async {});
     when(
       mockAuthService.getAuthToken(),
     ).thenAnswer((_) async => 'opaque-token');
@@ -183,17 +184,30 @@ void main() {
 
   group('JWT expiry timer', () {
     test(
-      'Scenario A — timer expiry clears session and disconnects WS',
+      'Scenario A — timer refresh keeps session when the user is active',
       () async {
         final token = buildJwt(
           expUtc: DateTime.now().toUtc().add(
             TokenManager.tokenExpirySafetyMargin + const Duration(seconds: 2),
           ),
         );
+        final refreshed = buildJwt(
+          expUtc: DateTime.now().toUtc().add(const Duration(hours: 1)),
+        );
         final request = LoginRequest(username: 'tester', password: 'password');
         when(mockAuthService.login(request)).thenAnswer(
           (_) async => AuthResponse(
             token: token,
+            type: 'Bearer',
+            id: 1,
+            username: 'tester',
+            email: 'tester@example.com',
+            role: 'USER',
+          ),
+        );
+        when(mockAuthService.refreshToken()).thenAnswer(
+          (_) async => AuthResponse(
+            token: refreshed,
             type: 'Bearer',
             id: 1,
             username: 'tester',
@@ -214,10 +228,49 @@ void main() {
 
         await Future<void>.delayed(const Duration(seconds: 3));
 
+        expect(cubit.state.status, AuthStatus.authenticated);
+        expect(cubit.scheduledExpiryTokenForTest, refreshed);
+        expect(socket.disconnectCalls, 0);
+        verify(mockAuthService.refreshToken()).called(1);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'idle timeout logs out even when JWT and WebSocket are still valid',
+      () async {
+        final token = buildJwt(
+          expUtc: DateTime.now().toUtc().add(const Duration(hours: 1)),
+        );
+        final request = LoginRequest(username: 'tester', password: 'password');
+        when(mockAuthService.login(request)).thenAnswer(
+          (_) async => AuthResponse(
+            token: token,
+            type: 'Bearer',
+            id: 1,
+            username: 'tester',
+            email: 'tester@example.com',
+            role: 'USER',
+          ),
+        );
+        when(
+          mockAuthService.getCurrentUser(),
+        ).thenAnswer((_) async => testUser());
+
+        final cubit = AuthCubit(
+          authService: mockAuthService,
+          tokenManager: tokenManager,
+          idleTimeout: const Duration(milliseconds: 80),
+          activityPingThrottle: const Duration(hours: 1),
+        );
+        await cubit.login(request);
+        expect(cubit.state.status, AuthStatus.authenticated);
+
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+
         expect(cubit.state.status, AuthStatus.unauthenticated);
-        expect(cubit.hasTokenExpiryTimerForTest, isFalse);
         expect(socket.disconnectCalls, greaterThanOrEqualTo(1));
-        verify(mockAuthService.logout()).called(greaterThanOrEqualTo(1));
+        verifyNever(mockAuthService.refreshToken());
         await cubit.close();
       },
     );

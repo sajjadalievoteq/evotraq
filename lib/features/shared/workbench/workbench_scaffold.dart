@@ -58,6 +58,7 @@ class WorkbenchScaffold extends StatelessWidget {
                   ),
                   child: DropdownButtonFormField<String>(
                     value: selectedId,
+                    isExpanded: true,
                     decoration: const InputDecoration(
                       labelText: 'Section',
                       border: OutlineInputBorder(),
@@ -70,6 +71,7 @@ class WorkbenchScaffold extends StatelessWidget {
                           value: '__hdr_${group.title}',
                           child: Text(
                             group.title.toUpperCase(),
+                            overflow: TextOverflow.ellipsis,
                             style: context.text.cap.copyWith(
                               color: colors.textMuted,
                               fontWeight: FontWeight.w700,
@@ -81,8 +83,12 @@ class WorkbenchScaffold extends StatelessWidget {
                           DropdownMenuItem<String>(
                             value: item.id,
                             child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Flexible(child: Text(item.label)),
+                                Text(
+                                  item.label,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                                 if (item.badgeCount != null &&
                                     item.badgeCount! > 0) ...[
                                   const SizedBox(width: TraqSpacing.sm),

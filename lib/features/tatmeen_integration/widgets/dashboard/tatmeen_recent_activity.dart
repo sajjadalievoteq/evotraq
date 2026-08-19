@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 
 class TatmeenRecentActivity extends StatelessWidget {
   const TatmeenRecentActivity({
@@ -15,12 +16,14 @@ class TatmeenRecentActivity extends StatelessWidget {
     required this.isLoading,
     required this.error,
     required this.onRetry,
+    this.onViewAll,
   });
 
   final List<TatmeenSyncEvent> events;
   final bool isLoading;
   final String? error;
   final VoidCallback onRetry;
+  final VoidCallback? onViewAll;
 
   static const _tableMinWidth = 720.0;
 
@@ -28,8 +31,11 @@ class TatmeenRecentActivity extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) return const _RowsSkeleton();
     if (error != null) {
-      return Center(
-        child: FilledButton(onPressed: onRetry, child: const Text('Retry')),
+      return SubscriptionErrorView(
+        title: 'Unable to load recent activity',
+        message: error!,
+        onRetry: onRetry,
+        padding: EdgeInsets.zero,
       );
     }
     if (events.isEmpty) {
@@ -117,7 +123,10 @@ class TatmeenRecentActivity extends StatelessWidget {
             ),
         Align(
           alignment: Alignment.centerRight,
-          child: TextButton(onPressed: () {}, child: const Text('View all')),
+          child: TextButton(
+            onPressed: onViewAll,
+            child: const Text('View all'),
+          ),
         ),
       ],
     );
@@ -214,13 +223,49 @@ class _RowsSkeleton extends StatelessWidget {
     final muted = AppShimmer.defaultBaseColor(context);
     return AppShimmer(
       child: Column(
-        children: List.generate(
-          5,
-          (_) => Padding(
-            padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
-            child: AppSkeletonBox(height: 24, color: muted),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ...List.generate(5, (_) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: TraqSpacing.sm),
+              child: Row(
+                children: [
+                  AppSkeletonBox(
+                    width: 18,
+                    height: 18,
+                    radius: 9,
+                    color: muted,
+                  ),
+                  const SizedBox(width: TraqSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: 0.72,
+                          child: AppSkeletonBox(height: 14, color: muted),
+                        ),
+                        const SizedBox(height: TraqSpacing.xs),
+                        FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: 0.45,
+                          child: AppSkeletonBox(height: 12, color: muted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: TraqSpacing.sm),
+                  AppSkeletonBox(width: 72, height: 12, color: muted),
+                ],
+              ),
+            );
+          }),
+          Align(
+            alignment: Alignment.centerRight,
+            child: AppSkeletonBox(width: 72, height: 32, radius: 8, color: muted),
           ),
-        ),
+        ],
       ),
     );
   }

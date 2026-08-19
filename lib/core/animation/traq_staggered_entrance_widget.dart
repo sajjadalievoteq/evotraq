@@ -47,10 +47,9 @@ class _StaggerSlot {
 }
 
 class _TraqStaggeredEntranceState extends State<TraqStaggeredEntrance>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, TraqDeferredPlay {
   late final AnimationController _controller;
   List<_StaggerSlot> _slots = const [];
-  bool _started = false;
 
   bool get _isBranding => widget.slide == TraqEntranceSlide.fromRight;
 
@@ -91,7 +90,13 @@ class _TraqStaggeredEntranceState extends State<TraqStaggeredEntrance>
     super.initState();
     _controller = AnimationController(vsync: this, duration: _totalDuration);
     _rebuildSlots();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _startIfNeeded());
+    traqSchedulePlay(_startIfNeeded);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!traqPlayStarted) traqSchedulePlay(_startIfNeeded);
   }
 
   @override
@@ -110,8 +115,9 @@ class _TraqStaggeredEntranceState extends State<TraqStaggeredEntrance>
       _rebuildSlots();
     }
 
-    if (oldWidget.playEntrance && !widget.playEntrance && !_started) {
+    if (oldWidget.playEntrance && !widget.playEntrance && !traqPlayStarted) {
       _controller.value = 1;
+      traqMarkPlayed();
     }
   }
 
@@ -157,15 +163,15 @@ class _TraqStaggeredEntranceState extends State<TraqStaggeredEntrance>
   }
 
   void _startIfNeeded() {
-    if (!mounted || _started) return;
+    if (!mounted || traqPlayStarted) return;
 
     if (!widget.playEntrance || TraqAnimationManager.reduceMotion(context)) {
       _controller.value = 1;
-      _started = true;
+      traqMarkPlayed();
       return;
     }
 
-    _started = true;
+    traqMarkPlayed();
     _controller.forward();
   }
 
@@ -182,7 +188,7 @@ class _TraqStaggeredEntranceState extends State<TraqStaggeredEntrance>
   @override
   Widget build(BuildContext context) {
     if (TraqAnimationManager.reduceMotion(context) ||
-        (!widget.playEntrance && !_started)) {
+        (!widget.playEntrance && !traqPlayStarted)) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,

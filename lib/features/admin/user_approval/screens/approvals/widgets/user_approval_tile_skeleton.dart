@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/admin/user_approval/screens/approvals/widgets/user_approval_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/skeleton_box.dart';
 
 class UserApprovalTileSkeleton extends StatelessWidget {
   const UserApprovalTileSkeleton({super.key, required this.baseColor});
@@ -22,46 +22,38 @@ class UserApprovalTileSkeleton extends StatelessWidget {
             final compact = constraints.maxWidth < 760;
 
             final info = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                UserApprovalSkeletonBox(
-                  color: baseColor,
-                  width: 160,
-                  height: 18,
-                  radius: r,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SkeletonBox(
+                    baseColor,
+                    width: 160,
+                    height: 18,
+                    radius: r,
+                  ),
                 ),
                 const SizedBox(height: 6),
-                UserApprovalSkeletonBox(
-                  color: baseColor,
-                  width: 120,
-                  height: 14,
-                  radius: r,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SkeletonBox(
+                    baseColor,
+                    width: 120,
+                    height: 14,
+                    radius: r,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                UserApprovalSkeletonBox(
-                  color: baseColor,
-                  width: double.infinity,
-                  height: 14,
-                  radius: r,
-                ),
+                SkeletonBox(baseColor, height: 14, radius: r),
               ],
             );
 
-            final buttons = Column(
+            final stackedButtons = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                UserApprovalSkeletonBox(
-                  color: baseColor,
-                  width: double.infinity,
-                  height: 40,
-                  radius: btnRadius,
-                ),
+                SkeletonBox(baseColor, height: 40, radius: btnRadius),
                 const SizedBox(height: Constants.spacing),
-                UserApprovalSkeletonBox(
-                  color: baseColor,
-                  width: double.infinity,
-                  height: 40,
-                  radius: btnRadius,
-                ),
+                SkeletonBox(baseColor, height: 40, radius: btnRadius),
               ],
             );
 
@@ -71,42 +63,30 @@ class UserApprovalTileSkeleton extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    UserApprovalSkeletonBox(
-                      color: baseColor,
-                      width: 40,
-                      height: 40,
-                      radius: 999,
-                    ),
+                    SkeletonBox(baseColor, width: 40, height: 40, radius: 999),
                     const SizedBox(width: 16),
                     Expanded(child: info),
                   ],
                 ),
                 const SizedBox(height: 16),
-                UserApprovalSkeletonBox(
-                  color: baseColor,
-                  width: 180,
-                  height: 13,
-                  radius: r,
-                ),
+                SkeletonBox(baseColor, width: 180, height: 13, radius: r),
                 const SizedBox(height: 16),
                 if (compact)
-                  buttons
+                  stackedButtons
                 else
                   Row(
                     children: [
                       Expanded(
-                        child: UserApprovalSkeletonBox(
-                          color: baseColor,
-                          width: double.infinity,
+                        child: SkeletonBox(
+                          baseColor,
                           height: 40,
                           radius: btnRadius,
                         ),
                       ),
                       const SizedBox(width: Constants.spacing),
                       Expanded(
-                        child: UserApprovalSkeletonBox(
-                          color: baseColor,
-                          width: double.infinity,
+                        child: SkeletonBox(
+                          baseColor,
                           height: 40,
                           radius: btnRadius,
                         ),

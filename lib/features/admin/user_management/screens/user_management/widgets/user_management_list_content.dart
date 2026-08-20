@@ -31,22 +31,22 @@ class UserManagementListContent extends StatelessWidget {
         ),
       );
     }
-
-    final g = context.gutter;
-
     return ListView.separated(
-      padding: EdgeInsets.all(g),
+      padding: EdgeInsets.zero,
       physics: const ClampingScrollPhysics(),
       itemCount: users.length,
-      separatorBuilder: (_, __) => SizedBox(height: g),
+      separatorBuilder: (context, index) => SizedBox(height: 20),
       itemBuilder: (context, index) {
         final user = users[index];
-        return UserManagementUserCard(
-          user: user,
-          isToggleLoading: togglingUserId == user.id,
-          onEdit: onEditUser,
-          onToggleStatus: onToggleStatus,
-          variant: UserManagementUserCardVariant.listTile,
+        return Padding(
+          padding:  EdgeInsets.only(top:index==0?20:0, bottom: index==users.length-1?context.gutter:0),
+          child: UserManagementUserCard(
+            user: user,
+            isToggleLoading: togglingUserId == user.id,
+            onEdit: onEditUser,
+            onToggleStatus: onToggleStatus,
+            variant: UserManagementUserCardVariant.listTile,
+          ),
         );
       },
     );

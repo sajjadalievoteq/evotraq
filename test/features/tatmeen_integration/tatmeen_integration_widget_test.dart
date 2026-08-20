@@ -13,8 +13,8 @@ import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_cubit.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_state.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/utils/tatmeen_integration_sections.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_detail_pane.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_integration_body.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_detail_pane.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_configuration_body.dart';
 
 class _MockTatmeenIntegrationService extends Mock
     implements TatmeenIntegrationService {}
@@ -180,7 +180,7 @@ void main() {
           width: 1200,
           height: 700,
           child: SingleChildScrollView(
-            child: TatmeenIntegrationBody(
+            child: TatmeenConfigurationBody(
               canUpdate: true,
               selectedSection: TatmeenIntegrationSections.configurations,
             ),

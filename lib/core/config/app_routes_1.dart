@@ -387,7 +387,7 @@ List<RouteBase> _appRoutes1(AppRouter appRouter) => [
     path: Constants.tatmeenIntegrationRoute,
     pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
       key: state.pageKey,
-      child: const TatmeenIntegrationScreen(),
+      child: const TatmeenDashboardScreen(),
     ),
     redirect: (context, state) {
       if (!appRouter.authCubit.state.isAuthenticated) return null;

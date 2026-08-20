@@ -1,10 +1,7 @@
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 
 class TatmeenFailedQueueItem {
-  const TatmeenFailedQueueItem({
-    required this.event,
-    required this.attempts,
-  });
+  const TatmeenFailedQueueItem({required this.event, required this.attempts});
 
   final TatmeenSyncEvent event;
   final int attempts;

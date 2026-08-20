@@ -56,7 +56,9 @@ abstract final class TatmeenRecordsMockData {
         attemptHistory: [
           for (var attempt = 1; attempt <= attempts; attempt++)
             TatmeenAttemptHistory(
-              timestamp: at.subtract(Duration(minutes: index * 7 + attempt * 2)),
+              timestamp: at.subtract(
+                Duration(minutes: index * 7 + attempt * 2),
+              ),
               errorMessage: failed
                   ? message
                   : (attempt == attempts ? 'Accepted' : message),
@@ -94,11 +96,7 @@ abstract final class TatmeenRecordsMockData {
         query.fromDate!.month,
         query.fromDate!.day,
       );
-      items = items
-          .where(
-            (item) => !item.createdAt.isBefore(from),
-          )
-          .toList();
+      items = items.where((item) => !item.createdAt.isBefore(from)).toList();
     }
     if (query.toDate != null) {
       final to = DateTime(

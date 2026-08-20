@@ -1,7 +1,5 @@
 import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_rail.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/data/tatmeen_dummy_sync_data.dart';
 
 abstract final class TatmeenIntegrationSections {
   static const dashboard = 'dashboard';

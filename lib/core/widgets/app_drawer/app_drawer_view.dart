@@ -14,7 +14,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer/utils/app_drawer_metrics.d
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_expansion_tile.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/widgets/tatmeen_brand_icon.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_brand_icon.dart';
 
 typedef AppDrawerNavigate =
     void Function(String route, {bool isDashboard, Object? extra});

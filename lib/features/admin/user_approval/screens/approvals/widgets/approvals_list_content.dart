@@ -30,20 +30,23 @@ class ApprovalsListContent extends StatelessWidget {
       );
     }
 
-    final g = context.gutter;
+
 
     return ListView.separated(
-      padding: EdgeInsets.all(g),
+      padding: EdgeInsets.zero,
       physics: const ClampingScrollPhysics(),
       itemCount: approvals.length,
-      separatorBuilder: (_, __) => SizedBox(height: g),
+      separatorBuilder: (_, __) => SizedBox(height: 20),
       itemBuilder: (context, index) {
         final approval = approvals[index];
-        return UserApprovalCard(
-          user: approval,
-          onApprove: onApprove,
-          onReject: onReject,
-          variant: UserApprovalCardVariant.list,
+        return Padding(
+          padding:  EdgeInsets.only(top:index==0?20:0, bottom: index==approvals.length-1?context.gutter:0),
+          child: UserApprovalCard(
+            user: approval,
+            onApprove: onApprove,
+            onReject: onReject,
+            variant: UserApprovalCardVariant.list,
+          ),
         );
       },
     );

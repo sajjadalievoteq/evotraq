@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/transformation_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/widgets/help_widgets/transformation_events_help.dart';
@@ -14,24 +13,24 @@ import 'package:traqtrace_app/features/epcis/transformation_events/screens/trans
 
 import '../../../../../core/utils/cbv_display_utils.dart';
 
-part 'transformation_events_list_actions.dart';
+import 'package:traqtrace_app/features/epcis/transformation_events/screens/transformation_events_list/transformation_events_list_actions.dart';
 
 class TransformationEventsListScreen extends StatefulWidget {
   const TransformationEventsListScreen({Key? key}) : super(key: key);
 
   @override
   State<TransformationEventsListScreen> createState() =>
-      _TransformationEventsListScreenState();
+      TransformationEventsListScreenState();
 }
 
-class _TransformationEventsListScreenState
+class TransformationEventsListScreenState
     extends State<TransformationEventsListScreen> {
-  String? _filterTransformationId;
+  String? filterTransformationId;
   String? _filterBizStep;
   String? _filterDisposition;
   String? _filterLocationGLN;
-  String? _filterInputEPC;
-  String? _filterOutputEPC;
+  String? filterInputEPC;
+  String? filterOutputEPC;
   DateTimeRange? _filterDateRange;
 
   final ScrollController _scrollController = ScrollController();
@@ -41,7 +40,7 @@ class _TransformationEventsListScreenState
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadTransformationEvents();
+      loadTransformationEvents();
     });
   }
 
@@ -55,12 +54,12 @@ class _TransformationEventsListScreenState
     showDialog(
       context: context,
       builder: (context) {
-        String? transformationId = _filterTransformationId;
+        String? transformationId = filterTransformationId;
         String? bizStep = _filterBizStep;
         String? disposition = _filterDisposition;
         String? locationGLN = _filterLocationGLN;
-        String? inputEPC = _filterInputEPC;
-        String? outputEPC = _filterOutputEPC;
+        String? inputEPC = filterInputEPC;
+        String? outputEPC = filterOutputEPC;
         DateTimeRange? dateRange = _filterDateRange;
 
         return AlertDialog(
@@ -76,14 +75,14 @@ class _TransformationEventsListScreenState
                   onChanged: (value) =>
                       transformationId = value.isEmpty ? null : value,
                   controller: TextEditingController(
-                    text: _filterTransformationId ?? '',
+                    text: filterTransformationId ?? '',
                   ),
                 ),
                 TextField(
                   decoration: const InputDecoration(labelText: 'Input EPC'),
                   onChanged: (value) => inputEPC = value.isEmpty ? null : value,
                   controller: TextEditingController(
-                    text: _filterInputEPC ?? '',
+                    text: filterInputEPC ?? '',
                   ),
                 ),
                 TextField(
@@ -91,7 +90,7 @@ class _TransformationEventsListScreenState
                   onChanged: (value) =>
                       outputEPC = value.isEmpty ? null : value,
                   controller: TextEditingController(
-                    text: _filterOutputEPC ?? '',
+                    text: filterOutputEPC ?? '',
                   ),
                 ),
               ],
@@ -105,32 +104,32 @@ class _TransformationEventsListScreenState
             TextButton(
               onPressed: () {
                 setState(() {
-                  _filterTransformationId = transformationId;
+                  filterTransformationId = transformationId;
                   _filterBizStep = bizStep;
                   _filterDisposition = disposition;
                   _filterLocationGLN = locationGLN;
-                  _filterInputEPC = inputEPC;
-                  _filterOutputEPC = outputEPC;
+                  filterInputEPC = inputEPC;
+                  filterOutputEPC = outputEPC;
                   _filterDateRange = dateRange;
                 });
                 Navigator.pop(context);
-                _loadTransformationEvents();
+                loadTransformationEvents();
               },
               child: const Text('Apply'),
             ),
             TextButton(
               onPressed: () {
                 setState(() {
-                  _filterTransformationId = null;
+                  filterTransformationId = null;
                   _filterBizStep = null;
                   _filterDisposition = null;
                   _filterLocationGLN = null;
-                  _filterInputEPC = null;
-                  _filterOutputEPC = null;
+                  filterInputEPC = null;
+                  filterOutputEPC = null;
                   _filterDateRange = null;
                 });
                 Navigator.pop(context);
-                _loadTransformationEvents();
+                loadTransformationEvents();
               },
               child: const Text('Clear All'),
             ),
@@ -456,7 +455,7 @@ class _TransformationEventsListScreenState
           ),
           IconButton(
             icon: TraqIcon(AppAssets.iconPlus),
-            onPressed: _navigateToCreateEvent,
+            onPressed: navigateToCreateEvent,
             tooltip: 'Create Transformation Event',
           ),
         ],
@@ -469,15 +468,15 @@ class _TransformationEventsListScreenState
           Expanded(
             child: TransformationEventsList(
               scrollController: _scrollController,
-              onRefresh: _refreshData,
-              onCreateEvent: _navigateToCreateEvent,
-              onOpenEvent: _navigateToEventDetails,
+              onRefresh: refreshData,
+              onCreateEvent: navigateToCreateEvent,
+              onOpenEvent: navigateToEventDetails,
             ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToCreateEvent,
+        onPressed: navigateToCreateEvent,
         tooltip: 'Create Transformation Event',
         child: TraqIcon(AppAssets.iconPlus),
       ),

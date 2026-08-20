@@ -4,19 +4,19 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 
-part 'aggregation_event_service_operations.dart';
+import 'package:traqtrace_app/data/services/epcis/aggregation_event_service_operations.dart';
 
 class AggregationEventService {
-  final DioService _dioService;
+  final DioService dioService;
 
-  late final String _baseUrl;
+  late final String baseUrl;
   AggregationEventService({required DioService dioService})
-    : _dioService = dioService {
-    _baseUrl = '${_dioService.baseUrl}/events/aggregation';
+    : dioService = dioService {
+    baseUrl = '${dioService.baseUrl}/events/aggregation';
   }
 
-  Future<Map<String, String>> _getHeaders() async {
-    final token = await _dioService.getAuthToken();
+  Future<Map<String, String>> getHeaders() async {
+    final token = await dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -29,11 +29,11 @@ class AggregationEventService {
       throw ArgumentError('event identifier must not be empty');
     }
 
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     if (RegExp(r'^\d+$').hasMatch(trimmed)) {
-      final response = await _dioService.get(
-        '$_baseUrl/$trimmed',
+      final response = await dioService.get(
+        '$baseUrl/$trimmed',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -43,8 +43,8 @@ class AggregationEventService {
       }
     }
 
-    final response = await _dioService.get(
-      '$_baseUrl/event-id',
+    final response = await dioService.get(
+      '$baseUrl/event-id',
       queryParameters: {'eventId': trimmed},
       headers: headers,
       responseType: ResponseType.plain,
@@ -61,7 +61,7 @@ class AggregationEventService {
   Future<AggregationEvent> createAggregationEvent(
     AggregationEvent event,
   ) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
@@ -98,8 +98,8 @@ class AggregationEventService {
     }
 
     final jsonPayload = jsonEncode(jsonData);
-    final response = await _dioService.post(
-      _baseUrl,
+    final response = await dioService.post(
+      baseUrl,
       headers: headers,
       data: jsonPayload,
       responseType: ResponseType.plain,
@@ -109,7 +109,7 @@ class AggregationEventService {
     if (response.statusCode == 201 || response.statusCode == 200) {
       return AggregationEvent.fromJson(json.decode(response.data));
     } else {
-      throw Exception(_getDetailedErrorMessage(response));
+      throw Exception(getDetailedErrorMessage(response));
     }
   }
 
@@ -120,7 +120,7 @@ class AggregationEventService {
     String direction = 'DESC',
   }) async {
     final raw = await _getAggregationEventsPage(
-      _baseUrl,
+      baseUrl,
       page: page,
       size: size,
       extraQueryParameters: {'sortBy': sortBy, 'direction': direction},
@@ -137,13 +137,13 @@ class AggregationEventService {
     required int page,
     required int size,
   }) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
     final queryParameters = <String, String>{
       ...?extraQueryParameters,
       'page': page.toString(),
       'size': PageResponseUtils.clampSize(size).toString(),
     };
-    final response = await _dioService.get(
+    final response = await dioService.get(
       path,
       queryParameters: queryParameters,
       headers: headers,
@@ -177,14 +177,14 @@ class AggregationEventService {
   Future<List<AggregationEvent>> findAggregationEventsByAction(
     String action,
   ) async {
-    return _fetchAllAggregationEvents('$_baseUrl/action/$action');
+    return _fetchAllAggregationEvents('$baseUrl/action/$action');
   }
 
   Future<List<AggregationEvent>> findAggregationEventsByParentEPC(
     String parentEPC,
   ) async {
     return _fetchAllAggregationEvents(
-      '$_baseUrl/parent',
+      '$baseUrl/parent',
       extraQueryParameters: {'parentEPC': parentEPC},
     );
   }
@@ -193,7 +193,7 @@ class AggregationEventService {
     String childEPC,
   ) async {
     return _fetchAllAggregationEvents(
-      '$_baseUrl/child',
+      '$baseUrl/child',
       extraQueryParameters: {'childEPC': childEPC},
     );
   }
@@ -217,23 +217,23 @@ class AggregationEventService {
   Future<List<AggregationEvent>> findAggregationEventsByBusinessStep(
     String businessStep,
   ) async {
-    return _fetchAllAggregationEvents('$_baseUrl/business-step/$businessStep');
+    return _fetchAllAggregationEvents('$baseUrl/business-step/$businessStep');
   }
 
   Future<List<AggregationEvent>> findAggregationEventsByDisposition(
     String disposition,
   ) async {
-    return _fetchAllAggregationEvents('$_baseUrl/disposition/$disposition');
+    return _fetchAllAggregationEvents('$baseUrl/disposition/$disposition');
   }
 
   /// Resolves the active parent of [childEPC] via `/container` only.
   /// Does not re-fetch child ADD events (use event history APIs for that).
   Future<AggregationEvent> findCurrentParentOfChild(String childEPC) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     try {
-      final response = await _dioService.get(
-        '$_baseUrl/container',
+      final response = await dioService.get(
+        '$baseUrl/container',
         queryParameters: {'childEPC': childEPC},
         headers: headers,
         responseType: ResponseType.plain,
@@ -262,7 +262,7 @@ class AggregationEventService {
       } else if (response.statusCode == 404) {
         throw Exception("Child $childEPC is not currently in any container");
       } else {
-        throw Exception(_getDetailedErrorMessage(response));
+        throw Exception(getDetailedErrorMessage(response));
       }
     } catch (e) {
       rethrow;
@@ -284,7 +284,7 @@ class AggregationEventService {
     DateTime endTime,
   ) async {
     final events = await _fetchAllAggregationEvents(
-      '$_baseUrl/time-range',
+      '$baseUrl/time-range',
       extraQueryParameters: {
         'startTime': startTime.toIso8601String(),
         'endTime': endTime.toIso8601String(),

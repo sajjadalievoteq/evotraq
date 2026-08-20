@@ -1,9 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_types.dart';
-export 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_types.dart';
 
-part 'gtin_pharmaceutical_copy_with.dart';
 
 double? _jsonDouble(dynamic v) {
   if (v == null) return null;

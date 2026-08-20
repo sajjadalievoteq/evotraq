@@ -1,10 +1,10 @@
+import 'package:traqtrace_app/data/services/admin/event_generation_test_data_models.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/data/services/admin/event_generation_test_service.dart';
 import 'package:traqtrace_app/features/admin/screens/event_generation_test/widgets/event_data_action_button.dart';
 import 'package:traqtrace_app/features/admin/screens/event_generation_test/widgets/event_gen_stat_card.dart';
 

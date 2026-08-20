@@ -1,4 +1,14 @@
-part of '../tatmeen_records_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_records.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/records/tatmeen_records_table.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_records_filters.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_records_header.dart';
 
 class TatmeenRecordsContent extends StatelessWidget {
   const TatmeenRecordsContent({
@@ -63,7 +73,7 @@ class TatmeenRecordsContent extends StatelessWidget {
                   records: records.records,
                   isLoading: records.isLoading,
                   isBusy: records.isBusy,
-                  onRetry: (record) => records.retryRecord(record.id),
+                  onRetry: (record) => records.retryRecord(record.operationId),
                 ),
         ),
       ],

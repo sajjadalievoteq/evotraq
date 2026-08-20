@@ -1,5 +1,7 @@
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_extension_tile.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_outline_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_primary_button.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_skeleton_three_field_row.dart';
 
 class GlnDetailFormSkeleton extends StatelessWidget {

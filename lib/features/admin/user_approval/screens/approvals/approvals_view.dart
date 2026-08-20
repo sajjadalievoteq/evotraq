@@ -1,9 +1,8 @@
+import 'package:traqtrace_app/core/layout/app_responsive_body.dart';
+import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
-import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/features/admin/user_approval/screens/approvals/widgets/approvals_list_content.dart';
 import 'package:traqtrace_app/features/admin/user_approval/screens/approvals/widgets/user_approval_reject_dialog.dart';

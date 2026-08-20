@@ -12,34 +12,34 @@ import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy
 import 'package:traqtrace_app/features/product_hierarchy/utils/product_hierarchy_identifier_utils.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 
-part 'product_hierarchy_tree_actions.dart';
+import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_tree_actions.dart';
 
 class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
   ProductHierarchyCubit({
     HierarchyService? hierarchyService,
     ProductJourneyService? journeyService,
     PackingOperationService? packingService,
-  }) : _hierarchyService = hierarchyService ?? getIt<HierarchyService>(),
+  }) : hierarchyService = hierarchyService ?? getIt<HierarchyService>(),
        _journeyService = journeyService ?? getIt<ProductJourneyService>(),
        _packingService = packingService ?? getIt<PackingOperationService>(),
        super(const ProductHierarchyState());
 
-  final HierarchyService _hierarchyService;
+  final HierarchyService hierarchyService;
   final ProductJourneyService _journeyService;
   final PackingOperationService _packingService;
-  static const int _pageSize = 20;
-  bool _recentParentsRequested = false;
+  static const int pageSize = 20;
+  bool recentParentsRequested = false;
   final Map<String, ProductJourney?> _journeyCache = {};
 
   /// Idle left panel: recent packing ops from [PackingOperationService],
   /// de-duped by parent container (newest first). Does not clear on
   /// [openHierarchy] so returning to idle is instant.
   Future<void> loadRecentParents() async {
-    if (_recentParentsRequested) return;
+    if (recentParentsRequested) return;
     if (state.root != null || state.isResolvingRoot) return;
     if (state.recentParents.isNotEmpty) return;
 
-    _recentParentsRequested = true;
+    recentParentsRequested = true;
     emit(state.copyWith(recentParentsLoading: true));
     try {
       // Fetch a bit more than 10 so de-dupe by parent still yields ~10 rows.
@@ -108,12 +108,12 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       // Containers open as the view root so a mid-level SSCC keeps its climb arrow.
       // Leaf SGTINs open from their IMMEDIATE parent container (not the whole-tree
       // root), with the leaf as focus; climb-up then reaches higher parents.
-      final inputType = _inferType(input);
+      final inputType = inferType(input);
       final String viewRootEpc;
       if (inputType == 'SSCC') {
         viewRootEpc = input;
       } else {
-        final immediateParent = await _hierarchyService.getParentContainer(
+        final immediateParent = await hierarchyService.getParentContainer(
           input,
         );
         viewRootEpc = (immediateParent != null && immediateParent.isNotEmpty)
@@ -126,14 +126,14 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
           ? normalizedRoot
           : normalizeProductHierarchyInput(input);
 
-      final pageFuture = _hierarchyService.getHierarchyChildren(
+      final pageFuture = hierarchyService.getHierarchyChildren(
         viewRootEpc,
         page: 0,
-        size: _pageSize,
+        size: pageSize,
       );
       // Lightweight parent probe — same answer as children?focusEpc without
       // loading a siblings page we discard.
-      final parentProbeFuture = _hierarchyService.getParentContainer(
+      final parentProbeFuture = hierarchyService.getParentContainer(
         viewRootEpc,
       );
 
@@ -144,7 +144,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       final rootState = HierarchyTreeNodeState(
         node: HierarchyNode(
           epc: normalizedRoot,
-          type: _inferType(normalizedRoot),
+          type: inferType(normalizedRoot),
           hasChildren: page.children.isNotEmpty,
           childCount: page.total,
         ),
@@ -233,9 +233,9 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
 
     emit(state.copyWith(isClimbing: true, clearClimbToast: true));
     try {
-      final page = await _hierarchyService.getParentContext(
+      final page = await hierarchyService.getParentContext(
         focus,
-        size: _pageSize,
+        size: pageSize,
       );
       if (page.hasParent != true ||
           page.parent == null ||
@@ -256,16 +256,16 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       // original root. Focus-anchored seeding left mid-level grafted parents
       // unable to load their remaining children on scroll (their siblings were
       // treated as "earlier" pages), so only the root kept paginating.
-      final page0 = await _hierarchyService.getHierarchyChildren(
+      final page0 = await hierarchyService.getHierarchyChildren(
         parentNode.epc,
         page: 0,
-        size: _pageSize,
+        size: pageSize,
       );
 
       var focusReused = false;
       final siblings = <HierarchyTreeNodeState>[];
       for (final n in page0.children) {
-        if (_sameEpc(n.epc, focus)) {
+        if (sameEpc(n.epc, focus)) {
           // Reuse the current view-root subtree (expansion + loaded descendants).
           siblings.add(previousRoot);
           focusReused = true;
@@ -323,7 +323,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
     }
   }
 
-  bool _sameEpc(String a, String b) =>
+  bool sameEpc(String a, String b) =>
       normalizeProductHierarchyInput(a) == normalizeProductHierarchyInput(b);
 
   void clearScrollToEpc() {

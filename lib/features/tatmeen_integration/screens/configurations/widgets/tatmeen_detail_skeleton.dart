@@ -1,4 +1,10 @@
-part of 'tatmeen_detail_pane.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_credentials_form.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_notifications_settings.dart';
 
 class TatmeenDetailSkeleton extends StatelessWidget {
   const TatmeenDetailSkeleton({super.key});

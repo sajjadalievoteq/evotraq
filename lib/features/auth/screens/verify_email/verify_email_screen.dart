@@ -4,7 +4,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/screens/verify_email/widgets/verify_email_content_widget.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
-import 'package:traqtrace_app/features/auth/widgets/auth_responsive_layout_widget.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_responsive_form_layout.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_screen_host.dart';
 
 class VerifyEmailScreen extends StatefulWidget {

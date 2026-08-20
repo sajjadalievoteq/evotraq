@@ -1,12 +1,13 @@
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_search_bar_suffix_actions.dart';
+import 'package:traqtrace_app/features/product_journey/screens/journey_dashboard/widgets/journey_search_bar_suffix_actions.dart';
 
 class ProductHierarchySearchHeader extends StatelessWidget {
   const ProductHierarchySearchHeader({

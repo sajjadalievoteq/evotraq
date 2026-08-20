@@ -1,4 +1,7 @@
-part of '../tatmeen_records_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_records.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_records_date_field.dart';
 
 class TatmeenRecordsFilters extends StatelessWidget {
   const TatmeenRecordsFilters({

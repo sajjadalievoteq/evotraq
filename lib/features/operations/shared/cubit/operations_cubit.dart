@@ -1,15 +1,12 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
 
-part 'operations_state.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operations_state.dart';
 
-typedef OperationFetchList<T> = Future<OperationPage<T>> Function({
-  required int page,
-  required int size,
-});
+typedef OperationFetchList<T> =
+    Future<OperationPage<T>> Function({required int page, required int size});
 
 typedef OperationFetchDetails<T> = Future<T> Function(String id);
 
@@ -22,9 +19,9 @@ class OperationsCubit<T> extends Cubit<OperationsState<T>> {
         'Could not load operations. Check your connection and tap Retry.',
     this.loadMoreErrorMessage =
         'Could not load more operations. Check your connection and try again.',
-  })  : _fetchList = fetchList,
-        _fetchDetails = fetchDetails,
-        super(OperationsState<T>());
+  }) : _fetchList = fetchList,
+       _fetchDetails = fetchDetails,
+       super(OperationsState<T>());
 
   final OperationFetchList<T> _fetchList;
   final OperationFetchDetails<T>? _fetchDetails;
@@ -39,25 +36,31 @@ class OperationsCubit<T> extends Cubit<OperationsState<T>> {
     try {
       final page = await _fetchList(page: 0, size: pageSize);
       if (generation != _loadGeneration) return;
-      _safeEmit(state.copyWith(
-        isLoading: false,
-        items: page.operations,
-        currentPage: page.page,
-        total: page.total,
-        totalPages: page.totalPages,
-        hasMore: page.hasMore,
-        errorMessage: null,
-      ));
+      _safeEmit(
+        state.copyWith(
+          isLoading: false,
+          items: page.operations,
+          currentPage: page.page,
+          total: page.total,
+          totalPages: page.totalPages,
+          hasMore: page.hasMore,
+          errorMessage: null,
+        ),
+      );
     } on ApiException catch (e) {
       if (generation != _loadGeneration) return;
-      _safeEmit(state.copyWith(
-        isLoading: false,
-        errorMessage: e.getUserFriendlyMessage(),
-      ));
+      _safeEmit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: e.getUserFriendlyMessage(),
+        ),
+      );
     } catch (e, stackTrace) {
       if (generation != _loadGeneration) return;
       debugPrint('[OperationsCubit] loadInitial failed: $e\n$stackTrace');
-      _safeEmit(state.copyWith(isLoading: false, errorMessage: loadErrorMessage));
+      _safeEmit(
+        state.copyWith(isLoading: false, errorMessage: loadErrorMessage),
+      );
     }
   }
 
@@ -69,26 +72,33 @@ class OperationsCubit<T> extends Cubit<OperationsState<T>> {
       final nextPage = state.currentPage + 1;
       final page = await _fetchList(page: nextPage, size: pageSize);
       if (generation != _loadGeneration) return;
-      _safeEmit(state.copyWith(
-        isLoadingMore: false,
-        items: [...state.items, ...page.operations],
-        currentPage: page.page,
-        total: page.total,
-        totalPages: page.totalPages,
-        hasMore: page.hasMore,
-        errorMessage: null,
-      ));
+      _safeEmit(
+        state.copyWith(
+          isLoadingMore: false,
+          items: [...state.items, ...page.operations],
+          currentPage: page.page,
+          total: page.total,
+          totalPages: page.totalPages,
+          hasMore: page.hasMore,
+          errorMessage: null,
+        ),
+      );
     } on ApiException catch (e) {
       if (generation != _loadGeneration) return;
-      _safeEmit(state.copyWith(
-        isLoadingMore: false,
-        errorMessage: e.getUserFriendlyMessage(),
-      ));
+      _safeEmit(
+        state.copyWith(
+          isLoadingMore: false,
+          errorMessage: e.getUserFriendlyMessage(),
+        ),
+      );
     } catch (e, stackTrace) {
       if (generation != _loadGeneration) return;
       debugPrint('[OperationsCubit] loadMore failed: $e\n$stackTrace');
       _safeEmit(
-        state.copyWith(isLoadingMore: false, errorMessage: loadMoreErrorMessage),
+        state.copyWith(
+          isLoadingMore: false,
+          errorMessage: loadMoreErrorMessage,
+        ),
       );
     }
   }
@@ -103,7 +113,9 @@ class OperationsCubit<T> extends Cubit<OperationsState<T>> {
       final detail = await fetchDetails(id);
       _safeEmit(state.copyWith(isDetailLoading: false, selectedDetail: detail));
     } catch (e) {
-      _safeEmit(state.copyWith(isDetailLoading: false, detailError: e.toString()));
+      _safeEmit(
+        state.copyWith(isDetailLoading: false, detailError: e.toString()),
+      );
     }
   }
 

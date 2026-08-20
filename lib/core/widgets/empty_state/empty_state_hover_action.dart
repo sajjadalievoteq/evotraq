@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class EmptyStateHoverAction extends StatefulWidget {
   const EmptyStateHoverAction({super.key, required this.child});

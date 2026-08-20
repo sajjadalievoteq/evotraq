@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class EmptyStateIconAura extends StatelessWidget {
-  const EmptyStateIconAura({
+  const EmptyStateIconAura({super.key,
     required this.iconAsset,
     required this.size,
     this.breath,

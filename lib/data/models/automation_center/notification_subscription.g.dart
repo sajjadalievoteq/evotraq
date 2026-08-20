@@ -1,12 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'notification_subscription.dart';
+import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-NotificationSubscription _$NotificationSubscriptionFromJson(
+NotificationSubscription notificationSubscriptionFromJson(
   Map<String, dynamic> json,
 ) => NotificationSubscription(
   id: json['id'] as String,
@@ -29,7 +31,7 @@ NotificationSubscription _$NotificationSubscriptionFromJson(
       : NotificationStats.fromJson(json['metrics'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$NotificationSubscriptionToJson(
+Map<String, dynamic> notificationSubscriptionToJson(
   NotificationSubscription instance,
 ) => <String, dynamic>{
   'id': instance.id,
@@ -48,7 +50,7 @@ Map<String, dynamic> _$NotificationSubscriptionToJson(
   'metrics': instance.stats?.toJson(),
 };
 
-NotificationStats _$NotificationStatsFromJson(Map<String, dynamic> json) =>
+NotificationStats notificationStatsFromJson(Map<String, dynamic> json) =>
     NotificationStats(
       totalNotifications: (json['totalEventsMatched'] as num).toInt(),
       successfulNotifications: (json['successfulNotifications'] as num).toInt(),
@@ -60,7 +62,7 @@ NotificationStats _$NotificationStatsFromJson(Map<String, dynamic> json) =>
       avgDeliveryTime: (json['averageDeliveryTimeMs'] as num).toDouble(),
     );
 
-Map<String, dynamic> _$NotificationStatsToJson(NotificationStats instance) =>
+Map<String, dynamic> notificationStatsToJson(NotificationStats instance) =>
     <String, dynamic>{
       'totalEventsMatched': instance.totalNotifications,
       'successfulNotifications': instance.successfulNotifications,
@@ -70,7 +72,7 @@ Map<String, dynamic> _$NotificationStatsToJson(NotificationStats instance) =>
       'averageDeliveryTimeMs': instance.avgDeliveryTime,
     };
 
-CreateSubscriptionRequest _$CreateSubscriptionRequestFromJson(
+CreateSubscriptionRequest createSubscriptionRequestFromJson(
   Map<String, dynamic> json,
 ) => CreateSubscriptionRequest(
   subscriptionName: json['subscriptionName'] as String,
@@ -87,7 +89,7 @@ CreateSubscriptionRequest _$CreateSubscriptionRequestFromJson(
   webhookAuthPassword: json['webhookAuthPassword'] as String?,
 );
 
-Map<String, dynamic> _$CreateSubscriptionRequestToJson(
+Map<String, dynamic> createSubscriptionRequestToJson(
   CreateSubscriptionRequest instance,
 ) => <String, dynamic>{
   'subscriptionName': instance.subscriptionName,
@@ -107,17 +109,16 @@ Map<String, dynamic> _$CreateSubscriptionRequestToJson(
 WebhookNotification _$WebhookNotificationFromJson(Map<String, dynamic> json) =>
     WebhookNotification.fromJson(json);
 
-Map<String, dynamic> _$WebhookNotificationToJson(
-  WebhookNotification instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'subscriptionId': instance.subscriptionId,
-  'eventId': instance.eventId,
-  'status': instance.status,
-  'webhookUrl': instance.webhookUrl,
-  'createdAt': instance.createdAt.toIso8601String(),
-  'deliveredAt': instance.deliveredAt?.toIso8601String(),
-  'retryCount': instance.retryCount,
-  'errorMessage': instance.errorMessage,
-  'response': instance.response,
-};
+Map<String, dynamic> webhookNotificationToJson(WebhookNotification instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'subscriptionId': instance.subscriptionId,
+      'eventId': instance.eventId,
+      'status': instance.status,
+      'webhookUrl': instance.webhookUrl,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'deliveredAt': instance.deliveredAt?.toIso8601String(),
+      'retryCount': instance.retryCount,
+      'errorMessage': instance.errorMessage,
+      'response': instance.response,
+    };

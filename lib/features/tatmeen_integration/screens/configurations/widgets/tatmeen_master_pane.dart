@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_state.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/utils/tatmeen_integration_sections.dart';
 
-part 'tatmeen_master_item.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_master_item.dart';
 
 class TatmeenMasterPane extends StatelessWidget {
   const TatmeenMasterPane({

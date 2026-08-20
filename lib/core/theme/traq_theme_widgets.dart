@@ -1,4 +1,6 @@
-part of 'traq_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class TraqCard extends StatelessWidget {
   const TraqCard({

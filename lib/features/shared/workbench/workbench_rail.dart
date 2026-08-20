@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_rail_item_widget.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_rail_section_header.dart';
 

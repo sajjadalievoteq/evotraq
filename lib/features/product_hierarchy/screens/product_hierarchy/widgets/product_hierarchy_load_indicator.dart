@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 
 class ProductHierarchyLoadIndicator extends StatelessWidget {
   const ProductHierarchyLoadIndicator({super.key, required this.isLoading});

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/inbound/create_system_user_dialog.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/inbound/b2b_users_list_skeleton.dart';
 
 /// Survives Outbound ↔ Inbound panel remounts within the same app session.
 List<UserResponse> _sessionB2bUsers = const [];
@@ -141,7 +142,7 @@ class _SystemUsersCardState extends State<SystemUsersCard> {
             ),
             const SizedBox(height: TraqSpacing.md),
             if (_loading)
-              const _B2bUsersListSkeleton()
+              const B2bUsersListSkeleton()
             else if (_error != null)
               TextButton.icon(
                 onPressed: () => _load(force: true),
@@ -171,52 +172,6 @@ class _SystemUsersCardState extends State<SystemUsersCard> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _B2bUsersListSkeleton extends StatelessWidget {
-  const _B2bUsersListSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final muted = context.colors.surfaceMuted;
-    return Column(
-      children: [
-        for (var i = 0; i < 3; i++) ...[
-          if (i > 0) const SizedBox(height: TraqSpacing.sm),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: TraqSpacing.sm),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppSkeletonBox(
-                        width: 120 + (i * 24),
-                        height: 14,
-                        radius: 4,
-                        color: muted,
-                      ),
-                      const SizedBox(height: TraqSpacing.xs),
-                      AppSkeletonBox(
-                        width: 200,
-                        height: 12,
-                        radius: 4,
-                        color: muted,
-                      ),
-                    ],
-                  ),
-                ),
-                AppSkeletonBox(width: 56, height: 12, radius: 4, color: muted),
-                const SizedBox(width: TraqSpacing.md),
-                AppSkeletonBox(width: 40, height: 24, radius: 12, color: muted),
-              ],
-            ),
-          ),
-        ],
-      ],
     );
   }
 }

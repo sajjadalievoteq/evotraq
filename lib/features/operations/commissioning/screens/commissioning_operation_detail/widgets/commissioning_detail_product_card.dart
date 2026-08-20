@@ -1,6 +1,6 @@
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_batch_models.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';

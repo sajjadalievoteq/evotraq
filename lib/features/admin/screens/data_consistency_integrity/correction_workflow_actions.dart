@@ -1,7 +1,14 @@
-part of 'data_consistency_integrity_dashboard_screen.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/data_consistency_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/data_consistency_integrity_dashboard_screen.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_detail_row.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 
-extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
-  void _navigateToWorkflowDetails(String workflowId) {
+extension CorrectionWorkflowActions on DataConsistencyIntegrityDashboardState {
+  void navigateToWorkflowDetails(String workflowId) {
     context.showSnackBar(
       SnackBar(
         content: Text(
@@ -13,7 +20,7 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
     );
   }
 
-  void _showFiltersDialog() {
+  void showFiltersDialog() {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -36,18 +43,18 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
                         onPressed: () async {
                           final date = await showDatePicker(
                             context: context,
-                            initialDate: _startDate,
+                            initialDate: startDate,
                             firstDate: DateTime.now().subtract(
                               const Duration(days: 365),
                             ),
                             lastDate: DateTime.now(),
                           );
                           if (date != null) {
-                            setState(() => _startDate = date);
+                            setState(() => startDate = date);
                           }
                         },
                         child: Text(
-                          'Start: ${_startDate.toString().split(' ')[0]}',
+                          'Start: ${startDate.toString().split(' ')[0]}',
                         ),
                       ),
                     ),
@@ -56,16 +63,16 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
                         onPressed: () async {
                           final date = await showDatePicker(
                             context: context,
-                            initialDate: _endDate,
-                            firstDate: _startDate,
+                            initialDate: endDate,
+                            firstDate: startDate,
                             lastDate: DateTime.now(),
                           );
                           if (date != null) {
-                            setState(() => _endDate = date);
+                            setState(() => endDate = date);
                           }
                         },
                         child: Text(
-                          'End: ${_endDate.toString().split(' ')[0]}',
+                          'End: ${endDate.toString().split(' ')[0]}',
                         ),
                       ),
                     ),
@@ -82,13 +89,13 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
                     .map(
                       (type) => CheckboxListTile(
                         title: Text(type),
-                        value: _selectedEventTypes.contains(type),
+                        value: selectedEventTypes.contains(type),
                         onChanged: (checked) {
                           setState(() {
                             if (checked == true) {
-                              _selectedEventTypes.add(type);
+                              selectedEventTypes.add(type);
                             } else {
-                              _selectedEventTypes.remove(type);
+                              selectedEventTypes.remove(type);
                             }
                           });
                         },
@@ -105,7 +112,7 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _refreshLoadedTabs();
+                refreshLoadedTabs();
               },
               child: const Text('Apply'),
             ),
@@ -115,7 +122,7 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
     );
   }
 
-  void _showCorrectionDialog(Map<String, dynamic> error) {
+  void showCorrectionDialog(Map<String, dynamic> error) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -155,7 +162,7 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
 
   void _initiateCorrectionWorkflow(Map<String, dynamic> error) async {
     try {
-      final result = await _correctionService.initiateErrorCorrectionWorkflow(
+      final result = await correctionService.initiateErrorCorrectionWorkflow(
         error['error_id'],
         error['correction_type'],
         error['proposed_correction'] ?? {},
@@ -166,32 +173,32 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
         'Correction workflow initiated: ${result['workflow_id']}',
       );
 
-      _identifyCorrectableErrors();
+      identifyCorrectableErrors();
     } catch (e) {
-      _showErrorSnackBar('Failed to initiate correction workflow: $e');
+      showErrorSnackBar('Failed to initiate correction workflow: $e');
     }
   }
 
-  void _startIntegrityJob() async {
+  void startIntegrityJob() async {
     try {
-      final result = await _consistencyService.runDataIntegrityVerificationJob({
+      final result = await consistencyService.runDataIntegrityVerificationJob({
         'scope': 'FULL',
         'time_range': {
-          'start': _startDate.toIso8601String(),
-          'end': _endDate.toIso8601String(),
+          'start': startDate.toIso8601String(),
+          'end': endDate.toIso8601String(),
         },
-        'event_types': _selectedEventTypes,
+        'event_types': selectedEventTypes,
       });
 
       setState(() {
-        _integrityJobs.insert(0, {
+        integrityJobs.insert(0, {
           'job_id': result['job_id'],
           'status': 'RUNNING',
           'progress': 0.0,
         });
       });
 
-      _persistenceService.addIntegrityJob({
+      persistenceService.addIntegrityJob({
         'job_id': result['job_id'],
         'status': 'RUNNING',
         'progress': 0.0,
@@ -203,48 +210,48 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
 
       _pollJobStatus(result['job_id']);
     } catch (e) {
-      _showErrorSnackBar('Failed to start integrity job: $e');
+      showErrorSnackBar('Failed to start integrity job: $e');
     }
   }
 
   void _pollJobStatus(String jobId) {
-    _jobPollTimers[jobId]?.cancel();
-    _jobPollTimers[jobId] = Timer.periodic(const Duration(seconds: 5), (
+    jobPollTimers[jobId]?.cancel();
+    jobPollTimers[jobId] = Timer.periodic(const Duration(seconds: 5), (
       timer,
     ) async {
       try {
-        final status = await _consistencyService.getIntegrityJobStatus(jobId);
+        final status = await consistencyService.getIntegrityJobStatus(jobId);
 
         if (mounted) {
           setState(() {
-            final jobIndex = _integrityJobs.indexWhere(
+            final jobIndex = integrityJobs.indexWhere(
               (job) => job['job_id'] == jobId,
             );
             if (jobIndex >= 0) {
-              _integrityJobs[jobIndex] = status;
+              integrityJobs[jobIndex] = status;
             }
           });
         }
 
-        _persistenceService.updateIntegrityJob(jobId, status);
+        persistenceService.updateIntegrityJob(jobId, status);
 
         if (status['status'] == 'COMPLETED' || status['status'] == 'FAILED') {
           timer.cancel();
-          _jobPollTimers.remove(jobId);
+          jobPollTimers.remove(jobId);
         }
       } catch (e) {
         timer.cancel();
-        _jobPollTimers.remove(jobId);
+        jobPollTimers.remove(jobId);
       }
     });
   }
 
-  void _refreshWorkflowData() async {
+  void refreshWorkflowData() async {
     try {
-      final workflows = await _correctionService.getAllCorrectionWorkflows();
+      final workflows = await correctionService.getAllCorrectionWorkflows();
 
       setState(() {
-        _correctionWorkflows.clear();
+        correctionWorkflows.clear();
 
         for (int i = 0; i < workflows.length; i++) {
           final w = workflows[i];
@@ -259,21 +266,21 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
             'workflow_type': w['workflow_type'] ?? 'UNKNOWN',
           };
 
-          _correctionWorkflows.add(mappedWorkflow);
+          correctionWorkflows.add(mappedWorkflow);
         }
 
-        _workflowDataState = _correctionWorkflows.isEmpty
+        workflowDataState = correctionWorkflows.isEmpty
             ? const LoadState.empty()
-            : LoadState.success(_correctionWorkflows);
+            : LoadState.success(correctionWorkflows);
       });
 
-      context.showSuccess('Loaded ${_correctionWorkflows.length} workflows');
+      context.showSuccess('Loaded ${correctionWorkflows.length} workflows');
     } catch (e) {
       context.showError('Error: $e');
     }
   }
 
-  void _showWorkflowDetails(Map<String, dynamic> workflow) {
+  void showWorkflowDetails(Map<String, dynamic> workflow) {
     final executionResults = workflow['execution_results'];
     final correctionData = workflow['correction_data'];
 
@@ -397,24 +404,24 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
     );
   }
 
-  void _pollWorkflowStatus(String workflowId) {
-    _workflowPollTimers[workflowId]?.cancel();
-    _workflowPollTimers[workflowId] = Timer.periodic(
+  void pollWorkflowStatus(String workflowId) {
+    workflowPollTimers[workflowId]?.cancel();
+    workflowPollTimers[workflowId] = Timer.periodic(
       const Duration(seconds: 3),
       (timer) async {
         try {
-          final status = await _correctionService.getCorrectionWorkflowStatus(
+          final status = await correctionService.getCorrectionWorkflowStatus(
             workflowId,
           );
 
           if (mounted) {
             setState(() {
-              final workflowIndex = _correctionWorkflows.indexWhere(
+              final workflowIndex = correctionWorkflows.indexWhere(
                 (w) => w['workflow_id'] == workflowId,
               );
               if (workflowIndex >= 0) {
-                _correctionWorkflows[workflowIndex] = {
-                  ..._correctionWorkflows[workflowIndex],
+                correctionWorkflows[workflowIndex] = {
+                  ...correctionWorkflows[workflowIndex],
                   'status': status['workflow_status'],
                   'current_step': status['current_step'],
                   'total_steps': status['total_steps'],
@@ -424,28 +431,28 @@ extension CorrectionWorkflowActions on _DataConsistencyIntegrityDashboardState {
             });
           }
 
-          final workflowIndex = _correctionWorkflows.indexWhere(
+          final workflowIndex = correctionWorkflows.indexWhere(
             (w) => w['workflow_id'] == workflowId,
           );
           if (workflowIndex >= 0) {
-            _persistenceService.updateCorrectionWorkflow(
+            persistenceService.updateCorrectionWorkflow(
               workflowId,
-              _correctionWorkflows[workflowIndex],
+              correctionWorkflows[workflowIndex],
             );
           }
 
           if (status['workflow_status'] == 'COMPLETED' ||
               status['workflow_status'] == 'FAILED') {
             timer.cancel();
-            _workflowPollTimers.remove(workflowId);
+            workflowPollTimers.remove(workflowId);
 
             if (status['workflow_status'] == 'COMPLETED') {
-              _identifyCorrectableErrors();
+              identifyCorrectableErrors();
             }
           }
         } catch (e) {
           timer.cancel();
-          _workflowPollTimers.remove(workflowId);
+          workflowPollTimers.remove(workflowId);
         }
       },
     );

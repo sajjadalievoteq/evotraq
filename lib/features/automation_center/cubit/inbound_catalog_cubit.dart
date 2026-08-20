@@ -4,8 +4,8 @@ import 'package:traqtrace_app/features/automation_center/cubit/inbound_catalog_s
 
 class InboundCatalogCubit extends Cubit<InboundCatalogState> {
   InboundCatalogCubit({required InboundCatalogService service})
-      : _service = service,
-        super(const InboundCatalogState());
+    : _service = service,
+      super(const InboundCatalogState());
 
   final InboundCatalogService _service;
   bool _loading = false;
@@ -24,7 +24,8 @@ class InboundCatalogCubit extends Cubit<InboundCatalogState> {
     try {
       final catalog = await _service.fetchCatalog();
       final previousId = state.selectedCategoryId;
-      final stillValid = previousId != null &&
+      final stillValid =
+          previousId != null &&
           catalog.categories.any((c) => c.id == previousId);
       emit(
         state.copyWith(
@@ -37,10 +38,7 @@ class InboundCatalogCubit extends Cubit<InboundCatalogState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(
-          status: InboundCatalogStatus.error,
-          error: e.toString(),
-        ),
+        state.copyWith(status: InboundCatalogStatus.error, error: e.toString()),
       );
     } finally {
       _loading = false;

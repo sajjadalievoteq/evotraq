@@ -1,12 +1,8 @@
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
-import 'package:traqtrace_app/features/auth/widgets/auth_shell_scope.dart';
-import 'package:traqtrace_app/features/auth/widgets/branding_widget.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_branding_section.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 
 class AuthShellMobile extends StatelessWidget {

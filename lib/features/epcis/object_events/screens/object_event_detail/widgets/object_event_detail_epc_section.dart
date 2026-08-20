@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/data/models/epcis/epcis_types.dart' as types;
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_detail/utils/object_event_detail_ui_constants.dart';
-import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_detail/widgets/object_event_detail_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_detail/widgets/object_event_detail_quantity_fields.dart';

@@ -1,14 +1,13 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 
-part 'tatmeen_status_breakdown_skeleton.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_status_breakdown_skeleton.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_status_breakdown_legend.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_status_breakdown_pie.dart';
 
 class TatmeenStatusBreakdownChart extends StatelessWidget {
   const TatmeenStatusBreakdownChart({
@@ -42,100 +41,24 @@ class TatmeenStatusBreakdownChart extends StatelessWidget {
         subtitle: 'Monthly status breakdown will appear here.',
       );
     }
-    final b = breakdown!;
-    final sections = [
-      ('Successful', b.successful, context.colors.success),
-      ('Failed', b.failed, context.colors.error),
-      ('Pending', b.pending, context.colors.warning),
-    ];
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 360;
-        final chart = SizedBox(
-          height: 200,
-          width: 200,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              PieChart(
-                PieChartData(
-                  centerSpaceRadius: 48,
-                  sectionsSpace: 2,
-                  sections: sections
-                      .map(
-                        (s) => PieChartSectionData(
-                          value: s.$2.toDouble(),
-                          color: s.$3,
-                          radius: 26,
-                          showTitle: false,
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${b.total}',
-                    style: context.text.h2.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    'This month',
-                    style: context.text.bodySm.copyWith(
-                      color: context.colors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-        final legend = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: sections.map((s) {
-            final pct = b.total == 0 ? 0 : (s.$2 / b.total * 100);
-            return Padding(
-              padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
-              child: Row(
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: s.$3,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: TraqSpacing.xs),
-                  Expanded(child: Text(s.$1, style: context.text.bodySm)),
-                  Text(
-                    '${pct.toStringAsFixed(1)}%',
-                    style: context.text.bodySm.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        );
-        if (compact) {
+        if (constraints.maxWidth < 360) {
           return Column(
             children: [
-              chart,
+              TatmeenStatusBreakdownPie(breakdown: breakdown!),
               const SizedBox(height: TraqSpacing.md),
-              legend,
+              TatmeenStatusBreakdownLegend(breakdown: breakdown!),
             ],
           );
         }
         return Row(
           children: [
-            chart,
+            TatmeenStatusBreakdownPie(breakdown: breakdown!),
             const SizedBox(width: TraqSpacing.md),
-            Expanded(child: legend),
+            Expanded(
+              child: TatmeenStatusBreakdownLegend(breakdown: breakdown!),
+            ),
           ],
         );
       },

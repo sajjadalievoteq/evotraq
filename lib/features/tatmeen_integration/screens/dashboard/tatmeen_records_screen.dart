@@ -1,26 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/display_date_utils.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
 import 'package:traqtrace_app/data/services/tatmeen_integration/tatmeen_integration_service.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_navigation.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_records.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/records/tatmeen_records_table.dart';
 
-part 'widgets/tatmeen_records_content.dart';
-part 'widgets/tatmeen_records_header.dart';
-part 'widgets/tatmeen_records_filters.dart';
-part 'widgets/tatmeen_records_date_field.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_records_content.dart';
 
 class TatmeenRecordsScreen extends StatefulWidget {
   const TatmeenRecordsScreen({
@@ -59,20 +46,29 @@ class _TatmeenRecordsScreenState extends State<TatmeenRecordsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final body = AnimatedBuilder(
-      animation: _records,
-      builder: (context, _) => TatmeenRecordsContent(
-        records: _records,
-        searchController: _searchController,
-        title: widget.filter.title,
-        summaryText: _summaryText(),
-      ),
-    );
-    if (widget.embedded) return body;
+    if (widget.embedded) {
+      return AnimatedBuilder(
+        animation: _records,
+        builder: (context, _) => TatmeenRecordsContent(
+          records: _records,
+          searchController: _searchController,
+          title: widget.filter.title,
+          summaryText: _summaryText(),
+        ),
+      );
+    }
     return Scaffold(
       appBar: TraqAppBar(context, title: Text(widget.filter.title)),
       drawer: const AppDrawer(),
-      body: body,
+      body: AnimatedBuilder(
+        animation: _records,
+        builder: (context, _) => TatmeenRecordsContent(
+          records: _records,
+          searchController: _searchController,
+          title: widget.filter.title,
+          summaryText: _summaryText(),
+        ),
+      ),
     );
   }
 

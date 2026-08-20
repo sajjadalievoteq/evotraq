@@ -1,4 +1,16 @@
-part of 'auth_cubit.dart';
+import 'dart:async';
+import 'package:flutter/widgets.dart';
+import 'package:traqtrace_app/core/config/app_navigation.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
+import 'package:traqtrace_app/data/models/auth/user.dart';
+import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
+import 'package:traqtrace_app/data/services/websocket_service.dart';
+import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 
 extension AuthCubitSession on AuthCubit {
   /// Roles that must never reach [AuthStatus.authenticated] through the
@@ -14,15 +26,15 @@ extension AuthCubitSession on AuthCubit {
   /// any partial session state and emits an explanatory error instead of
   /// ever emitting [AuthStatus.authenticated]. Returns true when the caller
   /// (login/checkAuth) should stop and return immediately.
-  Future<bool> _rejectIfFrontendBlockedRole(User user) async {
+  Future<bool> rejectIfFrontendBlockedRole(User user) async {
     final role = user.role.trim().toUpperCase();
     if (!_frontendBlockedRoles.contains(role)) return false;
 
-    _cancelTokenExpiration();
-    _disconnectSharedWebSocket();
-    _clearSessionCaches();
+    cancelTokenExpiration();
+    disconnectSharedWebSocket();
+    clearSessionCaches();
     try {
-      await _authService.logout();
+      await authService.logout();
     } catch (_) {}
 
     emit(
@@ -38,7 +50,7 @@ extension AuthCubitSession on AuthCubit {
     return true;
   }
 
-  bool _requiresEmailVerification(String? message) {
+  bool requiresEmailVerification(String? message) {
     final normalized = message?.trim().toLowerCase();
     if (normalized == null || normalized.isEmpty) {
       return false;
@@ -46,12 +58,12 @@ extension AuthCubitSession on AuthCubit {
     return normalized.contains('verify your email');
   }
 
-  String? _extractEmailFromError(dynamic error) {
+  String? extractEmailFromError(dynamic error) {
     if (error is! ApiException || error.responseBody == null) {
       return null;
     }
 
-    final body = _authService.parseResponseMap(error.responseBody);
+    final body = authService.parseResponseMap(error.responseBody);
     final email = body?['email'];
     if (email is String && email.trim().isNotEmpty) {
       return email.trim();
@@ -59,7 +71,7 @@ extension AuthCubitSession on AuthCubit {
     return null;
   }
 
-  String _resolveErrorMessage(dynamic error, String fallback) {
+  String resolveErrorMessage(dynamic error, String fallback) {
     if (error is ApiException) {
       final message = error.message.trim();
       if (message.isNotEmpty) {
@@ -76,17 +88,17 @@ extension AuthCubitSession on AuthCubit {
         .replaceFirst('ApiException: ', '');
   }
 
-  void _cancelTokenExpiration() {
-    _tokenExpiryTimer?.cancel();
-    _tokenExpiryTimer = null;
-    _scheduledExpiryToken = null;
-    _idleTimer?.cancel();
-    _idleTimer = null;
+  void cancelTokenExpiration() {
+    tokenExpiryTimer?.cancel();
+    tokenExpiryTimer = null;
+    scheduledExpiryToken = null;
+    idleTimer?.cancel();
+    idleTimer = null;
   }
 
-  void _onAuthenticatedSessionStarted(String token) {
-    _lastUserActivityAt = DateTime.now();
-    _lastActivityPingAt = null;
+  void onAuthenticatedSessionStarted(String token) {
+    lastUserActivityAt = DateTime.now();
+    lastActivityPingAt = null;
     _scheduleTokenRefresh(token);
     _scheduleIdleLogout();
     _preloadGlnPickerCatalog();
@@ -97,14 +109,14 @@ extension AuthCubitSession on AuthCubit {
   /// Pointer / keyboard / scroll from the live UI. WebSocket traffic is ignored.
   void noteUserActivity() {
     if (state.status != AuthStatus.authenticated) return;
-    _lastUserActivityAt = DateTime.now();
+    lastUserActivityAt = DateTime.now();
     _scheduleIdleLogout();
     _pingActivityIfDue();
   }
 
   void _scheduleIdleLogout() {
-    _idleTimer?.cancel();
-    _idleTimer = Timer(_idleTimeout, () {
+    idleTimer?.cancel();
+    idleTimer = Timer(sessionIdleTimeout, () {
       if (state.status != AuthStatus.authenticated) return;
       unawaited(sessionExpired());
     });
@@ -112,22 +124,23 @@ extension AuthCubitSession on AuthCubit {
 
   void _pingActivityIfDue() {
     final now = DateTime.now();
-    final lastPing = _lastActivityPingAt;
-    if (lastPing != null && now.difference(lastPing) < _activityPingThrottle) {
+    final lastPing = lastActivityPingAt;
+    if (lastPing != null &&
+        now.difference(lastPing) < sessionActivityPingThrottle) {
       return;
     }
-    _lastActivityPingAt = now;
-    unawaited(_authService.pingActivity());
+    lastActivityPingAt = now;
+    unawaited(authService.pingActivity());
   }
 
   /// Refresh the JWT shortly before `exp` when the user is still active.
   /// Idle users are logged out instead of silently extending the session.
   void _scheduleTokenRefresh(String token) {
-    _tokenExpiryTimer?.cancel();
-    _tokenExpiryTimer = null;
-    _scheduledExpiryToken = null;
+    tokenExpiryTimer?.cancel();
+    tokenExpiryTimer = null;
+    scheduledExpiryToken = null;
 
-    final remaining = _tokenManager.remainingLifetime(token);
+    final remaining = tokenManager.remainingLifetime(token);
     if (remaining == null) {
       return;
     }
@@ -136,18 +149,18 @@ extension AuthCubitSession on AuthCubit {
       return;
     }
 
-    _scheduledExpiryToken = token;
-    _tokenExpiryTimer = Timer(remaining, () {
-      if (_scheduledExpiryToken != token) return;
+    scheduledExpiryToken = token;
+    tokenExpiryTimer = Timer(remaining, () {
+      if (scheduledExpiryToken != token) return;
       if (state.status != AuthStatus.authenticated) return;
       unawaited(_refreshOrExpire(token));
     });
   }
 
   bool _isUserIdle() {
-    final last = _lastUserActivityAt;
+    final last = lastUserActivityAt;
     if (last == null) return true;
-    return DateTime.now().difference(last) >= _idleTimeout;
+    return DateTime.now().difference(last) >= sessionIdleTimeout;
   }
 
   Future<void> _refreshOrExpire(String token) async {
@@ -155,23 +168,23 @@ extension AuthCubitSession on AuthCubit {
       await sessionExpired();
       return;
     }
-    if (_tokenRefreshInFlight) return;
-    _tokenRefreshInFlight = true;
+    if (tokenRefreshInFlight) return;
+    tokenRefreshInFlight = true;
     try {
-      final refreshed = await _authService.refreshToken();
+      final refreshed = await authService.refreshToken();
       if (state.status != AuthStatus.authenticated) return;
       emit(state.copyWith(token: refreshed.token, error: null, message: null));
       _scheduleTokenRefresh(refreshed.token);
     } catch (_) {
       await sessionExpired();
     } finally {
-      _tokenRefreshInFlight = false;
+      tokenRefreshInFlight = false;
     }
   }
 
   /// Closes any dialog/bottom-sheet routes still on screen (e.g. the
   /// New/Edit Subscription dialog). Must run synchronously and *before*
-  /// [AuthCubit._forceUnauthenticated] emits the unauthenticated state:
+  /// [AuthCubit.forceUnauthenticated] emits the unauthenticated state:
   /// GoRouter's redirect is deferred to the next frame (see
   /// GoRouterRefreshStream), so without this a dialog left open at the
   /// moment of logout survives as an orphaned overlay when the underlying
@@ -184,13 +197,13 @@ extension AuthCubitSession on AuthCubit {
   /// `popUntil` only removes routes for which the predicate is false, so
   /// this stops as soon as it reaches the underlying page route - it never
   /// touches page-level navigation.
-  void _closeAnyOpenDialogs() {
+  void closeAnyOpenDialogs() {
     final navigator = rootNavigatorKey.currentState;
     if (navigator == null) return;
     navigator.popUntil((route) => route is! PopupRoute);
   }
 
-  void _backfillOperationalGln(User user) {
+  void backfillOperationalGln(User user) {
     unawaited(
       OperationalGlnStore.backfillIfNeeded(user).catchError((_) {
         // Best-effort migration: storage failure must not destabilize auth.
@@ -203,7 +216,7 @@ extension AuthCubitSession on AuthCubit {
     getIt<WebSocketService>().connect();
   }
 
-  void _disconnectSharedWebSocket() {
+  void disconnectSharedWebSocket() {
     if (!getIt.isRegistered<WebSocketService>()) return;
     getIt<WebSocketService>().disconnect();
   }
@@ -220,7 +233,7 @@ extension AuthCubitSession on AuthCubit {
     }
   }
 
-  void _clearSessionCaches() {
+  void clearSessionCaches() {
     _clearHomeOverviewSession();
     _clearGlnPickerCatalog();
     _resetCbvVocabulary();

@@ -1,10 +1,15 @@
-part of 'auth_service.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/data/models/auth/user_session.dart';
+import 'package:traqtrace_app/data/services/auth/auth_service.dart';
 
 extension AuthServiceAccountActions on AuthService {
   Future<List<UserSession>> listSessions() async {
     try {
-      final response = await _dioService.get(
-        '${_dioService.baseUrl}${Constants.authSessionsEndpoint}',
+      final response = await dioService.get(
+        '${dioService.baseUrl}${Constants.authSessionsEndpoint}',
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -27,15 +32,15 @@ extension AuthServiceAccountActions on AuthService {
 
       throw ApiException(
         statusCode: response.statusCode,
-        message: _parseErrorMessage(response.data) ?? 'Failed to load sessions',
-        responseBody: _stringifyResponseData(response.data),
+        message: parseErrorMessage(response.data) ?? 'Failed to load sessions',
+        responseBody: stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message:
-            _parseErrorMessage(e.response?.data) ?? 'Failed to load sessions',
-        responseBody: _stringifyResponseData(e.response?.data),
+            parseErrorMessage(e.response?.data) ?? 'Failed to load sessions',
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }
@@ -43,8 +48,8 @@ extension AuthServiceAccountActions on AuthService {
 
   Future<void> revokeSession(String sessionId) async {
     try {
-      final response = await _dioService.delete(
-        '${_dioService.baseUrl}${Constants.authSessionsEndpoint}/$sessionId',
+      final response = await dioService.delete(
+        '${dioService.baseUrl}${Constants.authSessionsEndpoint}/$sessionId',
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -57,16 +62,15 @@ extension AuthServiceAccountActions on AuthService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ?? 'Failed to sign out session',
-        responseBody: _stringifyResponseData(response.data),
+            parseErrorMessage(response.data) ?? 'Failed to sign out session',
+        responseBody: stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message:
-            _parseErrorMessage(e.response?.data) ??
-            'Failed to sign out session',
-        responseBody: _stringifyResponseData(e.response?.data),
+            parseErrorMessage(e.response?.data) ?? 'Failed to sign out session',
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }
@@ -74,8 +78,8 @@ extension AuthServiceAccountActions on AuthService {
 
   Future<void> revokeOtherSessions() async {
     try {
-      final response = await _dioService.post(
-        '${_dioService.baseUrl}${Constants.authSessionsRevokeOthersEndpoint}',
+      final response = await dioService.post(
+        '${dioService.baseUrl}${Constants.authSessionsRevokeOthersEndpoint}',
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -88,17 +92,17 @@ extension AuthServiceAccountActions on AuthService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            parseErrorMessage(response.data) ??
             'Failed to sign out other sessions',
-        responseBody: _stringifyResponseData(response.data),
+        responseBody: stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message:
-            _parseErrorMessage(e.response?.data) ??
+            parseErrorMessage(e.response?.data) ??
             'Failed to sign out other sessions',
-        responseBody: _stringifyResponseData(e.response?.data),
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }
@@ -106,8 +110,8 @@ extension AuthServiceAccountActions on AuthService {
 
   Future<bool> requestPasswordReset(String email) async {
     try {
-      await _dioService.post(
-        '${_dioService.baseUrl}${Constants.authPasswordResetRequestEndpoint}',
+      await dioService.post(
+        '${dioService.baseUrl}${Constants.authPasswordResetRequestEndpoint}',
         data: jsonEncode({'email': email}),
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -122,8 +126,8 @@ extension AuthServiceAccountActions on AuthService {
 
   Future<bool> validatePasswordResetToken(String token) async {
     try {
-      final response = await _dioService.get(
-        '${_dioService.baseUrl}${Constants.authValidateResetTokenEndpoint}',
+      final response = await dioService.get(
+        '${dioService.baseUrl}${Constants.authValidateResetTokenEndpoint}',
         queryParameters: {'token': token},
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -148,8 +152,8 @@ extension AuthServiceAccountActions on AuthService {
     String confirmPassword,
   ) async {
     try {
-      final response = await _dioService.post(
-        '${_dioService.baseUrl}${Constants.authResetPasswordEndpoint}',
+      final response = await dioService.post(
+        '${dioService.baseUrl}${Constants.authResetPasswordEndpoint}',
         data: jsonEncode({
           'token': token,
           'newPassword': newPassword,
@@ -168,8 +172,8 @@ extension AuthServiceAccountActions on AuthService {
 
   Future<String> verifyEmail(String token) async {
     try {
-      final response = await _dioService.get(
-        '${_dioService.baseUrl}${Constants.verificationVerifyEmailEndpoint}',
+      final response = await dioService.get(
+        '${dioService.baseUrl}${Constants.verificationVerifyEmailEndpoint}',
         queryParameters: {'token': token},
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -177,22 +181,22 @@ extension AuthServiceAccountActions on AuthService {
       );
 
       if (response.statusCode == 200) {
-        return _parseErrorMessage(response.data) ??
+        return parseErrorMessage(response.data) ??
             'Email verified successfully. Your account is now pending admin approval.';
       }
 
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ?? 'Email verification failed',
-        responseBody: _stringifyResponseData(response.data),
+            parseErrorMessage(response.data) ?? 'Email verification failed',
+        responseBody: stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message:
-            _parseErrorMessage(e.response?.data) ?? 'Email verification failed',
-        responseBody: _stringifyResponseData(e.response?.data),
+            parseErrorMessage(e.response?.data) ?? 'Email verification failed',
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }

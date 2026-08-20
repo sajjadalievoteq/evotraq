@@ -1,4 +1,3 @@
-
 enum HealthcareFacilityType {
   hospital,
   pharmacy,

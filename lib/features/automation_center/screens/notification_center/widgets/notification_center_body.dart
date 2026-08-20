@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/batch_delivery_event_row.dart';
@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/automation_center/screens/notification_ce
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/empty_delivery_feed.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_loading_skeleton.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_skeleton_shape.dart';
 
 class NotificationCenterBody extends StatelessWidget {
   const NotificationCenterBody({
@@ -73,8 +74,8 @@ class NotificationCenterBody extends StatelessWidget {
     });
     if (filtered.isEmpty && state.failedBatches.isEmpty) {
       return EmptyDeliveryFeed(
-        hasAnyEvents: state.deliveryActivity.isNotEmpty ||
-            state.deliveryActivityHasMore,
+        hasAnyEvents:
+            state.deliveryActivity.isNotEmpty || state.deliveryActivityHasMore,
         hasCounters: hasCounters,
         selectedFilter: selectedFilter,
         onClearFilters: onClearFilters,
@@ -109,8 +110,8 @@ class NotificationCenterBody extends StatelessWidget {
 
     if (timeline.isEmpty) {
       return EmptyDeliveryFeed(
-        hasAnyEvents: state.deliveryActivity.isNotEmpty ||
-            state.deliveryActivityHasMore,
+        hasAnyEvents:
+            state.deliveryActivity.isNotEmpty || state.deliveryActivityHasMore,
         hasCounters: hasCounters,
         selectedFilter: selectedFilter,
         onClearFilters: onClearFilters,

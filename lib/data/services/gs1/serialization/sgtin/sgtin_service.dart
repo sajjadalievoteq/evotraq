@@ -7,22 +7,21 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'sgtin_service_constants.dart';
 
-part 'sgtin_service_operations.dart';
 
 class SGTINService {
-  final DioService _dioService;
+  final DioService dioService;
 
-  SGTINService({required DioService dioService}) : _dioService = dioService;
+  SGTINService({required this.dioService});
 
-  static const _headers = {
+  static const headers = {
     SgtinServiceConstants.headerContentType:
         SgtinServiceConstants.contentTypeJson,
   };
 
   Future<SGTIN> getSGTINById(String id) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathById(id)}',
-      headers: _headers,
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathById(id)}',
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -39,10 +38,10 @@ class SGTINService {
   }
 
   Future<SGTIN> getSGTINByEPC(String epcUri) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathByEpc}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathByEpc}',
       queryParameters: {SgtinServiceConstants.qEpcUri: epcUri},
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -58,10 +57,10 @@ class SGTINService {
   }
 
   Future<SGTIN> getSGTINBySerialNumber(String serialNumber) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathBySerial}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathBySerial}',
       queryParameters: {SgtinServiceConstants.qSerialNumber: serialNumber},
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -81,13 +80,13 @@ class SGTINService {
     int page = SgtinServiceConstants.defaultPage,
     int size = SgtinServiceConstants.defaultSize,
   }) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathBase}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathBase}',
       queryParameters: {
         SgtinServiceConstants.qPage: page,
         SgtinServiceConstants.qSize: size,
       },
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -118,9 +117,9 @@ class SGTINService {
       );
     }
 
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathBase}',
-      headers: _headers,
+    final response = await dioService.post(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathBase}',
+      headers: headers,
       data: json.encode(jsonData),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -172,9 +171,9 @@ class SGTINService {
   }
 
   Future<SGTIN> updateSGTIN(String id, SGTIN sgtin) async {
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathById(id)}',
-      headers: _headers,
+    final response = await dioService.put(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathById(id)}',
+      headers: headers,
       data: json.encode(sgtin.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -198,10 +197,10 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsByGTIN(String gtinCode) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathByGtin}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathByGtin}',
       queryParameters: {SgtinServiceConstants.qGtin: gtinCode},
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -220,10 +219,10 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsByBatchLotNumber(String batchLotNumber) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathBatch}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathBatch}',
       queryParameters: {SgtinServiceConstants.qBatchLot: batchLotNumber},
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -242,10 +241,10 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsByStatus(ItemStatus status) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathStatus}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathStatus}',
       queryParameters: {SgtinServiceConstants.qStatus: status.name},
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -264,9 +263,9 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsByLocation(String glnCode) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathByLocation(glnCode)}',
-      headers: _headers,
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathByLocation(glnCode)}',
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -285,9 +284,9 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsBySSCC(String ssccCode) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathBySscc(ssccCode)}',
-      headers: _headers,
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathBySscc(ssccCode)}',
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -308,10 +307,10 @@ class SGTINService {
   Future<List<SGTIN>> findSGTINsExpiringBefore(DateTime date) async {
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
 
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathExpiring}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathExpiring}',
       queryParameters: {SgtinServiceConstants.qDate: dateStr},
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -332,10 +331,10 @@ class SGTINService {
   Future<List<SGTIN>> findSGTINsByRegulatoryMarket(
     String regulatoryMarket,
   ) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathMarket}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathMarket}',
       queryParameters: {SgtinServiceConstants.qMarket: regulatoryMarket},
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -370,10 +369,10 @@ class SGTINService {
       SgtinServiceConstants.qLocationId: ?locationId,
     };
 
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathSearch}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathSearch}',
       queryParameters: queryParams,
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -421,10 +420,10 @@ class SGTINService {
         SgtinServiceConstants.qLocationName: locationName,
     };
 
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathSearchAdvanced}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathSearchAdvanced}',
       queryParameters: queryParams,
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );

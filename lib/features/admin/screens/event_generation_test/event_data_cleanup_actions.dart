@@ -1,8 +1,11 @@
-part of 'event_generation_test_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/features/admin/screens/event_generation_test/event_generation_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/event_generation_test/event_generation_test_screen.dart';
 
-extension EventDataCleanupActions on _EventGenerationTestScreenState {
-  Future<void> _cleanTestData() async {
-    if (_testService == null) return;
+extension EventDataCleanupActions on EventGenerationTestScreenState {
+  Future<void> cleanTestData() async {
+    if (testService == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -25,29 +28,29 @@ extension EventDataCleanupActions on _EventGenerationTestScreenState {
     if (confirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanTestData({});
+      final result = await testService!.cleanTestData({});
 
       context.showSuccess(
         'Cleaned ${result.deletedEvents} events, '
         '${result.deletedGLNs} GLNs, ${result.deletedGTINs} GTINs',
       );
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to clean test data: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to clean test data: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _cleanTransformationEvents() async {
-    if (_testService == null) return;
+  Future<void> cleanTransformationEvents() async {
+    if (testService == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -72,29 +75,29 @@ extension EventDataCleanupActions on _EventGenerationTestScreenState {
     if (confirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanTransformationEvents();
+      final result = await testService!.cleanTransformationEvents();
 
       context.showSuccess(
         'Cleaned ${result['deletedTransformationEvents']} transformation events',
       );
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage =
+        errorMessage =
             'Failed to clean transformation events: ${e.toString()}';
-        _isLoading = false;
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _cleanTransactionEvents() async {
-    if (_testService == null) return;
+  Future<void> cleanTransactionEvents() async {
+    if (testService == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -119,28 +122,28 @@ extension EventDataCleanupActions on _EventGenerationTestScreenState {
     if (confirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanTransactionEvents();
+      final result = await testService!.cleanTransactionEvents();
 
       context.showSuccess(
         'Cleaned ${result['deletedTransactionEvents']} transaction events',
       );
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to clean transaction events: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to clean transaction events: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _cleanAggregationEvents() async {
-    if (_testService == null) return;
+  Future<void> cleanAggregationEvents() async {
+    if (testService == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -165,28 +168,28 @@ extension EventDataCleanupActions on _EventGenerationTestScreenState {
     if (confirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanAggregationEvents();
+      final result = await testService!.cleanAggregationEvents();
 
       context.showSuccess(
         'Cleaned ${result['deletedAggregationEvents']} aggregation events',
       );
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to clean aggregation events: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to clean aggregation events: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _cleanObjectEvents() async {
-    if (_testService == null) return;
+  Future<void> cleanObjectEvents() async {
+    if (testService == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -211,22 +214,22 @@ extension EventDataCleanupActions on _EventGenerationTestScreenState {
     if (confirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanObjectEvents();
+      final result = await testService!.cleanObjectEvents();
 
       context.showSuccess(
         'Cleaned ${result['deletedObjectEvents']} object events',
       );
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to clean object events: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to clean object events: ${e.toString()}';
+        isLoading = false;
       });
     }
   }

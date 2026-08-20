@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
@@ -12,11 +11,8 @@ import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
-import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_constants.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_event_mapper.dart';
-import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_mandatory_fields.dart';
-import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_save_handler.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_validation_context.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_error_banner.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/cbv_biz_step_disposition_picker.dart';
@@ -35,7 +31,7 @@ import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_
 import 'package:traqtrace_app/features/epcis/widgets/validation_error_widget.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 
-part 'object_event_form_actions.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/object_event_form_actions.dart';
 
 class ObjectEventFormScreen extends StatefulWidget {
   final ObjectEvent? event;
@@ -58,49 +54,49 @@ class ObjectEventFormScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ObjectEventFormScreen> createState() => _ObjectEventFormScreenState();
+  State<ObjectEventFormScreen> createState() => ObjectEventFormScreenState();
 }
 
-class _ObjectEventFormScreenState extends State<ObjectEventFormScreen> {
-  List<dynamic> _validationErrors = [];
-  final _formKey = GlobalKey<FormState>();
+class ObjectEventFormScreenState extends State<ObjectEventFormScreen> {
+  List<dynamic> validationErrors = [];
+  final formKey = GlobalKey<FormState>();
 
-  late DateTime _eventTime;
-  late String _eventTimeZone;
-  String? _action;
-  String? _businessStep;
-  String? _disposition;
-  GLN? _readPoint;
-  GLN? _businessLocation;
+  late DateTime eventTime;
+  late String eventTimeZone;
+  String? action;
+  String? businessStep;
+  String? disposition;
+  GLN? readPoint;
+  GLN? businessLocation;
 
-  final List<String> _epcList = [];
-  final List<String> _epcClassList = [];
-  final List<types.QuantityElement> _quantityList = [];
-  final Map<String, String> _bizData = {};
-  final List<types.SourceDestination> _sourceList = [];
-  final List<types.SourceDestination> _destinationList = [];
-  String? _persistentDisposition;
+  final List<String> epcList = [];
+  final List<String> epcClassList = [];
+  final List<types.QuantityElement> quantityList = [];
+  final Map<String, String> bizData = {};
+  final List<types.SourceDestination> sourceList = [];
+  final List<types.SourceDestination> destinationList = [];
+  String? persistentDisposition;
 
-  final List<SensorElement> _sensorElementList = [];
-  final List<CertificationInfo> _certificationInfoList = [];
-  final Map<String, Object> _ilmd = {};
+  final List<SensorElement> sensorElementList = [];
+  final List<CertificationInfo> certificationInfoList = [];
+  final Map<String, Object> ilmd = {};
 
-  EPCISVersion _epcisVersion = EPCISVersion.v2_0;
+  EPCISVersion epcisVersion = EPCISVersion.v2_0;
 
-  String _epcisVersionString() =>
-      _epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
+  String epcisVersionString() =>
+      epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
 
-  bool _isLoading = false;
-  String? _errorMessage;
-  String? _queryItemDisposition;
+  bool isLoading = false;
+  String? errorMessage;
+  String? queryItemDisposition;
 
   ObjectEventFormValidationContext get _validationContext =>
       ObjectEventFormValidationContext(
-        getFieldError: _getFieldError,
-        hasFieldBeenValidated: _hasFieldBeenValidated,
-        setFieldError: _setFieldError,
-        markFieldAsValid: _markFieldAsValid,
-        validateField: _validateField,
+        getFieldError: getFieldError,
+        hasFieldBeenValidated: hasFieldBeenValidated,
+        setFieldError: setFieldError,
+        markFieldAsValid: markFieldAsValid,
+        validateField: validateField,
       );
 
   @override
@@ -109,16 +105,16 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen> {
     if (widget.event != null) {
       _initializeWithEvent(widget.event!);
     } else {
-      _eventTime = DateTime.now();
+      eventTime = DateTime.now();
       final offset = DateTime.now().timeZoneOffset;
       final hours = offset.inHours.abs();
       final minutes = (offset.inMinutes.abs() % 60);
       final sign = offset.isNegative ? '-' : '+';
-      _eventTimeZone =
+      eventTimeZone =
           '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-      _action = 'ADD';
+      action = 'ADD';
       if (widget.currentItemDisposition != null) {
-        _applyDispositionContextActions();
+        applyDispositionContextActions();
       }
     }
   }
@@ -133,30 +129,30 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen> {
 
       if (queryParams.containsKey('currentItemDisposition')) {
         setState(() {
-          _queryItemDisposition = queryParams['currentItemDisposition'];
-          _applyDispositionContextActions();
+          queryItemDisposition = queryParams['currentItemDisposition'];
+          applyDispositionContextActions();
         });
       }
       if (queryParams.containsKey('bizStep')) {
         setState(() {
           final bizStep = queryParams['bizStep']!;
-          _businessStep = CbvVocabularyFormatter.formatBizStep(
-            _epcisVersionString(),
+          businessStep = CbvVocabularyFormatter.formatBizStep(
+            epcisVersionString(),
             bizStep.startsWith(CbvVocabularyFormatter.bizStepUrnPrefix)
                 ? bizStep
                 : '${CbvVocabularyFormatter.bizStepUrnPrefix}$bizStep',
           );
-          _syncIlmdState();
+          syncIlmdState();
         });
       }
       if (queryParams.containsKey('action')) {
         setState(() {
-          _action = queryParams['action']!;
+          action = queryParams['action']!;
         });
       }
       if (queryParams.containsKey('epcs')) {
         setState(() {
-          _epcList.addAll(
+          epcList.addAll(
             queryParams['epcs']!
                 .split(',')
                 .map((e) => e.trim())
@@ -168,52 +164,52 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen> {
   }
 
   void _initializeWithEvent(ObjectEvent event) {
-    _eventTime = event.eventTime;
-    _eventTimeZone = event.eventTimeZone;
-    _action = event.action;
-    _epcisVersion = event.epcisVersion ?? EPCISVersion.v1_3;
-    _businessStep = event.businessStep != null
+    eventTime = event.eventTime;
+    eventTimeZone = event.eventTimeZone;
+    action = event.action;
+    epcisVersion = event.epcisVersion ?? EPCISVersion.v1_3;
+    businessStep = event.businessStep != null
         ? CbvVocabularyFormatter.formatBizStep(
-            _epcisVersionString(),
+            epcisVersionString(),
             event.businessStep!,
           )
         : null;
-    _disposition = event.disposition != null
+    disposition = event.disposition != null
         ? CbvVocabularyFormatter.formatDisposition(
-            _epcisVersionString(),
+            epcisVersionString(),
             event.disposition!,
           )
         : null;
-    _readPoint = event.readPoint;
-    _businessLocation = event.businessLocation;
+    readPoint = event.readPoint;
+    businessLocation = event.businessLocation;
 
-    if (event.epcList != null) _epcList.addAll(event.epcList!);
-    if (event.epcClassList != null) _epcClassList.addAll(event.epcClassList!);
-    if (event.quantityList != null) _quantityList.addAll(event.quantityList!);
+    if (event.epcList != null) epcList.addAll(event.epcList!);
+    if (event.epcClassList != null) epcClassList.addAll(event.epcClassList!);
+    if (event.quantityList != null) quantityList.addAll(event.quantityList!);
     if (event.ilmd != null) {
-      _ilmd.addAll(Map<String, Object>.from(event.ilmd!));
+      ilmd.addAll(Map<String, Object>.from(event.ilmd!));
     }
-    if (event.bizData != null) _bizData.addAll(event.bizData!);
-    if (event.sourceList != null) _sourceList.addAll(event.sourceList!);
+    if (event.bizData != null) bizData.addAll(event.bizData!);
+    if (event.sourceList != null) sourceList.addAll(event.sourceList!);
     if (event.destinationList != null) {
-      _destinationList.addAll(event.destinationList!);
+      destinationList.addAll(event.destinationList!);
     }
     if (event.persistentDisposition != null) {
-      _persistentDisposition = event.persistentDisposition;
+      persistentDisposition = event.persistentDisposition;
     }
     if (event.sensorElementList != null) {
       try {
-        _sensorElementList.addAll(
+        sensorElementList.addAll(
           ObjectEventFormEventMapper.mapListToSensorElementList(
             event.sensorElementList!,
           ),
         );
       } catch (_) {
-        _sensorElementList.clear();
+        sensorElementList.clear();
       }
     }
     if (event.certificationInfo != null) {
-      _certificationInfoList.addAll(
+      certificationInfoList.addAll(
         ObjectEventFormEventMapper.mapListToCertificationInfoList(
           event.certificationInfo!,
         ),
@@ -237,24 +233,24 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen> {
         context.watch<ObjectEventsCubit>().state.selectedEvent == null;
 
     return Scaffold(
-      body: _isLoading || isLoadingViewOnly
+      body: isLoading || isLoadingViewOnly
           ? const Center(child: AppLoadingIndicator())
           : BlocBuilder<ValidationCubit, ValidationState>(
               builder: (context, _) => Form(
-                key: _formKey,
+                key: formKey,
                 child: Column(
                   children: [
-                    if (_errorMessage != null || _validationErrors.isNotEmpty)
+                    if (errorMessage != null || validationErrors.isNotEmpty)
                       const SizedBox(height: 16.0),
-                    if (_validationErrors.isNotEmpty)
+                    if (validationErrors.isNotEmpty)
                       ValidationErrorWidget(
-                        validationErrors: _validationErrors,
-                        onDismiss: () => setState(() => _validationErrors = []),
+                        validationErrors: validationErrors,
+                        onDismiss: () => setState(() => validationErrors = []),
                       ),
-                    if (_errorMessage != null)
+                    if (errorMessage != null)
                       ObjectEventFormErrorBanner(
-                        message: _errorMessage!,
-                        onDismiss: () => setState(() => _errorMessage = null),
+                        message: errorMessage!,
+                        onDismiss: () => setState(() => errorMessage = null),
                       ),
 
                     Expanded(
@@ -263,7 +259,7 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (_allowedActionsForItemState().isEmpty)
+                            if (allowedActionsForItemState().isEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
                                 child: ObjectEventFormErrorBanner(
@@ -273,96 +269,96 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen> {
                                 ),
                               ),
                             ObjectEventFormEpcisVersionSection(
-                              epcisVersion: _epcisVersion,
+                              epcisVersion: epcisVersion,
                               isViewOnly: widget.isViewOnly,
                               onChanged: (v) => setState(() {
-                                _epcisVersion = v;
-                                _formatCbvFieldsForVersion(v);
+                                epcisVersion = v;
+                                formatCbvFieldsForVersion(v);
                               }),
                             ),
                             const SizedBox(height: 16.0),
                             ObjectEventFormEventTimeSection(
-                              eventTime: _eventTime,
-                              eventTimeZone: _eventTimeZone,
+                              eventTime: eventTime,
+                              eventTimeZone: eventTimeZone,
                               isViewOnly: widget.isViewOnly,
-                              isTimeZoneMandatory: _isMandatory(
+                              isTimeZoneMandatory: isMandatory(
                                 'eventTimeZone',
                               ),
                               validation: _validationContext,
-                              onSelectEventTime: _selectEventTime,
+                              onSelectEventTime: selectEventTime,
                               onTimeZoneChanged: (v) =>
-                                  setState(() => _eventTimeZone = v),
+                                  setState(() => eventTimeZone = v),
                             ),
                             const SizedBox(height: 16.0),
                             ObjectEventFormActionSection(
-                              action: _action,
-                              allowedActions: _allowedActionsForItemState(),
+                              action: action,
+                              allowedActions: allowedActionsForItemState(),
                               isViewOnly: widget.isViewOnly,
-                              isMandatory: _isMandatory('action'),
+                              isMandatory: isMandatory('action'),
                               validation: _validationContext,
-                              onChanged: _onActionChanged,
+                              onChanged: onActionChanged,
                               onRevalidateForm: () => Future.delayed(
                                 const Duration(milliseconds: 100),
-                                () => _formKey.currentState?.validate(),
+                                () => formKey.currentState?.validate(),
                               ),
                             ),
                             const SizedBox(height: 16.0),
                             CbvBizStepDispositionPicker(
-                              action: _action,
-                              initialBizStep: _businessStep,
-                              initialDisposition: _disposition,
-                              epcisVersion: _epcisVersion,
+                              action: action,
+                              initialBizStep: businessStep,
+                              initialDisposition: disposition,
+                              epcisVersion: epcisVersion,
                               isViewOnly: widget.isViewOnly,
-                              isBizStepMandatory: _isMandatory('businessStep'),
-                              isDispositionMandatory: _isMandatory(
+                              isBizStepMandatory: isMandatory('businessStep'),
+                              isDispositionMandatory: isMandatory(
                                 'disposition',
                               ),
                               validation: _validationContext,
-                              onBizStepChanged: _onBusinessStepChanged,
+                              onBizStepChanged: onBusinessStepChanged,
                               onDispositionChanged: (v) =>
-                                  setState(() => _disposition = v),
+                                  setState(() => disposition = v),
                             ),
                             const SizedBox(height: 16.0),
                             ObjectEventFormLocationSection(
-                              businessLocation: _businessLocation,
-                              readPoint: _readPoint,
+                              businessLocation: businessLocation,
+                              readPoint: readPoint,
                               isViewOnly: widget.isViewOnly,
-                              isBusinessLocationMandatory: _isMandatory(
+                              isBusinessLocationMandatory: isMandatory(
                                 'businessLocationGLN',
                               ),
-                              isReadPointMandatory: _isMandatory(
+                              isReadPointMandatory: isMandatory(
                                 'readPointGLN',
                               ),
                               validation: _validationContext,
                               onBusinessLocationChanged: (v) =>
-                                  setState(() => _businessLocation = v),
+                                  setState(() => businessLocation = v),
                               onReadPointChanged: (v) =>
-                                  setState(() => _readPoint = v),
+                                  setState(() => readPoint = v),
                             ),
                             const SizedBox(height: 16.0),
                             ObjectEventFormEpcsSection(
-                              epcList: _epcList,
+                              epcList: epcList,
                               isViewOnly: widget.isViewOnly,
-                              action: _action,
-                              businessStep: _businessStep,
-                              quantityListEmpty: _quantityList.isEmpty,
+                              action: action,
+                              businessStep: businessStep,
+                              quantityListEmpty: quantityList.isEmpty,
                               onChanged: (epcs) => setState(() {
-                                _epcList
+                                epcList
                                   ..clear()
                                   ..addAll(epcs);
-                                _syncIlmdState();
+                                syncIlmdState();
                               }),
                             ),
-                            if (_shouldShowIlmdSection()) ...[
+                            if (shouldShowIlmdSection()) ...[
                               const SizedBox(height: 16.0),
                               ObjectEventFormIlmdSection(
-                                ilmd: _ilmd,
+                                ilmd: ilmd,
                                 isViewOnly: widget.isViewOnly,
-                                action: _action,
-                                businessStep: _businessStep,
-                                epcList: _epcList,
+                                action: action,
+                                businessStep: businessStep,
+                                epcList: epcList,
                                 onChanged: (ilmd) => setState(() {
-                                  _ilmd
+                                  ilmd
                                     ..clear()
                                     ..addAll(ilmd);
                                 }),
@@ -370,88 +366,88 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen> {
                             ],
                             const SizedBox(height: 16.0),
                             ObjectEventFormEpcClassesSection(
-                              epcClassList: _epcClassList,
+                              epcClassList: epcClassList,
                               isViewOnly: widget.isViewOnly,
                               onChanged: (classes) => setState(() {
-                                _epcClassList
+                                epcClassList
                                   ..clear()
                                   ..addAll(classes);
                               }),
                             ),
                             const SizedBox(height: 16.0),
                             ObjectEventFormQuantitiesSection(
-                              quantityList: _quantityList,
+                              quantityList: quantityList,
                               isViewOnly: widget.isViewOnly,
-                              action: _action,
-                              businessStep: _businessStep,
-                              epcListEmpty: _epcList.isEmpty,
+                              action: action,
+                              businessStep: businessStep,
+                              epcListEmpty: epcList.isEmpty,
                               onChanged: (quantities) => setState(() {
-                                _quantityList
+                                quantityList
                                   ..clear()
                                   ..addAll(quantities);
                               }),
                             ),
                             ObjectEventFormSourceListSection(
-                              sourceList: _sourceList,
+                              sourceList: sourceList,
                               isViewOnly: widget.isViewOnly,
                               onChanged: (sources) => setState(() {
-                                _sourceList
+                                sourceList
                                   ..clear()
                                   ..addAll(sources);
                               }),
                             ),
                             const SizedBox(height: 16.0),
                             ObjectEventFormDestinationListSection(
-                              destinationList: _destinationList,
+                              destinationList: destinationList,
                               isViewOnly: widget.isViewOnly,
-                              action: _action,
-                              businessStep: _businessStep,
-                              epcListEmpty: _epcList.isEmpty,
-                              quantityListEmpty: _quantityList.isEmpty,
-                              epcList: _epcList,
+                              action: action,
+                              businessStep: businessStep,
+                              epcListEmpty: epcList.isEmpty,
+                              quantityListEmpty: quantityList.isEmpty,
+                              epcList: epcList,
                               onChanged: (destinations) => setState(() {
-                                _destinationList
+                                destinationList
                                   ..clear()
                                   ..addAll(destinations);
                               }),
                             ),
                             const SizedBox(height: 16.0),
                             ObjectEventFormEventSummarySection(
-                              action: _action,
-                              businessStep: _businessStep,
-                              disposition: _disposition,
-                              businessLocation: _businessLocation,
-                              epcList: _epcList,
-                              epcClassList: _epcClassList,
-                              quantityList: _quantityList,
-                              sourceList: _sourceList,
-                              destinationList: _destinationList,
-                              eventTime: _eventTime,
-                              eventTimeZone: _eventTimeZone,
+                              action: action,
+                              businessStep: businessStep,
+                              disposition: disposition,
+                              businessLocation: businessLocation,
+                              epcList: epcList,
+                              epcClassList: epcClassList,
+                              quantityList: quantityList,
+                              sourceList: sourceList,
+                              destinationList: destinationList,
+                              eventTime: eventTime,
+                              eventTimeZone: eventTimeZone,
                             ),
                             const SizedBox(height: 16.0),
                             ObjectEventFormEpcis20ExtensionsSection(
-                              epcisVersion: _epcisVersion,
-                              sensorElementList: _sensorElementList,
-                              certificationInfoList: _certificationInfoList,
+                              epcisVersion: epcisVersion,
+                              sensorElementList: sensorElementList,
+                              certificationInfoList: certificationInfoList,
                               isViewOnly: widget.isViewOnly,
                               onSensorElementsChanged: (elements) =>
                                   setState(() {
-                                    _sensorElementList
+                                    sensorElementList
                                       ..clear()
                                       ..addAll(elements);
                                   }),
                               onCertificationsChanged: (certs) => setState(() {
-                                _certificationInfoList
+                                certificationInfoList
                                   ..clear()
                                   ..addAll(certs);
                               }),
                             ),
                             const SizedBox(height: 16.0),
                             if (!widget.isViewOnly &&
-                                _allowedActionsForItemState().isNotEmpty)
+                                allowedActionsForItemState().isNotEmpty)
                               CustomElevatedButton(
-                                onPressed: _isLoading ? null : _saveEvent,
+                                onPressed: isLoading ? null : saveEvent,
                                 label: widget.event != null
                                     ? 'Update Object Event'
                                     : 'Create Object Event',

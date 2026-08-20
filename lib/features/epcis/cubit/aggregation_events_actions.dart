@@ -1,4 +1,10 @@
-part of 'aggregation_events_cubit.dart';
+import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/operations/packing/packing_request_model.dart';
+import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_request_model.dart';
+import 'package:traqtrace_app/data/services/epcis/aggregation_event_service_operations.dart';
+import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
+import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_state.dart';
 
 extension AggregationEventsActions on AggregationEventsCubit {
   Future<AggregationEvent> createAggregationEvent(
@@ -8,7 +14,7 @@ extension AggregationEventsActions on AggregationEventsCubit {
       state.copyWith(status: AggregationEventsStatus.loading, clearError: true),
     );
     try {
-      final newEvent = await _service.createAggregationEvent(event);
+      final newEvent = await service.createAggregationEvent(event);
       emit(
         state.copyWith(
           status: AggregationEventsStatus.success,
@@ -44,7 +50,7 @@ extension AggregationEventsActions on AggregationEventsCubit {
     );
     try {
       final ref = bizData['traqtrace:packingReference']?.trim();
-      final result = await _packingService.createPackingOperation(
+      final result = await packingService.createPackingOperation(
         PackingRequest(
           packingReference: (ref != null && ref.isNotEmpty)
               ? ref
@@ -117,7 +123,7 @@ extension AggregationEventsActions on AggregationEventsCubit {
     try {
       final children = childEPCs ?? const <String>[];
       final ref = bizData['traqtrace:unpackingReference']?.trim();
-      final result = await _unpackingService.createUnpackingOperation(
+      final result = await unpackingService.createUnpackingOperation(
         UnpackingRequest(
           unpackingReference: (ref != null && ref.isNotEmpty)
               ? ref
@@ -186,7 +192,7 @@ extension AggregationEventsActions on AggregationEventsCubit {
     final id = preferredEventId?.trim();
     if (id != null && id.isNotEmpty) {
       try {
-        return await _service.getAggregationEventByIdentifier(id);
+        return await service.getAggregationEventByIdentifier(id);
       } catch (_) {
         // Fall through to a client-side stub for list UX.
       }
@@ -210,7 +216,7 @@ extension AggregationEventsActions on AggregationEventsCubit {
 
   Future<AggregationEvent?> findCurrentParentOfChild(String childEPC) async {
     try {
-      return await _service.findCurrentParentOfChild(childEPC);
+      return await service.findCurrentParentOfChild(childEPC);
     } catch (_) {
       return null;
     }
@@ -219,8 +225,8 @@ extension AggregationEventsActions on AggregationEventsCubit {
   Future<void> trackParentHistory(String parentEPC) async {
     emit(state.copyWith(isListLoading: true, clearListFetchError: true));
     try {
-      final raw = await _service.findAggregationEventsByParentEPC(parentEPC);
-      final events = await _enrichWithGlns(raw);
+      final raw = await service.findAggregationEventsByParentEPC(parentEPC);
+      final events = await enrichWithGlns(raw);
       emit(
         state.copyWith(
           status: AggregationEventsStatus.success,
@@ -243,8 +249,8 @@ extension AggregationEventsActions on AggregationEventsCubit {
   Future<void> trackChildHistory(String childEPC) async {
     emit(state.copyWith(isListLoading: true, clearListFetchError: true));
     try {
-      final raw = await _service.findAggregationEventsByChildEPC(childEPC);
-      final events = await _enrichWithGlns(raw);
+      final raw = await service.findAggregationEventsByChildEPC(childEPC);
+      final events = await enrichWithGlns(raw);
       emit(
         state.copyWith(
           status: AggregationEventsStatus.success,
@@ -266,7 +272,7 @@ extension AggregationEventsActions on AggregationEventsCubit {
 
   Future<List<String>> loadContainerContents(String parentEPC) async {
     try {
-      return await _service.findContainerContents(parentEPC);
+      return await service.findContainerContents(parentEPC);
     } catch (_) {
       return [];
     }
@@ -274,7 +280,7 @@ extension AggregationEventsActions on AggregationEventsCubit {
 
   Future<bool> verifyHierarchy(String epc) async {
     try {
-      return await _service.verifyHierarchy(epc);
+      return await service.verifyHierarchy(epc);
     } catch (_) {
       return false;
     }

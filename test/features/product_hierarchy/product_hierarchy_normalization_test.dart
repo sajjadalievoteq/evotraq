@@ -5,6 +5,7 @@ import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
 import 'package:traqtrace_app/data/services/product_journey/product_journey_service.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_cubit.dart';
+import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_tree_actions.dart';
 
 class _MockHierarchyService extends Mock implements HierarchyService {}
 

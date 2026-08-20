@@ -1,5 +1,5 @@
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class PrimaryFetchScope extends InheritedWidget {
   const PrimaryFetchScope({

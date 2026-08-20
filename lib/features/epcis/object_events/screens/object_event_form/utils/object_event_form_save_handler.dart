@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart' as types;
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
-import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_entry_dialogs.dart';
@@ -22,7 +20,6 @@ import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_save_models.dart';
-export 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_save_models.dart';
 
 class ObjectEventFormSaveHandler {
   ObjectEventFormSaveHandler._();

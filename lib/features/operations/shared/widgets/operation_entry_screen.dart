@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_state.dart';
 
 class OperationEntryScreen extends StatefulWidget {
   const OperationEntryScreen({

@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -9,7 +10,6 @@ import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/cubit/home_state.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/features/home/screens/home/utils/status_rail_formatters.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/wall_clock_tick.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/status_rail/live_updates_indicator.dart';

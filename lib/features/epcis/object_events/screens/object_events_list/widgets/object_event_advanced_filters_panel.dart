@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_events_list/widgets/object_event_date_range_row.dart';
 
 class ObjectEventAdvancedFiltersPanel extends StatelessWidget {

@@ -1,4 +1,9 @@
-part of 'tatmeen_stats_row.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_widgets.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/utils/tatmeen_dashboard_layout.dart';
 
 class TatmeenStatsSkeleton extends StatelessWidget {
   const TatmeenStatsSkeleton({super.key});
@@ -6,7 +11,7 @@ class TatmeenStatsSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final base = AppShimmer.defaultBaseColor(context);
-    final width = _tatmeenKpiCardWidth(context);
+    final width = tatmeenKpiCardWidth(context);
     return AppShimmer(
       child: Wrap(
         spacing: TraqSpacing.md,

@@ -1,37 +1,49 @@
-part of 'sscc_detail_screen.dart';
-
-extension SSCCDetailEditActions on _SSCCDetailScreenState {
-  void _setFieldError(String fieldName, String? error) {
-    if (_validationCubit.getFieldError(fieldName) == error) {
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/extensions/validation_feedback_extension.dart';
+import 'package:traqtrace_app/core/utils/gs1_utils.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_route_constants.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
+import 'package:traqtrace_app/features/barcode/widgets/dialog/gs1_barcode_scan.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/sscc_detail_actions.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/sscc_detail_screen.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/utils/sscc_input_mode.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_actions.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_form_validation.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
+    as edit_rules;
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
+extension SSCCDetailEditActions on SSCCDetailScreenState {
+  void setFieldError(String fieldName, String? error) {
+    if (validationCubit.getFieldError(fieldName) == error) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _validationCubit.setFieldError(fieldName, error);
+      validationCubit.setFieldError(fieldName, error);
     });
   }
-
-  Future<void> _savePharmaExtensionIfNeeded(
-    int? ssccId,
-    String ssccCode,
-  ) async {
-    final pharmaState = _pharmaExtensionKey.currentState;
+  Future<void> savePharmaExtensionIfNeeded(int? ssccId, String ssccCode) async {
+    final pharmaState = pharmaExtensionKey.currentState;
     debugPrint(
       'SSCC Pharma extension check - state: ${pharmaState != null}, hasData: ${pharmaState?.hasData}',
     );
-
     if (pharmaState == null) {
       debugPrint(
         'Pharma extension widget not in tree (probably not in pharmaceutical mode)',
       );
       return;
     }
-
     if (!pharmaState.hasData) {
       debugPrint('No pharmaceutical extension data to save');
       return;
     }
-
     try {
       final extension = pharmaState.buildExtension(
         ssccId: ssccId,
@@ -47,48 +59,44 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
       debugPrint('Error saving SSCC pharmaceutical extension: $e');
     }
   }
-
-  void _populateFormFields(SSCC sscc) {
-    _sscc = sscc;
+  void populateFormFields(SSCC sscc) {
+    sscc = sscc;
     hydrateSsccDetailFields(sscc);
-
-    _issuingGln = sscc.issuingGLN;
-    _issuingGlnError = null;
-
-    _containedExpiry = sscc.containedExpiry;
-    _shipFromGln = _glnFromStoredCode(sscc.shipFromGln);
-    _shipToGln = _glnFromStoredCode(sscc.shipToGln);
-    _billToGln = _glnFromStoredCode(sscc.billToGln);
-    _shipForGln = _glnFromStoredCode(sscc.shipForGln);
-    _custodianGln = _glnFromStoredCode(sscc.currentCustodianGln);
-
+    issuingGln = sscc.issuingGLN;
+    issuingGlnError = null;
+    containedExpiry = sscc.containedExpiry;
+    shipFromGln = _glnFromStoredCode(sscc.shipFromGln);
+    shipToGln = _glnFromStoredCode(sscc.shipToGln);
+    billToGln = _glnFromStoredCode(sscc.billToGln);
+    shipForGln = _glnFromStoredCode(sscc.shipForGln);
+    custodianGln = _glnFromStoredCode(sscc.currentCustodianGln);
     setState(() {
-      _unitType = sscc.unitType;
-      _status = sscc.status;
-      _contentHomogeneity = sscc.contentHomogeneity;
-      _serverTransitions = sscc.availableTransitions ?? const [];
-      _packingDate = sscc.packingDate;
-      _formFieldsHydrated = true;
+      unitType = sscc.unitType;
+      status = sscc.status;
+      contentHomogeneity = sscc.contentHomogeneity;
+      serverTransitions = sscc.availableTransitions ?? const [];
+      packingDate = sscc.packingDate;
+      formFieldsHydrated = true;
     });
 
-    if (sscc.id != null && _serverTransitions.isEmpty) {
+    if (sscc.id != null && serverTransitions.isEmpty) {
       _loadTransitions(sscc.id!);
     }
-    _loadAggregationLinks(sscc.ssccCode);
-    _loadedSsccKey = _requestedSsccKey;
-    _applyGlnCatalogToFields();
-    _ensureGlnPickerCatalog();
+    loadAggregationLinks(sscc.ssccCode);
+    loadedSsccKey = requestedSsccKey;
+    applyGlnCatalogToFields();
+    ensureGlnPickerCatalog();
     _enforceEditRouteIfNeeded(sscc);
   }
 
   void _enforceEditRouteIfNeeded(SSCC sscc) {
-    if (_editRedirectHandled || widget.isCreating || !widget.isEditing) {
+    if (editRedirectHandled || widget.isCreating || !widget.isEditing) {
       return;
     }
     if (edit_rules.canEditSsccRecord(sscc.status)) {
       return;
     }
-    _editRedirectHandled = true;
+    editRedirectHandled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.showInfo(edit_rules.readOnlyLifecycleMessage(sscc.status));
@@ -102,106 +110,106 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
     });
   }
 
-  void _applyGlnCatalogToFields() {
-    if (_glnPickerCatalog.isEmpty) return;
+  void applyGlnCatalogToFields() {
+    if (glnPickerCatalog.isEmpty) return;
     setState(() {
-      _issuingGln = resolveGlnForPicker(
-        code: _issuingGln?.glnCode ?? _sscc?.issuingGLN?.glnCode,
-        fallback: _issuingGln ?? _sscc?.issuingGLN,
-        catalog: _glnPickerCatalog,
+      issuingGln = resolveGlnForPicker(
+        code: issuingGln?.glnCode ?? sscc?.issuingGLN?.glnCode,
+        fallback: issuingGln ?? sscc?.issuingGLN,
+        catalog: glnPickerCatalog,
       );
-      _shipFromGln = resolveGlnForPicker(
-        code: _shipFromGln?.glnCode ?? _sscc?.shipFromGln,
-        fallback: _shipFromGln,
-        catalog: _glnPickerCatalog,
+      shipFromGln = resolveGlnForPicker(
+        code: shipFromGln?.glnCode ?? sscc?.shipFromGln,
+        fallback: shipFromGln,
+        catalog: glnPickerCatalog,
       );
-      _shipToGln = resolveGlnForPicker(
-        code: _shipToGln?.glnCode ?? _sscc?.shipToGln,
-        fallback: _shipToGln,
-        catalog: _glnPickerCatalog,
+      shipToGln = resolveGlnForPicker(
+        code: shipToGln?.glnCode ?? sscc?.shipToGln,
+        fallback: shipToGln,
+        catalog: glnPickerCatalog,
       );
-      _billToGln = resolveGlnForPicker(
-        code: _billToGln?.glnCode ?? _sscc?.billToGln,
-        fallback: _billToGln,
-        catalog: _glnPickerCatalog,
+      billToGln = resolveGlnForPicker(
+        code: billToGln?.glnCode ?? sscc?.billToGln,
+        fallback: billToGln,
+        catalog: glnPickerCatalog,
       );
-      _shipForGln = resolveGlnForPicker(
-        code: _shipForGln?.glnCode ?? _sscc?.shipForGln,
-        fallback: _shipForGln,
-        catalog: _glnPickerCatalog,
+      shipForGln = resolveGlnForPicker(
+        code: shipForGln?.glnCode ?? sscc?.shipForGln,
+        fallback: shipForGln,
+        catalog: glnPickerCatalog,
       );
-      _custodianGln = resolveGlnForPicker(
-        code: _custodianGln?.glnCode ?? _sscc?.currentCustodianGln,
-        fallback: _custodianGln,
-        catalog: _glnPickerCatalog,
+      custodianGln = resolveGlnForPicker(
+        code: custodianGln?.glnCode ?? sscc?.currentCustodianGln,
+        fallback: custodianGln,
+        catalog: glnPickerCatalog,
       );
     });
   }
 
-  Future<void> _loadAggregationLinks(String ssccCode) {
-    if (_aggregationLinksRequestedCode == ssccCode &&
-        _aggregationLinksFuture != null) {
-      return _aggregationLinksFuture!;
+  Future<void> loadAggregationLinks(String ssccCode) {
+    if (aggregationLinksRequestedCode == ssccCode &&
+        aggregationLinksFuture != null) {
+      return aggregationLinksFuture!;
     }
-    _aggregationLinksRequestedCode = ssccCode;
+    aggregationLinksRequestedCode = ssccCode;
     final future = () async {
-      final links = await _cubit.fetchAggregationLinks(ssccCode);
-      if (!mounted || _aggregationLinksRequestedCode != ssccCode) return;
-      setState(() => _aggregationLinks = links);
+      final links = await cubit.fetchAggregationLinks(ssccCode);
+      if (!mounted || aggregationLinksRequestedCode != ssccCode) return;
+      setState(() => aggregationLinks = links);
     }();
-    _aggregationLinksFuture = future;
+    aggregationLinksFuture = future;
     return future;
   }
 
-  Future<bool> _addAggregationChild({
+  Future<bool> addAggregationChild({
     required String childEpc,
     required String childKind,
     required String aggregationEventId,
   }) async {
-    final ssccId = _sscc?.id;
+    final ssccId = sscc?.id;
     if (ssccId == null) return false;
 
-    final link = await _cubit.addAggregationChild(
+    final link = await cubit.addAggregationChild(
       ssccId: ssccId,
       childEpc: childEpc,
       childKind: childKind,
       aggregationEventId: aggregationEventId,
     );
     if (link != null && mounted) {
-      await _loadAggregationLinks(_sscc!.ssccCode);
+      await loadAggregationLinks(sscc!.ssccCode);
       context.showSuccess('Child aggregated successfully');
       return true;
     }
     return false;
   }
 
-  Future<bool> _disaggregateChild({
+  Future<bool> disaggregateChild({
     required int linkId,
     required String disaggregationEventId,
   }) async {
-    final ok = await _cubit.disaggregateChild(
+    final ok = await cubit.disaggregateChild(
       linkId: linkId,
       disaggregationEventId: disaggregationEventId,
     );
     if (ok && mounted) {
-      await _loadAggregationLinks(_sscc!.ssccCode);
+      await loadAggregationLinks(sscc!.ssccCode);
       context.showSuccess('Child disaggregated');
     }
     return ok;
   }
 
   Future<void> _loadTransitions(String id) async {
-    final transitions = await _cubit.fetchAvailableTransitions(id);
+    final transitions = await cubit.fetchAvailableTransitions(id);
     if (mounted && transitions.isNotEmpty) {
-      setState(() => _serverTransitions = transitions);
+      setState(() => serverTransitions = transitions);
     }
   }
 
-  Future<void> _saveSSCC() async {
+  Future<void> saveSSCC() async {
     if (widget.awaitingListSelection) return;
 
-    if (!_forceMountAllSections) {
-      setState(() => _forceMountAllSections = true);
+    if (!forceMountAllSections) {
+      setState(() => forceMountAllSections = true);
       await Future<void>.delayed(Duration.zero);
       if (!mounted) return;
       await WidgetsBinding.instance.endOfFrame;
@@ -209,26 +217,26 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
     }
 
     setState(() {
-      _issuingGlnError = validateIssuingGlnRequired(_issuingGln?.glnCode);
+      issuingGlnError = validateIssuingGlnRequired(issuingGln?.glnCode);
     });
 
     final validationErrors = SsccCreateFormValidation.collectErrors(
       isCreating: widget.isCreating,
-      issuingGlnCode: _issuingGln?.glnCode,
+      issuingGlnCode: issuingGln?.glnCode,
       extensionDigit: extensionDigitText(),
       ssccCodeRaw: ssccCodeText(),
-      ssccMissingMessage: _ssccCodeMissingMessage(),
-      contentHomogeneity: _contentHomogeneity,
+      ssccMissingMessage: ssccCodeMissingMessage(),
+      contentHomogeneity: contentHomogeneity,
       containedGtin: containedGtinText(),
       containedQuantity: containedQuantityText(),
       gsin: gsinText(),
       purchaseOrder: poText(),
     );
 
-    _formKey.currentState?.validate();
+    formKey.currentState?.validate();
 
     validationErrors.addAll(
-      SsccCreateFormValidation.collectFormFieldErrors(_formKey),
+      SsccCreateFormValidation.collectFormFieldErrors(formKey),
     );
 
     if (validationErrors.isNotEmpty) {
@@ -243,7 +251,7 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
     final now = DateTime.now();
 
     setState(() {
-      _hasSubmittedForm = true;
+      hasSubmittedForm = true;
     });
 
     String gs1CompanyPrefix = '';
@@ -267,14 +275,14 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
         }
       }
 
-      _syncExtensionDigitFromSscc(ssccCode);
+      syncExtensionDigitFromSscc(ssccCode);
 
       gs1CompanyPrefix = ssccCode.substring(1, 8);
       serialReference = ssccCode.substring(8, 17);
       checkDigit = ssccCode.substring(17);
     } else {
       context.showValidationErrors([
-        'SSCC Code: ${_ssccCodeMissingMessage()}',
+        'SSCC Code: ${ssccCodeMissingMessage()}',
       ], title: 'Cannot save SSCC — fix these fields');
       return;
     }
@@ -282,23 +290,23 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
     final containedQty = int.tryParse(containedQuantityText().trim());
     final identityLocked =
         !widget.isCreating &&
-        _sscc != null &&
-        edit_rules.isSsccIdentityLocked(_sscc!.status);
-    final persistedStatus = _sscc?.status ?? _status;
+        sscc != null &&
+        edit_rules.isSsccIdentityLocked(sscc!.status);
+    final persistedStatus = sscc?.status ?? status;
     final saveStatus =
         edit_rules.canManuallyEditSsccStatus(
           persistedStatus,
           isCreating: widget.isCreating,
         )
-        ? _status
+        ? status
         : persistedStatus;
 
-    final sscc = SSCC(
-      id: widget.isCreating ? null : _sscc?.id,
-      ssccCode: identityLocked ? _sscc!.ssccCode : ssccCodeText(),
-      unitType: _unitType,
+    final savedSscc = SSCC(
+      id: widget.isCreating ? null : sscc?.id,
+      ssccCode: identityLocked ? sscc!.ssccCode : ssccCodeText(),
+      unitType: unitType,
       status: saveStatus,
-      contentHomogeneity: _contentHomogeneity,
+      contentHomogeneity: contentHomogeneity,
       containedGtin: containedGtinText().trim().isEmpty
           ? null
           : containedGtinText().trim(),
@@ -306,59 +314,59 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
       containedBatch: containedBatchText().trim().isEmpty
           ? null
           : containedBatchText().trim(),
-      containedExpiry: _containedExpiry,
-      packingDate: _packingDate,
-      shipFromGln: _glnCodeOrNull(_shipFromGln),
-      shipToGln: _glnCodeOrNull(_shipToGln),
-      billToGln: _glnCodeOrNull(_billToGln),
-      shipForGln: _glnCodeOrNull(_shipForGln),
-      currentCustodianGln: _glnCodeOrNull(_custodianGln),
+      containedExpiry: containedExpiry,
+      packingDate: packingDate,
+      shipFromGln: _glnCodeOrNull(shipFromGln),
+      shipToGln: _glnCodeOrNull(shipToGln),
+      billToGln: _glnCodeOrNull(billToGln),
+      shipForGln: _glnCodeOrNull(shipForGln),
+      currentCustodianGln: _glnCodeOrNull(custodianGln),
       gsin: _trimOrNull(gsinText()),
       ginc: _trimOrNull(gincText()),
       purchaseOrderNumber: _trimOrNull(poText()),
       carrierRoutingCode: _trimOrNull(carrierRoutingText()),
-      parentSsccCode: _sscc?.parentSsccCode,
+      parentSsccCode: sscc?.parentSsccCode,
       extensionDigit: identityLocked
-          ? (_sscc!.extensionDigit ?? '0')
+          ? (sscc!.extensionDigit ?? '0')
           : (extensionDigitText().isEmpty ? '0' : extensionDigitText()),
       gs1CompanyPrefix: identityLocked
-          ? (_sscc!.gs1CompanyPrefix ?? gs1CompanyPrefix)
+          ? (sscc!.gs1CompanyPrefix ?? gs1CompanyPrefix)
           : gs1CompanyPrefix,
       serialReference: identityLocked
-          ? (_sscc!.serialReference ?? serialReference)
+          ? (sscc!.serialReference ?? serialReference)
           : serialReference,
       checkDigit: identityLocked
-          ? (_sscc!.checkDigit ?? checkDigit)
+          ? (sscc!.checkDigit ?? checkDigit)
           : checkDigit,
-      issuingGLN: _issuingGln,
-      createdAt: _sscc?.createdAt ?? now,
+      issuingGLN: issuingGln,
+      createdAt: sscc?.createdAt ?? now,
       updatedAt: now,
     );
 
     if (widget.isCreating) {
-      _cubit.createSSCC(sscc);
+      cubit.createSSCC(savedSscc);
     } else if (widget.isEditing &&
-        _sscc?.id != null &&
-        edit_rules.canEditSsccRecord(_sscc!.status)) {
-      _cubit.updateSSCC(_sscc!.id!, sscc);
+        sscc?.id != null &&
+        edit_rules.canEditSsccRecord(sscc!.status)) {
+      cubit.updateSSCC(sscc!.id!, savedSscc);
     }
   }
 
   void _scrollToFormTop() {
-    if (!_scrollController.hasClients) return;
-    _scrollController.animateTo(
+    if (!scrollController.hasClients) return;
+    scrollController.animateTo(
       0,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
   }
 
-  void _generateSSCCCode() {
+  void generateSSCCCode() {
     context.dismissSnackBar();
 
-    final issuingError = validateIssuingGlnRequired(_issuingGln?.glnCode);
+    final issuingError = validateIssuingGlnRequired(issuingGln?.glnCode);
     if (issuingError != null) {
-      setState(() => _issuingGlnError = issuingError);
+      setState(() => issuingGlnError = issuingError);
       context.showError(issuingError);
       return;
     }
@@ -379,10 +387,10 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
       duration: const Duration(seconds: 2),
     );
 
-    _cubit.generateSSCCFromGLN(_issuingGln!.glnCode, extensionDigitText());
+    cubit.generateSSCCFromGLN(issuingGln!.glnCode, extensionDigitText());
   }
 
-  Future<void> _scanSSCCCode() async {
+  Future<void> scanSSCCCode() async {
     final result = await GS1BarcodeScanDialog.show(
       context,
       title: 'Scan SSCC Barcode',
@@ -410,8 +418,8 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
     context.showSuccess('SSCC captured: $parsed');
   }
 
-  String _ssccCodeMissingMessage() {
-    switch (_ssccInputMode) {
+  String ssccCodeMissingMessage() {
+    switch (ssccInputMode) {
       case SsccInputMode.generate:
         return 'Generate an SSCC code using the button, or switch to Manual or Scan';
       case SsccInputMode.scan:
@@ -421,7 +429,7 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
     }
   }
 
-  void _syncExtensionDigitFromSscc(String ssccCode) {
+  void syncExtensionDigitFromSscc(String ssccCode) {
     syncExtensionDigitFromSsccCode(ssccCode);
   }
 
@@ -435,7 +443,7 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
     return GLN.fromCode(code.trim());
   }
 
-  int? _parseSsccId(String? id) {
+  int? parseSsccId(String? id) {
     if (id == null || id.trim().isEmpty) return null;
     return int.tryParse(id.trim());
   }
@@ -446,7 +454,7 @@ extension SSCCDetailEditActions on _SSCCDetailScreenState {
     return code;
   }
 
-  Future<void> _selectDate(
+  Future<void> selectDate(
     BuildContext context,
     Function(DateTime) onDateSelected, {
     DateTime? initialDate,

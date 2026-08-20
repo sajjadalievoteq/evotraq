@@ -21,6 +21,12 @@ abstract final class OperationEventTimeCodec {
     return '$y-$mo-${d}T$h:$mi:$s$sign$hours:$minutes';
   }
 
+  /// Parses an API instant (UTC / offset) into the device's local wall clock.
+  static DateTime? parseApiDateTime(Object? raw) {
+    if (raw == null) return null;
+    return DateTime.tryParse(raw.toString())?.toLocal();
+  }
+
   static Map<String, String> fieldsForRequest(DateTime? eventTime) {
     final local = eventTime ?? DateTime.now();
     return {

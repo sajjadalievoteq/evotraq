@@ -3,7 +3,7 @@ import 'package:traqtrace_app/features/epcis/transaction_events/screens/transact
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_state.dart';
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';

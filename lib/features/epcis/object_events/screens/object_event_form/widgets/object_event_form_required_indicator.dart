@@ -1,3 +1,16 @@
-export 'object_event_form_field_label.dart';
-export 'object_event_form_required_mark.dart';
-export 'object_event_form_section_title.dart';
+import 'package:flutter/material.dart';
+
+class ObjectEventFormRequiredIndicator extends StatelessWidget {
+  const ObjectEventFormRequiredIndicator({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      ' *',
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.primary,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+}

@@ -6,6 +6,7 @@ import 'package:traqtrace_app/data/models/automation_center/notification_subscri
 import 'package:traqtrace_app/data/services/automation_center/notification_api_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit_realtime.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 
 class _MockNotificationApiService extends Mock

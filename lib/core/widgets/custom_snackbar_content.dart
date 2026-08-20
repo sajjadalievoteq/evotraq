@@ -1,18 +1,17 @@
-
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_types.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-class CustomSnackBarWidget extends StatelessWidget {
+class CustomSnackbarContent extends StatelessWidget {
   final CustomSnackBarVariant variant;
   final String message;
   final String? title;
   final VoidCallback? onClose;
 
-  const CustomSnackBarWidget({
+  const CustomSnackbarContent({
     super.key,
     required this.variant,
     required this.message,

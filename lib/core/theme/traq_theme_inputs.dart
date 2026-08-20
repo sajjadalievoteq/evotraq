@@ -1,4 +1,7 @@
-part of 'traq_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_colors.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_typography.dart';
 
 abstract final class TraqThemeInputs {
   static SwitchThemeData switchTheme(TraqColors c, Brightness b) =>
@@ -38,33 +41,32 @@ abstract final class TraqThemeInputs {
         }),
       );
 
-  static InputDecorationTheme inputDecoration(TraqColors c, TraqText text) =>
-      InputDecorationTheme(
-        filled: true,
-        prefixIconConstraints: const BoxConstraints(
-          minWidth: 32,
-          minHeight: 32,
-        ),
-        fillColor: c.background,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        hintStyle: text.body.copyWith(color: c.textFaint),
-        labelStyle: text.cap.copyWith(color: c.textMuted),
-        border: OutlineInputBorder(
-          borderRadius: TraqRadius.input,
-          borderSide: BorderSide(color: c.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: TraqRadius.input,
-          borderSide: BorderSide(color: c.border),
-        ),
+  static InputDecorationTheme inputDecoration(
+    TraqColors c,
+    TraqText text,
+  ) => InputDecorationTheme(
+    filled: true,
+    prefixIconConstraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+    fillColor: c.background,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    hintStyle: text.body.copyWith(color: c.textFaint),
+    labelStyle: text.cap.copyWith(color: c.textMuted),
+    border: OutlineInputBorder(
+      borderRadius: TraqRadius.input,
+      borderSide: BorderSide(color: c.border),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: TraqRadius.input,
+      borderSide: BorderSide(color: c.border),
+    ),
 
-        focusedBorder: OutlineInputBorder(
-          borderRadius: TraqRadius.input,
-          borderSide: BorderSide(color: c.primary, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: TraqRadius.input,
-          borderSide: BorderSide(color: c.error),
-        ),
-      );
+    focusedBorder: OutlineInputBorder(
+      borderRadius: TraqRadius.input,
+      borderSide: BorderSide(color: c.primary, width: 1.5),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: TraqRadius.input,
+      borderSide: BorderSide(color: c.error),
+    ),
+  );
 }

@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -11,14 +12,15 @@ import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_lookup_status
 import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_state.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_form_bloc_body.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_scaffold.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_body.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_cubit_providers.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_screen_content.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart'
     as gtin_model;
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_decommission_dialog.dart';
 
 class SGTINDetailScreen extends StatefulWidget {
   const SGTINDetailScreen({
@@ -338,94 +340,92 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
   }
 
   void _decommission() {
-    String reason = '';
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Decommission SGTIN'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Please provide a reason for decommissioning:'),
-            SizedBox(height: 16),
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Reason',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-              onChanged: (v) => reason = v,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColorMapper.errorColor(ctx),
-            ),
-            onPressed: () {
-              if (reason.isNotEmpty) {
-                Navigator.pop(ctx);
-                final serial = _serialNumberController.text;
-                _cubit.decommission(serial, reason);
-              }
-            },
-            child: const Text('Decommission'),
-          ),
-        ],
-      ),
+    SgtinDecommissionDialog.show(
+      context,
+      onConfirm: (reason) =>
+          _cubit.decommission(_serialNumberController.text, reason),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget body = SgtinDetailBody(
-      awaitingListSelection: widget.awaitingListSelection,
-      embedded: widget.embedded,
-      onStateChanged: _handleSgtinState,
-      content: widget.embedded
-          ? _formBlocBody()
-          : SgtinDetailScaffold(
-              appBarTitle: _appBarTitle,
-              showEditAction: !widget.isCreating && !_isEditing,
-              showCloseEditAction: !widget.isCreating && _isEditing,
-              onEdit: () => setState(() => _isEditing = true),
-              onCloseEdit: () => setState(() => _isEditing = false),
-              body: _formBlocBody(),
-              showSaveFab: _isEditing || widget.isCreating,
-              isSaving: _isLocalLoading,
-              onSave: _submit,
-            ),
-    );
-
-    if (!widget.embedded) {
-      final cubit = _sgtinCubit;
-      if (cubit != null) {
-        body = BlocProvider<SGTINCubit>.value(value: cubit, child: body);
-      }
-    }
-
-    final batchCubit = _batchCubit;
-    if (batchCubit != null) {
-      body = BlocProvider<SgtinBatchCubit>.value(
-        value: batchCubit,
-        child: BlocListener<SgtinBatchCubit, SgtinBatchState>(
-          listenWhen: (previous, current) =>
-              previous.resolvedBatch != current.resolvedBatch ||
-              previous.status != current.status,
-          listener: (context, state) => _applyResolvedBatchDates(state),
-          child: body,
+    return SgtinDetailCubitProviders(
+      validationCubit: _validationCubit,
+      sgtinCubit: widget.embedded ? null : _sgtinCubit,
+      batchCubit: _batchCubit,
+      onBatchStateChanged: _applyResolvedBatchDates,
+      child: SgtinDetailBody(
+        awaitingListSelection: widget.awaitingListSelection,
+        embedded: widget.embedded,
+        onStateChanged: _handleSgtinState,
+        content: SgtinDetailScreenContent(
+          embedded: widget.embedded,
+          appBarTitle: _appBarTitle,
+          isCreating: widget.isCreating,
+          isEditing: _isEditing,
+          isSaving: _isLocalLoading,
+          onEdit: () => setState(() => _isEditing = true),
+          onCloseEdit: () => setState(() => _isEditing = false),
+          onSave: _submit,
+          formBody: SgtinDetailFormBlocBody(
+            sgtinId: widget.sgtinId,
+            formFieldsHydrated: _formFieldsHydrated,
+            formKey: _formKey,
+            onRefresh: () async {
+              if (widget.sgtinId != null) _loadById(widget.sgtinId!);
+            },
+            isCreating: widget.isCreating,
+            isEditing: _isEditing,
+            isLocalLoading: _isLocalLoading,
+            loadedSgtin: _loadedSgtin,
+            gtinController: _gtinController,
+            serialNumberController: _serialNumberController,
+            batchLotNumberController: _batchLotNumberController,
+            regulatoryMarketController: _regulatoryMarketController,
+            regulatoryStatusController: _regulatoryStatusController,
+            selectedGtin: _selectedGtin,
+            selectedStatus: _selectedStatus,
+            expiryDate: _expiryDate,
+            productionDate: _productionDate,
+            bestBeforeDate: _bestBeforeDate,
+            onGtinChanged: (gtin) {
+              setState(() {
+                _selectedGtin = gtin;
+                _gtinController.text = gtin?.gtinCode ?? '';
+                _expiryDate = null;
+                _productionDate = null;
+              });
+              _batchCubit?.onGtinChanged(
+                gtinId: gtin?.id,
+                gtinCode: gtin?.gtinCode,
+              );
+              if (widget.isCreating &&
+                  gtin?.id != null &&
+                  _batchLotNumberController.text.trim().isNotEmpty) {
+                _batchCubit?.onBatchLotInputChanged(
+                  _batchLotNumberController.text,
+                );
+              }
+            },
+            onStatusChanged: (status) =>
+                setState(() => _selectedStatus = status),
+            onTransitionError: (message) => context.showError(message),
+            onPickExpiry: () =>
+                _pickDate((date) => setState(() => _expiryDate = date)),
+            onPickProduction: () =>
+                _pickDate((date) => setState(() => _productionDate = date)),
+            onPickBestBefore: () =>
+                _pickDate((date) => setState(() => _bestBeforeDate = date)),
+            setFieldError: _setFieldError,
+            onDecommission: _decommission,
+            onSubmit: _submit,
+            onBatchLotEditingComplete: () =>
+                _batchCubit?.triggerLookupNow(_batchLotNumberController.text),
+            onBatchLotFocusLost: () =>
+                _batchCubit?.triggerLookupNow(_batchLotNumberController.text),
+          ),
         ),
-      );
-    }
-
-    return BlocProvider<ValidationCubit>.value(
-      value: _validationCubit,
-      child: body,
+      ),
     );
   }
 
@@ -465,59 +465,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> {
         }
       }
     }
-  }
-
-  SgtinDetailFormBlocBody _formBlocBody() {
-    return SgtinDetailFormBlocBody(
-      sgtinId: widget.sgtinId,
-      formFieldsHydrated: _formFieldsHydrated,
-      formKey: _formKey,
-      onRefresh: () async {
-        if (widget.sgtinId != null) _loadById(widget.sgtinId!);
-      },
-      isCreating: widget.isCreating,
-      isEditing: _isEditing,
-      isLocalLoading: _isLocalLoading,
-      loadedSgtin: _loadedSgtin,
-      gtinController: _gtinController,
-      serialNumberController: _serialNumberController,
-      batchLotNumberController: _batchLotNumberController,
-      regulatoryMarketController: _regulatoryMarketController,
-      regulatoryStatusController: _regulatoryStatusController,
-      selectedGtin: _selectedGtin,
-      selectedStatus: _selectedStatus,
-      expiryDate: _expiryDate,
-      productionDate: _productionDate,
-      bestBeforeDate: _bestBeforeDate,
-      onGtinChanged: (gtin) {
-        setState(() {
-          _selectedGtin = gtin;
-          _gtinController.text = gtin?.gtinCode ?? '';
-          _expiryDate = null;
-          _productionDate = null;
-        });
-        _batchCubit?.onGtinChanged(gtinId: gtin?.id, gtinCode: gtin?.gtinCode);
-        if (widget.isCreating &&
-            gtin?.id != null &&
-            _batchLotNumberController.text.trim().isNotEmpty) {
-          _batchCubit?.onBatchLotInputChanged(_batchLotNumberController.text);
-        }
-      },
-      onStatusChanged: (s) => setState(() => _selectedStatus = s),
-      onTransitionError: (msg) => context.showError(msg),
-      onPickExpiry: () => _pickDate((d) => setState(() => _expiryDate = d)),
-      onPickProduction: () =>
-          _pickDate((d) => setState(() => _productionDate = d)),
-      onPickBestBefore: () =>
-          _pickDate((d) => setState(() => _bestBeforeDate = d)),
-      setFieldError: _setFieldError,
-      onDecommission: _decommission,
-      onSubmit: _submit,
-      onBatchLotEditingComplete: () =>
-          _batchCubit?.triggerLookupNow(_batchLotNumberController.text),
-      onBatchLotFocusLost: () =>
-          _batchCubit?.triggerLookupNow(_batchLotNumberController.text),
-    );
   }
 
   String get _appBarTitle {

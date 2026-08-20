@@ -1,4 +1,9 @@
-part of 'gs1_tools_cubit.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_element_string_builder.dart';
+import 'package:traqtrace_app/data/services/barcode/epc_uri_converter.dart';
+import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
+import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
+import 'package:traqtrace_app/features/shared/workbench/workbench_slice.dart';
 
 extension Gs1ToolsConversionActions on Gs1ToolsCubit {
   Future<void> convertIdentifier({
@@ -98,11 +103,11 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
         }
       }
       if (err != null) {
-        _emitError(Gs1ToolKind.convert, err);
+        emitError(Gs1ToolKind.convert, err);
         return;
       }
       if (uri == null || uri.isEmpty) {
-        _emitError(Gs1ToolKind.convert, 'Unable to build Digital Link');
+        emitError(Gs1ToolKind.convert, 'Unable to build Digital Link');
         return;
       }
       emit(
@@ -123,14 +128,14 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
 
     final trimmed = input.trim();
     if (trimmed.isEmpty) {
-      _emitError(Gs1ToolKind.convert, 'Paste a Digital Link URL or URN');
+      emitError(Gs1ToolKind.convert, 'Paste a Digital Link URL or URN');
       return;
     }
     final normalized = EPCURIConverter.normalizeForStorage(trimmed);
     final type = EPCURIConverter.getEPCType(normalized);
     final fields = <String, String>{
-      'Normalized': _safe(normalized),
-      'Type': _safe(type),
+      'Normalized': safe(normalized),
+      'Type': safe(type),
     };
     final g = EPCURIConverter.extractGTINFromEPCUri(normalized);
     final s = EPCURIConverter.extractSerialFromEPCUri(normalized);
@@ -147,7 +152,7 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
       fields['SSCC check digit'] = cdErr ?? 'Valid';
     }
     if (fields.length <= 2 && type == null) {
-      _emitError(Gs1ToolKind.convert, 'Unrecognized Digital Link / URN format');
+      emitError(Gs1ToolKind.convert, 'Unrecognized Digital Link / URN format');
       return;
     }
     emit(
@@ -155,7 +160,7 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
         Gs1ToolKind.convert,
         WorkbenchSlice(
           status: WorkbenchActionStatus.success,
-          resultText: _safe(normalized),
+          resultText: safe(normalized),
           resultFields: fields,
         ),
       ),
@@ -177,34 +182,34 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
     if (dir == 'from-epc' || dir == 'epc-to-gs1') {
       final uri = (input ?? '').trim();
       if (uri.isEmpty) {
-        _emitError(Gs1ToolKind.convert, 'EPC URI is required');
+        emitError(Gs1ToolKind.convert, 'EPC URI is required');
         return;
       }
-      await _run(Gs1ToolKind.convert, () async {
+      await run(Gs1ToolKind.convert, () async {
         switch (type) {
           case 'SSCC':
-            final v = await _epc.convertEPCToSSCC(uri);
+            final v = await epc.convertEPCToSSCC(uri);
             return WorkbenchSlice(
               status: WorkbenchActionStatus.success,
-              resultText: _safe(v),
-              resultFields: {'SSCC': _safe(v)},
+              resultText: safe(v),
+              resultFields: {'SSCC': safe(v)},
             );
           case 'GLN':
-            final v = await _epc.convertEPCToGLN(uri);
+            final v = await epc.convertEPCToGLN(uri);
             return WorkbenchSlice(
               status: WorkbenchActionStatus.success,
-              resultText: _safe(v),
-              resultFields: {'GLN': _safe(v)},
+              resultText: safe(v),
+              resultFields: {'GLN': safe(v)},
             );
           default:
-            final result = await _epc.convertEPCToSGTIN(uri);
+            final result = await epc.convertEPCToSGTIN(uri);
             return WorkbenchSlice(
               status: WorkbenchActionStatus.success,
               resultText:
-                  'GTIN: ${_safe(result['gtin'])}\nSerial: ${_safe(result['serial'])}',
+                  'GTIN: ${safe(result['gtin'])}\nSerial: ${safe(result['serial'])}',
               resultFields: {
-                'GTIN': _safe(result['gtin']),
-                'Serial': _safe(result['serial']),
+                'GTIN': safe(result['gtin']),
+                'Serial': safe(result['serial']),
               },
             );
         }
@@ -215,15 +220,15 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
     if (type == 'ELEMENT' || type == 'ELEMENT-STRING') {
       final es = (input ?? '').trim();
       if (es.isEmpty) {
-        _emitError(Gs1ToolKind.convert, 'Element string is required');
+        emitError(Gs1ToolKind.convert, 'Element string is required');
         return;
       }
-      await _run(Gs1ToolKind.convert, () async {
-        final uri = await _epc.convertGS1ElementStringToEPC(es);
+      await run(Gs1ToolKind.convert, () async {
+        final uri = await epc.convertGS1ElementStringToEPC(es);
         return WorkbenchSlice(
           status: WorkbenchActionStatus.success,
-          resultText: _safe(uri),
-          resultFields: {'EPC URI': _safe(uri)},
+          resultText: safe(uri),
+          resultFields: {'EPC URI': safe(uri)},
         );
       });
       return;
@@ -232,15 +237,15 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
     if (type == 'SSCC') {
       final err = CheckDigitUtils.validateSscc(sscc);
       if (err != null) {
-        _emitError(Gs1ToolKind.convert, err);
+        emitError(Gs1ToolKind.convert, err);
         return;
       }
-      await _run(Gs1ToolKind.convert, () async {
-        final uri = await _epc.convertSSCCToEPC(sscc!.trim());
+      await run(Gs1ToolKind.convert, () async {
+        final uri = await epc.convertSSCCToEPC(sscc!.trim());
         return WorkbenchSlice(
           status: WorkbenchActionStatus.success,
-          resultText: _safe(uri),
-          resultFields: {'EPC URI': _safe(uri)},
+          resultText: safe(uri),
+          resultFields: {'EPC URI': safe(uri)},
         );
       });
       return;
@@ -248,19 +253,19 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
     if (type == 'GLN') {
       final err = CheckDigitUtils.validateGln(gln);
       if (err != null) {
-        _emitError(Gs1ToolKind.convert, err);
+        emitError(Gs1ToolKind.convert, err);
         return;
       }
-      await _run(Gs1ToolKind.convert, () async {
+      await run(Gs1ToolKind.convert, () async {
         final ext = (extension ?? '').trim();
-        final uri = await _epc.convertGLNToEPC(
+        final uri = await epc.convertGLNToEPC(
           gln!.trim(),
           ext.isEmpty ? null : ext,
         );
         return WorkbenchSlice(
           status: WorkbenchActionStatus.success,
-          resultText: _safe(uri),
-          resultFields: {'EPC URI': _safe(uri)},
+          resultText: safe(uri),
+          resultFields: {'EPC URI': safe(uri)},
         );
       });
       return;
@@ -268,19 +273,19 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
 
     final gtinErr = CheckDigitUtils.validateGtin(gtin);
     if (gtinErr != null) {
-      _emitError(Gs1ToolKind.convert, gtinErr);
+      emitError(Gs1ToolKind.convert, gtinErr);
       return;
     }
     if ((serial ?? '').trim().isEmpty) {
-      _emitError(Gs1ToolKind.convert, 'Serial is required');
+      emitError(Gs1ToolKind.convert, 'Serial is required');
       return;
     }
-    await _run(Gs1ToolKind.convert, () async {
-      final uri = await _epc.convertSGTINToEPC(gtin!.trim(), serial!.trim());
+    await run(Gs1ToolKind.convert, () async {
+      final uri = await epc.convertSGTINToEPC(gtin!.trim(), serial!.trim());
       return WorkbenchSlice(
         status: WorkbenchActionStatus.success,
-        resultText: _safe(uri),
-        resultFields: {'EPC URI': _safe(uri)},
+        resultText: safe(uri),
+        resultFields: {'EPC URI': safe(uri)},
       );
     });
   }
@@ -288,7 +293,7 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
   void _convertElementBridge(String input) {
     final trimmed = input.trim();
     if (trimmed.isEmpty) {
-      _emitError(Gs1ToolKind.convert, 'Enter a Digital Link or element string');
+      emitError(Gs1ToolKind.convert, 'Enter a Digital Link or element string');
       return;
     }
     if (trimmed.startsWith('http') || trimmed.startsWith('urn:')) {
@@ -301,7 +306,7 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
       if (gtin != null) ais['01'] = gtin.padLeft(14, '0');
       if (serial != null) ais['21'] = serial;
       if (ais.isEmpty) {
-        _emitError(
+        emitError(
           Gs1ToolKind.convert,
           'Could not derive AIs from Digital Link',
         );
@@ -320,7 +325,7 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
                 Gs1ElementStringBuilder.fnc1,
                 '|',
               ),
-              'Source': _safe(normalized),
+              'Source': safe(normalized),
             },
           ),
         ),
@@ -330,7 +335,7 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
 
     final uri = EPCURIConverter.convertToEPCUri(trimmed);
     if (uri == null || uri.isEmpty) {
-      _emitError(
+      emitError(
         Gs1ToolKind.convert,
         'Unable to convert element string to Digital Link',
       );

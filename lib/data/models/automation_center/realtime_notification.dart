@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
-part 'realtime_notification.g.dart';
+import 'package:traqtrace_app/data/models/automation_center/realtime_notification.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class RealtimeNotification extends Equatable {
@@ -24,20 +24,20 @@ class RealtimeNotification extends Equatable {
   });
 
   factory RealtimeNotification.fromJson(Map<String, dynamic> json) =>
-      _$RealtimeNotificationFromJson(json);
+      realtimeNotificationFromJson(json);
 
-  Map<String, dynamic> toJson() => _$RealtimeNotificationToJson(this);
+  Map<String, dynamic> toJson() => realtimeNotificationToJson(this);
 
   @override
   List<Object?> get props => [
-        id,
-        subscriptionId,
-        eventType,
-        eventId,
-        eventData,
-        timestamp,
-        source,
-      ];
+    id,
+    subscriptionId,
+    eventType,
+    eventId,
+    eventData,
+    timestamp,
+    source,
+  ];
 }
 
 @JsonSerializable()
@@ -65,20 +65,20 @@ class NotificationBatch extends Equatable {
   });
 
   factory NotificationBatch.fromJson(Map<String, dynamic> json) =>
-      _$NotificationBatchFromJson(json);
+      notificationBatchFromJson(json);
 
-  Map<String, dynamic> toJson() => _$NotificationBatchToJson(this);
+  Map<String, dynamic> toJson() => notificationBatchToJson(this);
 
   @override
   List<Object?> get props => [
-        id,
-        subscriptionId,
-        eventIds,
-        status,
-        createdAt,
-        processedAt,
-        deliveredAt,
-        retryCount,
-        errorMessage,
-      ];
+    id,
+    subscriptionId,
+    eventIds,
+    status,
+    createdAt,
+    processedAt,
+    deliveredAt,
+    retryCount,
+    errorMessage,
+  ];
 }

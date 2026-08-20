@@ -1,4 +1,6 @@
-part of 'product_hierarchy_cubit.dart';
+import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_cubit.dart';
+import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_state.dart';
+import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 
 extension ProductHierarchyTreeActions on ProductHierarchyCubit {
   Future<void> expand(HierarchyTreeNodeState target) async {
@@ -18,10 +20,10 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
       n.error = null;
     });
     try {
-      final page = await _hierarchyService.getHierarchyChildren(
+      final page = await hierarchyService.getHierarchyChildren(
         target.node.epc,
         page: 0,
-        size: ProductHierarchyCubit._pageSize,
+        size: ProductHierarchyCubit.pageSize,
       );
       _mutate(target, (n) {
         n.isLoading = false;
@@ -50,10 +52,10 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
     final nextPage = target.loadedPage + 1;
     _mutate(target, (n) => n.isLoading = true);
     try {
-      final page = await _hierarchyService.getHierarchyChildren(
+      final page = await hierarchyService.getHierarchyChildren(
         target.node.epc,
         page: nextPage,
-        size: ProductHierarchyCubit._pageSize,
+        size: ProductHierarchyCubit.pageSize,
       );
       _mutate(target, (n) {
         n.isLoading = false;
@@ -62,7 +64,7 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
         // appending a duplicate plain one.
         for (final c in page.children) {
           final exists = n.loadedChildren.any(
-            (e) => _sameEpc(e.node.epc, c.epc),
+            (e) => sameEpc(e.node.epc, c.epc),
           );
           if (exists) continue;
           n.loadedChildren.add(HierarchyTreeNodeState(node: c));
@@ -92,10 +94,10 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
     }
     _mutate(target, (n) => n.isLoading = true);
     try {
-      final page = await _hierarchyService.getHierarchyChildren(
+      final page = await hierarchyService.getHierarchyChildren(
         target.node.epc,
         page: prevPage,
-        size: ProductHierarchyCubit._pageSize,
+        size: ProductHierarchyCubit.pageSize,
       );
       var inserted = 0;
       _mutate(target, (n) {
@@ -103,7 +105,7 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
         final fresh = <HierarchyTreeNodeState>[];
         for (final c in page.children) {
           final exists = n.loadedChildren.any(
-            (e) => _sameEpc(e.node.epc, c.epc),
+            (e) => sameEpc(e.node.epc, c.epc),
           );
           if (exists) continue;
           fresh.add(HierarchyTreeNodeState(node: c));
@@ -169,7 +171,7 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
       ),
     );
     if (recent.isEmpty) {
-      _recentParentsRequested = false;
+      recentParentsRequested = false;
       loadRecentParents();
     }
   }
@@ -193,7 +195,7 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
     );
   }
 
-  String _inferType(String epc) {
+  String inferType(String epc) {
     final lower = epc.toLowerCase();
     if (lower.contains(':sscc:') || lower.contains('/00/')) return 'SSCC';
     if (lower.contains(':sgtin:') || lower.contains('/01/')) return 'SGTIN';

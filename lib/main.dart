@@ -1,3 +1,5 @@
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
+import 'package:traqtrace_app/core/widgets/snack_bar_interaction_scope.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -18,14 +20,12 @@ import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
 
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/utils/app_screen_util.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/storage/hive_storage.dart';
 import 'package:traqtrace_app/core/auth/auth_session_bootstrap.dart';
-import 'package:traqtrace_app/features/splash/screens/Splash/splash_screen.dart';
+import 'package:traqtrace_app/features/splash/screens/splash_screen.dart';
 
 import 'package:traqtrace_app/data/services/admin/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/auth/auth_service.dart';

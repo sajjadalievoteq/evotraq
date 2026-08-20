@@ -1,9 +1,9 @@
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_field_label.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart' as types;
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_source_destination_types.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_mandatory_fields.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_add_to_list_section.dart';
-import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_required_indicator.dart';
 
 class ObjectEventFormDestinationListSection extends StatefulWidget {
   final List<types.SourceDestination> destinationList;

@@ -30,7 +30,11 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
   @override
   void initState() {
     super.initState();
-    _activated = List<bool>.filled(widget.children.length, false, growable: true);
+    _activated = List<bool>.filled(
+      widget.children.length,
+      false,
+      growable: true,
+    );
     _activate(widget.index);
   }
 
@@ -40,7 +44,11 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
     if (widget.children.length != _activated.length) {
       // Replace the list — never [List.clear] a [List.filled] fixed-length list
       // (throws UnsupportedError: set length on web/JS).
-      final next = List<bool>.filled(widget.children.length, false, growable: true);
+      final next = List<bool>.filled(
+        widget.children.length,
+        false,
+        growable: true,
+      );
       for (var i = 0; i < next.length && i < _activated.length; i++) {
         next[i] = _activated[i];
       }
@@ -69,9 +77,7 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
         else if (i != activeIndex)
           // Built but inactive: absorb no pointer / scroll events so the
           // active tab's scrollable receives them on Flutter web.
-          IgnorePointer(
-            child: widget.children[i],
-          )
+          IgnorePointer(child: widget.children[i])
         else
           // Active tab — pass through normally.
           widget.children[i],

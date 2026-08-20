@@ -9,7 +9,7 @@ import 'package:traqtrace_app/features/auth/widgets/input/auth_input_field_type.
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
 import 'package:traqtrace_app/features/user/utils/user_strings.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -280,4 +280,3 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
     );
   }
 }
-   

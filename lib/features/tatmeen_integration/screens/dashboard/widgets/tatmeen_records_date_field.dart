@@ -1,4 +1,7 @@
-part of '../tatmeen_records_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/display_date_utils.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class TatmeenRecordsDateField extends StatelessWidget {
   const TatmeenRecordsDateField({

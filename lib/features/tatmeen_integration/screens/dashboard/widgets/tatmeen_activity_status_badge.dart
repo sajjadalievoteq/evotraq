@@ -1,4 +1,7 @@
-part of 'tatmeen_recent_activity.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 
 class TatmeenActivityStatusBadge extends StatelessWidget {
   const TatmeenActivityStatusBadge({super.key, required this.status});

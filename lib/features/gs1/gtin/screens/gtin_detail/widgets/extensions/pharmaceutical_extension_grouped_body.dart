@@ -1,6 +1,6 @@
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_types.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_controlled_substance_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_data_carrier_integrity_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_dosage_route_composition_widget.dart';

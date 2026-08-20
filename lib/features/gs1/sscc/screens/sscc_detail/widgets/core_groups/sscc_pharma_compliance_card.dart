@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_controlled_chain_audit_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_emvo_submission_model.dart';
@@ -296,4 +296,3 @@ class _SsccPharmaComplianceCardState extends State<SsccPharmaComplianceCard> {
     );
   }
 }
-        

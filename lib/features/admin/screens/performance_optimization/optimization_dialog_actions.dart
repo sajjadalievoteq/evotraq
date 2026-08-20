@@ -1,7 +1,12 @@
-part of 'performance_optimization_dashboard_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/performance_optimization_dashboard_screen.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/widgets/perf_opt_stat_row.dart';
 
-extension OptimizationDialogActions on _PerformanceOptimizationDashboardState {
-  void _showSlowQueriesDialog(Map<String, dynamic> data) {
+extension OptimizationDialogActions on PerformanceOptimizationDashboardState {
+  void showSlowQueriesDialog(Map<String, dynamic> data) {
     final List<dynamic> slowQueries = data['slowQueries'] ?? [];
     final String summary = data['summary'] ?? 'No summary available';
 
@@ -260,7 +265,7 @@ extension OptimizationDialogActions on _PerformanceOptimizationDashboardState {
     );
   }
 
-  void _showMemoryOptimizationDialog(Map<String, dynamic> data) {
+  void showMemoryOptimizationDialog(Map<String, dynamic> data) {
     final String status = data['status'] ?? 'Unknown';
     final List<dynamic> optimizations = data['optimizations'] ?? [];
     final Map<String, dynamic> memoryStats = data['memoryStats'] ?? {};

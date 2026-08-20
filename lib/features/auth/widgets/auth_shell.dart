@@ -1,7 +1,7 @@
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
+import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
-import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_shell_scope.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_shell_desktop.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_shell_mobile.dart';

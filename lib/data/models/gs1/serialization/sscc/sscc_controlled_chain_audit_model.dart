@@ -32,9 +32,9 @@ class SsccControlledChainAudit {
   }
 
   Map<String, dynamic> toJson() => {
-        if (witnessName != null) 'witnessName': witnessName,
-        if (witnessGln != null) 'witnessGln': witnessGln,
-        if (transferAt != null) 'transferAt': transferAt!.toIso8601String(),
-        if (notes != null) 'notes': notes,
-      };
+    if (witnessName != null) 'witnessName': witnessName,
+    if (witnessGln != null) 'witnessGln': witnessGln,
+    if (transferAt != null) 'transferAt': transferAt!.toIso8601String(),
+    if (notes != null) 'notes': notes,
+  };
 }

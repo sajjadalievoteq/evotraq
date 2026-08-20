@@ -1,8 +1,8 @@
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/key_metrics/widgets/key_metrics_grid.dart';
 import 'package:traqtrace_app/core/widgets/traq_section_title.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class KeyMetricsSection extends StatelessWidget {
   const KeyMetricsSection({super.key, required this.layout});

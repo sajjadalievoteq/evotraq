@@ -3,7 +3,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/admin/cache_service.dart';
 import 'package:traqtrace_app/data/models/admin/cache_statistics.dart';
 import 'package:traqtrace_app/data/models/admin/cache_health.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/core/widgets/error_message.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';

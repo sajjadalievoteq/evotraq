@@ -1,6 +1,6 @@
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_batch_models.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
-import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_serial_item_row.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';

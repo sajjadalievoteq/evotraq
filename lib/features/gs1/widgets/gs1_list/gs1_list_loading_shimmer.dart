@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_shimmer.dart';
 
-export 'gs1_list_load_more_indicator.dart';
 
 class Gs1ListLoadingShimmer extends StatelessWidget {
   const Gs1ListLoadingShimmer({super.key, this.itemCount = 8});

@@ -1,8 +1,9 @@
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
 Future<void> showLogoutConfirmDialog(BuildContext context) async {

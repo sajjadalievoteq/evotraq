@@ -1,4 +1,4 @@
-part of 'operation_detail_cubit.dart';
+import 'package:equatable/equatable.dart';
 
 class OperationDetailState<T> extends Equatable {
   const OperationDetailState({
@@ -21,7 +21,9 @@ class OperationDetailState<T> extends Equatable {
     return OperationDetailState<T>(
       operation: clearOperation ? null : (operation ?? this.operation),
       isLoading: isLoading,
-      errorMessage: clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
+      errorMessage: clearErrorMessage
+          ? null
+          : (errorMessage ?? this.errorMessage),
     );
   }
 

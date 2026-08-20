@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
-import 'package:traqtrace_app/features/barcode/widgets/dialog/gs1_barcode_scan_dialog.dart';
+import 'package:traqtrace_app/features/barcode/widgets/dialog/gs1_barcode_scan.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_add_to_list_section.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';

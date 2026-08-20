@@ -5,12 +5,7 @@ import 'package:traqtrace_app/features/epcis/cubit/transformation_events_cubit.d
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 import 'package:traqtrace_app/features/epcis/widgets/help_widgets/transformation_event_form_help.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
-import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:uuid/uuid.dart';
-import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -18,7 +13,7 @@ import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/transformation_events/screens/transformation_event_form/widgets/transformation_event_form_body.dart';
 import 'package:traqtrace_app/features/epcis/transformation_events/screens/transformation_event_form/widgets/transformation_event_form_content.dart';
 
-part 'transformation_event_form_actions.dart';
+import 'package:traqtrace_app/features/epcis/transformation_events/screens/transformation_event_form/transformation_event_form_actions.dart';
 
 class TransformationEventFormScreen extends StatefulWidget {
   final TransformationEvent? event;
@@ -33,34 +28,34 @@ class TransformationEventFormScreen extends StatefulWidget {
 
   @override
   State<TransformationEventFormScreen> createState() =>
-      _TransformationEventFormScreenState();
+      TransformationEventFormScreenState();
 }
 
-class _TransformationEventFormScreenState
+class TransformationEventFormScreenState
     extends State<TransformationEventFormScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late DateTime _eventTime;
-  String _eventTimeZoneOffset = '+00:00';
-  Map<String, String> _bizData = {};
+  final formKey = GlobalKey<FormState>();
+  late DateTime eventTime;
+  String eventTimeZoneOffset = '+00:00';
+  Map<String, String> bizData = {};
 
   String? _lastKnownGLNCode;
 
-  bool _isLoading = false;
-  bool _isEdit = false;
-  bool _hasTriedToSubmit = false;
+  bool isLoading = false;
+  bool isEdit = false;
+  bool hasTriedToSubmit = false;
   Timer? _validationTimer;
 
-  final _transformationIdController = TextEditingController();
-  final _inputEpcsController = TextEditingController();
-  final _outputEpcsController = TextEditingController();
-  final _bizStepController = TextEditingController();
-  final _dispositionController = TextEditingController();
-  final _locationGLNController = TextEditingController();
+  final transformationIdController = TextEditingController();
+  final inputEpcsController = TextEditingController();
+  final outputEpcsController = TextEditingController();
+  final bizStepController = TextEditingController();
+  final dispositionController = TextEditingController();
+  final locationGLNController = TextEditingController();
 
-  final _certificateNumberController = TextEditingController();
-  final _certificationStandardController = TextEditingController();
-  final _certificationAgencyController = TextEditingController();
-  final _certificationTypeController = TextEditingController();
+  final certificateNumberController = TextEditingController();
+  final certificationStandardController = TextEditingController();
+  final certificationAgencyController = TextEditingController();
+  final certificationTypeController = TextEditingController();
 
   void _setFieldError(String fieldName, String? error) {
     context.read<ValidationCubit>().setFieldError(fieldName, error);
@@ -70,32 +65,32 @@ class _TransformationEventFormScreenState
   void initState() {
     super.initState();
 
-    _eventTime = DateTime.now();
+    eventTime = DateTime.now();
     final now = DateTime.now();
     final offset = now.timeZoneOffset;
     final hours = offset.inHours.abs().toString().padLeft(2, '0');
     final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
-    _eventTimeZoneOffset = "${offset.isNegative ? '-' : '+'}$hours:$minutes";
+    eventTimeZoneOffset = "${offset.isNegative ? '-' : '+'}$hours:$minutes";
 
-    _transformationIdController.addListener(_clearFieldErrors);
-    _inputEpcsController.addListener(_clearFieldErrors);
-    _outputEpcsController.addListener(_clearFieldErrors);
-    _bizStepController.addListener(_clearFieldErrors);
-    _dispositionController.addListener(_clearFieldErrors);
-    _locationGLNController.addListener(_clearFieldErrors);
+    transformationIdController.addListener(_clearFieldErrors);
+    inputEpcsController.addListener(_clearFieldErrors);
+    outputEpcsController.addListener(_clearFieldErrors);
+    bizStepController.addListener(_clearFieldErrors);
+    dispositionController.addListener(_clearFieldErrors);
+    locationGLNController.addListener(_clearFieldErrors);
 
-    _isEdit = widget.event != null || widget.transformationEventId != null;
+    isEdit = widget.event != null || widget.transformationEventId != null;
     context.read<CbvVocabularyCubit>().loadVocabulary();
 
-    if (_isEdit && widget.event != null) {
+    if (isEdit && widget.event != null) {
       _initializeWithEvent(widget.event!);
-    } else if (_isEdit && widget.transformationEventId != null) {
+    } else if (isEdit && widget.transformationEventId != null) {
       _loadEventData();
     }
   }
 
   Future<void> _loadEventData() async {
-    setState(() => _isLoading = true);
+    setState(() => isLoading = true);
 
     try {
       final event = await context
@@ -114,15 +109,15 @@ class _TransformationEventFormScreenState
       _initializeWithEvent(event);
 
       if (event.bizData == null) {
-        await _tryRestoreGLNFromBackend(event.eventId);
+        await tryRestoreGLNFromBackend(event.eventId);
       }
 
       setState(() {
-        _isLoading = false;
+        isLoading = false;
       });
     } catch (error) {
       setState(() {
-        _isLoading = false;
+        isLoading = false;
       });
       if (mounted) {
         context.showError('Error loading event: ${error.toString()}');
@@ -131,32 +126,32 @@ class _TransformationEventFormScreenState
   }
 
   void _initializeWithEvent(TransformationEvent event) {
-    _eventTime = event.eventTime;
-    _eventTimeZoneOffset = event.eventTimeZone;
-    _transformationIdController.text = event.transformationID;
-    _inputEpcsController.text = event.inputEPCList.join(', ');
-    _outputEpcsController.text = event.outputEPCList.join(', ');
+    eventTime = event.eventTime;
+    eventTimeZoneOffset = event.eventTimeZone;
+    transformationIdController.text = event.transformationID;
+    inputEpcsController.text = event.inputEPCList.join(', ');
+    outputEpcsController.text = event.outputEPCList.join(', ');
 
     if (event.businessStep != null && event.businessStep!.isNotEmpty) {
       if (event.businessStep!.contains(':')) {
         final parts = event.businessStep!.split(':');
-        _bizStepController.text = parts.last;
+        bizStepController.text = parts.last;
       } else {
-        _bizStepController.text = event.businessStep!;
+        bizStepController.text = event.businessStep!;
       }
 
-      print('Setting business step to: ${_bizStepController.text}');
+      print('Setting business step to: ${bizStepController.text}');
     }
 
     if (event.disposition != null && event.disposition!.isNotEmpty) {
       if (event.disposition!.contains(':')) {
         final parts = event.disposition!.split(':');
-        _dispositionController.text = parts.last;
+        dispositionController.text = parts.last;
       } else {
-        _dispositionController.text = event.disposition!;
+        dispositionController.text = event.disposition!;
       }
 
-      print('Setting disposition to: ${_dispositionController.text}');
+      print('Setting disposition to: ${dispositionController.text}');
     }
     String? glnCode;
 
@@ -204,31 +199,31 @@ class _TransformationEventFormScreenState
     }
 
     if (glnCode != null) {
-      _locationGLNController.text = glnCode;
+      locationGLNController.text = glnCode;
     } else {
       print('No GLN code found in event data');
     }
 
-    _bizData = event.bizData != null ? Map.from(event.bizData!) : {};
+    bizData = event.bizData != null ? Map.from(event.bizData!) : {};
 
     if (event.certificationInfo != null &&
         event.certificationInfo!.isNotEmpty) {
       final firstCert = event.certificationInfo!.first;
-      _certificateNumberController.text = firstCert.certificateId ?? '';
-      _certificationStandardController.text =
+      certificateNumberController.text = firstCert.certificateId ?? '';
+      certificationStandardController.text =
           firstCert.certificationStandard ?? '';
-      _certificationAgencyController.text = firstCert.certificationAgency ?? '';
-      _certificationTypeController.text = firstCert.certificationType ?? '';
+      certificationAgencyController.text = firstCert.certificationAgency ?? '';
+      certificationTypeController.text = firstCert.certificationType ?? '';
     }
   }
 
   void _clearFieldErrors() {
-    if (_hasTriedToSubmit) {
+    if (hasTriedToSubmit) {
       _validationTimer?.cancel();
 
       _validationTimer = Timer(const Duration(milliseconds: 500), () {
-        if (_formKey.currentState != null && mounted) {
-          _formKey.currentState!.validate();
+        if (formKey.currentState != null && mounted) {
+          formKey.currentState!.validate();
         }
       });
     }
@@ -240,23 +235,23 @@ class _TransformationEventFormScreenState
   void dispose() {
     _validationTimer?.cancel();
 
-    _transformationIdController.removeListener(_clearFieldErrors);
-    _inputEpcsController.removeListener(_clearFieldErrors);
-    _outputEpcsController.removeListener(_clearFieldErrors);
-    _bizStepController.removeListener(_clearFieldErrors);
-    _dispositionController.removeListener(_clearFieldErrors);
-    _locationGLNController.removeListener(_clearFieldErrors);
+    transformationIdController.removeListener(_clearFieldErrors);
+    inputEpcsController.removeListener(_clearFieldErrors);
+    outputEpcsController.removeListener(_clearFieldErrors);
+    bizStepController.removeListener(_clearFieldErrors);
+    dispositionController.removeListener(_clearFieldErrors);
+    locationGLNController.removeListener(_clearFieldErrors);
 
-    _transformationIdController.dispose();
-    _inputEpcsController.dispose();
-    _outputEpcsController.dispose();
-    _bizStepController.dispose();
-    _dispositionController.dispose();
-    _locationGLNController.dispose();
-    _certificateNumberController.dispose();
-    _certificationStandardController.dispose();
-    _certificationAgencyController.dispose();
-    _certificationTypeController.dispose();
+    transformationIdController.dispose();
+    inputEpcsController.dispose();
+    outputEpcsController.dispose();
+    bizStepController.dispose();
+    dispositionController.dispose();
+    locationGLNController.dispose();
+    certificateNumberController.dispose();
+    certificationStandardController.dispose();
+    certificationAgencyController.dispose();
+    certificationTypeController.dispose();
     super.dispose();
   }
 
@@ -272,7 +267,7 @@ class _TransformationEventFormScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _isEdit ? 'Edit Transformation Event' : 'New Transformation Event',
+          isEdit ? 'Edit Transformation Event' : 'New Transformation Event',
         ),
         actions: [
           IconButton(
@@ -282,43 +277,43 @@ class _TransformationEventFormScreenState
           ),
         ],
       ),
-      body: _isLoading && _isEdit
+      body: isLoading && isEdit
           ? const Center(child: AppLoadingIndicator())
           : TransformationEventFormContent(
               onShowHelp: _showHelpDialog,
               form: TransformationEventFormBody(
-                formKey: _formKey,
-                hasTriedToSubmit: _hasTriedToSubmit,
-                transformationIdController: _transformationIdController,
-                inputEpcsController: _inputEpcsController,
-                outputEpcsController: _outputEpcsController,
-                bizStepController: _bizStepController,
-                dispositionController: _dispositionController,
-                locationGlnController: _locationGLNController,
-                certificateNumberController: _certificateNumberController,
+                formKey: formKey,
+                hasTriedToSubmit: hasTriedToSubmit,
+                transformationIdController: transformationIdController,
+                inputEpcsController: inputEpcsController,
+                outputEpcsController: outputEpcsController,
+                bizStepController: bizStepController,
+                dispositionController: dispositionController,
+                locationGlnController: locationGLNController,
+                certificateNumberController: certificateNumberController,
                 certificationStandardController:
-                    _certificationStandardController,
-                certificationAgencyController: _certificationAgencyController,
-                certificationTypeController: _certificationTypeController,
-                eventTime: _eventTime,
+                    certificationStandardController,
+                certificationAgencyController: certificationAgencyController,
+                certificationTypeController: certificationTypeController,
+                eventTime: eventTime,
                 validDispositions:
-                    _getValidDispositionsForCurrentBusinessStep(),
+                    getValidDispositionsForCurrentBusinessStep(),
                 onFieldError: _setFieldError,
-                onGenerateSampleInput: _generateSampleInputEPC,
-                onGenerateBatchInput: _generateBatchInputEPCs,
-                onGenerateSampleOutput: _generateSampleOutputEPC,
-                onGenerateBatchOutput: _generateBatchOutputEPCs,
+                onGenerateSampleInput: generateSampleInputEPC,
+                onGenerateBatchInput: generateBatchInputEPCs,
+                onGenerateSampleOutput: generateSampleOutputEPC,
+                onGenerateBatchOutput: generateBatchOutputEPCs,
                 onBusinessStepChanged: (value) {
                   setState(() {
-                    _bizStepController.text = value;
-                    _dispositionController.text = '';
+                    bizStepController.text = value;
+                    dispositionController.text = '';
                   });
                 },
                 onDispositionChanged: (value) {
-                  setState(() => _dispositionController.text = value);
+                  setState(() => dispositionController.text = value);
                 },
                 onEventTimeChanged: (value) {
-                  setState(() => _eventTime = value);
+                  setState(() => eventTime = value);
                 },
               ),
             ),
@@ -334,14 +329,14 @@ class _TransformationEventFormScreenState
               ),
               const SizedBox(width: 16),
               ElevatedButton(
-                onPressed: _isLoading ? null : _saveEvent,
-                child: _isLoading
+                onPressed: isLoading ? null : saveEvent,
+                child: isLoading
                     ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(_isEdit ? 'UPDATE' : 'SAVE'),
+                    : Text(isEdit ? 'UPDATE' : 'SAVE'),
               ),
             ],
           ),

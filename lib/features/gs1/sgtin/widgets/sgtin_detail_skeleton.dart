@@ -1,5 +1,7 @@
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_constants.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_extension_tile.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_outline_field.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 
 class SgtinDetailSkeleton extends StatelessWidget {
   const SgtinDetailSkeleton({super.key});

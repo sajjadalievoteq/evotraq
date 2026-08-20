@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/web/web_download_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/web_download_web.dart'
@@ -16,6 +16,7 @@ import 'package:traqtrace_app/features/automation_center/cubit/notification_cubi
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 import 'package:traqtrace_app/features/automation_center/utils/subscription_sample_payloads.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/create_subscription_form_fields.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/sample_payload_downloads.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/help_widgets/notification_subscription_help.dart';
 import 'package:traqtrace_app/features/automation_center/utils/subscription_delivery_utils.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/delivery_test_feedback.dart';
@@ -169,8 +170,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 16),
               child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CreateSubscriptionFormFields(
                     isEditing: _isEditing,
@@ -209,7 +209,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                   ),
                   if (_selectedDeliveryMethod == 'WEBHOOK') ...[
                     const SizedBox(height: TraqSpacing.md),
-                    _SamplePayloadDownloads(
+                    SamplePayloadDownloads(
                       onDownloadJson: () => _downloadSamplePayload(
                         content: SubscriptionSamplePayloads.jsonSample,
                         filename: SubscriptionSamplePayloads.jsonFilename,
@@ -236,7 +236,6 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           ),
         ),
         actions: [
-
           TextButton(
             onPressed: _isLoading
                 ? null
@@ -427,48 +426,5 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         );
       }
     }
-  }
-}
-
-/// "Download Sample JSON/XML" buttons shown for API/webhook subscriptions so
-/// a third-party developer can build their receiving endpoint against the
-/// exact payload shape TraqTrace sends.
-class _SamplePayloadDownloads extends StatelessWidget {
-  const _SamplePayloadDownloads({
-    required this.onDownloadJson,
-    required this.onDownloadXml,
-  });
-
-  final VoidCallback onDownloadJson;
-  final VoidCallback onDownloadXml;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Sample payload for the receiving system',
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            OutlinedButton.icon(
-              onPressed: onDownloadJson,
-              icon: const Icon(Icons.download, size: 18),
-              label: const Text('Download Sample JSON'),
-            ),
-            OutlinedButton.icon(
-              onPressed: onDownloadXml,
-              icon: const Icon(Icons.download, size: 18),
-              label: const Text('Download Sample XML'),
-            ),
-          ],
-        ),
-      ],
-    );
   }
 }

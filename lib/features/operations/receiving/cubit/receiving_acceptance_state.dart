@@ -1,4 +1,5 @@
-part of 'receiving_acceptance_cubit.dart';
+import 'package:equatable/equatable.dart';
+import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 
 enum ReceivingAcceptanceStatus { idle, loading, success, error }
 
@@ -22,8 +23,9 @@ class ReceivingAcceptanceState extends Equatable {
   }) {
     return ReceivingAcceptanceState(
       status: status ?? this.status,
-      updatedOperation:
-          clearUpdatedOperation ? null : (updatedOperation ?? this.updatedOperation),
+      updatedOperation: clearUpdatedOperation
+          ? null
+          : (updatedOperation ?? this.updatedOperation),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }

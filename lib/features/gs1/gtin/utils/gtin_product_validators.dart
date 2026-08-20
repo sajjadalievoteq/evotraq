@@ -1,6 +1,7 @@
-part of 'gtin_field_validators.dart';
+import 'gtin_format.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_core_validators.dart';
 
-abstract final class _GtinProductValidators {
+abstract final class GtinProductValidators {
   static String? validateBrandName(String? value) {
     if (value == null || value.trim().isEmpty) return 'brand_name is required';
     final v = value.trim();
@@ -230,7 +231,7 @@ abstract final class _GtinProductValidators {
     if (v.isEmpty) {
       return 'next_lower_level_gtin is required when is_base_unit is false';
     }
-    final gtinErr = _GtinCoreValidators.validateGtinCodeOptional(v);
+    final gtinErr = GtinCoreValidators.validateGtinCodeOptional(v);
     if (gtinErr != null) {
       return gtinErr.replaceFirst('GTIN', 'next_lower_level_gtin');
     }

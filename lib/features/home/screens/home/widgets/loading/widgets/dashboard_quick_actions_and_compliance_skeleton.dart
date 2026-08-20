@@ -1,5 +1,5 @@
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/loading/widgets/dashboard_compliance_skeleton.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/loading/widgets/dashboard_quick_actions_skeleton.dart';
 

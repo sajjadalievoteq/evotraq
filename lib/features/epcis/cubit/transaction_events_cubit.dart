@@ -4,6 +4,7 @@ import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 
 import 'package:traqtrace_app/data/services/epcis/transaction_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/transaction_event_service_operations.dart';
 
 class TransactionEventsState extends Equatable {
   final List<TransactionEvent> transactionEvents;
@@ -23,13 +24,13 @@ class TransactionEventsState extends Equatable {
   });
 
   factory TransactionEventsState.initial() => const TransactionEventsState(
-        transactionEvents: [],
-        loading: false,
-        error: null,
-        totalPages: 0,
-        totalElements: 0,
-        selectedEvent: null,
-      );
+    transactionEvents: [],
+    loading: false,
+    error: null,
+    totalPages: 0,
+    totalElements: 0,
+    selectedEvent: null,
+  );
 
   TransactionEventsState copyWith({
     List<TransactionEvent>? transactionEvents,
@@ -47,28 +48,29 @@ class TransactionEventsState extends Equatable {
       error: clearError ? null : (error ?? this.error),
       totalPages: totalPages ?? this.totalPages,
       totalElements: totalElements ?? this.totalElements,
-      selectedEvent:
-          clearSelectedEvent ? null : (selectedEvent ?? this.selectedEvent),
+      selectedEvent: clearSelectedEvent
+          ? null
+          : (selectedEvent ?? this.selectedEvent),
     );
   }
 
   @override
   List<Object?> get props => [
-        transactionEvents,
-        loading,
-        error,
-        totalPages,
-        totalElements,
-        selectedEvent,
-      ];
+    transactionEvents,
+    loading,
+    error,
+    totalPages,
+    totalElements,
+    selectedEvent,
+  ];
 }
 
 class TransactionEventsCubit extends Cubit<TransactionEventsState> {
   final TransactionEventService _service;
 
   TransactionEventsCubit({TransactionEventService? service})
-      : _service = service ?? getIt<TransactionEventService>(),
-        super(TransactionEventsState.initial());
+    : _service = service ?? getIt<TransactionEventService>(),
+      super(TransactionEventsState.initial());
 
   Future<void> loadTransactionEvents({
     int page = 0,
@@ -103,8 +105,10 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
       } else if (bizStep != null) {
         events = await _service.findTransactionEventsByBusinessStep(bizStep);
       } else if (disposition != null) {
-        events =
-            await _service.findTransactionEventsByDispositionAndEPC(disposition, "");
+        events = await _service.findTransactionEventsByDispositionAndEPC(
+          disposition,
+          "",
+        );
       } else {
         // TODO: server-side paged multi-action query
         final results = await Future.wait([
@@ -123,8 +127,9 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
       final pageItems = startIndex >= totalElements
           ? <TransactionEvent>[]
           : events.skip(startIndex).take(size).toList(growable: false);
-      final updated =
-          loadMore ? [...state.transactionEvents, ...pageItems] : pageItems;
+      final updated = loadMore
+          ? [...state.transactionEvents, ...pageItems]
+          : pageItems;
 
       emit(
         state.copyWith(
@@ -280,7 +285,10 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
   Future<void> updateTransactionEvent(TransactionEvent event) async {
     try {
       emit(state.copyWith(loading: true, clearError: true));
-      final updatedEvent = await _service.updateTransactionEvent(event.id!, event);
+      final updatedEvent = await _service.updateTransactionEvent(
+        event.id!,
+        event,
+      );
 
       final index = state.transactionEvents.indexWhere((e) => e.id == event.id);
       final updatedEvents = [...state.transactionEvents];
@@ -288,8 +296,9 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
         updatedEvents[index] = updatedEvent;
       }
 
-      final selectedEvent =
-          state.selectedEvent?.id == event.id ? updatedEvent : state.selectedEvent;
+      final selectedEvent = state.selectedEvent?.id == event.id
+          ? updatedEvent
+          : state.selectedEvent;
 
       emit(
         state.copyWith(
@@ -309,8 +318,9 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
       emit(state.copyWith(loading: true, clearError: true));
       await _service.deleteTransactionEvent(id);
 
-      final updated =
-          state.transactionEvents.where((event) => event.id != id).toList(growable: false);
+      final updated = state.transactionEvents
+          .where((event) => event.id != id)
+          .toList(growable: false);
 
       emit(
         state.copyWith(
@@ -343,11 +353,16 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
     }
   }
 
-  Future<void> findEventsByBusinessStepAndEPC(String businessStep, String epc) async {
+  Future<void> findEventsByBusinessStepAndEPC(
+    String businessStep,
+    String epc,
+  ) async {
     try {
       emit(state.copyWith(loading: true, clearError: true));
-      final events =
-          await _service.findTransactionEventsByBusinessStepAndEPC(businessStep, epc);
+      final events = await _service.findTransactionEventsByBusinessStepAndEPC(
+        businessStep,
+        epc,
+      );
       emit(
         state.copyWith(
           transactionEvents: events,

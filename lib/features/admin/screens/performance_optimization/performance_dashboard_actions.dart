@@ -1,48 +1,57 @@
-part of 'performance_optimization_dashboard_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/benchmark_connection_dialog_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/connection_dialog_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/optimization_dialog_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/performance_optimization_dashboard_screen.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 
 extension PerformanceDashboardActions
-    on _PerformanceOptimizationDashboardState {
-  void _ensureTabLoaded(int index) {
-    if (_reportLoaded) return;
-    _reportLoaded = true;
+    on PerformanceOptimizationDashboardState {
+  void ensureTabLoaded(int index) {
+    if (reportLoaded) return;
+    reportLoaded = true;
     _loadPerformanceData();
   }
 
   Future<void> _loadPerformanceData() async {
     setState(() {
-      _reportState = const LoadState.loading();
+      reportState = const LoadState.loading();
     });
 
     try {
-      final report = await _performanceService.getPerformanceReport();
+      final report = await performanceService.getPerformanceReport();
 
       if (!mounted) return;
       setState(() {
-        _reportState = report.isEmpty
+        reportState = report.isEmpty
             ? const LoadState.empty()
             : LoadState.success(report);
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _reportState = LoadState.error('Failed to load performance data: $e');
+        reportState = LoadState.error('Failed to load performance data: $e');
       });
     }
   }
 
-  void _refreshPerformanceData() {
-    _reportLoaded = true;
+  void refreshPerformanceData() {
+    reportLoaded = true;
     _loadPerformanceData();
   }
 
-  void _analyzeQuery(String query) async {
+  void analyzeQuery(String query) async {
     if (query.isEmpty) {
       context.showError('Please enter a query to analyze');
       return;
     }
 
     try {
-      final analysis = await _performanceService.analyzeQueryExecutionPlan(
+      final analysis = await performanceService.analyzeQueryExecutionPlan(
         query,
       );
       _showAnalysisDialog('Query Analysis', analysis);
@@ -51,18 +60,18 @@ extension PerformanceDashboardActions
     }
   }
 
-  void _detectSlowQueries() async {
+  void detectSlowQueries() async {
     try {
-      final slowQueries = await _performanceService.detectSlowQueries();
-      _showSlowQueriesDialog(slowQueries);
+      final slowQueries = await performanceService.detectSlowQueries();
+      showSlowQueriesDialog(slowQueries);
     } catch (e) {
       _showErrorDialog('Failed to detect slow queries: $e');
     }
   }
 
-  void _analyzeTableIndexes(String tableName) async {
+  void analyzeTableIndexes(String tableName) async {
     try {
-      final recommendations = await _performanceService
+      final recommendations = await performanceService
           .getIndexOptimizationRecommendations(tableName);
       _showAnalysisDialog('Index Optimization for $tableName', recommendations);
     } catch (e) {
@@ -70,9 +79,9 @@ extension PerformanceDashboardActions
     }
   }
 
-  void _showConnectionPoolOptimization() async {
+  void showConnectionPoolOptimization() async {
     try {
-      final config = await _performanceService
+      final config = await performanceService
           .getOptimizedConnectionPoolConfig();
       _showAnalysisDialog('Connection Pool Optimization', config);
     } catch (e) {
@@ -80,18 +89,18 @@ extension PerformanceDashboardActions
     }
   }
 
-  void _detectConnectionLeaks() async {
+  void detectConnectionLeaks() async {
     try {
-      final leaks = await _performanceService.detectConnectionLeaks();
-      _showConnectionLeaksDialog(leaks);
+      final leaks = await performanceService.detectConnectionLeaks();
+      showConnectionLeaksDialog(leaks);
     } catch (e) {
       _showErrorDialog('Failed to detect connection leaks: $e');
     }
   }
 
-  void _configureThreadPool() async {
+  void configureThreadPool() async {
     try {
-      final result = await _performanceService.configureOptimalThreadPool(
+      final result = await performanceService.configureOptimalThreadPool(
         poolName: 'default',
         coreSize: 4,
         maxSize: 8,
@@ -103,39 +112,39 @@ extension PerformanceDashboardActions
     }
   }
 
-  void _optimizeMemory() async {
+  void optimizeMemory() async {
     try {
-      final result = await _performanceService.optimizeMemoryUsage();
-      _showMemoryOptimizationDialog(result);
+      final result = await performanceService.optimizeMemoryUsage();
+      showMemoryOptimizationDialog(result);
     } catch (e) {
       _showErrorDialog('Failed to optimize memory: $e');
     }
   }
 
-  void _optimizeCpu() async {
+  void optimizeCpu() async {
     try {
-      final result = await _performanceService.balanceCpuUtilization();
+      final result = await performanceService.balanceCpuUtilization();
       _showAnalysisDialog('CPU Optimization', result);
     } catch (e) {
       _showErrorDialog('Failed to balance CPU utilization: $e');
     }
   }
 
-  void _optimizeIo() async {
+  void optimizeIo() async {
     try {
-      final result = await _performanceService.optimizeIoOperations();
+      final result = await performanceService.optimizeIoOperations();
       _showAnalysisDialog('I/O Optimization', result);
     } catch (e) {
       _showErrorDialog('Failed to optimize I/O operations: $e');
     }
   }
 
-  void _runBenchmark(String testType) async {
+  void runBenchmark(String testType) async {
     try {
-      final result = await _performanceService.runPerformanceBenchmark(
+      final result = await performanceService.runPerformanceBenchmark(
         testType,
       );
-      _showBenchmarkResultsDialog(result);
+      showBenchmarkResultsDialog(result);
     } catch (e) {
       _showErrorDialog('Failed to run benchmark: $e');
     }

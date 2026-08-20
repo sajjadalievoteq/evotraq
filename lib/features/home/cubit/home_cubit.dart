@@ -1,21 +1,14 @@
 import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/data/models/home/dashboard_stats.dart';
 import 'package:traqtrace_app/data/models/home/throughput_window.dart';
 import 'package:traqtrace_app/data/services/home/dashboard_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/home/cubit/home_state.dart';
-
-/// Drives the Home dashboard from an initial REST load plus a live WebSocket heartbeat push.
-///
-/// The backend recomputes the summary on a fixed interval and broadcasts it to every connected
-/// client (see `DashboardSummaryBroadcaster`) instead of each client polling REST on its own
-/// timer. REST is used only for: the initial load, an immediate re-sync on (re)connect, and a
-/// fallback poll while the socket is disconnected — mirroring JobQueueCubit's reconnect model.
+import 'package:traqtrace_app/features/home/cubit/home_health_loader.dart';
+import 'package:traqtrace_app/features/home/cubit/home_throughput_cache.dart';
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit(
     this._dashboardService,
@@ -27,6 +20,7 @@ class HomeCubit extends Cubit<HomeState> {
        _webSocketService = webSocketService ?? getIt<WebSocketService>(),
        _currentPollInterval = pollInterval,
        super(const HomeState(status: HomeLoadStatus.loading)) {
+    _healthLoader = HomeHealthLoader(_dashboardService, _sessionStore);
     _initializeWebSocketListeners();
     if (_webSocketService.isConnected) {
       emit(state.copyWith(liveUpdatesConnected: true));
@@ -37,13 +31,12 @@ class HomeCubit extends Cubit<HomeState> {
   final HomeOverviewSessionStore _sessionStore;
   final AuthCubit _authCubit;
   final WebSocketService _webSocketService;
+  late final HomeHealthLoader _healthLoader;
 
   final Duration pollInterval;
 
   static const Duration _maxPollBackoff = Duration(minutes: 5);
 
-  // The backend heartbeat always broadcasts this throughput window (DashboardSummaryBroadcaster).
-  // If the user has selected a different one, a push must not clobber their selected view.
   static const int _broadcastThroughputHours = 24;
 
   static const List<int> _prefetchThroughputHours = [1, 168];
@@ -51,7 +44,6 @@ class HomeCubit extends Cubit<HomeState> {
   StreamSubscription? _dashboardSubscription;
   StreamSubscription? _connectionSubscription;
 
-  int _healthLoadGeneration = 0;
   int _throughputPrefetchGeneration = 0;
   Timer? _pollTimer;
   Duration _currentPollInterval;
@@ -227,9 +219,7 @@ class HomeCubit extends Cubit<HomeState> {
       // refreshHealth: false — the actuator health/info check isn't tied to the WebSocket
       // heartbeat, so re-running it here on every (re)connect only produces a redundant
       // duplicate call racing with the one the initial `load()` already kicked off.
-      unawaited(
-        refresh(accountEmail: _pollAccountEmail, refreshHealth: false),
-      );
+      unawaited(refresh(accountEmail: _pollAccountEmail, refreshHealth: false));
     } else {
       // Enable the REST fallback poll immediately (don't wait for the first periodic tick).
       startPolling(accountEmail: _pollAccountEmail);
@@ -242,11 +232,17 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       final parsed = DashboardService.parseSummaryPayload(payload);
       final refreshedAt = DateTime.now();
-      final cache = _cacheWithBroadcastWindow(
+      final cache = cacheHomeBroadcastWindow(
         state.throughputByHours,
         parsed.stats,
+        broadcastHours: _broadcastThroughputHours,
       );
-      final stats = _statsForSelectedWindow(parsed.stats, cache);
+      final stats = homeStatsForSelectedWindow(
+        parsed.stats,
+        cache,
+        selectedHours: state.throughputHours,
+        broadcastHours: _broadcastThroughputHours,
+      );
 
       emit(
         state.copyWith(
@@ -315,11 +311,17 @@ class HomeCubit extends Cubit<HomeState> {
 
       if (isClosed) return;
 
-      final cache = _cacheWithBroadcastWindow(
+      final cache = cacheHomeBroadcastWindow(
         state.throughputByHours,
         overview.stats,
+        broadcastHours: _broadcastThroughputHours,
       );
-      final stats = _statsForSelectedWindow(overview.stats, cache);
+      final stats = homeStatsForSelectedWindow(
+        overview.stats,
+        cache,
+        selectedHours: state.throughputHours,
+        broadcastHours: _broadcastThroughputHours,
+      );
 
       emit(
         state.copyWith(
@@ -430,32 +432,6 @@ class HomeCubit extends Cubit<HomeState> {
     );
   }
 
-  Map<int, ThroughputWindow> _cacheWithBroadcastWindow(
-    Map<int, ThroughputWindow> existing,
-    DashboardStats broadcastStats,
-  ) {
-    return Map<int, ThroughputWindow>.from(existing)
-      ..[_broadcastThroughputHours] = ThroughputWindow(
-        buckets: Map<int, int>.from(broadcastStats.throughputBuckets),
-        total: broadcastStats.throughputTotal,
-      );
-  }
-
-  DashboardStats _statsForSelectedWindow(
-    DashboardStats broadcastStats,
-    Map<int, ThroughputWindow> cache,
-  ) {
-    if (state.throughputHours == _broadcastThroughputHours) {
-      return broadcastStats;
-    }
-    final selected = cache[state.throughputHours];
-    if (selected == null) return broadcastStats;
-    return broadcastStats.copyWithThroughput(
-      buckets: selected.buckets,
-      total: selected.total,
-    );
-  }
-
   void _restorePollInterval() {
     if (_currentPollInterval == pollInterval) return;
     _currentPollInterval = pollInterval;
@@ -475,43 +451,13 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void _startHealthLoad({String? accountEmail}) {
-    if (!_canReadHealth) {
-      if (!isClosed && state.healthLoading) {
-        emit(state.copyWith(healthLoading: false));
-      }
-      return;
-    }
-    final generation = ++_healthLoadGeneration;
-    _loadHealthInBackground(accountEmail: accountEmail, generation: generation);
-  }
-
-  Future<void> _loadHealthInBackground({
-    required String? accountEmail,
-    required int generation,
-  }) async {
-    if (isClosed || !_canReadHealth) return;
-    emit(state.copyWith(healthLoading: true));
-    try {
-      final healthStatus = await _dashboardService.getSystemHealth();
-      if (isClosed || generation != _healthLoadGeneration) return;
-
-      emit(state.copyWith(healthStatus: healthStatus, healthLoading: false));
-
-      if (state.stats != null && state.recentEvents != null) {
-        await _sessionStore.save(
-          HomeOverviewBundle(
-            stats: state.stats!,
-            recentEvents: state.recentEvents!,
-            healthStatus: healthStatus,
-            lastDataRefreshAt: state.lastDataRefreshAt ?? DateTime.now(),
-            accountEmail: accountEmail,
-          ),
-        );
-      }
-    } catch (_) {
-      if (isClosed || generation != _healthLoadGeneration) return;
-      emit(state.copyWith(healthLoading: false));
-    }
+    _healthLoader.load(
+      accountEmail: accountEmail,
+      canReadHealth: _canReadHealth,
+      isClosed: () => isClosed,
+      currentState: () => state,
+      emitState: emit,
+    );
   }
 
   /// Switch the visible throughput range using startup-prefetched windows only.

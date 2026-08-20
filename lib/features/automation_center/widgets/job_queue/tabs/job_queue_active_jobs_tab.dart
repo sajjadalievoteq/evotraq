@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/cards/job_queue_active_job_card.dart';
 
 class JobQueueActiveJobsTab extends StatelessWidget {

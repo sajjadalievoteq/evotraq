@@ -1,6 +1,7 @@
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 
@@ -103,12 +104,7 @@ class AutomationWorkbenchPanel extends StatelessWidget {
           ),
         ],
         body: Padding(
-          padding: EdgeInsets.fromLTRB(
-            context.gutter,
-            0,
-            context.gutter,
-            0,
-          ),
+          padding: EdgeInsets.fromLTRB(context.gutter, 0, context.gutter, 0),
           child: Column(
             children: [
               Expanded(child: card),
@@ -119,9 +115,6 @@ class AutomationWorkbenchPanel extends StatelessWidget {
       );
     }
 
-    return ListView(
-      padding: EdgeInsets.all(pad),
-      children: [...header, card],
-    );
+    return ListView(padding: EdgeInsets.all(pad), children: [...header, card]);
   }
 }

@@ -1,8 +1,8 @@
+import 'package:traqtrace_app/core/animation/traq_staggered_entrance_widget.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/storage/recent_login_usernames_store.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/data/models/auth/login_request.dart';

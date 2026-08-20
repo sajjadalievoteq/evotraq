@@ -2,22 +2,20 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
-import 'package:uuid/uuid.dart';
 
-part 'transaction_event_service_operations.dart';
 
 class TransactionEventService {
-  final DioService _dioService;
+  final DioService dioService;
 
-  late final String _baseUrl;
+  late final String baseUrl;
 
   TransactionEventService({required DioService dioService})
-    : _dioService = dioService {
-    _baseUrl = '${_dioService.baseUrl}/events/transaction';
+    : dioService = dioService {
+    baseUrl = '${dioService.baseUrl}/events/transaction';
   }
 
-  Future<Map<String, String>> _getHeaders() async {
-    final token = await _dioService.getAuthToken();
+  Future<Map<String, String>> getHeaders() async {
+    final token = await dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -25,7 +23,7 @@ class TransactionEventService {
   }
 
   Future<TransactionEvent> getTransactionEventById(String id) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     String cleanId;
     if (id.contains(':')) {
@@ -35,8 +33,8 @@ class TransactionEventService {
     }
 
     try {
-      final response = await _dioService.get(
-        '$_baseUrl/$cleanId',
+      final response = await dioService.get(
+        '$baseUrl/$cleanId',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -55,9 +53,9 @@ class TransactionEventService {
   }
 
   Future<TransactionEvent> getTransactionEventByEventId(String eventId) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/event-id',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/event-id',
       queryParameters: {'eventId': eventId},
       headers: headers,
       responseType: ResponseType.plain,
@@ -76,9 +74,9 @@ class TransactionEventService {
   Future<TransactionEvent> createTransactionEvent(
     TransactionEvent event,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.post(
-      _baseUrl,
+    final headers = await getHeaders();
+    final response = await dioService.post(
+      baseUrl,
       headers: headers,
       data: json.encode(event.toJson()),
       responseType: ResponseType.plain,
@@ -98,9 +96,9 @@ class TransactionEventService {
     String id,
     TransactionEvent event,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.put(
-      '$_baseUrl/$id',
+    final headers = await getHeaders();
+    final response = await dioService.put(
+      '$baseUrl/$id',
       headers: headers,
       data: json.encode(event.toJson()),
       responseType: ResponseType.plain,
@@ -117,9 +115,9 @@ class TransactionEventService {
   }
 
   Future<void> deleteTransactionEvent(String id) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.delete(
-      '$_baseUrl/$id',
+    final headers = await getHeaders();
+    final response = await dioService.delete(
+      '$baseUrl/$id',
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -135,9 +133,9 @@ class TransactionEventService {
   Future<List<TransactionEvent>> findTransactionEventsByAction(
     String action,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/action/$action',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/action/$action',
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -154,9 +152,9 @@ class TransactionEventService {
   }
 
   Future<List<TransactionEvent>> findTransactionEventsByEPC(String epc) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/epc',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/epc',
       queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
@@ -176,9 +174,9 @@ class TransactionEventService {
   Future<List<TransactionEvent>> findTransactionEventsByEPCClass(
     String epcClass,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/epcclass',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/epcclass',
       queryParameters: {'epcClass': epcClass},
       headers: headers,
       responseType: ResponseType.plain,
@@ -199,9 +197,9 @@ class TransactionEventService {
     String type,
     String id,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/biz-transaction',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/biz-transaction',
       queryParameters: {'type': type, 'id': id},
       headers: headers,
       responseType: ResponseType.plain,
@@ -221,9 +219,9 @@ class TransactionEventService {
   Future<List<TransactionEvent>> findTransactionEventsByBusinessStep(
     String businessStep,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/business-step/$businessStep',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/business-step/$businessStep',
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -243,9 +241,9 @@ class TransactionEventService {
     String businessStep,
     String epc,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/business-step/$businessStep/epc',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/business-step/$businessStep/epc',
       queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
@@ -266,9 +264,9 @@ class TransactionEventService {
     String disposition,
     String epc,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/disposition/$disposition/epc',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/disposition/$disposition/epc',
       queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
@@ -290,9 +288,9 @@ class TransactionEventService {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/location',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/location',
       queryParameters: {'locationGLN': locationGLN},
       headers: headers,
       responseType: ResponseType.plain,
@@ -322,9 +320,9 @@ class TransactionEventService {
   Future<List<TransactionEvent>> findActiveTransactionsForEPC(
     String epc,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/active/epc',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/active/epc',
       queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
@@ -344,9 +342,9 @@ class TransactionEventService {
   Future<List<TransactionEvent>> findTransactionHistoryForEPC(
     String epc,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.get(
-      '$_baseUrl/history/epc',
+    final headers = await getHeaders();
+    final response = await dioService.get(
+      '$baseUrl/history/epc',
       queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,

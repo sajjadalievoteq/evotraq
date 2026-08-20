@@ -123,7 +123,8 @@ class SSCCPharmaceuticalExtension extends Equatable {
       temperatureMonitoringRequired:
           json['temperatureMonitoringRequired'] ?? false,
       temperatureMonitoringDeviceId: json['temperatureMonitoringDeviceId'],
-      temperatureExcursionLimitMinutes: json['temperatureExcursionLimitMinutes'],
+      temperatureExcursionLimitMinutes:
+          json['temperatureExcursionLimitMinutes'],
       gdpCompliant: json['gdpCompliant'] ?? true,
       gdpCertificateNumber: json['gdpCertificateNumber'],
       gdpCertificateExpiry: json['gdpCertificateExpiry'] != null
@@ -152,7 +153,8 @@ class SSCCPharmaceuticalExtension extends Equatable {
       requiresPharmacistVerification:
           json['requiresPharmacistVerification'] ?? false,
       carrierGdpQualificationNumber: json['carrierGdpQualificationNumber'],
-      carrierGdpQualificationExpiry: json['carrierGdpQualificationExpiry'] != null
+      carrierGdpQualificationExpiry:
+          json['carrierGdpQualificationExpiry'] != null
           ? DateTime.parse(json['carrierGdpQualificationExpiry'])
           : null,
       vehicleQualificationNumber: json['vehicleQualificationNumber'],
@@ -194,8 +196,10 @@ class SSCCPharmaceuticalExtension extends Equatable {
       if (gdpCertificateNumber != null)
         'gdpCertificateNumber': gdpCertificateNumber,
       if (gdpCertificateExpiry != null)
-        'gdpCertificateExpiry':
-            gdpCertificateExpiry!.toIso8601String().split('T').first,
+        'gdpCertificateExpiry': gdpCertificateExpiry!
+            .toIso8601String()
+            .split('T')
+            .first,
       if (gdpIssuingAuthority != null)
         'gdpIssuingAuthority': gdpIssuingAuthority,
       'whoPqsRequired': whoPqsRequired,
@@ -225,13 +229,17 @@ class SSCCPharmaceuticalExtension extends Equatable {
       if (carrierGdpQualificationNumber != null)
         'carrierGdpQualificationNumber': carrierGdpQualificationNumber,
       if (carrierGdpQualificationExpiry != null)
-        'carrierGdpQualificationExpiry':
-            carrierGdpQualificationExpiry!.toIso8601String().split('T').first,
+        'carrierGdpQualificationExpiry': carrierGdpQualificationExpiry!
+            .toIso8601String()
+            .split('T')
+            .first,
       if (vehicleQualificationNumber != null)
         'vehicleQualificationNumber': vehicleQualificationNumber,
       if (vehicleLastQualificationDate != null)
-        'vehicleLastQualificationDate':
-            vehicleLastQualificationDate!.toIso8601String().split('T').first,
+        'vehicleLastQualificationDate': vehicleLastQualificationDate!
+            .toIso8601String()
+            .split('T')
+            .first,
       'clinicalTrialShipment': clinicalTrialShipment,
       if (clinicalTrialProtocolNumber != null)
         'clinicalTrialProtocolNumber': clinicalTrialProtocolNumber,
@@ -305,7 +313,8 @@ class SSCCPharmaceuticalExtension extends Equatable {
           temperatureMonitoringRequired ?? this.temperatureMonitoringRequired,
       temperatureMonitoringDeviceId:
           temperatureMonitoringDeviceId ?? this.temperatureMonitoringDeviceId,
-      temperatureExcursionLimitMinutes: temperatureExcursionLimitMinutes ??
+      temperatureExcursionLimitMinutes:
+          temperatureExcursionLimitMinutes ??
           this.temperatureExcursionLimitMinutes,
       gdpCompliant: gdpCompliant ?? this.gdpCompliant,
       gdpCertificateNumber: gdpCertificateNumber ?? this.gdpCertificateNumber,
@@ -363,53 +372,53 @@ class SSCCPharmaceuticalExtension extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        ssccId,
-        ssccCode,
-        coldChainRequired,
-        minTemperatureCelsius,
-        maxTemperatureCelsius,
-        temperatureMonitoringRequired,
-        temperatureMonitoringDeviceId,
-        temperatureExcursionLimitMinutes,
-        gdpCompliant,
-        gdpCertificateNumber,
-        gdpCertificateExpiry,
-        gdpIssuingAuthority,
-        whoPqsRequired,
-        whoPqsEquipmentCode,
-        containsControlledSubstance,
-        deaSchedule,
-        deaOrderFormNumber,
-        incbAuthorizationNumber,
-        narcoticTransitPermit,
-        hazmatClass,
-        hazmatUnNumber,
-        hazmatPackingGroup,
-        hazmatSpecialProvisions,
-        humidityControlled,
-        minHumidityPercent,
-        maxHumidityPercent,
-        lightSensitive,
-        orientationSensitive,
-        shockSensitive,
-        chainOfCustodyRequired,
-        requiresSignatureOnReceipt,
-        requiresPharmacistVerification,
-        carrierGdpQualificationNumber,
-        carrierGdpQualificationExpiry,
-        vehicleQualificationNumber,
-        vehicleLastQualificationDate,
-        clinicalTrialShipment,
-        clinicalTrialProtocolNumber,
-        irbApprovalNumber,
-        specialHandlingInstructions,
-        fragile,
-        doNotStack,
-        thisSideUp,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    ssccId,
+    ssccCode,
+    coldChainRequired,
+    minTemperatureCelsius,
+    maxTemperatureCelsius,
+    temperatureMonitoringRequired,
+    temperatureMonitoringDeviceId,
+    temperatureExcursionLimitMinutes,
+    gdpCompliant,
+    gdpCertificateNumber,
+    gdpCertificateExpiry,
+    gdpIssuingAuthority,
+    whoPqsRequired,
+    whoPqsEquipmentCode,
+    containsControlledSubstance,
+    deaSchedule,
+    deaOrderFormNumber,
+    incbAuthorizationNumber,
+    narcoticTransitPermit,
+    hazmatClass,
+    hazmatUnNumber,
+    hazmatPackingGroup,
+    hazmatSpecialProvisions,
+    humidityControlled,
+    minHumidityPercent,
+    maxHumidityPercent,
+    lightSensitive,
+    orientationSensitive,
+    shockSensitive,
+    chainOfCustodyRequired,
+    requiresSignatureOnReceipt,
+    requiresPharmacistVerification,
+    carrierGdpQualificationNumber,
+    carrierGdpQualificationExpiry,
+    vehicleQualificationNumber,
+    vehicleLastQualificationDate,
+    clinicalTrialShipment,
+    clinicalTrialProtocolNumber,
+    irbApprovalNumber,
+    specialHandlingInstructions,
+    fragile,
+    doNotStack,
+    thisSideUp,
+    createdAt,
+    updatedAt,
+  ];
 }
 
 enum DEASchedule {

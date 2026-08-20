@@ -1,4 +1,9 @@
-part of 'tatmeen_recent_activity.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/utils/display_date_utils.dart';
+import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_activity_status_badge.dart';
 
 class TatmeenActivityListTile extends StatelessWidget {
   const TatmeenActivityListTile({super.key, required this.event});

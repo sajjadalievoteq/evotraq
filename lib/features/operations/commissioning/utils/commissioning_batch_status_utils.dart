@@ -1,7 +1,7 @@
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_batch_models.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
-import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 
 abstract final class CommissioningBatchStatusUtils {
   static Color color(BuildContext context, CommissioningBatchStatus status) {

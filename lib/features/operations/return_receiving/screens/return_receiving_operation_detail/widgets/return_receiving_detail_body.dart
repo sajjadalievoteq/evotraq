@@ -4,7 +4,7 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_response_model.dart';
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/utils/return_receiving_detail_helpers.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_two_gln_location_card.dart';
-import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/widgets/return_receiving_detail_shipped_items_card.dart';
+import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/widgets/return_receiving_detail_received_items_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_transport_card.dart';
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/widgets/return_receiving_detail_reference_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_comments_card.dart';

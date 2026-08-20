@@ -3,7 +3,7 @@ import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 
 class AppDrawerAnimatedContent extends StatefulWidget {
-  const AppDrawerAnimatedContent({required this.child});
+  const AppDrawerAnimatedContent({super.key, required this.child});
 
   final Widget child;
 

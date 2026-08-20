@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 
 
 

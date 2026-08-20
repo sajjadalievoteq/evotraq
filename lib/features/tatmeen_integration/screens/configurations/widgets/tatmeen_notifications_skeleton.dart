@@ -1,4 +1,8 @@
-part of 'tatmeen_notifications_settings.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_notification_switch_row_skeleton.dart';
 
 class TatmeenNotificationsSkeleton extends StatelessWidget {
   const TatmeenNotificationsSkeleton({super.key});

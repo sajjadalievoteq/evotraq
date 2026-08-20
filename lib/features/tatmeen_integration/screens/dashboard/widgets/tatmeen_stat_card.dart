@@ -1,4 +1,10 @@
-part of 'tatmeen_stats_row.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_widgets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/utils/tatmeen_dashboard_layout.dart';
 
 class TatmeenStatCard extends StatelessWidget {
   const TatmeenStatCard({
@@ -21,7 +27,7 @@ class TatmeenStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: _tatmeenKpiCardWidth(context),
+      width: tatmeenKpiCardWidth(context),
       child: InkWell(
         onTap: onTap,
         borderRadius: TraqRadius.card,

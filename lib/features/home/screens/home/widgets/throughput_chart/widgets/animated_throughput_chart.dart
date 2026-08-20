@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/home/screens/home/utils/throughput_chart_utils.dart';
 
 /// Mini bar chart that uses the bars themselves as the loading indicator.

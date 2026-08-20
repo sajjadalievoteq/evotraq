@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/services/admin/performance_optimization_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -14,30 +12,26 @@ import 'package:traqtrace_app/features/admin/screens/performance_optimization/wi
 import 'package:traqtrace_app/features/admin/screens/performance_optimization/widgets/perf_opt_connection_pool_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/performance_optimization/widgets/perf_opt_thread_management_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/performance_optimization/widgets/perf_opt_resource_management_tab.dart';
-import 'package:traqtrace_app/features/admin/screens/performance_optimization/widgets/perf_opt_stat_row.dart';
 
-part 'performance_dashboard_actions.dart';
-part 'optimization_dialog_actions.dart';
-part 'benchmark_connection_dialog_actions.dart';
-part 'connection_dialog_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/performance_dashboard_actions.dart';
 
 class PerformanceOptimizationDashboard extends StatefulWidget {
   const PerformanceOptimizationDashboard({super.key});
 
   @override
   State<PerformanceOptimizationDashboard> createState() =>
-      _PerformanceOptimizationDashboardState();
+      PerformanceOptimizationDashboardState();
 }
 
-class _PerformanceOptimizationDashboardState
+class PerformanceOptimizationDashboardState
     extends State<PerformanceOptimizationDashboard>
     with SingleTickerProviderStateMixin {
-  final PerformanceOptimizationService _performanceService =
+  final PerformanceOptimizationService performanceService =
       getIt<PerformanceOptimizationService>();
 
   late TabController _tabController;
-  LoadState<Map<String, dynamic>> _reportState = const LoadState.loading();
-  bool _reportLoaded = false;
+  LoadState<Map<String, dynamic>> reportState = const LoadState.loading();
+  bool reportLoaded = false;
 
   @override
   void initState() {
@@ -45,10 +39,10 @@ class _PerformanceOptimizationDashboardState
     _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
-        _ensureTabLoaded(_tabController.index);
+        ensureTabLoaded(_tabController.index);
       }
     });
-    _ensureTabLoaded(_tabController.index);
+    ensureTabLoaded(_tabController.index);
   }
 
   @override
@@ -65,7 +59,7 @@ class _PerformanceOptimizationDashboardState
         actions: [
           IconButton(
             icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _refreshPerformanceData,
+            onPressed: refreshPerformanceData,
             tooltip: 'Refresh Data',
           ),
         ],
@@ -95,45 +89,45 @@ class _PerformanceOptimizationDashboardState
         children: [
           KeepAliveTabView(
             child: PerfOptOverviewTab(
-              reportState: _reportState,
-              onRetry: _refreshPerformanceData,
-              onRunBenchmark: () => _runBenchmark('comprehensive'),
-              onDetectSlowQueries: _detectSlowQueries,
-              onOptimizeMemory: _optimizeMemory,
-              onDetectLeaks: _detectConnectionLeaks,
+              reportState: reportState,
+              onRetry: refreshPerformanceData,
+              onRunBenchmark: () => runBenchmark('comprehensive'),
+              onDetectSlowQueries: detectSlowQueries,
+              onOptimizeMemory: optimizeMemory,
+              onDetectLeaks: detectConnectionLeaks,
             ),
           ),
           KeepAliveTabView(
             child: PerfOptQueryOptimizationTab(
-              reportState: _reportState,
-              onRetry: _refreshPerformanceData,
-              onAnalyzeQuery: _analyzeQuery,
-              onDetectSlowQueries: _detectSlowQueries,
-              onAnalyzeTableIndexes: _analyzeTableIndexes,
+              reportState: reportState,
+              onRetry: refreshPerformanceData,
+              onAnalyzeQuery: analyzeQuery,
+              onDetectSlowQueries: detectSlowQueries,
+              onAnalyzeTableIndexes: analyzeTableIndexes,
             ),
           ),
           KeepAliveTabView(
             child: PerfOptConnectionPoolTab(
-              reportState: _reportState,
-              onRetry: _refreshPerformanceData,
-              onOptimizePool: _showConnectionPoolOptimization,
-              onDetectLeaks: _detectConnectionLeaks,
+              reportState: reportState,
+              onRetry: refreshPerformanceData,
+              onOptimizePool: showConnectionPoolOptimization,
+              onDetectLeaks: detectConnectionLeaks,
             ),
           ),
           KeepAliveTabView(
             child: PerfOptThreadManagementTab(
-              reportState: _reportState,
-              onRetry: _refreshPerformanceData,
-              onConfigureThreadPool: _configureThreadPool,
+              reportState: reportState,
+              onRetry: refreshPerformanceData,
+              onConfigureThreadPool: configureThreadPool,
             ),
           ),
           KeepAliveTabView(
             child: PerfOptResourceManagementTab(
-              reportState: _reportState,
-              onRetry: _refreshPerformanceData,
-              onOptimizeMemory: _optimizeMemory,
-              onOptimizeCpu: _optimizeCpu,
-              onOptimizeIo: _optimizeIo,
+              reportState: reportState,
+              onRetry: refreshPerformanceData,
+              onOptimizeMemory: optimizeMemory,
+              onOptimizeCpu: optimizeCpu,
+              onOptimizeIo: optimizeIo,
             ),
           ),
         ],

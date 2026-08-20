@@ -4,8 +4,6 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/services/admin/event_generation_test_models.dart';
 import 'package:traqtrace_app/data/services/admin/event_generation_test_data_models.dart';
 
-export 'event_generation_test_models.dart';
-export 'event_generation_test_data_models.dart';
 
 class EventGenerationTestService {
   final DioService _dioService;

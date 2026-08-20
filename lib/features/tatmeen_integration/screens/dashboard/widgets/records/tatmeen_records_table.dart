@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/display_date_utils.dart';
-import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
-import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/records/tatmeen_operation_details_dialog.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/records/tatmeen_record_confirm_dialogs.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_sync_status_badge.dart';
 
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 
-part 'tatmeen_record_tile.dart';
-part 'tatmeen_records_table_skeleton.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/records/tatmeen_record_tile.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/records/tatmeen_records_table_skeleton.dart';
 
 class TatmeenRecordsTable extends StatelessWidget {
   const TatmeenRecordsTable({
@@ -28,7 +22,7 @@ class TatmeenRecordsTable extends StatelessWidget {
   final List<TatmeenSyncRecord> records;
   final bool isLoading;
   final bool Function(String id) isBusy;
-  final Future<void> Function(TatmeenSyncRecord record) onRetry;
+  final Future<TatmeenRetryOutcome> Function(TatmeenSyncRecord record) onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +53,7 @@ class TatmeenRecordsTable extends StatelessWidget {
               ),
               child: TatmeenRecordTile(
                 record: record,
-                busy: isBusy(record.id),
+                busy: isBusy(record.operationId),
                 onRetry: () => onRetry(record),
               ),
             ),

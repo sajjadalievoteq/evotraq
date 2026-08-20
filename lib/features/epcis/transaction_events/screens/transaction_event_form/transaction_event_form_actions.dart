@@ -1,7 +1,16 @@
-part of 'transaction_event_form_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
+import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/features/epcis/cubit/transaction_events_cubit.dart';
+import 'package:traqtrace_app/features/epcis/transaction_events/screens/transaction_event_form/transaction_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 
-extension TransactionEventFormActions on _TransactionEventFormScreenState {
-  Future<void> _loadTransactionEvent() async {
+extension TransactionEventFormActions on TransactionEventFormScreenState {
+  Future<void> loadTransactionEvent() async {
     if (widget.transactionEventId == null) return;
 
     final event = await context
@@ -10,78 +19,78 @@ extension TransactionEventFormActions on _TransactionEventFormScreenState {
 
     if (event != null) {
       setState(() {
-        _selectedAction = event.action;
-        _eventTime = event.eventTime;
+        selectedAction = event.action;
+        eventTime = event.eventTime;
 
         if (event.bizTransactionList.isNotEmpty) {
           final entry = event.bizTransactionList.entries.first;
-          _bizTransactionTypeController.text = entry.key;
-          _bizTransactionIdController.text = entry.value;
-          if (_standardBizTransactionTypes.contains(entry.key)) {
-            _bizTransactionType = entry.key;
+          bizTransactionTypeController.text = entry.key;
+          bizTransactionIdController.text = entry.value;
+          if (standardBizTransactionTypes.contains(entry.key)) {
+            bizTransactionType = entry.key;
           }
         }
 
-        _epcsController.text = event.epcList?.join(', ') ?? '';
+        epcsController.text = event.epcList?.join(', ') ?? '';
 
-        _locationGLNController.text = event.businessLocation?.glnCode ?? '';
+        locationGLNController.text = event.businessLocation?.glnCode ?? '';
 
-        _businessStep = event.businessStep;
+        businessStep = event.businessStep;
 
-        _disposition = event.disposition;
+        disposition = event.disposition;
 
-        _bizDataControllers.clear();
+        bizDataControllers.clear();
         if (event.bizData != null && event.bizData!.isNotEmpty) {
           event.bizData!.forEach((key, value) {
             final keyController = TextEditingController(text: key);
             final valueController = TextEditingController(text: value);
-            _bizDataControllers.add(MapEntry(keyController, valueController));
+            bizDataControllers.add(MapEntry(keyController, valueController));
           });
         } else {
-          _addBizDataField();
+          addBizDataField();
         }
       });
     }
   }
 
-  void _addBizDataField() {
+  void addBizDataField() {
     setState(() {
-      _bizDataControllers.add(
+      bizDataControllers.add(
         MapEntry(TextEditingController(), TextEditingController()),
       );
     });
   }
 
-  void _removeBizDataField(int index) {
+  void removeBizDataField(int index) {
     setState(() {
-      final entry = _bizDataControllers.removeAt(index);
+      final entry = bizDataControllers.removeAt(index);
       entry.key.dispose();
       entry.value.dispose();
     });
   }
 
-  Future<void> _saveTransactionEvent() async {
-    if (!_formKey.currentState!.validate()) {
+  Future<void> saveTransactionEvent() async {
+    if (!formKey.currentState!.validate()) {
       return;
     }
 
     final cubit = context.read<TransactionEventsCubit>();
 
-    final bizTransactionType =
-        _bizTransactionType ?? _bizTransactionTypeController.text.trim();
-    final bizTransactionId = _bizTransactionIdController.text.trim();
-    final epcs = _epcsController.text
+    final resolvedBizTransactionType =
+        bizTransactionType ?? bizTransactionTypeController.text.trim();
+    final bizTransactionId = bizTransactionIdController.text.trim();
+    final epcs = epcsController.text
         .split(',')
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .map((e) => EPCFormatter.formatToEPCUri(e) ?? e)
         .toList();
-    final locationGLN = _locationGLNController.text.trim();
-    final businessStep = _businessStep ?? '';
-    final disposition = _disposition ?? '';
+    final locationGLN = locationGLNController.text.trim();
+    final resolvedBusinessStep = businessStep ?? '';
+    final resolvedDisposition = disposition ?? '';
 
     final bizData = <String, String>{};
-    for (var entry in _bizDataControllers) {
+    for (var entry in bizDataControllers) {
       final key = entry.key.text.trim();
       final value = entry.value.text.trim();
       if (key.isNotEmpty && value.isNotEmpty) {
@@ -90,7 +99,7 @@ extension TransactionEventFormActions on _TransactionEventFormScreenState {
     }
 
     try {
-      if (_isEdit) {
+      if (isEdit) {
         final eventTime = DateTime.now().subtract(const Duration(seconds: 60));
 
         final event = TransactionEvent(
@@ -98,55 +107,55 @@ extension TransactionEventFormActions on _TransactionEventFormScreenState {
           eventId: widget.transactionEventId ?? '',
           eventTime: eventTime,
           recordTime: DateTime.now(),
-          eventTimeZoneOffset: _eventTimeZoneOffset,
+          eventTimeZoneOffset: eventTimeZoneOffset,
           epcisVersion: EPCISVersion.v2_0,
-          action: _selectedAction,
-          disposition: disposition.isEmpty ? null : disposition,
-          bizStep: businessStep.isEmpty ? null : businessStep,
+          action: selectedAction,
+          disposition: resolvedDisposition.isEmpty ? null : resolvedDisposition,
+          bizStep: resolvedBusinessStep.isEmpty ? null : resolvedBusinessStep,
           readPoint: locationGLN.isEmpty ? null : GLN.fromCode(locationGLN),
           bizLocation: locationGLN.isEmpty ? null : GLN.fromCode(locationGLN),
           bizData: bizData.isEmpty ? null : bizData,
           epcList: epcs.isEmpty ? null : epcs,
           bizTransactionList:
-              bizTransactionType.isEmpty || bizTransactionId.isEmpty
+              resolvedBizTransactionType.isEmpty || bizTransactionId.isEmpty
               ? {}
-              : {bizTransactionType: bizTransactionId},
+              : {resolvedBizTransactionType: bizTransactionId},
         );
 
         await cubit.updateTransactionEvent(event);
       } else {
         final eventTime = DateTime.now().subtract(const Duration(seconds: 60));
 
-        if (_selectedAction == 'ADD') {
+        if (selectedAction == 'ADD') {
           await cubit.createAddTransactionEvent(
-            bizTransactionType: bizTransactionType,
+            bizTransactionType: resolvedBizTransactionType,
             bizTransactionId: bizTransactionId,
             epcs: epcs,
             locationGLN: locationGLN,
-            businessStep: businessStep,
-            disposition: disposition,
+            businessStep: resolvedBusinessStep,
+            disposition: resolvedDisposition,
             bizData: bizData,
             eventTime: eventTime,
           );
-        } else if (_selectedAction == 'DELETE') {
+        } else if (selectedAction == 'DELETE') {
           await cubit.createDeleteTransactionEvent(
-            bizTransactionType: bizTransactionType,
+            bizTransactionType: resolvedBizTransactionType,
             bizTransactionId: bizTransactionId,
             epcs: epcs,
             locationGLN: locationGLN,
-            businessStep: businessStep,
-            disposition: disposition,
+            businessStep: resolvedBusinessStep,
+            disposition: resolvedDisposition,
             bizData: bizData,
             eventTime: eventTime,
           );
-        } else if (_selectedAction == 'OBSERVE') {
+        } else if (selectedAction == 'OBSERVE') {
           await cubit.createObserveTransactionEvent(
-            bizTransactionType: bizTransactionType,
+            bizTransactionType: resolvedBizTransactionType,
             bizTransactionId: bizTransactionId,
             epcs: epcs,
             locationGLN: locationGLN,
-            businessStep: businessStep,
-            disposition: disposition,
+            businessStep: resolvedBusinessStep,
+            disposition: resolvedDisposition,
             bizData: bizData,
             eventTime: eventTime,
           );
@@ -156,7 +165,7 @@ extension TransactionEventFormActions on _TransactionEventFormScreenState {
       if (!mounted) return;
 
       context.showSuccess(
-        _isEdit ? 'Transaction event updated' : 'Transaction event created',
+        isEdit ? 'Transaction event updated' : 'Transaction event created',
       );
       Navigator.pop(context, true);
     } catch (e) {
@@ -164,7 +173,7 @@ extension TransactionEventFormActions on _TransactionEventFormScreenState {
     }
   }
 
-  void _showHelpScreen(BuildContext context) {
+  void showHelpScreen(BuildContext context) {
     context.push('/epcis/transaction-events/help');
   }
 }

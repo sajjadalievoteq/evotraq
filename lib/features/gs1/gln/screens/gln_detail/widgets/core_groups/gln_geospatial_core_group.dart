@@ -1,5 +1,5 @@
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_outline_field.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 import 'package:traqtrace_app/features/epcis/widgets/geospatial_coordinates_widget.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';

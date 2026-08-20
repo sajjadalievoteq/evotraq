@@ -3,117 +3,115 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_operations.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_status.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_filters.dart';
 import 'package:traqtrace_app/core/utils/gs1_utils.dart';
-
 class SSCCCubit extends Cubit<SSCCState> {
   final SSCCService _ssccService;
-
   SSCCCubit({required SSCCService ssccService})
-      : _ssccService = ssccService,
-        super(const SSCCState());
-
+    : _ssccService = ssccService,
+      super(const SSCCState());
   Future<void> fetchSSCCs({int page = 0, int size = 20}) async {
     await loadSSCCList(page: page, size: size);
   }
-
   Future<void> fetchSSCCById(String id) async {
-    emit(state.copyWith(
-      status: SSCCStatus.loading,
-      clearSelectedSSCC: true,
-      isListLoading: false,
-      error: null,
-    ));
-    try {
-      final sscc = await _ssccService.getSSCCById(id);
-      emit(state.copyWith(
-        status: SSCCStatus.success,
-        selectedSSCC: sscc,
+    emit(
+      state.copyWith(
+        status: SSCCStatus.loading,
+        clearSelectedSSCC: true,
         isListLoading: false,
         error: null,
-      ));
+      ),
+    );
+    try {
+      final sscc = await _ssccService.getSSCCById(id);
+      emit(
+        state.copyWith(
+          status: SSCCStatus.success,
+          selectedSSCC: sscc,
+          isListLoading: false,
+          error: null,
+        ),
+      );
     } catch (e) {
       _handleError(e, 'Failed to load SSCC by ID');
     }
   }
-
   Future<void> fetchSSCCByCode(String ssccCode) async {
-    emit(state.copyWith(
-      status: SSCCStatus.loading,
-      clearSelectedSSCC: true,
-      isListLoading: false,
-      error: null,
-    ));
-    try {
-      final sscc = await _ssccService.getSSCCByCode(ssccCode);
-      emit(state.copyWith(
-        status: SSCCStatus.success,
-        selectedSSCC: sscc,
+    emit(
+      state.copyWith(
+        status: SSCCStatus.loading,
+        clearSelectedSSCC: true,
         isListLoading: false,
         error: null,
-      ));
+      ),
+    );
+    try {
+      final sscc = await _ssccService.getSSCCByCode(ssccCode);
+      emit(
+        state.copyWith(
+          status: SSCCStatus.success,
+          selectedSSCC: sscc,
+          isListLoading: false,
+          error: null,
+        ),
+      );
     } catch (e) {
       _handleError(e, 'Failed to load SSCC by code');
     }
   }
-
   Future<void> createSSCC(SSCC sscc) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
       final createdSSCC = await _ssccService.createSSCC(sscc);
-      emit(state.copyWith(
-        status: SSCCStatus.success,
-        selectedSSCC: createdSSCC,
-      ));
+      emit(
+        state.copyWith(status: SSCCStatus.success, selectedSSCC: createdSSCC),
+      );
     } catch (e) {
       _handleError(e, 'Failed to create SSCC');
     }
   }
-
   Future<void> updateSSCC(String id, SSCC sscc) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
       final updatedSSCC = await _ssccService.updateSSCC(id, sscc);
-      emit(state.copyWith(
-        status: SSCCStatus.success,
-        selectedSSCC: updatedSSCC,
-      ));
+      emit(
+        state.copyWith(status: SSCCStatus.success, selectedSSCC: updatedSSCC),
+      );
     } catch (e) {
       _handleError(e, 'Failed to update SSCC');
     }
   }
-
   Future<void> deleteSSCC(String id) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
       await _ssccService.deleteSSCC(id);
       final updatedSSccs = state.ssccs.where((s) => s.id != id).toList();
-      emit(state.copyWith(
-        status: SSCCStatus.deleted,
-        ssccs: updatedSSccs,
-        clearSelectedSSCC: state.selectedSSCC?.id == id,
-      ));
+      emit(
+        state.copyWith(
+          status: SSCCStatus.deleted,
+          ssccs: updatedSSccs,
+          clearSelectedSSCC: state.selectedSSCC?.id == id,
+        ),
+      );
     } catch (e) {
       _handleError(e, 'Failed to delete SSCC');
     }
   }
-
   Future<void> updateSSCCStatus(String id, String newStatus) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
       final statusEnum = SSCC.parseStatus(newStatus);
       final updatedSSCC = await _ssccService.updateSSCCStatus(id, statusEnum);
-      emit(state.copyWith(
-        status: SSCCStatus.success,
-        selectedSSCC: updatedSSCC,
-      ));
+      emit(
+        state.copyWith(status: SSCCStatus.success, selectedSSCC: updatedSSCC),
+      );
     } catch (e) {
       _handleError(e, 'Failed to update SSCC status');
     }
   }
-
   Future<List<String>> fetchAvailableTransitions(String id) async {
     try {
       return await _ssccService.getAvailableTransitions(id);
@@ -122,15 +120,15 @@ class SSCCCubit extends Cubit<SSCCState> {
       return const [];
     }
   }
-
-  Future<List<SsccAggregationLink>> fetchAggregationLinks(String ssccCode) async {
+  Future<List<SsccAggregationLink>> fetchAggregationLinks(
+    String ssccCode,
+  ) async {
     try {
       return await _ssccService.getAggregationLinksByCode(ssccCode);
     } catch (_) {
       return const [];
     }
   }
-
   Future<SsccAggregationLink?> addAggregationChild({
     required String ssccId,
     required String childEpc,
@@ -149,7 +147,6 @@ class SSCCCubit extends Cubit<SSCCState> {
       return null;
     }
   }
-
   Future<bool> disaggregateChild({
     required int linkId,
     required String disaggregationEventId,
@@ -165,40 +162,49 @@ class SSCCCubit extends Cubit<SSCCState> {
       return false;
     }
   }
-
   Future<void> validateSSCCCode(String ssccCode) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
       final isValid = await _ssccService.validateSSCCCode(ssccCode);
-      emit(state.copyWith(
-        status: SSCCStatus.validated,
-        isValid: isValid,
-        validatedCode: ssccCode,
-      ));
+      emit(
+        state.copyWith(
+          status: SSCCStatus.validated,
+          isValid: isValid,
+          validatedCode: ssccCode,
+        ),
+      );
     } catch (e) {
       _handleError(e, 'Failed to validate SSCC code');
     }
   }
-
-  Future<void> generateSSCCCode(String gs1CompanyPrefix, String extensionDigit) async {
+  Future<void> generateSSCCCode(
+    String gs1CompanyPrefix,
+    String extensionDigit,
+  ) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
-      final ssccCode = await _ssccService.generateSSCCCode(gs1CompanyPrefix, extensionDigit);
-      emit(state.copyWith(
-        status: SSCCStatus.codeGenerated,
-        generatedCode: ssccCode,
-      ));
+      final ssccCode = await _ssccService.generateSSCCCode(
+        gs1CompanyPrefix,
+        extensionDigit,
+      );
+      emit(
+        state.copyWith(
+          status: SSCCStatus.codeGenerated,
+          generatedCode: ssccCode,
+        ),
+      );
     } catch (e) {
       _handleError(e, 'Failed to generate SSCC code');
     }
   }
-
-  Future<void> generateSSCCFromGLN(String glnCode, String extensionDigit) async {
+  Future<void> generateSSCCFromGLN(
+    String glnCode,
+    String extensionDigit,
+  ) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
       String? ssccCode;
       String? errorMessage;
-
       if (extensionDigit.isEmpty || !RegExp(r'^\d$').hasMatch(extensionDigit)) {
         throw Exception('Extension digit must be a single digit (0-9)');
       }
@@ -207,22 +213,30 @@ class SSCCCubit extends Cubit<SSCCState> {
       }
 
       try {
-        final companyPrefix = await _ssccService.extractCompanyPrefixFromGLN(glnCode);
-        ssccCode = await _ssccService.generateSSCCCode(companyPrefix, extensionDigit);
+        final companyPrefix = await _ssccService.extractCompanyPrefixFromGLN(
+          glnCode,
+        );
+        ssccCode = await _ssccService.generateSSCCCode(
+          companyPrefix,
+          extensionDigit,
+        );
       } catch (apiError) {
         errorMessage = apiError.toString();
         try {
           ssccCode = GS1Utils.generateSSCCFromGLN(glnCode, extensionDigit);
         } catch (localError) {
-          errorMessage = 'API error: $errorMessage\nLocal generation error: ${localError.toString()}';
+          errorMessage =
+              'API error: $errorMessage\nLocal generation error: ${localError.toString()}';
         }
       }
 
       if (ssccCode != null && ssccCode.isNotEmpty) {
-        emit(state.copyWith(
-          status: SSCCStatus.codeGenerated,
-          generatedCode: ssccCode,
-        ));
+        emit(
+          state.copyWith(
+            status: SSCCStatus.codeGenerated,
+            generatedCode: ssccCode,
+          ),
+        );
       } else {
         throw Exception(errorMessage ?? 'Failed to generate SSCC code');
       }
@@ -380,27 +394,31 @@ class SSCCCubit extends Cubit<SSCCState> {
       final isLast = result['last'] ?? (page >= totalPages - 1);
 
       if (page == 0 || !isLoadMore) {
-        emit(state.copyWith(
-          status: SSCCStatus.success,
-          ssccs: ssccs,
-          page: page,
-          totalElements: totalElements,
-          totalPages: totalPages,
-          hasMoreData: !isLast,
-          error: null,
-          isListLoading: false,
-        ));
+        emit(
+          state.copyWith(
+            status: SSCCStatus.success,
+            ssccs: ssccs,
+            page: page,
+            totalElements: totalElements,
+            totalPages: totalPages,
+            hasMoreData: !isLast,
+            error: null,
+            isListLoading: false,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          status: SSCCStatus.success,
-          ssccs: [...state.ssccs, ...ssccs],
-          page: page,
-          totalElements: totalElements,
-          totalPages: totalPages,
-          hasMoreData: !isLast,
-          error: null,
-          isListLoading: false,
-        ));
+        emit(
+          state.copyWith(
+            status: SSCCStatus.success,
+            ssccs: [...state.ssccs, ...ssccs],
+            page: page,
+            totalElements: totalElements,
+            totalPages: totalPages,
+            hasMoreData: !isLast,
+            error: null,
+            isListLoading: false,
+          ),
+        );
       }
     } catch (e) {
       _handleError(e, errorPrefix);
@@ -451,11 +469,13 @@ class SSCCCubit extends Cubit<SSCCState> {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
       final childSsccs = await _ssccService.findChildSSCCs(parentSsccCode);
-      emit(state.copyWith(
-        status: SSCCStatus.success,
-        childSsccs: childSsccs,
-        parentSsccCode: parentSsccCode,
-      ));
+      emit(
+        state.copyWith(
+          status: SSCCStatus.success,
+          childSsccs: childSsccs,
+          parentSsccCode: parentSsccCode,
+        ),
+      );
     } catch (e) {
       _handleError(e, 'Failed to find child SSCCs');
     }
@@ -469,10 +489,12 @@ class SSCCCubit extends Cubit<SSCCState> {
       final detail = e.toString();
       message = detail.length > 200 ? '$prefix.' : '$prefix: $detail';
     }
-    emit(state.copyWith(
-      status: SSCCStatus.error,
-      error: message,
-      isListLoading: false,
-    ));
+    emit(
+      state.copyWith(
+        status: SSCCStatus.error,
+        error: message,
+        isListLoading: false,
+      ),
+    );
   }
 }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/services/scanner_detection_service.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_input_manual_tab.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_input_scanner_tab.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
-import 'package:traqtrace_app/features/barcode/widgets/dialog/gs1_barcode_scan_dialog.dart';
+import 'package:traqtrace_app/features/barcode/widgets/dialog/gs1_barcode_scan.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 

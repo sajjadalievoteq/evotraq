@@ -6,7 +6,6 @@ import 'package:traqtrace_app/features/epcis/aggregation_events/utils/aggregatio
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_detail/widgets/aggregation_event_action_chip.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 

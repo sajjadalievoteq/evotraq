@@ -1,6 +1,5 @@
-part of 'gtin_field_validators.dart';
 
-abstract final class _GtinRegulatoryValidators {
+abstract final class GtinRegulatoryValidators {
   static String? validateMarketingAuthorizationNumber(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Marketing Authorization Number is required';

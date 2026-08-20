@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/product_journey/widgets/journey_animated_filter_chip.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/product_journey/utils/journey_animation_constants.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_event_filter.dart';
 
 class JourneyEventFilterChips extends StatelessWidget {

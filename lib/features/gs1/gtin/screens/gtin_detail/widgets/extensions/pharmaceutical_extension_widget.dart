@@ -1,11 +1,11 @@
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharmaceutical_extension_grouped_body.dart';
-import 'package:traqtrace_app/features/pharmaceutical/utils/pharma_field_validators.dart';
 
-part 'pharmaceutical_extension_actions.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharmaceutical_extension_actions.dart';
 
 class PharmaceuticalExtensionWidget extends StatefulWidget {
   final int? gtinId;
@@ -38,99 +38,99 @@ class PharmaceuticalExtensionWidget extends StatefulWidget {
 
 class PharmaceuticalExtensionWidgetState
     extends State<PharmaceuticalExtensionWidget> {
-  GTINPharmaceuticalExtension? _extension;
+  GTINPharmaceuticalExtension? extension;
   bool _isLoading = true;
 
-  String _ndcNumber = '';
-  String _dinNumber = '';
-  String _eanPharmaCode = '';
+  String ndcNumber = '';
+  String dinNumber = '';
+  String eanPharmaCode = '';
 
-  String _drugClass = '';
-  String _therapeuticClass = '';
-  String _pharmacologicalClass = '';
-  String _atcCode = '';
+  String drugClass = '';
+  String therapeuticClass = '';
+  String pharmacologicalClass = '';
+  String atcCode = '';
 
-  bool _isControlledSubstance = false;
-  DeaSchedule _deaSchedule = DeaSchedule.none;
-  String _controlClass = '';
+  bool isControlledSubstance = false;
+  DeaSchedule deaSchedule = DeaSchedule.none;
+  String controlClass = '';
 
-  String _dosageForm = '';
-  String _strength = '';
-  String _strengthUnit = '';
-  String _routeOfAdministration = '';
-  List<ActiveIngredient> _activeIngredients = [];
-  String _inactiveIngredients = '';
+  String dosageForm = '';
+  String strength = '';
+  String strengthUnit = '';
+  String routeOfAdministration = '';
+  List<ActiveIngredient> activeIngredients = [];
+  String inactiveIngredients = '';
 
-  String _storageConditions = '';
-  String _minStorageTemp = '';
-  String _maxStorageTemp = '';
-  bool _requiresRefrigeration = false;
-  bool _requiresFreezing = false;
-  bool _lightSensitive = false;
-  bool _humiditySensitive = false;
+  String storageConditions = '';
+  String minStorageTemp = '';
+  String maxStorageTemp = '';
+  bool requiresRefrigeration = false;
+  bool requiresFreezing = false;
+  bool lightSensitive = false;
+  bool humiditySensitive = false;
 
-  bool _requiresPrescription = true;
-  String _prescriptionType = '';
+  bool requiresPrescription = true;
+  String prescriptionType = '';
 
-  DateTime? _fdaApprovalDate;
-  String _fdaApplicationNumber = '';
-  DateTime? _emaApprovalDate;
-  String _emaProcedureNumber = '';
+  DateTime? fdaApprovalDate;
+  String fdaApplicationNumber = '';
+  DateTime? emaApprovalDate;
+  String emaProcedureNumber = '';
 
-  bool _blackBoxWarning = false;
-  String _blackBoxWarningText = '';
-  String _contraindications = '';
-  String _drugInteractions = '';
-  PregnancyCategory _pregnancyCategory = PregnancyCategory.notClassified;
+  bool blackBoxWarning = false;
+  String blackBoxWarningText = '';
+  String contraindications = '';
+  String drugInteractions = '';
+  PregnancyCategory pregnancyCategory = PregnancyCategory.notClassified;
 
-  String _regulatedProductName = '';
-  String _dosageFormTypeCode = '';
-  String _routeOfAdministrationCode = '';
+  String regulatedProductName = '';
+  String dosageFormTypeCode = '';
+  String routeOfAdministrationCode = '';
 
-  String _mahGln = '';
-  String _mahName = '';
-  String _mahCountry = '';
-  String _licensedAgentGlns = '';
-  String _additionalAtcCodes = '';
+  String mahGln = '';
+  String mahName = '';
+  String mahCountry = '';
+  String licensedAgentGlns = '';
+  String additionalAtcCodes = '';
 
-  String _maNumber = '';
-  DateTime? _maValidFrom;
-  DateTime? _maValidTo;
+  String maNumber = '';
+  DateTime? maValidFrom;
+  DateTime? maValidTo;
 
-  String _regulatoryStatus = '';
+  String regulatoryStatus = '';
 
-  String _prescriptionStatus = 'RX';
-  bool _controlledSubstance = false;
-  String _controlledSubstanceSchedule = '';
-  bool _additionalMonitoring = false;
+  String prescriptionStatus = 'RX';
+  bool controlledSubstance = false;
+  String controlledSubstanceSchedule = '';
+  bool additionalMonitoring = false;
 
-  String _shelfLifeMonths = '';
-  String _shelfLifeAfterOpenDays = '';
+  String shelfLifeMonths = '';
+  String shelfLifeAfterOpenDays = '';
 
-  String _countryOfManufacture = '';
-  String _packSizeDescription = '';
+  String countryOfManufacture = '';
+  String packSizeDescription = '';
 
-  String _nhmnGermanyPzn = '';
-  String _nhmnFranceCip = '';
-  String _nhmnSpainCn = '';
-  String _nhmnBrazilAnvisa = '';
-  String _nhmnPortugalAim = '';
-  String _nhmnUsaNdc = '';
-  String _nhmnItalyAifa = '';
-  String _localDrugCodeUaeGcc = '';
+  String nhmnGermanyPzn = '';
+  String nhmnFranceCip = '';
+  String nhmnSpainCn = '';
+  String nhmnBrazilAnvisa = '';
+  String nhmnPortugalAim = '';
+  String nhmnUsaNdc = '';
+  String nhmnItalyAifa = '';
+  String localDrugCodeUaeGcc = '';
 
-  String _dataCarrierTypeCode = '';
-  bool _antiTamperingIndicator = false;
-  bool _pseudoGtinNtinFlag = false;
-  bool _coldChainRequired = false;
+  String dataCarrierTypeCode = '';
+  bool antiTamperingIndicator = false;
+  bool pseudoGtinNtinFlag = false;
+  bool coldChainRequired = false;
 
-  String _activePotencyAi7004 = '';
+  String activePotencyAi7004 = '';
   @override
   void initState() {
     super.initState();
     if (widget.initialExtension != null) {
-      _populateFormFromExtension(widget.initialExtension!);
-      _extension = widget.initialExtension;
+      populateFormFromExtension(widget.initialExtension!);
+      extension = widget.initialExtension;
       _isLoading = false;
     } else {
       _isLoading =
@@ -149,8 +149,8 @@ class PharmaceuticalExtensionWidgetState
         _applyState(() {
           _isLoading = false;
           if (widget.initialExtension != null) {
-            _populateFormFromExtension(widget.initialExtension!);
-            _extension = widget.initialExtension;
+            populateFormFromExtension(widget.initialExtension!);
+            extension = widget.initialExtension;
           }
         });
       }
@@ -158,9 +158,9 @@ class PharmaceuticalExtensionWidgetState
     if (widget.initialExtension != oldWidget.initialExtension) {
       final next = widget.initialExtension;
       if (next != null) {
-        _populateFormFromExtension(next);
+        populateFormFromExtension(next);
         _applyState(() {
-          _extension = next;
+          extension = next;
           _isLoading = false;
         });
       }
@@ -194,78 +194,78 @@ class PharmaceuticalExtensionWidgetState
     return PharmaceuticalExtensionGroupedBody(
       isEditing: widget.isEditing,
       isLoading: _isLoading,
-      initialNdcNumber: _ndcNumber,
-      initialDinNumber: _dinNumber,
-      initialEanPharmaCode: _eanPharmaCode,
-      initialDrugClass: _drugClass,
-      initialTherapeuticClass: _therapeuticClass,
-      initialPharmacologicalClass: _pharmacologicalClass,
-      initialAtcCode: _atcCode,
-      initialAdditionalAtcCodes: _additionalAtcCodes,
-      initialIsControlledSubstance: _isControlledSubstance,
-      initialDeaSchedule: _deaSchedule,
-      initialControlClass: _controlClass,
-      initialDosageForm: _dosageForm,
-      initialStrength: _strength,
-      initialStrengthUnit: _strengthUnit,
-      initialRouteOfAdministration: _routeOfAdministration,
-      initialActiveIngredients: _activeIngredients,
-      initialInactiveIngredients: _inactiveIngredients,
-      initialStorageConditions: _storageConditions,
-      initialMinStorageTemp: _minStorageTemp,
-      initialMaxStorageTemp: _maxStorageTemp,
-      initialRequiresRefrigeration: _requiresRefrigeration,
-      initialRequiresFreezing: _requiresFreezing,
-      initialLightSensitive: _lightSensitive,
-      initialHumiditySensitive: _humiditySensitive,
-      initialColdChainRequired: _coldChainRequired,
-      initialRequiresPrescription: _requiresPrescription,
-      initialPrescriptionType: _prescriptionType,
-      initialFdaApplicationNumber: _fdaApplicationNumber,
-      initialFdaApprovalDate: _fdaApprovalDate,
-      initialEmaProcedureNumber: _emaProcedureNumber,
-      initialEmaApprovalDate: _emaApprovalDate,
-      initialBlackBoxWarning: _blackBoxWarning,
-      initialBlackBoxWarningText: _blackBoxWarningText,
-      initialPregnancyCategory: _pregnancyCategory,
-      initialContraindications: _contraindications,
-      initialDrugInteractions: _drugInteractions,
-      initialRegulatedProductName: _regulatedProductName,
-      initialDosageFormTypeCode: _dosageFormTypeCode,
-      initialRouteOfAdministrationCode: _routeOfAdministrationCode,
-      initialMahGln: _mahGln,
-      initialMahName: _mahName,
-      initialMahCountry: _mahCountry,
-      initialLicensedAgentGlns: _licensedAgentGlns,
-      initialMaNumber: _maNumber,
-      initialMaValidFrom: _maValidFrom,
-      initialMaValidTo: _maValidTo,
-      initialRegulatoryStatus: _regulatoryStatus,
-      initialPrescriptionStatus: _prescriptionStatus,
-      initialControlledSubstance: _controlledSubstance,
-      initialControlledSubstanceSchedule: _controlledSubstanceSchedule,
-      initialAdditionalMonitoring: _additionalMonitoring,
-      initialShelfLifeMonths: _shelfLifeMonths,
-      initialShelfLifeAfterOpenDays: _shelfLifeAfterOpenDays,
-      initialCountryOfManufacture: _countryOfManufacture,
-      initialPackSizeDescription: _packSizeDescription,
-      initialActivePotencyAi7004: _activePotencyAi7004,
-      initialNhmnGermanyPzn: _nhmnGermanyPzn,
-      initialNhmnFranceCip: _nhmnFranceCip,
-      initialNhmnSpainCn: _nhmnSpainCn,
-      initialNhmnBrazilAnvisa: _nhmnBrazilAnvisa,
-      initialNhmnPortugalAim: _nhmnPortugalAim,
-      initialNhmnUsaNdc: _nhmnUsaNdc,
-      initialNhmnItalyAifa: _nhmnItalyAifa,
-      initialLocalDrugCodeUaeGcc: _localDrugCodeUaeGcc,
-      initialDataCarrierTypeCode: _dataCarrierTypeCode,
-      initialAntiTamperingIndicator: _antiTamperingIndicator,
-      initialPseudoGtinNtinFlag: _pseudoGtinNtinFlag,
+      initialNdcNumber: ndcNumber,
+      initialDinNumber: dinNumber,
+      initialEanPharmaCode: eanPharmaCode,
+      initialDrugClass: drugClass,
+      initialTherapeuticClass: therapeuticClass,
+      initialPharmacologicalClass: pharmacologicalClass,
+      initialAtcCode: atcCode,
+      initialAdditionalAtcCodes: additionalAtcCodes,
+      initialIsControlledSubstance: isControlledSubstance,
+      initialDeaSchedule: deaSchedule,
+      initialControlClass: controlClass,
+      initialDosageForm: dosageForm,
+      initialStrength: strength,
+      initialStrengthUnit: strengthUnit,
+      initialRouteOfAdministration: routeOfAdministration,
+      initialActiveIngredients: activeIngredients,
+      initialInactiveIngredients: inactiveIngredients,
+      initialStorageConditions: storageConditions,
+      initialMinStorageTemp: minStorageTemp,
+      initialMaxStorageTemp: maxStorageTemp,
+      initialRequiresRefrigeration: requiresRefrigeration,
+      initialRequiresFreezing: requiresFreezing,
+      initialLightSensitive: lightSensitive,
+      initialHumiditySensitive: humiditySensitive,
+      initialColdChainRequired: coldChainRequired,
+      initialRequiresPrescription: requiresPrescription,
+      initialPrescriptionType: prescriptionType,
+      initialFdaApplicationNumber: fdaApplicationNumber,
+      initialFdaApprovalDate: fdaApprovalDate,
+      initialEmaProcedureNumber: emaProcedureNumber,
+      initialEmaApprovalDate: emaApprovalDate,
+      initialBlackBoxWarning: blackBoxWarning,
+      initialBlackBoxWarningText: blackBoxWarningText,
+      initialPregnancyCategory: pregnancyCategory,
+      initialContraindications: contraindications,
+      initialDrugInteractions: drugInteractions,
+      initialRegulatedProductName: regulatedProductName,
+      initialDosageFormTypeCode: dosageFormTypeCode,
+      initialRouteOfAdministrationCode: routeOfAdministrationCode,
+      initialMahGln: mahGln,
+      initialMahName: mahName,
+      initialMahCountry: mahCountry,
+      initialLicensedAgentGlns: licensedAgentGlns,
+      initialMaNumber: maNumber,
+      initialMaValidFrom: maValidFrom,
+      initialMaValidTo: maValidTo,
+      initialRegulatoryStatus: regulatoryStatus,
+      initialPrescriptionStatus: prescriptionStatus,
+      initialControlledSubstance: controlledSubstance,
+      initialControlledSubstanceSchedule: controlledSubstanceSchedule,
+      initialAdditionalMonitoring: additionalMonitoring,
+      initialShelfLifeMonths: shelfLifeMonths,
+      initialShelfLifeAfterOpenDays: shelfLifeAfterOpenDays,
+      initialCountryOfManufacture: countryOfManufacture,
+      initialPackSizeDescription: packSizeDescription,
+      initialActivePotencyAi7004: activePotencyAi7004,
+      initialNhmnGermanyPzn: nhmnGermanyPzn,
+      initialNhmnFranceCip: nhmnFranceCip,
+      initialNhmnSpainCn: nhmnSpainCn,
+      initialNhmnBrazilAnvisa: nhmnBrazilAnvisa,
+      initialNhmnPortugalAim: nhmnPortugalAim,
+      initialNhmnUsaNdc: nhmnUsaNdc,
+      initialNhmnItalyAifa: nhmnItalyAifa,
+      initialLocalDrugCodeUaeGcc: localDrugCodeUaeGcc,
+      initialDataCarrierTypeCode: dataCarrierTypeCode,
+      initialAntiTamperingIndicator: antiTamperingIndicator,
+      initialPseudoGtinNtinFlag: pseudoGtinNtinFlag,
       onDrugIdentificationChanged:
           ({required ndcNumber, required dinNumber, required eanPharmaCode}) {
-            _ndcNumber = ndcNumber;
-            _dinNumber = dinNumber;
-            _eanPharmaCode = eanPharmaCode;
+            ndcNumber = ndcNumber;
+            dinNumber = dinNumber;
+            eanPharmaCode = eanPharmaCode;
           },
       onDrugClassificationChanged:
           ({
@@ -275,11 +275,11 @@ class PharmaceuticalExtensionWidgetState
             required atcCode,
             required additionalAtcCodes,
           }) {
-            _drugClass = drugClass;
-            _therapeuticClass = therapeuticClass;
-            _pharmacologicalClass = pharmacologicalClass;
-            _atcCode = atcCode;
-            _additionalAtcCodes = additionalAtcCodes;
+            drugClass = drugClass;
+            therapeuticClass = therapeuticClass;
+            pharmacologicalClass = pharmacologicalClass;
+            atcCode = atcCode;
+            additionalAtcCodes = additionalAtcCodes;
           },
       onControlledSubstanceChanged:
           ({
@@ -287,9 +287,9 @@ class PharmaceuticalExtensionWidgetState
             required deaSchedule,
             required controlClass,
           }) {
-            _isControlledSubstance = isControlledSubstance;
-            _deaSchedule = deaSchedule;
-            _controlClass = controlClass;
+            isControlledSubstance = isControlledSubstance;
+            deaSchedule = deaSchedule;
+            controlClass = controlClass;
           },
       onDosageRouteCompositionChanged:
           ({
@@ -300,12 +300,12 @@ class PharmaceuticalExtensionWidgetState
             required activeIngredients,
             required inactiveIngredients,
           }) {
-            _dosageForm = dosageForm;
-            _strength = strength;
-            _strengthUnit = strengthUnit;
-            _routeOfAdministration = routeOfAdministration;
-            _activeIngredients = activeIngredients;
-            _inactiveIngredients = inactiveIngredients;
+            dosageForm = dosageForm;
+            strength = strength;
+            strengthUnit = strengthUnit;
+            routeOfAdministration = routeOfAdministration;
+            activeIngredients = activeIngredients;
+            inactiveIngredients = inactiveIngredients;
           },
       onStorageHandlingChanged:
           ({
@@ -318,19 +318,19 @@ class PharmaceuticalExtensionWidgetState
             required humiditySensitive,
             required coldChainRequired,
           }) {
-            _storageConditions = storageConditions;
-            _minStorageTemp = minStorageTemp;
-            _maxStorageTemp = maxStorageTemp;
-            _requiresRefrigeration = requiresRefrigeration;
-            _requiresFreezing = requiresFreezing;
-            _lightSensitive = lightSensitive;
-            _humiditySensitive = humiditySensitive;
-            _coldChainRequired = coldChainRequired;
+            storageConditions = storageConditions;
+            minStorageTemp = minStorageTemp;
+            maxStorageTemp = maxStorageTemp;
+            requiresRefrigeration = requiresRefrigeration;
+            requiresFreezing = requiresFreezing;
+            lightSensitive = lightSensitive;
+            humiditySensitive = humiditySensitive;
+            coldChainRequired = coldChainRequired;
           },
       onPrescriptionRequirementsChanged:
           ({required requiresPrescription, required prescriptionType}) {
-            _requiresPrescription = requiresPrescription;
-            _prescriptionType = prescriptionType;
+            requiresPrescription = requiresPrescription;
+            prescriptionType = prescriptionType;
           },
       onRegulatoryApprovalsChanged:
           ({
@@ -339,10 +339,10 @@ class PharmaceuticalExtensionWidgetState
             required emaProcedureNumber,
             required emaApprovalDate,
           }) {
-            _fdaApplicationNumber = fdaApplicationNumber;
-            _fdaApprovalDate = fdaApprovalDate;
-            _emaProcedureNumber = emaProcedureNumber;
-            _emaApprovalDate = emaApprovalDate;
+            fdaApplicationNumber = fdaApplicationNumber;
+            fdaApprovalDate = fdaApprovalDate;
+            emaProcedureNumber = emaProcedureNumber;
+            emaApprovalDate = emaApprovalDate;
           },
       onWarningsPrecautionsChanged:
           ({
@@ -352,11 +352,11 @@ class PharmaceuticalExtensionWidgetState
             required contraindications,
             required drugInteractions,
           }) {
-            _blackBoxWarning = blackBoxWarning;
-            _blackBoxWarningText = blackBoxWarningText;
-            _pregnancyCategory = pregnancyCategory;
-            _contraindications = contraindications;
-            _drugInteractions = drugInteractions;
+            blackBoxWarning = blackBoxWarning;
+            blackBoxWarningText = blackBoxWarningText;
+            pregnancyCategory = pregnancyCategory;
+            contraindications = contraindications;
+            drugInteractions = drugInteractions;
           },
       onTechProductCodedChanged:
           ({
@@ -364,9 +364,9 @@ class PharmaceuticalExtensionWidgetState
             required dosageFormTypeCode,
             required routeOfAdministrationCode,
           }) {
-            _regulatedProductName = regulatedProductName;
-            _dosageFormTypeCode = dosageFormTypeCode;
-            _routeOfAdministrationCode = routeOfAdministrationCode;
+            regulatedProductName = regulatedProductName;
+            dosageFormTypeCode = dosageFormTypeCode;
+            routeOfAdministrationCode = routeOfAdministrationCode;
           },
       onTechMahAuthorizationChanged:
           ({
@@ -379,14 +379,14 @@ class PharmaceuticalExtensionWidgetState
             required maValidTo,
             required regulatoryStatus,
           }) {
-            _mahGln = mahGln;
-            _mahName = mahName;
-            _mahCountry = mahCountry;
-            _licensedAgentGlns = licensedAgentGlns;
-            _maNumber = maNumber;
-            _maValidFrom = maValidFrom;
-            _maValidTo = maValidTo;
-            _regulatoryStatus = regulatoryStatus;
+            mahGln = mahGln;
+            mahName = mahName;
+            mahCountry = mahCountry;
+            licensedAgentGlns = licensedAgentGlns;
+            maNumber = maNumber;
+            maValidFrom = maValidFrom;
+            maValidTo = maValidTo;
+            regulatoryStatus = regulatoryStatus;
           },
       onTechDispensingLifecycleChanged:
           ({
@@ -400,15 +400,15 @@ class PharmaceuticalExtensionWidgetState
             required packSizeDescription,
             required activePotencyAi7004,
           }) {
-            _prescriptionStatus = prescriptionStatus;
-            _controlledSubstance = controlledSubstance;
-            _controlledSubstanceSchedule = controlledSubstanceSchedule;
-            _additionalMonitoring = additionalMonitoring;
-            _shelfLifeMonths = shelfLifeMonths;
-            _shelfLifeAfterOpenDays = shelfLifeAfterOpenDays;
-            _countryOfManufacture = countryOfManufacture;
-            _packSizeDescription = packSizeDescription;
-            _activePotencyAi7004 = activePotencyAi7004;
+            prescriptionStatus = prescriptionStatus;
+            controlledSubstance = controlledSubstance;
+            controlledSubstanceSchedule = controlledSubstanceSchedule;
+            additionalMonitoring = additionalMonitoring;
+            shelfLifeMonths = shelfLifeMonths;
+            shelfLifeAfterOpenDays = shelfLifeAfterOpenDays;
+            countryOfManufacture = countryOfManufacture;
+            packSizeDescription = packSizeDescription;
+            activePotencyAi7004 = activePotencyAi7004;
           },
       onNationalIdentifiersChanged:
           ({
@@ -421,19 +421,19 @@ class PharmaceuticalExtensionWidgetState
             required nhmnItalyAifa,
             required localDrugCodeUaeGcc,
           }) {
-            _nhmnGermanyPzn = nhmnGermanyPzn;
-            _nhmnFranceCip = nhmnFranceCip;
-            _nhmnSpainCn = nhmnSpainCn;
-            _nhmnBrazilAnvisa = nhmnBrazilAnvisa;
-            _nhmnPortugalAim = nhmnPortugalAim;
-            _nhmnUsaNdc = nhmnUsaNdc;
-            _nhmnItalyAifa = nhmnItalyAifa;
-            _localDrugCodeUaeGcc = localDrugCodeUaeGcc;
+            nhmnGermanyPzn = nhmnGermanyPzn;
+            nhmnFranceCip = nhmnFranceCip;
+            nhmnSpainCn = nhmnSpainCn;
+            nhmnBrazilAnvisa = nhmnBrazilAnvisa;
+            nhmnPortugalAim = nhmnPortugalAim;
+            nhmnUsaNdc = nhmnUsaNdc;
+            nhmnItalyAifa = nhmnItalyAifa;
+            localDrugCodeUaeGcc = localDrugCodeUaeGcc;
           },
       onDataCarrierIntegrityChanged:
           ({required dataCarrierTypeCode, required antiTamperingIndicator}) {
-            _dataCarrierTypeCode = dataCarrierTypeCode;
-            _antiTamperingIndicator = antiTamperingIndicator;
+            dataCarrierTypeCode = dataCarrierTypeCode;
+            antiTamperingIndicator = antiTamperingIndicator;
           },
     );
   }

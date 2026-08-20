@@ -1,23 +1,24 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_mutation_serialization.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_api_consts.dart';
-
 class GTINService {
   final DioService _dioService;
-
-  GTINService({
-    required DioService dioService,
-  }) : _dioService = dioService;
-
-  String get _base => '${_dioService.baseUrl}${GtinApiConsts.masterDataGtinsPath}';
-
-  void _log(String op, Object error, {int? statusCode, String? path, String? body}) {
+  GTINService({required DioService dioService}) : _dioService = dioService;
+  String get _base =>
+      '${_dioService.baseUrl}${GtinApiConsts.masterDataGtinsPath}';
+  void _log(
+    String op,
+    Object error, {
+    int? statusCode,
+    String? path,
+    String? body,
+  }) {
     final parts = <String>[
       '[GTINService]',
       op,
@@ -42,7 +43,6 @@ class GTINService {
       debugPrint(error.stackTrace.toString());
     }
   }
-
   Future<GTIN> getGTIN(String gtinCode) async {
     final response = await _dioService.get(
       '$_base/code/$gtinCode',
@@ -50,7 +50,6 @@ class GTINService {
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
-
     if (response.statusCode == 200) {
       try {
         final jsonData = json.decode(response.data);
@@ -60,9 +59,16 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.data is String ? response.data as String? : null,
+          responseBody: response.data is String
+              ? response.data as String?
+              : null,
         );
-        _log('getGTIN:fromJson', ex, path: '$_base/code/$gtinCode', body: ex.responseBody);
+        _log(
+          'getGTIN:fromJson',
+          ex,
+          path: '$_base/code/$gtinCode',
+          body: ex.responseBody,
+        );
         throw ex;
       }
     } else {
@@ -71,12 +77,16 @@ class GTINService {
         message: 'Failed to load GTIN: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String? : null,
       );
-      _log('getGTIN', ex,
-          path: '$_base/code/$gtinCode', statusCode: response.statusCode, body: ex.responseBody);
+      _log(
+        'getGTIN',
+        ex,
+        path: '$_base/code/$gtinCode',
+        statusCode: response.statusCode,
+        body: ex.responseBody,
+      );
       throw ex;
     }
   }
-
   Future<Map<String, dynamic>> getGTINsPaginated({
     String? manufacturer,
     String? status,
@@ -89,7 +99,6 @@ class GTINService {
       'manufacturer': ?manufacturer,
       'status': ?status,
     };
-
     final response = await _dioService.get(
       _base,
       queryParameters: queryParams,
@@ -97,13 +106,12 @@ class GTINService {
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
-
     if (response.statusCode == 200) {
       try {
         final raw = PageResponseUtils.normalizeBody(json.decode(response.data));
-        final gtins = PageResponseUtils.contentList(raw)
-            .map((item) => GTIN.fromJson(item as Map<String, dynamic>))
-            .toList();
+        final gtins = PageResponseUtils.contentList(
+          raw,
+        ).map((item) => GTIN.fromJson(item as Map<String, dynamic>)).toList();
         return {
           'gtins': gtins,
           'totalElements': raw['totalElements'] ?? gtins.length,
@@ -117,9 +125,16 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.data is String ? response.data as String? : null,
+          responseBody: response.data is String
+              ? response.data as String?
+              : null,
         );
-        _log('getGTINsPaginated:fromJson', ex, path: _base, body: ex.responseBody);
+        _log(
+          'getGTINsPaginated:fromJson',
+          ex,
+          path: _base,
+          body: ex.responseBody,
+        );
         throw ex;
       }
     } else {
@@ -128,12 +143,16 @@ class GTINService {
         message: 'Failed to load GTINs: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String? : null,
       );
-      _log('getGTINsPaginated', ex,
-          path: _base, statusCode: response.statusCode, body: ex.responseBody);
+      _log(
+        'getGTINsPaginated',
+        ex,
+        path: _base,
+        statusCode: response.statusCode,
+        body: ex.responseBody,
+      );
       throw ex;
     }
   }
-
   Future<List<GTIN>> getGTINs({
     String? manufacturer,
     String? status,
@@ -148,7 +167,6 @@ class GTINService {
     );
     return result['gtins'] as List<GTIN>;
   }
-
   Future<List<GTIN>> fetchAllGTINs({
     String? manufacturer,
     String? status,
@@ -168,7 +186,6 @@ class GTINService {
     }
     return all;
   }
-
   Future<Map<String, dynamic>> searchGTINsAdvanced({
     String? search,
     String? productName,
@@ -203,7 +220,6 @@ class GTINService {
       if (registrationDateTo != null && registrationDateTo.isNotEmpty)
         'registrationDateTo': registrationDateTo,
     };
-
     final response = await _dioService.get(
       '$_base/search',
       queryParameters: queryParams,
@@ -211,22 +227,18 @@ class GTINService {
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
-
     if (response.statusCode == 200) {
       try {
         final data = json.decode(response.data);
         final content = data is Map<String, dynamic> ? data['content'] : null;
-        final gtins = (content as List?)
-                ?.map((item) => GTIN.fromJson(item))
-                .toList() ??
+        final gtins =
+            (content as List?)?.map((item) => GTIN.fromJson(item)).toList() ??
             [];
-
         final int currentPage =
             (data['pageNumber'] ?? data['number'] ?? 0) as int;
         final int resolvedPageSize =
             (data['pageSize'] ?? data['size'] ?? size) as int;
         final bool isLast = (data['last'] ?? true) as bool;
-
         return {
           'gtins': gtins,
           'totalElements': data['totalElements'] ?? 0,
@@ -240,10 +252,16 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.data is String ? response.data as String? : null,
+          responseBody: response.data is String
+              ? response.data as String?
+              : null,
         );
-        _log('searchGTINsAdvanced:fromJson', ex,
-            path: '$_base/search', body: ex.responseBody);
+        _log(
+          'searchGTINsAdvanced:fromJson',
+          ex,
+          path: '$_base/search',
+          body: ex.responseBody,
+        );
         throw ex;
       }
     } else {
@@ -252,19 +270,24 @@ class GTINService {
         message: 'Failed to search GTINs: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String? : null,
       );
-      _log('searchGTINsAdvanced', ex,
-          path: '$_base/search', statusCode: response.statusCode, body: ex.responseBody);
+      _log(
+        'searchGTINsAdvanced',
+        ex,
+        path: '$_base/search',
+        statusCode: response.statusCode,
+        body: ex.responseBody,
+      );
       throw ex;
     }
   }
-
   Future<GTIN> createGTIN(GTIN gtin) async {
     final jsonPayload = gtin.toJson();
     if (kDebugMode) {
       debugPrint('[GTINService] createGTIN request -> POST $_base');
-      debugPrint('[GTINService] createGTIN payload: ${json.encode(jsonPayload)}');
+      debugPrint(
+        '[GTINService] createGTIN payload: ${json.encode(jsonPayload)}',
+      );
     }
-
     final response = await _dioService.post(
       _base,
       headers: {'Content-Type': 'application/json'},
@@ -272,7 +295,6 @@ class GTINService {
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
-
     if (response.statusCode == 201) {
       try {
         return GTIN.fromJson(json.decode(response.data));
@@ -281,7 +303,9 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.data is String ? response.data as String? : null,
+          responseBody: response.data is String
+              ? response.data as String?
+              : null,
         );
         _log('createGTIN:fromJson', ex, path: _base, body: ex.responseBody);
         throw ex;
@@ -292,12 +316,16 @@ class GTINService {
         message: 'Failed to create GTIN: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String? : null,
       );
-      _log('createGTIN', ex,
-          path: _base, statusCode: response.statusCode, body: ex.responseBody);
+      _log(
+        'createGTIN',
+        ex,
+        path: _base,
+        statusCode: response.statusCode,
+        body: ex.responseBody,
+      );
       throw ex;
     }
   }
-
   Future<GTIN> updateGTIN(GTIN gtin) async {
     final response = await _dioService.put(
       '$_base/${gtin.gtinCode}',
@@ -315,10 +343,16 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.data is String ? response.data as String? : null,
+          responseBody: response.data is String
+              ? response.data as String?
+              : null,
         );
-        _log('updateGTIN:fromJson', ex,
-            path: '$_base/${gtin.gtinCode}', body: ex.responseBody);
+        _log(
+          'updateGTIN:fromJson',
+          ex,
+          path: '$_base/${gtin.gtinCode}',
+          body: ex.responseBody,
+        );
         throw ex;
       }
     } else {
@@ -327,10 +361,13 @@ class GTINService {
         message: 'Failed to update GTIN: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String? : null,
       );
-      _log('updateGTIN', ex,
-          path: '$_base/${gtin.gtinCode}',
-          statusCode: response.statusCode,
-          body: ex.responseBody);
+      _log(
+        'updateGTIN',
+        ex,
+        path: '$_base/${gtin.gtinCode}',
+        statusCode: response.statusCode,
+        body: ex.responseBody,
+      );
       throw ex;
     }
   }
@@ -350,10 +387,13 @@ class GTINService {
         message: 'Failed to update GTIN status: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String? : null,
       );
-      _log('updateGTINStatus', ex,
-          path: '$_base/$gtinCode/status',
-          statusCode: response.statusCode,
-          body: ex.responseBody);
+      _log(
+        'updateGTINStatus',
+        ex,
+        path: '$_base/$gtinCode/status',
+        statusCode: response.statusCode,
+        body: ex.responseBody,
+      );
       throw ex;
     }
   }
@@ -376,9 +416,16 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing validation response: $e',
           originalException: e,
-          responseBody: response.data is String ? response.data as String? : null,
+          responseBody: response.data is String
+              ? response.data as String?
+              : null,
         );
-        _log('validateGTIN:parse', ex, path: '$_base/validate', body: ex.responseBody);
+        _log(
+          'validateGTIN:parse',
+          ex,
+          path: '$_base/validate',
+          body: ex.responseBody,
+        );
         throw ex;
       }
     } else {
@@ -387,8 +434,13 @@ class GTINService {
         message: 'Failed to validate GTIN: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String? : null,
       );
-      _log('validateGTIN', ex,
-          path: '$_base/validate', statusCode: response.statusCode, body: ex.responseBody);
+      _log(
+        'validateGTIN',
+        ex,
+        path: '$_base/validate',
+        statusCode: response.statusCode,
+        body: ex.responseBody,
+      );
       throw ex;
     }
   }
@@ -417,10 +469,16 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing derive-identification response: $e',
           originalException: e,
-          responseBody: response.data is String ? response.data as String? : null,
+          responseBody: response.data is String
+              ? response.data as String?
+              : null,
         );
-        _log('deriveIdentification:parse', ex,
-            path: '$_base${GtinApiConsts.deriveIdentificationPath}', body: ex.responseBody);
+        _log(
+          'deriveIdentification:parse',
+          ex,
+          path: '$_base${GtinApiConsts.deriveIdentificationPath}',
+          body: ex.responseBody,
+        );
         throw ex;
       }
     } else {
@@ -429,10 +487,13 @@ class GTINService {
         message: 'Failed to derive identification: ${response.statusMessage}',
         responseBody: response.data is String ? response.data as String? : null,
       );
-      _log('deriveIdentification', ex,
-          path: '$_base${GtinApiConsts.deriveIdentificationPath}',
-          statusCode: response.statusCode,
-          body: ex.responseBody);
+      _log(
+        'deriveIdentification',
+        ex,
+        path: '$_base${GtinApiConsts.deriveIdentificationPath}',
+        statusCode: response.statusCode,
+        body: ex.responseBody,
+      );
       throw ex;
     }
   }

@@ -1,9 +1,9 @@
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
@@ -32,7 +32,7 @@ import 'package:traqtrace_app/features/operations/packing/screens/packing_operat
 import 'package:traqtrace_app/features/operations/shared/utils/operation_parent_container_epc.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
 import 'package:traqtrace_app/features/operations/packing/utils/packing_submit_error_message.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_epc_status_cubit.dart';
 

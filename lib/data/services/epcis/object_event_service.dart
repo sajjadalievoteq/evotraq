@@ -4,27 +4,24 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/page_response_utils.dart';
-import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_api_constants.dart';
 
-part 'object_event_service_operations.dart';
-part 'object_event_service_convenience_operations.dart';
 
 class ObjectEventService {
-  final DioService _dioService;
+  final DioService dioService;
 
-  late final String _baseUrl;
+  late final String baseUrl;
 
   ObjectEventService({required DioService dioService})
-    : _dioService = dioService {
-    _baseUrl = '${_dioService.baseUrl}${ObjectEventApiConstants.basePath}';
+    : dioService = dioService {
+    baseUrl = '${dioService.baseUrl}${ObjectEventApiConstants.basePath}';
   }
 
-  Future<Map<String, String>> _getHeaders() async {
-    final token = await _dioService.getAuthToken();
+  Future<Map<String, String>> getHeaders() async {
+    final token = await dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -32,7 +29,7 @@ class ObjectEventService {
   }
 
   Future<Map<String, dynamic>> getAllEventsPaginated(int page, int size) async {
-    final raw = await _getObjectEventsPage(_baseUrl, page: page, size: size);
+    final raw = await _getObjectEventsPage(baseUrl, page: page, size: size);
     final content = PageResponseUtils.contentList(
       raw,
     ).map((e) => ObjectEvent.fromJson(e as Map<String, dynamic>)).toList();
@@ -45,7 +42,7 @@ class ObjectEventService {
     required int page,
     required int size,
   }) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
     final params = <String, String>{
       ...?queryParameters,
       ObjectEventApiConstants.queryPage: page.toString(),
@@ -53,7 +50,7 @@ class ObjectEventService {
         size,
       ).toString(),
     };
-    final response = await _dioService.get(
+    final response = await dioService.get(
       path,
       queryParameters: params,
       headers: headers,
@@ -67,7 +64,7 @@ class ObjectEventService {
     throw Exception('Failed to load object events: ${response.statusCode}');
   }
 
-  Future<List<ObjectEvent>> _fetchAllObjectEvents(
+  Future<List<ObjectEvent>> fetchAllObjectEvents(
     String path, {
     Map<String, String>? queryParameters,
   }) {
@@ -83,9 +80,9 @@ class ObjectEventService {
   }
 
   Future<ObjectEvent> getObjectEventById(String id) async {
-    final headers = await _getHeaders();
-    final path = '$_baseUrl/$id';
-    final response = await _dioService.get(
+    final headers = await getHeaders();
+    final path = '$baseUrl/$id';
+    final response = await dioService.get(
       path,
       headers: headers,
       responseType: ResponseType.plain,
@@ -112,9 +109,9 @@ class ObjectEventService {
       throw ArgumentError('eventId must not be empty');
     }
 
-    final headers = await _getHeaders();
-    final path = '$_baseUrl/${ObjectEventApiConstants.segmentEventId}';
-    final response = await _dioService.get(
+    final headers = await getHeaders();
+    final path = '$baseUrl/${ObjectEventApiConstants.segmentEventId}';
+    final response = await dioService.get(
       path,
       queryParameters: {ObjectEventApiConstants.queryEventId: trimmedEventId},
       headers: headers,
@@ -190,7 +187,7 @@ class ObjectEventService {
     List<Map<String, dynamic>>? certificationInfo,
     EPCISVersion epcisVersion = EPCISVersion.v2_0,
   }) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final versionString = epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
 
@@ -272,8 +269,8 @@ class ObjectEventService {
     }
 
     try {
-      final response = await _dioService.post(
-        _baseUrl,
+      final response = await dioService.post(
+        baseUrl,
         headers: headers,
         data: json.encode(eventData),
         responseType: ResponseType.plain,

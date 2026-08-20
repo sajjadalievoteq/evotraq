@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
-import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
-import 'package:traqtrace_app/features/product_hierarchy/utils/product_hierarchy_identifier_utils.dart';
 
 class ProductHierarchyRecentParentRowLine extends StatelessWidget {
   const ProductHierarchyRecentParentRowLine({

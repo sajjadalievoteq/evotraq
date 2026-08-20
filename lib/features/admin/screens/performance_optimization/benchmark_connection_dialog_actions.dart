@@ -1,8 +1,13 @@
-part of 'performance_optimization_dashboard_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/performance_optimization_dashboard_screen.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/widgets/perf_opt_stat_row.dart';
 
 extension BenchmarkConnectionDialogActions
-    on _PerformanceOptimizationDashboardState {
-  void _showBenchmarkResultsDialog(Map<String, dynamic> data) {
+    on PerformanceOptimizationDashboardState {
+  void showBenchmarkResultsDialog(Map<String, dynamic> data) {
     final String testType = data['testType'] ?? 'Unknown';
     final String status = data['status'] ?? 'Unknown';
     final List<dynamic> results = data['results'] ?? [];

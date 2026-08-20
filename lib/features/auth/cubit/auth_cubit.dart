@@ -3,48 +3,40 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/app_navigation.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/data/models/auth/user.dart';
-import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
-import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/data/services/auth/auth_service.dart';
+import 'package:traqtrace_app/data/services/auth/auth_service_account_actions.dart';
 import 'package:traqtrace_app/data/models/auth/login_request.dart';
 import 'package:traqtrace_app/data/models/auth/register_request.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
-import 'package:traqtrace_app/data/services/websocket_service.dart';
 
-part 'auth_cubit_session.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_cubit_session.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  final AuthService _authService;
-  final TokenManager _tokenManager;
+  final AuthService authService;
+  final TokenManager tokenManager;
   final Duration _authCheckTimeout;
   final Duration _loginTimeout;
   final Duration _verifyEmailTimeout;
-  AuthService get authService => _authService;
 
   /// Serializes concurrent session-expiry notifications (many parallel 401s).
   bool _sessionExpiryInFlight = false;
 
   /// One-shot JWT refresh timer for the current authenticated session.
-  Timer? _tokenExpiryTimer;
+  Timer? tokenExpiryTimer;
 
-  Timer? _idleTimer;
+  Timer? idleTimer;
 
-  /// Token identity associated with [_tokenExpiryTimer] (stale-timer guard).
-  String? _scheduledExpiryToken;
+  /// Token identity associated with [tokenExpiryTimer] (stale-timer guard).
+  String? scheduledExpiryToken;
 
-  DateTime? _lastUserActivityAt;
-  DateTime? _lastActivityPingAt;
-  bool _tokenRefreshInFlight = false;
+  DateTime? lastUserActivityAt;
+  DateTime? lastActivityPingAt;
+  bool tokenRefreshInFlight = false;
 
-  final Duration _idleTimeout;
-  final Duration _activityPingThrottle;
+  final Duration sessionIdleTimeout;
+  final Duration sessionActivityPingThrottle;
 
   static const Duration authCheckTimeout = Duration(seconds: 10);
 
@@ -65,21 +57,21 @@ class AuthCubit extends Cubit<AuthState> {
     Duration? verifyEmailTimeout,
     Duration? idleTimeout,
     Duration? activityPingThrottle,
-  }) : _authService = authService,
-       _tokenManager = tokenManager ?? TokenManager(),
+  }) : authService = authService,
+       tokenManager = tokenManager ?? TokenManager(),
        _authCheckTimeout = authCheckTimeout ?? AuthCubit.authCheckTimeout,
        _loginTimeout = loginTimeout ?? AuthCubit.loginTimeout,
        _verifyEmailTimeout = verifyEmailTimeout ?? AuthCubit.verifyEmailTimeout,
-       _idleTimeout = idleTimeout ?? AuthCubit.idleTimeout,
-       _activityPingThrottle =
+       sessionIdleTimeout = idleTimeout ?? AuthCubit.idleTimeout,
+       sessionActivityPingThrottle =
            activityPingThrottle ?? AuthCubit.activityPingThrottle,
        super(const AuthState(status: AuthStatus.initial));
 
   @visibleForTesting
-  bool get hasTokenExpiryTimerForTest => _tokenExpiryTimer != null;
+  bool get hasTokenExpiryTimerForTest => tokenExpiryTimer != null;
 
   @visibleForTesting
-  String? get scheduledExpiryTokenForTest => _scheduledExpiryToken;
+  String? get scheduledExpiryTokenForTest => scheduledExpiryToken;
 
   Future<void> checkAuth({Duration minSplashDelay = Duration.zero}) async {
     emit(
@@ -87,24 +79,24 @@ class AuthCubit extends Cubit<AuthState> {
     );
     final startedAt = DateTime.now();
     try {
-      final token = await _authService.getAuthToken();
+      final token = await authService.getAuthToken();
       if (token == null || token.isEmpty) {
         await _awaitMinSplash(startedAt, minSplashDelay);
-        await _forceUnauthenticated();
+        await forceUnauthenticated();
         return;
       }
 
-      if (_tokenManager.isExpired(token)) {
+      if (tokenManager.isExpired(token)) {
         await _awaitMinSplash(startedAt, minSplashDelay);
         await sessionExpired();
         return;
       }
 
-      final user = await _authService.getCurrentUser().timeout(
+      final user = await authService.getCurrentUser().timeout(
         _authCheckTimeout,
       );
       await _awaitMinSplash(startedAt, minSplashDelay);
-      if (await _rejectIfFrontendBlockedRole(user)) return;
+      if (await rejectIfFrontendBlockedRole(user)) return;
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -116,14 +108,14 @@ class AuthCubit extends Cubit<AuthState> {
           bootstrapCompleted: true,
         ),
       );
-      _onAuthenticatedSessionStarted(token);
-      _backfillOperationalGln(user);
+      onAuthenticatedSessionStarted(token);
+      backfillOperationalGln(user);
     } on TimeoutException {
       await _awaitMinSplash(startedAt, minSplashDelay);
-      await _forceUnauthenticated();
+      await forceUnauthenticated();
     } catch (e) {
       await _awaitMinSplash(startedAt, minSplashDelay);
-      await _forceUnauthenticated();
+      await forceUnauthenticated();
     }
   }
 
@@ -140,9 +132,9 @@ class AuthCubit extends Cubit<AuthState> {
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     try {
-      final response = await _authService.login(request).timeout(_loginTimeout);
-      final user = await _authService.getCurrentUser().timeout(_loginTimeout);
-      if (await _rejectIfFrontendBlockedRole(user)) return;
+      final response = await authService.login(request).timeout(_loginTimeout);
+      final user = await authService.getCurrentUser().timeout(_loginTimeout);
+      if (await rejectIfFrontendBlockedRole(user)) return;
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -153,8 +145,8 @@ class AuthCubit extends Cubit<AuthState> {
           registeredEmail: null,
         ),
       );
-      _onAuthenticatedSessionStarted(response.token);
-      _backfillOperationalGln(user);
+      onAuthenticatedSessionStarted(response.token);
+      backfillOperationalGln(user);
     } on TimeoutException {
       emit(
         state.copyWith(
@@ -164,7 +156,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
-      final errorMessage = _resolveErrorMessage(e, 'Authentication failed');
+      final errorMessage = resolveErrorMessage(e, 'Authentication failed');
       final fallbackEmail = request.username.contains('@')
           ? request.username.trim()
           : null;
@@ -173,8 +165,8 @@ class AuthCubit extends Cubit<AuthState> {
           status: AuthStatus.error,
           error: errorMessage,
           message: null,
-          registeredEmail: _requiresEmailVerification(errorMessage)
-              ? (_extractEmailFromError(e) ?? fallbackEmail)
+          registeredEmail: requiresEmailVerification(errorMessage)
+              ? (extractEmailFromError(e) ?? fallbackEmail)
               : null,
         ),
       );
@@ -186,7 +178,7 @@ class AuthCubit extends Cubit<AuthState> {
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     try {
-      await _authService.register(request);
+      await authService.register(request);
       emit(
         state.copyWith(
           status: AuthStatus.registered,
@@ -200,7 +192,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         state.copyWith(
           status: AuthStatus.error,
-          error: _resolveErrorMessage(e, 'Registration failed'),
+          error: resolveErrorMessage(e, 'Registration failed'),
           message: null,
         ),
       );
@@ -208,12 +200,12 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
-    _cancelTokenExpiration();
-    _disconnectSharedWebSocket();
+    cancelTokenExpiration();
+    disconnectSharedWebSocket();
     try {
-      await _authService.logout();
+      await authService.logout();
     } catch (_) {}
-    await _forceUnauthenticated();
+    await forceUnauthenticated();
   }
 
   /// Centralized path for JWT timer expiry, HTTP 401, and STOMP auth failures.
@@ -226,20 +218,20 @@ class AuthCubit extends Cubit<AuthState> {
     if (_sessionExpiryInFlight) return;
     _sessionExpiryInFlight = true;
     try {
-      _cancelTokenExpiration();
-      _disconnectSharedWebSocket();
-      await _forceUnauthenticated();
-      unawaited(_authService.logout().catchError((_) {}));
+      cancelTokenExpiration();
+      disconnectSharedWebSocket();
+      await forceUnauthenticated();
+      unawaited(authService.logout().catchError((_) {}));
     } finally {
       _sessionExpiryInFlight = false;
     }
   }
 
-  Future<void> _forceUnauthenticated() async {
-    _cancelTokenExpiration();
-    _disconnectSharedWebSocket();
-    _clearSessionCaches();
-    _closeAnyOpenDialogs();
+  Future<void> forceUnauthenticated() async {
+    cancelTokenExpiration();
+    disconnectSharedWebSocket();
+    clearSessionCaches();
+    closeAnyOpenDialogs();
     emit(
       const AuthState(
         status: AuthStatus.unauthenticated,
@@ -250,8 +242,8 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> getCurrentUser() async {
     try {
-      final token = await _authService.getAuthToken();
-      final user = await _authService.getCurrentUser();
+      final token = await authService.getAuthToken();
+      final user = await authService.getCurrentUser();
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -262,17 +254,17 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
       if (token != null && token.isNotEmpty) {
-        _onAuthenticatedSessionStarted(token);
+        onAuthenticatedSessionStarted(token);
       }
-      _backfillOperationalGln(user);
+      backfillOperationalGln(user);
     } catch (e) {
-      await _forceUnauthenticated();
+      await forceUnauthenticated();
     }
   }
 
   @override
   Future<void> close() {
-    _cancelTokenExpiration();
+    cancelTokenExpiration();
     return super.close();
   }
 
@@ -287,7 +279,7 @@ class AuthCubit extends Cubit<AuthState> {
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     try {
-      await _authService.requestPasswordReset(email);
+      await authService.requestPasswordReset(email);
       emit(
         state.copyWith(
           status: AuthStatus.passwordResetRequested,
@@ -299,7 +291,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         state.copyWith(
           status: AuthStatus.error,
-          error: _resolveErrorMessage(e, 'Password reset request failed'),
+          error: resolveErrorMessage(e, 'Password reset request failed'),
           message: null,
         ),
       );
@@ -311,7 +303,7 @@ class AuthCubit extends Cubit<AuthState> {
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     try {
-      final isValid = await _authService.validatePasswordResetToken(token);
+      final isValid = await authService.validatePasswordResetToken(token);
       if (isValid) {
         emit(
           state.copyWith(
@@ -333,7 +325,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         state.copyWith(
           status: AuthStatus.error,
-          error: _resolveErrorMessage(
+          error: resolveErrorMessage(
             e,
             'Password reset token validation failed',
           ),
@@ -364,7 +356,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
 
     try {
-      final success = await _authService.resetPassword(
+      final success = await authService.resetPassword(
         token,
         newPassword,
         confirmPassword,
@@ -391,7 +383,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         state.copyWith(
           status: AuthStatus.error,
-          error: _resolveErrorMessage(e, 'Password reset failed'),
+          error: resolveErrorMessage(e, 'Password reset failed'),
           message: null,
         ),
       );
@@ -403,7 +395,7 @@ class AuthCubit extends Cubit<AuthState> {
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     try {
-      final message = await _authService
+      final message = await authService
           .verifyEmail(token)
           .timeout(_verifyEmailTimeout);
       emit(
@@ -426,7 +418,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         state.copyWith(
           status: AuthStatus.error,
-          error: _resolveErrorMessage(e, 'Email verification failed'),
+          error: resolveErrorMessage(e, 'Email verification failed'),
           message: null,
         ),
       );
@@ -444,7 +436,7 @@ class AuthCubit extends Cubit<AuthState> {
       ),
     );
     try {
-      final message = await _authService.resendVerificationEmail(
+      final message = await authService.resendVerificationEmail(
         normalizedEmail,
       );
       emit(
@@ -459,7 +451,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         state.copyWith(
           status: AuthStatus.error,
-          error: _resolveErrorMessage(e, 'Failed to resend verification email'),
+          error: resolveErrorMessage(e, 'Failed to resend verification email'),
           message: null,
           registeredEmail: normalizedEmail,
         ),

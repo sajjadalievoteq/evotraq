@@ -1,9 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_types.dart';
-export 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_types.dart';
 
-part 'gln_pharmaceutical_mutation_serialization.dart';
 
 List<String>? _stringListFromJson(dynamic v) {
   if (v == null) return null;

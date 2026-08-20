@@ -5,6 +5,7 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_state.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 
 class GenericOperationDetailScreen<T> extends StatefulWidget {

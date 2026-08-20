@@ -66,10 +66,10 @@ class CommissioningBatch {
       operatorId: json['operatorId'] as String?,
       createdBy: json['createdBy'] as String?,
       createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'] as String)
+          ? DateTime.tryParse(json['createdAt'] as String)?.toLocal()
           : null,
       completedAt: json['completedAt'] != null
-          ? DateTime.tryParse(json['completedAt'] as String)
+          ? DateTime.tryParse(json['completedAt'] as String)?.toLocal()
           : null,
     );
   }

@@ -6,12 +6,19 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/page_response_utils.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart'
     as domain;
+import 'package:traqtrace_app/data/services/automation_center/notification_stats_api.dart';
 
 class NotificationApiService {
   final DioService _dioService;
+  late final NotificationStatsApi _statsApi;
 
   NotificationApiService({required DioService dioService})
-    : _dioService = dioService;
+    : _dioService = dioService {
+    _statsApi = NotificationStatsApi(
+      dioService: dioService,
+      authHeaders: _getAuthHeaders,
+    );
+  }
 
   Future<Map<String, String>> _getAuthHeaders() async {
     final token = await _dioService.getAuthToken();
@@ -211,7 +218,7 @@ class NotificationApiService {
 
   /// Paginated webhook history for one subscription.
   Future<({List<domain.WebhookNotification> items, bool hasMore, int page})>
-      getWebhookHistory(
+  getWebhookHistory(
     String subscriptionId, {
     int page = 0,
     int size = 20,
@@ -236,7 +243,10 @@ class NotificationApiService {
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.data);
-        final raw = PageResponseUtils.normalizeBody(decoded, fallbackSize: clamped);
+        final raw = PageResponseUtils.normalizeBody(
+          decoded,
+          fallbackSize: clamped,
+        );
         final history = <domain.WebhookNotification>[];
         for (final item in PageResponseUtils.contentList(raw)) {
           if (item is! Map) continue;
@@ -269,11 +279,7 @@ class NotificationApiService {
 
   /// Cross-subscription Activity feed (newest first).
   Future<({List<domain.WebhookNotification> items, bool hasMore, int page})>
-      getDeliveryActivity({
-    int page = 0,
-    int size = 20,
-    String? outcome,
-  }) async {
+  getDeliveryActivity({int page = 0, int size = 20, String? outcome}) async {
     try {
       final headers = await _getAuthHeaders();
       final clamped = PageResponseUtils.clampSize(size);
@@ -292,7 +298,10 @@ class NotificationApiService {
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.data);
-        final raw = PageResponseUtils.normalizeBody(decoded, fallbackSize: clamped);
+        final raw = PageResponseUtils.normalizeBody(
+          decoded,
+          fallbackSize: clamped,
+        );
         final history = <domain.WebhookNotification>[];
         for (final item in PageResponseUtils.contentList(raw)) {
           if (item is! Map) continue;
@@ -471,51 +480,8 @@ class NotificationApiService {
     }
   }
 
-  Future<domain.NotificationStats> getSubscriptionStats(String id) async {
-    try {
-      final headers = await _getAuthHeaders();
-      final response = await _dioService.get(
-        '${_dioService.baseUrl}/notifications/subscriptions/$id/stats',
-        headers: headers,
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
+  Future<domain.NotificationStats> getSubscriptionStats(String id) =>
+      _statsApi.getSubscriptionStats(id);
 
-      if (response.statusCode == 200) {
-        return domain.NotificationStats.fromJson(json.decode(response.data));
-      } else {
-        throw ApiException(
-          message: 'Failed to fetch subscription stats',
-          statusCode: response.statusCode,
-        );
-      }
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw ApiException(message: 'Failed to fetch subscription stats: $e');
-    }
-  }
-
-  Future<Map<String, dynamic>> getSystemStats() async {
-    try {
-      final headers = await _getAuthHeaders();
-      final response = await _dioService.get(
-        '${_dioService.baseUrl}/notifications/stats',
-        headers: headers,
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
-
-      if (response.statusCode == 200) {
-        return json.decode(response.data);
-      } else {
-        throw ApiException(
-          message: 'Failed to fetch system stats',
-          statusCode: response.statusCode,
-        );
-      }
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw ApiException(message: 'Failed to fetch system stats: $e');
-    }
-  }
+  Future<Map<String, dynamic>> getSystemStats() => _statsApi.getSystemStats();
 }

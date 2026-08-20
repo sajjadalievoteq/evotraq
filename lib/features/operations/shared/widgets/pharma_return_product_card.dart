@@ -1,22 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:intl/intl.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
-import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
-import 'package:traqtrace_app/core/widgets/role_gate.dart';
-import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
-import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
-import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-import 'package:traqtrace_app/features/operations/receiving/cubit/receiving_acceptance_cubit.dart';
-import 'package:traqtrace_app/data/models/operations/shared/pharma_return_context.dart';
-import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
-import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_context_builder.dart';
-import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_eligibility.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_row.dart';
 
 class PharmaReturnProductCard extends StatelessWidget {

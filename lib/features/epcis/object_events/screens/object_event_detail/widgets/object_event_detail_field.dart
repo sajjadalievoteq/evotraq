@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_detail/utils/object_event_detail_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/object_events/utils/object_event_shared_ui_constants.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 
 class ObjectEventDetailField extends StatelessWidget {
   const ObjectEventDetailField({

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_stat_tile_data.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/data/models/hierarchy/hierarchy_node.dart';
-import 'package:traqtrace_app/data/models/product_journey/product_info.dart';
-import 'package:traqtrace_app/features/product_hierarchy/widgets/product_hierarchy_section_label.dart';
 
 class ProductHierarchyStatTile extends StatelessWidget {
   const ProductHierarchyStatTile({super.key, required this.data});

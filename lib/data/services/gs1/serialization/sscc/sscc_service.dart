@@ -3,21 +3,18 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/page_response_utils.dart';
-import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
-import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
-import 'package:traqtrace_app/core/utils/gs1_utils.dart';
 
-part 'sscc_service_operations.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_operations.dart';
 
 class SSCCService {
-  final DioService _dioService;
+  final DioService dioService;
 
-  SSCCService({required DioService dioService}) : _dioService = dioService;
+  SSCCService({required DioService dioService}) : dioService = dioService;
 
-  static const _headers = {
+  static const headers = {
     SsccServiceConstants.headerContentType:
         SsccServiceConstants.contentTypeJson,
   };
@@ -30,9 +27,9 @@ class SSCCService {
       throw ApiException(message: 'SSCC code must be exactly 18 digits');
     }
 
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}',
-      headers: _headers,
+    final response = await dioService.post(
+      '${dioService.baseUrl}${SsccServiceConstants.pathBase}',
+      headers: headers,
       data: json.encode(sscc.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -74,9 +71,9 @@ class SSCCService {
   }
 
   Future<SSCC> getSSCCById(String id) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/$id',
-      headers: _headers,
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SsccServiceConstants.pathBase}/$id',
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -84,7 +81,7 @@ class SSCCService {
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);
       if (responseData is Map<String, dynamic>) {
-        SsccServiceOperations._normalizeFields(responseData);
+        SsccServiceOperations.normalizeFields(responseData);
       }
       return SSCC.fromJson(responseData);
     } else {
@@ -97,10 +94,10 @@ class SSCCService {
   }
 
   Future<SSCC> getSSCCByCode(String ssccCode) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathByCode}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SsccServiceConstants.pathByCode}',
       queryParameters: {SsccServiceConstants.qSsccCode: ssccCode},
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -108,7 +105,7 @@ class SSCCService {
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);
       if (responseData is Map<String, dynamic>) {
-        SsccServiceOperations._normalizeFields(responseData);
+        SsccServiceOperations.normalizeFields(responseData);
       }
       return SSCC.fromJson(responseData);
     } else {
@@ -133,12 +130,12 @@ class SSCCService {
       'direction': direction,
     };
     final uri = Uri.parse(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathBase}',
     ).replace(queryParameters: queryParams.map((k, v) => MapEntry(k, '$v')));
 
-    final response = await _dioService.get(
+    final response = await dioService.get(
       uri.toString(),
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -177,9 +174,9 @@ class SSCCService {
   }
 
   Future<SSCC> updateSSCC(String id, SSCC ssccDetails) async {
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/$id',
-      headers: _headers,
+    final response = await dioService.put(
+      '${dioService.baseUrl}${SsccServiceConstants.pathBase}/$id',
+      headers: headers,
       data: json.encode(ssccDetails.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -197,9 +194,9 @@ class SSCCService {
   }
 
   Future<void> deleteSSCC(String id) async {
-    final response = await _dioService.delete(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/$id',
-      headers: _headers,
+    final response = await dioService.delete(
+      '${dioService.baseUrl}${SsccServiceConstants.pathBase}/$id',
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -214,9 +211,9 @@ class SSCCService {
   }
 
   Future<SSCC> updateSSCCStatus(String id, LogisticUnitStatus newStatus) async {
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathStatus(id)}',
-      headers: _headers,
+    final response = await dioService.put(
+      '${dioService.baseUrl}${SsccServiceConstants.pathStatus(id)}',
+      headers: headers,
       data: json.encode({'status': newStatus.name}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -234,9 +231,9 @@ class SSCCService {
   }
 
   Future<List<String>> getAvailableTransitions(String id) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathTransitions(id)}',
-      headers: _headers,
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SsccServiceConstants.pathTransitions(id)}',
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -268,10 +265,10 @@ class SSCCService {
       'page': page.toString(),
       'size': PageResponseUtils.clampSize(size).toString(),
     };
-    final response = await _dioService.get(
+    final response = await dioService.get(
       path,
       queryParameters: params,
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -308,19 +305,19 @@ class SSCCService {
 
   Future<List<SSCC>> findSSCCsByUnitType(UnitType unitType) async {
     return _fetchAllSsccListPages(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathContainerType(unitType.name)}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathContainerType(unitType.name)}',
     );
   }
 
   Future<List<SSCC>> findSSCCsByStatus(LogisticUnitStatus status) async {
     return _fetchAllSsccListPages(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathContainerStatus(status.name)}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathContainerStatus(status.name)}',
     );
   }
 
   Future<List<SSCC>> findSSCCsBySourceLocation(String sourceGlnCode) async {
     return _fetchAllSsccListPages(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathSourceLocation(sourceGlnCode)}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathSourceLocation(sourceGlnCode)}',
     );
   }
 
@@ -328,7 +325,7 @@ class SSCCService {
     String destinationGlnCode,
   ) async {
     return _fetchAllSsccListPages(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathDestinationLocation(destinationGlnCode)}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathDestinationLocation(destinationGlnCode)}',
     );
   }
 
@@ -337,7 +334,7 @@ class SSCCService {
     DateTime endDate,
   ) async {
     return _fetchAllSsccListPages(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathPackedBetween}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathPackedBetween}',
       queryParameters: {
         'startDate': startDate.toIso8601String(),
         'endDate': endDate.toIso8601String(),
@@ -350,7 +347,7 @@ class SSCCService {
     DateTime endDate,
   ) async {
     return _fetchAllSsccListPages(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathShippedBetween}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathShippedBetween}',
       queryParameters: {
         'startDate': startDate.toIso8601String(),
         'endDate': endDate.toIso8601String(),
@@ -359,10 +356,10 @@ class SSCCService {
   }
 
   Future<List<SSCC>> findChildSSCCs(String parentSsccCode) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathHierarchy}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SsccServiceConstants.pathHierarchy}',
       queryParameters: {SsccServiceConstants.qSsccCode: parentSsccCode},
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -384,7 +381,7 @@ class SSCCService {
     String gs1CompanyPrefix,
   ) async {
     return _fetchAllSsccListPages(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathCompanyPrefix(gs1CompanyPrefix)}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathCompanyPrefix(gs1CompanyPrefix)}',
     );
   }
 
@@ -395,7 +392,7 @@ class SSCCService {
     String? destinationLocationId,
   }) async {
     return _fetchAllSsccListPages(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathSearch}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathSearch}',
       queryParameters: {
         if (unitType != null) 'containerType': unitType.name,
         if (status != null) 'containerStatus': status.name,
@@ -453,12 +450,12 @@ class SSCCService {
     };
 
     final uri = Uri.parse(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathSearchAdvanced}',
+      '${dioService.baseUrl}${SsccServiceConstants.pathSearchAdvanced}',
     ).replace(queryParameters: queryParams.map((k, v) => MapEntry(k, '$v')));
 
-    final response = await _dioService.get(
+    final response = await dioService.get(
       uri.toString(),
-      headers: _headers,
+      headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );

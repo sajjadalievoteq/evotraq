@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class EmptyStateActionRow extends StatelessWidget {
-  const EmptyStateActionRow({required this.actions, required this.fullWidth});
+  const EmptyStateActionRow({super.key, required this.actions, required this.fullWidth});
 
   final List<Widget> actions;
   final bool fullWidth;

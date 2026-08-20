@@ -1,14 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_integration_settings.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_email_recipients_field.dart';
 
-part 'tatmeen_notification_switch.dart';
-part 'tatmeen_notifications_skeleton.dart';
-part 'tatmeen_notification_switch_row_skeleton.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_notification_switch.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_notifications_skeleton.dart';
 
 class TatmeenNotificationsSettings extends StatefulWidget {
   const TatmeenNotificationsSettings({

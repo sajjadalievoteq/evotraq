@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_meta_chip.dart';
 
 class DeliveryActivityStatusBadge extends StatelessWidget {
   const DeliveryActivityStatusBadge({required this.icon, required this.color});

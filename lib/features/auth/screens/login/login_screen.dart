@@ -1,14 +1,14 @@
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/screens/login/utils/login_auth_redirect_utils.dart';
 import 'package:traqtrace_app/features/auth/screens/login/widgets/login_form_widget.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
-import 'package:traqtrace_app/features/auth/widgets/auth_responsive_layout_widget.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_responsive_form_layout.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_screen_host.dart';
 
 

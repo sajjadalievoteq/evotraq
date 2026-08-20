@@ -1,4 +1,6 @@
-part of 'gtin_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 
 extension GtinMutationSerialization on GTIN {
   GTIN copyWith({
@@ -193,11 +195,11 @@ extension GtinMutationSerialization on GTIN {
       if (manufacturerGln != null) 'manufacturerGln': manufacturerGln,
       if (tradeItemStatus != null) 'tradeItemStatus': tradeItemStatus,
       if (effectiveDate != null)
-        'effectiveDate': _formatDateWithTimezone(effectiveDate!),
+        'effectiveDate': formatDateWithTimezone(effectiveDate!),
       if (startAvailDate != null)
-        'startAvailDate': _formatDateWithTimezone(startAvailDate!),
+        'startAvailDate': formatDateWithTimezone(startAvailDate!),
       if (endAvailDate != null)
-        'endAvailDate': _formatDateWithTimezone(endAvailDate!),
+        'endAvailDate': formatDateWithTimezone(endAvailDate!),
       if (publicationDate != null)
         'publicationDate': publicationDate!.toIso8601String().split('T').first,
       if (hasBatchNumberIndicator != null)
@@ -206,8 +208,7 @@ extension GtinMutationSerialization on GTIN {
         'hasSerialNumberIndicator': hasSerialNumberIndicator,
       if (createdBy != null) 'createdBy': createdBy,
       if (updatedBy != null) 'updatedBy': updatedBy,
-      if (launchDate != null)
-        'launchDate': _formatDateWithTimezone(launchDate!),
+      if (launchDate != null) 'launchDate': formatDateWithTimezone(launchDate!),
       if (quantityPerParent != null) 'quantityPerParent': quantityPerParent,
       if (packagingLevel != null) 'packagingLevel': packagingLevel,
       if (packSize != null) 'packSize': packSize,
@@ -218,13 +219,11 @@ extension GtinMutationSerialization on GTIN {
       if (marketAuthorization != null)
         'marketAuthorizations': {'DEFAULT': marketAuthorization},
       if (registrationDate != null)
-        'marketingAuthorizationDate': _formatDateWithTimezone(
-          registrationDate!,
-        ),
+        'marketingAuthorizationDate': formatDateWithTimezone(registrationDate!),
       if (expirationDate != null)
-        'discontinuationDate': _formatDateWithTimezone(expirationDate!),
+        'discontinuationDate': formatDateWithTimezone(expirationDate!),
       if (authorizationExpiry != null && registrationDate == null)
-        'marketingAuthorizationDate': _formatDateWithTimezone(
+        'marketingAuthorizationDate': formatDateWithTimezone(
           authorizationExpiry!,
         ),
       if (currentLocation != null)

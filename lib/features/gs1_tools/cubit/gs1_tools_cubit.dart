@@ -1,30 +1,15 @@
-import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
-import 'package:traqtrace_app/core/utils/gs1/gs1_anatomy.dart';
-import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
-import 'package:traqtrace_app/core/utils/gs1/gs1_element_string_builder.dart';
-import 'package:traqtrace_app/core/utils/gs1/ndc_gtin_converter.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
-import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters_dto.dart';
 import 'package:traqtrace_app/data/services/barcode/barcode_generation_service.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
 import 'package:traqtrace_app/data/services/epcis/epcis_serialization_service.dart';
 import 'package:traqtrace_app/data/services/barcode/gs1_barcode_api_service.dart';
-import 'package:traqtrace_app/data/services/barcode/epc_uri_converter.dart';
-import 'package:traqtrace_app/data/services/barcode/gs1_barcode_parser.dart';
 import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_state.dart';
 import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
-import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validator.dart';
-import 'package:traqtrace_app/features/shared/validation/gs1_batch_validator.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_slice.dart';
 
-part 'gs1_tools_conversion_actions.dart';
-part 'gs1_tools_validation_actions.dart';
-part 'gs1_tools_barcode_actions.dart';
-part 'gs1_tools_epcis_actions.dart';
 
 class Gs1ToolsCubit extends Cubit<Gs1ToolsState> {
   Gs1ToolsCubit({
@@ -35,23 +20,23 @@ class Gs1ToolsCubit extends Cubit<Gs1ToolsState> {
     required CbvVocabularyService cbvVocabularyService,
     Gs1ToolKind initialTool = Gs1ToolKind.convert,
     String? initialMode,
-  }) : _epc = epcConversionService,
-       _barcodes = barcodeGenerationService,
-       _verify = gs1BarcodeApiService,
-       _serialization = serializationService,
+  }) : epc = epcConversionService,
+       barcodes = barcodeGenerationService,
+       verify = gs1BarcodeApiService,
+       serialization = serializationService,
        _cbvVocabulary = cbvVocabularyService,
        super(
          Gs1ToolsState(selectedTool: initialTool, initialMode: initialMode),
        );
 
-  final EPCConversionService _epc;
-  final BarcodeGenerationService _barcodes;
-  final GS1BarcodeApiService _verify;
-  final EPCISSerializationService _serialization;
+  final EPCConversionService epc;
+  final BarcodeGenerationService barcodes;
+  final GS1BarcodeApiService verify;
+  final EPCISSerializationService serialization;
   final CbvVocabularyService _cbvVocabulary;
 
   Future<({Set<String> bizSteps, Set<String> dispositions})>
-  _loadCbvSets() async {
+  loadCbvSets() async {
     final session = await _cbvVocabulary.ensureLoaded();
     final bizSteps = <String>{};
     final dispositions = <String>{};
@@ -84,7 +69,7 @@ class Gs1ToolsCubit extends Cubit<Gs1ToolsState> {
 
   // ─── Convert ──────────────────────────────────────────────────────────────
 
-  void _emitError(Gs1ToolKind kind, String message) {
+  void emitError(Gs1ToolKind kind, String message) {
     emit(
       state.withSlice(
         kind,
@@ -93,7 +78,7 @@ class Gs1ToolsCubit extends Cubit<Gs1ToolsState> {
     );
   }
 
-  Future<void> _run(
+  Future<void> run(
     Gs1ToolKind kind,
     Future<WorkbenchSlice> Function() action,
   ) async {
@@ -108,11 +93,11 @@ class Gs1ToolsCubit extends Cubit<Gs1ToolsState> {
     try {
       emit(state.withSlice(kind, await action()));
     } catch (e) {
-      _emitError(kind, e.toString());
+      emitError(kind, e.toString());
     }
   }
 
-  String _safe(Object? value) {
+  String safe(Object? value) {
     if (value == null) return '—';
     final text = value.toString().trim();
     if (text.isEmpty || text == 'null') return '—';

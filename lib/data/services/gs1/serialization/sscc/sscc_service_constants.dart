@@ -1,6 +1,4 @@
-
 abstract final class SsccServiceConstants {
-
   static const String pathBase = '/identifiers/ssccs';
 
   static const String pathSearchAdvanced = '$pathBase/search/advanced';
@@ -36,18 +34,16 @@ abstract final class SsccServiceConstants {
   static const String pathPharmaExtByCode =
       '$pathBase/code/pharmaceutical-extension';
 
-  static String pathContainerType(String type) => '$pathBase/container-type/$type';
+  static String pathContainerType(String type) =>
+      '$pathBase/container-type/$type';
 
   static String pathContainerStatus(String status) =>
-
       '$pathBase/status/$status';
 
   static String pathSourceLocation(String gln) =>
-
       '$pathBase/source-location/$gln';
 
   static String pathDestinationLocation(String gln) =>
-
       '$pathBase/destination-location/$gln';
 
   static const String pathPackedBetween = '$pathBase/packed-between';
@@ -113,5 +109,4 @@ abstract final class SsccServiceConstants {
   static const String rAvailableTransitions = 'availableTransitions';
 
   static const String errNoToken = 'No authentication token found';
-
 }

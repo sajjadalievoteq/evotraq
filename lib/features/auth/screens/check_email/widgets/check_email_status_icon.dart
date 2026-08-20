@@ -1,8 +1,9 @@
+import 'package:traqtrace_app/core/animation/traq_icon_pop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 
 class CheckEmailStatusIcon extends StatelessWidget {
   const CheckEmailStatusIcon({super.key});

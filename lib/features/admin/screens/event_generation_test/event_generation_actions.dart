@@ -1,14 +1,20 @@
-part of 'event_generation_test_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/features/admin/screens/event_generation_test/event_generation_test_screen.dart';
+import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 
-extension EventGenerationActions on _EventGenerationTestScreenState {
-  void _initializeDefaults() {
-    _eventParams['readPoint'] = '0614141000012';
-    _eventParams['bizLocation'] = '0614141000012';
+extension EventGenerationActions on EventGenerationTestScreenState {
+  void initializeDefaults() {
+    eventParams['readPoint'] = '0614141000012';
+    eventParams['bizLocation'] = '0614141000012';
 
-    _simulationParams['duration'] = 300;
-    _simulationParams['eventInterval'] = 1000;
-    _simulationParams['includeAnomalies'] = false;
-    _simulationParams['anomalyRate'] = 0.05;
+    simulationParams['duration'] = 300;
+    simulationParams['eventInterval'] = 1000;
+    simulationParams['includeAnomalies'] = false;
+    simulationParams['anomalyRate'] = 0.05;
     _seedCbvDefaults();
   }
 
@@ -23,84 +29,84 @@ extension EventGenerationActions on _EventGenerationTestScreenState {
       return;
     }
     setState(() {
-      _eventParams['businessStep'] = state.bizSteps.first.urn;
-      _eventParams['disposition'] = state.dispositions.first.urn;
+      eventParams['businessStep'] = state.bizSteps.first.urn;
+      eventParams['disposition'] = state.dispositions.first.urn;
     });
   }
 
-  Future<void> _loadDataManagementData() async {
-    if (_testService == null) return;
+  Future<void> loadDataManagementData() async {
+    if (testService == null) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final environments = await _testService!.getTestEnvironments();
-      final statistics = await _testService!.getTestDataStatistics();
+      final environments = await testService!.getTestEnvironments();
+      final statistics = await testService!.getTestDataStatistics();
 
       setState(() {
-        _dataStatistics = statistics;
-        _activeEnvironment = environments
+        dataStatistics = statistics;
+        activeEnvironment = environments
             .where((env) => env.isActive)
             .firstOrNull;
-        _isLoading = false;
+        isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage =
+        errorMessage =
             'Failed to load data management information: ${e.toString()}';
-        _isLoading = false;
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _generateSingleEvent() async {
-    if (_testService == null) return;
+  Future<void> generateSingleEvent() async {
+    if (testService == null) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.generateSingleEvent(
-        _selectedEventType,
-        _eventParams,
+      final result = await testService!.generateSingleEvent(
+        selectedEventType,
+        eventParams,
       );
 
       context.showSuccess('Successfully generated event: ${result['eventId']}');
 
       setState(() {
-        _isLoading = false;
+        isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to generate event: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to generate event: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _generateBulkEvents() async {
-    if (_testService == null) return;
+  Future<void> generateBulkEvents() async {
+    if (testService == null) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.generateBulkEvents(
-        _selectedEventType,
-        _bulkCount,
-        _eventParams,
+      final result = await testService!.generateBulkEvents(
+        selectedEventType,
+        bulkCount,
+        eventParams,
       );
 
       setState(() {
-        _lastBulkResult = result;
-        _isLoading = false;
+        lastBulkResult = result;
+        isLoading = false;
       });
 
       context.showSuccess(
@@ -108,60 +114,60 @@ extension EventGenerationActions on _EventGenerationTestScreenState {
       );
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to generate bulk events: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to generate bulk events: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _startSupplyChainSimulation() async {
-    if (_testService == null) return;
+  Future<void> startSupplyChainSimulation() async {
+    if (testService == null) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final session = await _testService!.startSupplyChainSimulation(
-        _simulationParams,
+      final session = await testService!.startSupplyChainSimulation(
+        simulationParams,
       );
 
       setState(() {
-        _activeSimulation = session;
-        _isLoading = false;
+        activeSimulation = session;
+        isLoading = false;
       });
 
       context.showSuccess(
         'Supply chain simulation started: ${session.sessionId}',
       );
 
-      _pollSimulationStatus();
+      pollSimulationStatus();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to start simulation: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to start simulation: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _stopSupplyChainSimulation() async {
-    if (_testService == null || _activeSimulation == null) return;
+  Future<void> stopSupplyChainSimulation() async {
+    if (testService == null || activeSimulation == null) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.stopSupplyChainSimulation(
-        _activeSimulation!.sessionId,
+      final result = await testService!.stopSupplyChainSimulation(
+        activeSimulation!.sessionId,
       );
 
       setState(() {
-        _activeSimulation = null;
-        _simulationStatus = null;
-        _isLoading = false;
+        activeSimulation = null;
+        simulationStatus = null;
+        isLoading = false;
       });
 
       context.showSuccess(
@@ -169,47 +175,47 @@ extension EventGenerationActions on _EventGenerationTestScreenState {
       );
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to stop simulation: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to stop simulation: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  void _clearSimulation() {
+  void clearSimulation() {
     setState(() {
-      _activeSimulation = null;
-      _simulationStatus = null;
-      _errorMessage = null;
+      activeSimulation = null;
+      simulationStatus = null;
+      errorMessage = null;
     });
   }
 
-  Future<void> _pollSimulationStatus() async {
-    if (_testService == null || _activeSimulation == null) return;
+  Future<void> pollSimulationStatus() async {
+    if (testService == null || activeSimulation == null) return;
 
     try {
-      final status = await _testService!.getSimulationStatus(
-        _activeSimulation!.sessionId,
+      final status = await testService!.getSimulationStatus(
+        activeSimulation!.sessionId,
       );
 
       if (mounted) {
         setState(() {
-          _simulationStatus = status;
+          simulationStatus = status;
         });
       }
 
       if (status.status == 'RUNNING') {
-        Future.delayed(const Duration(seconds: 2), _pollSimulationStatus);
+        Future.delayed(const Duration(seconds: 2), pollSimulationStatus);
       }
     } catch (e) {
       // Keep polling silent for transient backend errors.
     }
   }
 
-  Color _getSimulationStatusColor(BuildContext context) {
+  Color getSimulationStatusColor(BuildContext context) {
     final c = context.colors;
-    if (_simulationStatus == null) return c.primary;
+    if (simulationStatus == null) return c.primary;
 
-    switch (_simulationStatus!.status) {
+    switch (simulationStatus!.status) {
       case 'RUNNING':
         return c.success;
       case 'COMPLETED':
@@ -223,10 +229,10 @@ extension EventGenerationActions on _EventGenerationTestScreenState {
     }
   }
 
-  String _getSimulationStatusText() {
-    if (_simulationStatus == null) return 'Simulation Status Unknown';
+  String getSimulationStatusText() {
+    if (simulationStatus == null) return 'Simulation Status Unknown';
 
-    switch (_simulationStatus!.status) {
+    switch (simulationStatus!.status) {
       case 'RUNNING':
         return 'Simulation Running';
       case 'COMPLETED':
@@ -236,7 +242,7 @@ extension EventGenerationActions on _EventGenerationTestScreenState {
       case 'STOPPED':
         return 'Simulation Stopped';
       default:
-        return 'Simulation ${_simulationStatus!.status}';
+        return 'Simulation ${simulationStatus!.status}';
     }
   }
 }

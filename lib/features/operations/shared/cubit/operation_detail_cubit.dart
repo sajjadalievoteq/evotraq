@@ -1,10 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/reference_data_service.dart';
 
-part 'operation_detail_state.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_state.dart';
 
 class OperationDetailCubit<T> extends Cubit<OperationDetailState<T>> {
   OperationDetailCubit({

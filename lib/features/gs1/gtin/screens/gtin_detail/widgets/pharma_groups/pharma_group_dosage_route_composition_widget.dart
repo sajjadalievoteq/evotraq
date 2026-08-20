@@ -1,5 +1,5 @@
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_types.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/dosage_route_composition_card_content.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/pharma_groups/pharma_group_dosage_route_ingredient_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';

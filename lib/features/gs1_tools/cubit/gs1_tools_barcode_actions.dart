@@ -1,4 +1,11 @@
-part of 'gs1_tools_cubit.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_element_string_builder.dart';
+import 'package:traqtrace_app/core/utils/gs1/ndc_gtin_converter.dart';
+import 'package:traqtrace_app/data/services/barcode/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
+import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
+import 'package:traqtrace_app/features/shared/workbench/workbench_slice.dart';
 
 extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
   Future<void> barcodeTool({
@@ -14,22 +21,22 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
   }) async {
     final m = mode.toLowerCase();
     if (m == 'verify') {
-      await _verifyBarcode(verifyInput ?? elementString ?? '');
+      await verifyBarcode(verifyInput ?? elementString ?? '');
       return;
     }
     if (m == 'pharma' || m == 'sgtin') {
       final err = CheckDigitUtils.validateGtin(gtin);
       if (err != null) {
-        _emitError(Gs1ToolKind.barcode, err);
+        emitError(Gs1ToolKind.barcode, err);
         return;
       }
       if ((serial ?? '').trim().isEmpty) {
-        _emitError(Gs1ToolKind.barcode, 'Serial (AI 21) is required');
+        emitError(Gs1ToolKind.barcode, 'Serial (AI 21) is required');
         return;
       }
       final exp = (expiry ?? '').trim();
       if (exp.isEmpty) {
-        _emitError(
+        emitError(
           Gs1ToolKind.barcode,
           'Expiry (AI 17) is required for pharma pack',
         );
@@ -37,12 +44,12 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
       }
       final dateErr = Gs1DateUtils.validateYymmdd(exp, label: 'Expiry');
       if (dateErr != null) {
-        _emitError(Gs1ToolKind.barcode, dateErr);
+        emitError(Gs1ToolKind.barcode, dateErr);
         return;
       }
       final lot = (batch ?? '').trim();
       if (lot.isEmpty) {
-        _emitError(
+        emitError(
           Gs1ToolKind.barcode,
           'Batch/Lot (AI 10) is required for pharma pack',
         );
@@ -54,8 +61,8 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
         '17': exp,
         '10': lot,
       });
-      await _run(Gs1ToolKind.barcode, () async {
-        final bytes = await _barcodes.generateSGTINDataMatrix(
+      await run(Gs1ToolKind.barcode, () async {
+        final bytes = await barcodes.generateSGTINDataMatrix(
           gtin: gtin.trim(),
           serialNumber: serial.trim(),
           expiryDate: exp,
@@ -70,7 +77,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
             'AI 01 GTIN': gtin.trim(),
             'AI 21 Serial': serial.trim(),
             'AI 17 Expiry': exp,
-            'AI 17 ISO': _safe(Gs1DateUtils.toIsoDate(exp)),
+            'AI 17 ISO': safe(Gs1DateUtils.toIsoDate(exp)),
             'AI 10 Batch/Lot': lot,
           },
           meta: {'format': 'pharma-datamatrix'},
@@ -81,11 +88,11 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     if (m == 'sscc') {
       final err = CheckDigitUtils.validateSscc(sscc);
       if (err != null) {
-        _emitError(Gs1ToolKind.barcode, err);
+        emitError(Gs1ToolKind.barcode, err);
         return;
       }
-      await _run(Gs1ToolKind.barcode, () async {
-        final bytes = await _barcodes.generateSSCCBarcode(sscc: sscc!.trim());
+      await run(Gs1ToolKind.barcode, () async {
+        final bytes = await barcodes.generateSSCCBarcode(sscc: sscc!.trim());
         return WorkbenchSlice(
           status: WorkbenchActionStatus.success,
           imageBytes: bytes,
@@ -98,11 +105,11 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     if (m == 'datamatrix') {
       final es = (elementString ?? '').trim();
       if (es.isEmpty) {
-        _emitError(Gs1ToolKind.barcode, 'GS1 element string is required');
+        emitError(Gs1ToolKind.barcode, 'GS1 element string is required');
         return;
       }
-      await _run(Gs1ToolKind.barcode, () async {
-        final bytes = await _barcodes.generateDataMatrix(gs1ElementString: es);
+      await run(Gs1ToolKind.barcode, () async {
+        final bytes = await barcodes.generateDataMatrix(gs1ElementString: es);
         return WorkbenchSlice(
           status: WorkbenchActionStatus.success,
           imageBytes: bytes,
@@ -115,11 +122,11 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     if (m == 'gs1128' || m == 'gs1-128') {
       final es = (elementString ?? '').trim();
       if (es.isEmpty) {
-        _emitError(Gs1ToolKind.barcode, 'GS1 element string is required');
+        emitError(Gs1ToolKind.barcode, 'GS1 element string is required');
         return;
       }
-      await _run(Gs1ToolKind.barcode, () async {
-        final bytes = await _barcodes.generateGS1128(gs1ElementString: es);
+      await run(Gs1ToolKind.barcode, () async {
+        final bytes = await barcodes.generateGS1128(gs1ElementString: es);
         return WorkbenchSlice(
           status: WorkbenchActionStatus.success,
           imageBytes: bytes,
@@ -133,7 +140,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     // ean13 / upca / itf14 / qrDl via generic endpoint (may be unsupported server-side)
     final payload = (data ?? gtin ?? elementString ?? '').trim();
     if (payload.isEmpty) {
-      _emitError(Gs1ToolKind.barcode, 'Data is required');
+      emitError(Gs1ToolKind.barcode, 'Data is required');
       return;
     }
     if (m == 'ean13' || m == 'upca' || m == 'itf14') {
@@ -149,9 +156,9 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
       'qrdl' || 'qr' || 'qr-dl' => 'qr',
       _ => m,
     };
-    await _run(Gs1ToolKind.barcode, () async {
+    await run(Gs1ToolKind.barcode, () async {
       try {
-        final bytes = await _barcodes.generateGenericBarcode(
+        final bytes = await barcodes.generateGenericBarcode(
           data: payload,
           format: format,
         );
@@ -169,27 +176,27 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     });
   }
 
-  Future<void> _verifyBarcode(String input) async {
+  Future<void> verifyBarcode(String input) async {
     final trimmed = input.trim();
     if (trimmed.isEmpty) {
-      _emitError(Gs1ToolKind.barcode, 'Barcode / element string is required');
+      emitError(Gs1ToolKind.barcode, 'Barcode / element string is required');
       return;
     }
-    await _run(Gs1ToolKind.barcode, () async {
+    await run(Gs1ToolKind.barcode, () async {
       final local = GS1BarcodeParser.parseGS1Barcode(trimmed);
-      final remote = await _verify.verifyGS1Barcode(trimmed);
+      final remote = await verify.verifyGS1Barcode(trimmed);
       final gtin = local['GTIN']?.toString();
       final serial = local['SERIAL']?.toString();
       final expiry = local['EXPIRY']?.toString();
       final batch = local['BATCH']?.toString();
       final fields = <String, String>{
         'Local valid': local['valid'] == true ? 'Yes' : 'No',
-        'AI 01 GTIN': _safe(gtin),
-        'AI 21 Serial': _safe(serial),
-        'AI 17 Expiry': _safe(expiry),
-        'AI 10 Batch/Lot': _safe(batch),
-        'Local SSCC': _safe(local['SSCC']),
-        'Local GLN': _safe(local['GLN']),
+        'AI 01 GTIN': safe(gtin),
+        'AI 21 Serial': safe(serial),
+        'AI 17 Expiry': safe(expiry),
+        'AI 10 Batch/Lot': safe(batch),
+        'Local SSCC': safe(local['SSCC']),
+        'Local GLN': safe(local['GLN']),
       };
 
       // Pharma pack (01 present): flag missing mandatory AIs 21/17/10.
@@ -207,7 +214,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
       if (expiry != null && expiry.isNotEmpty) {
         final dateErr = Gs1DateUtils.validateYymmdd(expiry, label: 'Expiry');
         fields['Expiry check'] = dateErr == null
-            ? 'PASS — ${_safe(Gs1DateUtils.toIsoDate(expiry))}'
+            ? 'PASS — ${safe(Gs1DateUtils.toIsoDate(expiry))}'
             : 'FAIL — $dateErr';
       }
       final checkErrors = (local['checkDigitErrors'] as List?) ?? const [];
@@ -215,7 +222,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
         fields['Check digit errors'] = checkErrors.join('; ');
       }
       remote.forEach((key, value) {
-        fields['API $key'] = _safe(value);
+        fields['API $key'] = safe(value);
       });
       return WorkbenchSlice(
         status: WorkbenchActionStatus.success,
@@ -234,7 +241,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     if (m == 'build') {
       final built = Gs1ElementStringBuilder.build(ais ?? {});
       if (built.human.isEmpty) {
-        _emitError(Gs1ToolKind.aiElement, 'Enter at least one AI and value');
+        emitError(Gs1ToolKind.aiElement, 'Enter at least one AI and value');
         return;
       }
       emit(
@@ -271,7 +278,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
 
     final trimmed = (input ?? '').trim();
     if (trimmed.isEmpty) {
-      _emitError(Gs1ToolKind.aiElement, 'Paste a GS1 element string');
+      emitError(Gs1ToolKind.aiElement, 'Paste a GS1 element string');
       return;
     }
     final parsed = GS1BarcodeParser.parseGS1Barcode(trimmed);
@@ -279,7 +286,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     final human =
         (parsed['humanReadable'] as Map?)?.cast<String, String>() ?? {};
     if (map.isEmpty) {
-      _emitError(Gs1ToolKind.aiElement, 'No Application Identifiers found');
+      emitError(Gs1ToolKind.aiElement, 'No Application Identifiers found');
       return;
     }
     final fields = <String, String>{};
@@ -290,9 +297,9 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
             orElse: () => MapEntry('($ai)', value),
           )
           .key;
-      fields['AI $ai — $label'] = _safe(value);
+      fields['AI $ai — $label'] = safe(value);
       if (ai == '17' || ai == '11' || ai == '15') {
-        fields['AI $ai ISO'] = _safe(Gs1DateUtils.toIsoDate(value));
+        fields['AI $ai ISO'] = safe(Gs1DateUtils.toIsoDate(value));
       }
       if (ai == '01') {
         final err = CheckDigitUtils.validateGtin(value);
@@ -331,7 +338,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
         mode.toLowerCase() == 'gtin-to-ndc') {
       final ndc11 = NdcGtinConverter.gtin14ToNdc11(input);
       if (ndc11 == null) {
-        _emitError(
+        emitError(
           Gs1ToolKind.ndc,
           'Enter a valid US GTIN-14 starting with 003',
         );
@@ -355,12 +362,12 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
 
     final err = NdcGtinConverter.validateNdc(input, format: format);
     if (err != null) {
-      _emitError(Gs1ToolKind.ndc, err);
+      emitError(Gs1ToolKind.ndc, err);
       return;
     }
     final gtin = NdcGtinConverter.ndcToGtin14(input, format: format);
     if (gtin == null) {
-      _emitError(Gs1ToolKind.ndc, 'Unable to convert NDC to GTIN-14');
+      emitError(Gs1ToolKind.ndc, 'Unable to convert NDC to GTIN-14');
       return;
     }
     emit(
@@ -371,7 +378,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
           resultText: gtin,
           resultFields: {
             'GTIN-14': gtin,
-            'NDC-11': _safe(NdcGtinConverter.toNdc11(input, format: format)),
+            'NDC-11': safe(NdcGtinConverter.toNdc11(input, format: format)),
             'Format': format,
             'Check digit': gtin[gtin.length - 1],
           },
@@ -385,7 +392,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
   Future<void> lookupGs1(String identifier) async {
     final id = identifier.trim();
     if (id.isEmpty) {
-      _emitError(Gs1ToolKind.lookup, 'Enter a GTIN or GLN to look up');
+      emitError(Gs1ToolKind.lookup, 'Enter a GTIN or GLN to look up');
       return;
     }
     // No GEPIR/Verified-by-GS1 backend endpoint is wired in this app yet.

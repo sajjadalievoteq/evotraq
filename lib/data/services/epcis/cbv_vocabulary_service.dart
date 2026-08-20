@@ -6,21 +6,17 @@ import 'package:traqtrace_app/core/storage/cbv_vocabulary_cache_store.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_session.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_master_data_service.dart';
 
-
-
 class CbvVocabularyFetchEvent {
   final bool isLoading;
   final CbvVocabularySession? session;
   final Object? error;
 
-  const CbvVocabularyFetchEvent({required this.isLoading, this.session, this.error});
+  const CbvVocabularyFetchEvent({
+    required this.isLoading,
+    this.session,
+    this.error,
+  });
 }
-
-
-
-
-
-
 
 class CbvVocabularyService {
   final CbvMasterDataService _masterDataService;
@@ -42,21 +38,19 @@ class CbvVocabularyService {
   bool _networkStarted = false;
   bool _cacheHydrated = false;
 
-  final _eventsController = StreamController<CbvVocabularyFetchEvent>.broadcast();
+  final _eventsController =
+      StreamController<CbvVocabularyFetchEvent>.broadcast();
 
   CbvVocabularyService({
     required CbvMasterDataService masterDataService,
     required DioService dioService,
-  })  : _masterDataService = masterDataService,
-        _dioService = dioService;
+  }) : _masterDataService = masterDataService,
+       _dioService = dioService;
 
-  
   CbvVocabularySession? get currentSession => _session;
 
-  
   Stream<CbvVocabularyFetchEvent> get events => _eventsController.stream;
 
-  
   Future<void> hydrateFromCache() async {
     if (_cacheHydrated && _session != null) return;
     _cacheHydrated = true;
@@ -70,9 +64,6 @@ class CbvVocabularyService {
     }
   }
 
-  
-  
-  
   Future<void> start() async {
     await hydrateFromCache();
 
@@ -83,8 +74,6 @@ class CbvVocabularyService {
     _fireAndForget(_fetch(forceRefresh: false));
   }
 
-  
-  
   Future<void> reset() async {
     _retryTimer?.cancel();
     _ttlTimer?.cancel();
@@ -105,10 +94,6 @@ class CbvVocabularyService {
     await CbvVocabularyCacheStore.clear();
   }
 
-  
-  
-  
-  
   Future<CbvVocabularySession> ensureLoaded({
     Duration timeout = const Duration(seconds: 8),
   }) async {
@@ -129,8 +114,6 @@ class CbvVocabularyService {
     }
   }
 
-  
-  
   Future<void> refresh() async {
     if (!await _hasAuthToken()) return;
     _attempt = 0;
@@ -145,39 +128,42 @@ class CbvVocabularyService {
 
     _eventsController.add(const CbvVocabularyFetchEvent(isLoading: true));
 
-    final future = () async {
-      if (!await _hasAuthToken()) {
-        throw ApiException(
-          statusCode: 401,
-          message: 'Authentication required for CBV vocabulary',
+    final future =
+        () async {
+          if (!await _hasAuthToken()) {
+            throw ApiException(
+              statusCode: 401,
+              message: 'Authentication required for CBV vocabulary',
+            );
+          }
+          return _masterDataService.loadVocabularySession(
+            forceRefresh: forceRefresh,
+          );
+        }().then(
+          (session) {
+            _retryTimer?.cancel();
+            _attempt = 0;
+            _session = session;
+            unawaited(CbvVocabularyCacheStore.write(session));
+            _eventsController.add(
+              CbvVocabularyFetchEvent(isLoading: false, session: session),
+            );
+            _scheduleTtlRevalidation();
+            return session;
+          },
+          onError: (Object e) {
+            if (_isUnauthenticatedError(e)) {
+              _networkStarted = false;
+              _retryTimer?.cancel();
+              throw e;
+            }
+            _eventsController.add(
+              CbvVocabularyFetchEvent(isLoading: false, error: e),
+            );
+            _scheduleRetry();
+            throw e;
+          },
         );
-      }
-      return _masterDataService.loadVocabularySession(
-        forceRefresh: forceRefresh,
-      );
-    }()
-        .then((session) {
-      _retryTimer?.cancel();
-      _attempt = 0;
-      _session = session;
-      unawaited(CbvVocabularyCacheStore.write(session));
-      _eventsController.add(
-        CbvVocabularyFetchEvent(isLoading: false, session: session),
-      );
-      _scheduleTtlRevalidation();
-      return session;
-    }, onError: (Object e) {
-      if (_isUnauthenticatedError(e)) {
-        
-        
-        _networkStarted = false;
-        _retryTimer?.cancel();
-        throw e;
-      }
-      _eventsController.add(CbvVocabularyFetchEvent(isLoading: false, error: e));
-      _scheduleRetry();
-      throw e;
-    });
 
     _inFlight = future;
     future.whenComplete(() {
@@ -190,14 +176,22 @@ class CbvVocabularyService {
 
   void _scheduleRetry() {
     _retryTimer?.cancel();
-    final delay = _attempt < _retryDelays.length ? _retryDelays[_attempt] : _retryFloor;
+    final delay = _attempt < _retryDelays.length
+        ? _retryDelays[_attempt]
+        : _retryFloor;
     _attempt++;
-    _retryTimer = Timer(delay, () => _fireAndForget(_fetch(forceRefresh: false)));
+    _retryTimer = Timer(
+      delay,
+      () => _fireAndForget(_fetch(forceRefresh: false)),
+    );
   }
 
   void _scheduleTtlRevalidation() {
     _ttlTimer?.cancel();
-    _ttlTimer = Timer(_cacheTtl, () => _fireAndForget(_fetch(forceRefresh: true)));
+    _ttlTimer = Timer(
+      _cacheTtl,
+      () => _fireAndForget(_fetch(forceRefresh: true)),
+    );
   }
 
   Future<bool> _hasAuthToken() async {
@@ -212,9 +206,6 @@ class CbvVocabularyService {
     return false;
   }
 
-  
-  
-  
   void _fireAndForget(Future<CbvVocabularySession> future) {
     unawaited(future.then((_) {}, onError: (_) {}));
   }

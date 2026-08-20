@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/features/gs1/widgets/gs1_date_picker_field.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
@@ -5,7 +6,6 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class SsccClassificationCard extends StatelessWidget {

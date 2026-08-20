@@ -5,8 +5,6 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_management_action.dart';
 import 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_typed_clear_action.dart';
 
-export 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_management_action.dart';
-export 'package:traqtrace_app/features/admin/screens/cache_management/widgets/cache_typed_clear_action.dart';
 
 class CacheManagementTab extends StatelessWidget {
   const CacheManagementTab({

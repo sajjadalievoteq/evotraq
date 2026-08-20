@@ -1,9 +1,9 @@
+import 'package:traqtrace_app/core/animation/traq_staggered_entrance_widget.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
-import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/email_provider_launch_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';

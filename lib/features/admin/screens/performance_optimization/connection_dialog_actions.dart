@@ -1,7 +1,13 @@
-part of 'performance_optimization_dashboard_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/performance_optimization_dashboard_screen.dart';
+import 'package:traqtrace_app/features/admin/screens/performance_optimization/widgets/perf_opt_stat_row.dart';
 
-extension ConnectionDialogActions on _PerformanceOptimizationDashboardState {
-  void _showConnectionLeaksDialog(Map<String, dynamic> data) {
+extension ConnectionDialogActions on PerformanceOptimizationDashboardState {
+  void showConnectionLeaksDialog(Map<String, dynamic> data) {
     final List<dynamic> leaks = data['leaks'] ?? [];
     final Map<String, dynamic> summary = data['summary'] ?? {};
 

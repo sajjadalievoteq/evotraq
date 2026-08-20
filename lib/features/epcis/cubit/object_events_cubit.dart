@@ -6,7 +6,8 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
-
+import 'package:traqtrace_app/data/services/epcis/object_event_service_convenience_operations.dart';
+import 'package:traqtrace_app/data/services/epcis/object_event_service_operations.dart';
 
 enum ObjectEventsStatus { initial, loading, success, error }
 
@@ -87,59 +88,64 @@ class ObjectEventsState extends Equatable {
     return ObjectEventsState(
       status: status ?? this.status,
       objectEvents: objectEvents ?? this.objectEvents,
-      selectedEvent:
-          clearSelectedEvent ? null : (selectedEvent ?? this.selectedEvent),
+      selectedEvent: clearSelectedEvent
+          ? null
+          : (selectedEvent ?? this.selectedEvent),
       isListLoading: isListLoading ?? this.isListLoading,
       isFetchingMore: isFetchingMore ?? this.isFetchingMore,
       hasMoreData: hasMoreData ?? this.hasMoreData,
       page: page ?? this.page,
       pageSize: pageSize ?? this.pageSize,
       error: clearError ? null : (error ?? this.error),
-      listFetchError:
-          clearListFetchError ? null : (listFetchError ?? this.listFetchError),
+      listFetchError: clearListFetchError
+          ? null
+          : (listFetchError ?? this.listFetchError),
       filterAction: clearFilters ? null : (filterAction ?? this.filterAction),
-      filterBizStep:
-          clearFilters ? null : (filterBizStep ?? this.filterBizStep),
-      filterDisposition:
-          clearFilters ? null : (filterDisposition ?? this.filterDisposition),
-      filterLocationGLN:
-          clearFilters ? null : (filterLocationGLN ?? this.filterLocationGLN),
+      filterBizStep: clearFilters
+          ? null
+          : (filterBizStep ?? this.filterBizStep),
+      filterDisposition: clearFilters
+          ? null
+          : (filterDisposition ?? this.filterDisposition),
+      filterLocationGLN: clearFilters
+          ? null
+          : (filterLocationGLN ?? this.filterLocationGLN),
       filterEPC: clearFilters ? null : (filterEPC ?? this.filterEPC),
-      filterSearchText:
-          clearFilters ? null : (filterSearchText ?? this.filterSearchText),
+      filterSearchText: clearFilters
+          ? null
+          : (filterSearchText ?? this.filterSearchText),
       sortOrder: sortOrder ?? this.sortOrder,
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        objectEvents,
-        selectedEvent,
-        isListLoading,
-        isFetchingMore,
-        hasMoreData,
-        page,
-        pageSize,
-        error,
-        listFetchError,
-        filterAction,
-        filterBizStep,
-        filterDisposition,
-        filterLocationGLN,
-        filterEPC,
-        filterSearchText,
-        sortOrder,
-      ];
+    status,
+    objectEvents,
+    selectedEvent,
+    isListLoading,
+    isFetchingMore,
+    hasMoreData,
+    page,
+    pageSize,
+    error,
+    listFetchError,
+    filterAction,
+    filterBizStep,
+    filterDisposition,
+    filterLocationGLN,
+    filterEPC,
+    filterSearchText,
+    sortOrder,
+  ];
 }
 
 class ObjectEventsCubit extends Cubit<ObjectEventsState> {
   final ObjectEventService _service;
 
   ObjectEventsCubit({ObjectEventService? service})
-      : _service = service ?? getIt<ObjectEventService>(),
-        super(const ObjectEventsState());
-
+    : _service = service ?? getIt<ObjectEventService>(),
+      super(const ObjectEventsState());
 
   Future<void> loadObjectEvents({
     int page = 0,
@@ -153,21 +159,24 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     DateTime? startTime,
     DateTime? endTime,
   }) async {
-    emit(state.copyWith(
-      isListLoading: true,
-      clearListFetchError: true,
-      page: page,
-      pageSize: size,
-      filterAction: action,
-      filterBizStep: businessStep,
-      filterDisposition: disposition,
-      filterLocationGLN: locationGLN,
-      filterEPC: epc,
-      filterSearchText: searchText,
-    ));
+    emit(
+      state.copyWith(
+        isListLoading: true,
+        clearListFetchError: true,
+        page: page,
+        pageSize: size,
+        filterAction: action,
+        filterBizStep: businessStep,
+        filterDisposition: disposition,
+        filterLocationGLN: locationGLN,
+        filterEPC: epc,
+        filterSearchText: searchText,
+      ),
+    );
     try {
       final Map<String, dynamic> result;
-      final hasFilters = action != null ||
+      final hasFilters =
+          action != null ||
           businessStep != null ||
           disposition != null ||
           locationGLN != null ||
@@ -205,18 +214,22 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
 
       final newEvents = result['content'] as List<ObjectEvent>;
       final totalPages = result['totalPages'] as int? ?? 1;
-      emit(state.copyWith(
-        status: ObjectEventsStatus.success,
-        objectEvents: newEvents,
-        isListLoading: false,
-        hasMoreData: page < totalPages - 1,
-      ));
+      emit(
+        state.copyWith(
+          status: ObjectEventsStatus.success,
+          objectEvents: newEvents,
+          isListLoading: false,
+          hasMoreData: page < totalPages - 1,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ObjectEventsStatus.error,
-        isListLoading: false,
-        listFetchError: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: ObjectEventsStatus.error,
+          isListLoading: false,
+          listFetchError: e.toString(),
+        ),
+      );
     }
   }
 
@@ -226,7 +239,8 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     emit(state.copyWith(isFetchingMore: true));
     try {
       final Map<String, dynamic> result;
-      final hasFilters = state.filterAction != null ||
+      final hasFilters =
+          state.filterAction != null ||
           state.filterBizStep != null ||
           state.filterDisposition != null ||
           state.filterLocationGLN != null ||
@@ -252,12 +266,14 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
 
       final newEvents = result['content'] as List<ObjectEvent>;
       final totalPages = result['totalPages'] as int? ?? 1;
-      emit(state.copyWith(
-        objectEvents: [...state.objectEvents, ...newEvents],
-        isFetchingMore: false,
-        page: nextPage,
-        hasMoreData: nextPage < totalPages - 1,
-      ));
+      emit(
+        state.copyWith(
+          objectEvents: [...state.objectEvents, ...newEvents],
+          isFetchingMore: false,
+          page: nextPage,
+          hasMoreData: nextPage < totalPages - 1,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(isFetchingMore: false));
     }
@@ -282,7 +298,6 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     emit(state.copyWith(clearError: true));
   }
 
-
   Future<ObjectEvent?> getObjectEventById(String id) async {
     emit(state.copyWith(isListLoading: true, clearError: true));
     try {
@@ -300,7 +315,6 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
   Future<void> getObjectEvent(String id) async {
     await getObjectEventById(id);
   }
-
 
   Future<ObjectEvent> createObjectEvent({
     required String action,
@@ -340,11 +354,13 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
         certificationInfo: certificationInfo,
         epcisVersion: epcisVersion,
       );
-      emit(state.copyWith(
-        objectEvents: [newEvent, ...state.objectEvents],
-        selectedEvent: newEvent,
-        isListLoading: false,
-      ));
+      emit(
+        state.copyWith(
+          objectEvents: [newEvent, ...state.objectEvents],
+          selectedEvent: newEvent,
+          isListLoading: false,
+        ),
+      );
       return newEvent;
     } catch (e, st) {
       if (e is ApiException) {
@@ -366,7 +382,6 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     }
   }
 
-
   Future<void> updateObjectEvent(ObjectEvent event) async {
     emit(state.copyWith(isListLoading: true, clearError: true));
     try {
@@ -374,11 +389,13 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
       final list = List<ObjectEvent>.from(state.objectEvents);
       final idx = list.indexWhere((e) => e.id == event.id);
       if (idx != -1) list[idx] = updated;
-      emit(state.copyWith(
-        objectEvents: list,
-        selectedEvent: updated,
-        isListLoading: false,
-      ));
+      emit(
+        state.copyWith(
+          objectEvents: list,
+          selectedEvent: updated,
+          isListLoading: false,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(isListLoading: false, error: e.toString()));
       rethrow;
@@ -392,18 +409,19 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
       final list = List<ObjectEvent>.from(state.objectEvents)
         ..removeWhere((e) => e.id == id);
       final hasSel = state.selectedEvent?.id == id;
-      emit(state.copyWith(
-        objectEvents: list,
-        isListLoading: false,
-        clearSelectedEvent: hasSel,
-        selectedEvent: hasSel ? null : state.selectedEvent,
-      ));
+      emit(
+        state.copyWith(
+          objectEvents: list,
+          isListLoading: false,
+          clearSelectedEvent: hasSel,
+          selectedEvent: hasSel ? null : state.selectedEvent,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(isListLoading: false, error: e.toString()));
       rethrow;
     }
   }
-
 
   Future<List<ObjectEvent>> createEventsBatch(List<ObjectEvent> events) async {
     emit(state.copyWith(isListLoading: true, clearError: true));

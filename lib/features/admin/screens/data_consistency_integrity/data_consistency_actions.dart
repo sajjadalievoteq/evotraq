@@ -1,34 +1,42 @@
-part of 'data_consistency_integrity_dashboard_screen.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/data/services/admin/data_consistency_service.dart';
+import 'package:traqtrace_app/data/services/admin/error_correction_service.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/data_consistency_integrity_dashboard_screen.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_detail_row.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 
-extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
-  void _onPersistenceUpdate() {
+extension DataConsistencyActions on DataConsistencyIntegrityDashboardState {
+  void onPersistenceUpdate() {
     if (mounted) {
       setState(() {
-        _integrityJobs = _persistenceService.integrityJobs;
-        _correctionWorkflows = _persistenceService.correctionWorkflows;
-        if (_loadedTabs.contains(3)) {
-          _jobsState = _integrityJobs.isEmpty
+        integrityJobs = persistenceService.integrityJobs;
+        correctionWorkflows = persistenceService.correctionWorkflows;
+        if (loadedTabs.contains(3)) {
+          jobsState = integrityJobs.isEmpty
               ? const LoadState.empty()
-              : LoadState.success(_integrityJobs);
+              : LoadState.success(integrityJobs);
         }
-        if (_loadedTabs.contains(4)) {
-          _workflowDataState = _correctionWorkflows.isEmpty
+        if (loadedTabs.contains(4)) {
+          workflowDataState = correctionWorkflows.isEmpty
               ? const LoadState.empty()
-              : LoadState.success(_correctionWorkflows);
+              : LoadState.success(correctionWorkflows);
         }
       });
     }
   }
 
-  void _initializeServices() {
-    _consistencyService = getIt<DataConsistencyService>();
-    _correctionService = getIt<ErrorCorrectionService>();
+  void initializeServices() {
+    consistencyService = getIt<DataConsistencyService>();
+    correctionService = getIt<ErrorCorrectionService>();
   }
 
-  void _startAutoRefresh() {
-    _refreshTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+  void startAutoRefresh() {
+    refreshTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       if (mounted) {
-        _refreshLoadedTabs();
+        refreshLoadedTabs();
       }
     });
   }
@@ -36,63 +44,63 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
   Future<void> _triggerTabLoad(int index) {
     switch (index) {
       case 2:
-        return _loadCorrectionStatistics();
+        return loadCorrectionStatistics();
       case 3:
-        _refreshJobsState();
+        refreshJobsState();
         return Future.value();
       case 4:
-        return _loadWorkflowData();
+        return loadWorkflowData();
       default:
         return Future.value();
     }
   }
 
-  void _ensureTabLoaded(int index) {
-    if (_loadedTabs.contains(index)) return;
-    _loadedTabs.add(index);
+  void ensureTabLoaded(int index) {
+    if (loadedTabs.contains(index)) return;
+    loadedTabs.add(index);
     _triggerTabLoad(index);
   }
 
-  Future<void> _refreshLoadedTabs() async {
+  Future<void> refreshLoadedTabs() async {
     if (!mounted) return;
     setState(() {
-      _isRefreshingAll = true;
+      isRefreshingAll = true;
     });
     try {
-      await Future.wait(_loadedTabs.map(_triggerTabLoad));
+      await Future.wait(loadedTabs.map(_triggerTabLoad));
     } finally {
       if (mounted) {
         setState(() {
-          _isRefreshingAll = false;
+          isRefreshingAll = false;
         });
       }
     }
   }
 
-  void _refreshJobsState() {
+  void refreshJobsState() {
     if (!mounted) return;
     setState(() {
-      _jobsState = _integrityJobs.isEmpty
+      jobsState = integrityJobs.isEmpty
           ? const LoadState.empty()
-          : LoadState.success(_integrityJobs);
+          : LoadState.success(integrityJobs);
     });
   }
 
-  Future<void> _loadWorkflowData() async {
+  Future<void> loadWorkflowData() async {
     if (mounted) {
       setState(() {
-        if (_workflowDataState.data == null) {
-          _workflowDataState = const LoadState.loading();
+        if (workflowDataState.data == null) {
+          workflowDataState = const LoadState.loading();
         }
       });
     }
 
     try {
-      final workflows = await _correctionService.getAllCorrectionWorkflows();
+      final workflows = await correctionService.getAllCorrectionWorkflows();
       if (!mounted) return;
 
       setState(() {
-        _correctionWorkflows.clear();
+        correctionWorkflows.clear();
 
         for (int i = 0; i < workflows.length; i++) {
           final w = workflows[i];
@@ -107,82 +115,82 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
             'workflow_type': w['workflow_type'] ?? 'UNKNOWN',
           };
 
-          _correctionWorkflows.add(mappedWorkflow);
+          correctionWorkflows.add(mappedWorkflow);
         }
 
-        _workflowDataState = _correctionWorkflows.isEmpty
+        workflowDataState = correctionWorkflows.isEmpty
             ? const LoadState.empty()
-            : LoadState.success(_correctionWorkflows);
+            : LoadState.success(correctionWorkflows);
       });
     } catch (e) {
       if (mounted) {
         setState(() {
-          _workflowDataState = _correctionWorkflows.isNotEmpty
-              ? LoadState.success(_correctionWorkflows)
+          workflowDataState = correctionWorkflows.isNotEmpty
+              ? LoadState.success(correctionWorkflows)
               : LoadState.error('Failed to load workflows: $e');
         });
       }
     }
   }
 
-  Future<void> _generateConsistencyReport() async {
+  Future<void> generateConsistencyReport() async {
     if (!mounted) return;
     setState(() {
-      _isGeneratingReport = true;
-      if (_consistencyReportState.data == null) {
-        _consistencyReportState = const LoadState.loading();
+      isGeneratingReport = true;
+      if (consistencyReportState.data == null) {
+        consistencyReportState = const LoadState.loading();
       }
     });
 
     try {
-      final report = await _consistencyService.generateConsistencyReport(
-        _startDate,
-        _endDate,
-        _selectedEventTypes,
+      final report = await consistencyService.generateConsistencyReport(
+        startDate,
+        endDate,
+        selectedEventTypes,
       );
 
       if (mounted) {
         setState(() {
-          _consistencyReportState = LoadState.success(report);
+          consistencyReportState = LoadState.success(report);
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          final previous = _consistencyReportState.data;
-          _consistencyReportState = previous != null
+          final previous = consistencyReportState.data;
+          consistencyReportState = previous != null
               ? LoadState.success(previous)
               : LoadState.error('Failed to generate consistency report: $e');
         });
       }
-      _showErrorSnackBar('Failed to generate consistency report: $e');
+      showErrorSnackBar('Failed to generate consistency report: $e');
     } finally {
       if (mounted) {
         setState(() {
-          _isGeneratingReport = false;
+          isGeneratingReport = false;
         });
       }
     }
   }
 
-  Future<void> _detectAnomalies() async {
+  Future<void> detectAnomalies() async {
     if (!mounted) return;
     setState(() {
-      _isDetectingAnomalies = true;
-      if (_anomaliesState.data == null) {
-        _anomaliesState = const LoadState.loading();
+      isDetectingAnomalies = true;
+      if (anomaliesState.data == null) {
+        anomaliesState = const LoadState.loading();
       }
     });
 
     try {
-      final anomalies = await _consistencyService.detectDataAnomalies({
-        'start': _startDate,
-        'end': _endDate,
-      }, _selectedEventTypes);
+      final anomalies = await consistencyService.detectDataAnomalies({
+        'start': startDate,
+        'end': endDate,
+      }, selectedEventTypes);
 
       if (mounted) {
         setState(() {
-          _anomaliesState = anomalies.isEmpty
+          anomaliesState = anomalies.isEmpty
               ? const LoadState.empty()
               : LoadState.success(anomalies);
         });
@@ -190,71 +198,71 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
     } catch (e) {
       if (mounted) {
         setState(() {
-          final previous = _anomaliesState.data;
-          _anomaliesState = (previous != null && previous.isNotEmpty)
+          final previous = anomaliesState.data;
+          anomaliesState = (previous != null && previous.isNotEmpty)
               ? LoadState.success(previous)
               : LoadState.error('Failed to detect anomalies: $e');
         });
       }
-      _showErrorSnackBar('Failed to detect anomalies: $e');
+      showErrorSnackBar('Failed to detect anomalies: $e');
     } finally {
       if (mounted) {
         setState(() {
-          _isDetectingAnomalies = false;
+          isDetectingAnomalies = false;
         });
       }
     }
   }
 
-  Future<void> _identifyCorrectableErrors() async {
+  Future<void> identifyCorrectableErrors() async {
     setState(() {
-      _isIdentifyingErrors = true;
+      isIdentifyingErrors = true;
     });
 
     try {
-      final errors = await _correctionService.identifyCorrectableErrors(
-        _startDate,
-        _endDate,
-        _selectedErrorTypes,
+      final errors = await correctionService.identifyCorrectableErrors(
+        startDate,
+        endDate,
+        selectedErrorTypes,
       );
 
       setState(() {
-        _correctableErrors = errors;
+        correctableErrors = errors;
       });
     } catch (e) {
-      _showErrorSnackBar('Failed to identify correctable errors: $e');
+      showErrorSnackBar('Failed to identify correctable errors: $e');
     } finally {
       setState(() {
-        _isIdentifyingErrors = false;
+        isIdentifyingErrors = false;
       });
     }
   }
 
-  Future<void> _loadCorrectionStatistics() async {
+  Future<void> loadCorrectionStatistics() async {
     if (mounted) {
       setState(() {
-        if (_correctionStatisticsState.data == null) {
-          _correctionStatisticsState = const LoadState.loading();
+        if (correctionStatisticsState.data == null) {
+          correctionStatisticsState = const LoadState.loading();
         }
       });
     }
 
     try {
-      final statistics = await _correctionService.getErrorCorrectionStatistics(
-        _startDate,
-        _endDate,
+      final statistics = await correctionService.getErrorCorrectionStatistics(
+        startDate,
+        endDate,
       );
 
       if (mounted) {
         setState(() {
-          _correctionStatisticsState = LoadState.success(statistics);
+          correctionStatisticsState = LoadState.success(statistics);
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          final previous = _correctionStatisticsState.data;
-          _correctionStatisticsState = previous != null
+          final previous = correctionStatisticsState.data;
+          correctionStatisticsState = previous != null
               ? LoadState.success(previous)
               : LoadState.error('Failed to load correction statistics: $e');
         });
@@ -262,11 +270,11 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
     }
   }
 
-  void _showErrorSnackBar(String message) {
+  void showErrorSnackBar(String message) {
     context.showError(message, duration: const Duration(seconds: 5));
   }
 
-  Future<void> _correctConsistencyViolation(
+  Future<void> correctConsistencyViolation(
     Map<String, dynamic> violation,
   ) async {
     final violationType = violation['violation_type'] ?? 'UNKNOWN';
@@ -304,7 +312,7 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
 
     if (confirmed == true) {
       try {
-        final errorId = await _correctionService.registerRealError(
+        final errorId = await correctionService.registerRealError(
           violationType,
           description,
           violation['affected_events']?.cast<String>() ?? [],
@@ -315,7 +323,7 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
           },
         );
 
-        final workflowId = await _correctionService
+        final workflowId = await correctionService
             .initiateErrorCorrectionWorkflow(errorId, 'MANUAL', {
               'source': 'CONSISTENCY_VALIDATION',
               'violation_type': violationType,
@@ -326,14 +334,14 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
           'Correction workflow $workflowId created successfully!',
         );
 
-        await _loadWorkflowData();
+        await loadWorkflowData();
       } catch (e) {
-        _showErrorSnackBar('Failed to create correction workflow: $e');
+        showErrorSnackBar('Failed to create correction workflow: $e');
       }
     }
   }
 
-  void _showViolationDetails(Map<String, dynamic> violation) {
+  void showViolationDetails(Map<String, dynamic> violation) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -371,7 +379,7 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
     );
   }
 
-  Future<void> _correctAnomaly(Map<String, dynamic> anomaly) async {
+  Future<void> correctAnomaly(Map<String, dynamic> anomaly) async {
     final anomalyType = anomaly['anomaly_type'] ?? 'UNKNOWN';
     final description = anomaly['description'] ?? '';
 
@@ -411,7 +419,7 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
 
     if (confirmed == true) {
       try {
-        final errorId = await _correctionService.registerRealError(
+        final errorId = await correctionService.registerRealError(
           anomalyType,
           description,
           anomaly['affected_events']?.cast<String>() ?? [],
@@ -423,7 +431,7 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
           },
         );
 
-        final workflowId = await _correctionService
+        final workflowId = await correctionService
             .initiateErrorCorrectionWorkflow(errorId, 'MANUAL', {
               'source': 'ANOMALY_DETECTION',
               'anomaly_type': anomalyType,
@@ -434,9 +442,9 @@ extension DataConsistencyActions on _DataConsistencyIntegrityDashboardState {
           'Correction workflow $workflowId created successfully!',
         );
 
-        await _loadWorkflowData();
+        await loadWorkflowData();
       } catch (e) {
-        _showErrorSnackBar('Failed to create correction workflow: $e');
+        showErrorSnackBar('Failed to create correction workflow: $e');
       }
     }
   }

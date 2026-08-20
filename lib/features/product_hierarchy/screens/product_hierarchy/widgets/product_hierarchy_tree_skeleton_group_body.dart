@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/product_hierarchy/widgets/product_hierarchy_ancestor_accent_rails.dart';
 
 class ProductHierarchyTreeSkeletonGroupBody extends StatelessWidget {

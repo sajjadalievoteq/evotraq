@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/widgets/skeleton_box.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class GtinFieldSkeletonMask extends StatelessWidget {
   const GtinFieldSkeletonMask({

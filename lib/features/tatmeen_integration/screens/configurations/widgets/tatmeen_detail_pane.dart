@@ -1,22 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_integration_settings.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/cubit/tatmeen_integration_state.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/utils/tatmeen_integration_sections.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_dashboard.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_credentials_form.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_disabled_state.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_notifications_settings.dart';
 
-part 'tatmeen_detail_content.dart';
-part 'tatmeen_connection_result_banner.dart';
-part 'tatmeen_connection_status_chip.dart';
-part 'tatmeen_detail_skeleton.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_detail_content.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_detail_skeleton.dart';
 
 class TatmeenDetailPane extends StatelessWidget {
   const TatmeenDetailPane({

@@ -1,9 +1,10 @@
+import 'package:traqtrace_app/features/operations/shared/operation_epc_type.dart';
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
@@ -25,12 +26,11 @@ import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_vali
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/operations/shared/pharma_return_context.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_context_builder.dart';
 import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-
 class ReturnReceivingOperationScreen extends StatefulWidget {
   const ReturnReceivingOperationScreen({
     super.key,
@@ -38,17 +38,12 @@ class ReturnReceivingOperationScreen extends StatefulWidget {
     this.onEmbeddedActionSuccess,
     this.pharmaReturnContext,
   });
-
   final bool embedded;
-
   final VoidCallback? onEmbeddedActionSuccess;
-
   final PharmaReturnContext? pharmaReturnContext;
-
   @override
   State<ReturnReceivingOperationScreen> createState() => _ReturnReceivingOperationScreenState();
 }
-
 class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperationScreen> {
   static const _wizardSteps = [
     OperationStepConfig.details,

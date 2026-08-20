@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_types.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_clinical_trial_section.dart';
@@ -15,7 +16,7 @@ import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_state_license_section.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_wholesale_section.dart';
 
-part 'gln_pharmaceutical_extension_actions.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_actions.dart';
 
 class GLNPharmaceuticalExtensionWidget extends StatefulWidget {
   final int? glnId;
@@ -41,116 +42,116 @@ class GLNPharmaceuticalExtensionWidget extends StatefulWidget {
 
 class GLNPharmaceuticalExtensionWidgetState
     extends State<GLNPharmaceuticalExtensionWidget> {
-  GLNPharmaceuticalExtension? _extension;
-  bool _isLoading = true;
+  GLNPharmaceuticalExtension? extension;
+  bool isLoading = true;
 
-  HealthcareFacilityType _healthcareFacilityType = HealthcareFacilityType.other;
+  HealthcareFacilityType healthcareFacilityType = HealthcareFacilityType.other;
 
-  final _fdaEstablishmentIdController = TextEditingController();
-  final _fdaRegistrationNumberController = TextEditingController();
-  DateTime? _fdaRegistrationDate;
-  DateTime? _fdaRegistrationExpiry;
-  final _fdaEstablishmentTypeController = TextEditingController();
+  final fdaEstablishmentIdController = TextEditingController();
+  final fdaRegistrationNumberController = TextEditingController();
+  DateTime? fdaRegistrationDate;
+  DateTime? fdaRegistrationExpiry;
+  final fdaEstablishmentTypeController = TextEditingController();
 
-  final _deaRegistrationNumberController = TextEditingController();
-  DateTime? _deaRegistrationExpiry;
-  final _deaScheduleAuthorizationController = TextEditingController();
-  final _deaBusinessActivityController = TextEditingController();
+  final deaRegistrationNumberController = TextEditingController();
+  DateTime? deaRegistrationExpiry;
+  final deaScheduleAuthorizationController = TextEditingController();
+  final deaBusinessActivityController = TextEditingController();
 
-  final _stateLicenseNumberController = TextEditingController();
-  final _stateLicenseTypeController = TextEditingController();
-  DateTime? _stateLicenseExpiry;
-  String? _stateLicenseState;
+  final stateLicenseNumberController = TextEditingController();
+  final stateLicenseTypeController = TextEditingController();
+  DateTime? stateLicenseExpiry;
+  String? stateLicenseState;
 
-  final _wholesaleLicenseNumberController = TextEditingController();
-  DateTime? _wholesaleLicenseExpiry;
-  bool _isAuthorizedTradingPartner = false;
-  DateTime? _atpVerificationDate;
-  bool _vawdAccredited = false;
-  final _vawdAccreditationNumberController = TextEditingController();
-  DateTime? _vawdExpiryDate;
+  final wholesaleLicenseNumberController = TextEditingController();
+  DateTime? wholesaleLicenseExpiry;
+  bool isAuthorizedTradingPartner = false;
+  DateTime? atpVerificationDate;
+  bool vawdAccredited = false;
+  final vawdAccreditationNumberController = TextEditingController();
+  DateTime? vawdExpiryDate;
 
-  bool _hasColdChainCapability = false;
-  final _coldStorageMinTempController = TextEditingController();
-  final _coldStorageMaxTempController = TextEditingController();
-  bool _hasFreezerCapability = false;
-  final _freezerMinTempController = TextEditingController();
-  final _freezerMaxTempController = TextEditingController();
-  bool _hasControlledRoomTemp = false;
-  final _crtMinTempController = TextEditingController();
-  final _crtMaxTempController = TextEditingController();
-  bool _hasHumidityControl = false;
-  final _humidityRangeMinController = TextEditingController();
-  final _humidityRangeMaxController = TextEditingController();
-  bool _gdpCertified = false;
-  final _gdpCertificationNumberController = TextEditingController();
-  DateTime? _gdpCertificationExpiry;
+  bool hasColdChainCapability = false;
+  final coldStorageMinTempController = TextEditingController();
+  final coldStorageMaxTempController = TextEditingController();
+  bool hasFreezerCapability = false;
+  final freezerMinTempController = TextEditingController();
+  final freezerMaxTempController = TextEditingController();
+  bool hasControlledRoomTemp = false;
+  final crtMinTempController = TextEditingController();
+  final crtMaxTempController = TextEditingController();
+  bool hasHumidityControl = false;
+  final humidityRangeMinController = TextEditingController();
+  final humidityRangeMaxController = TextEditingController();
+  bool gdpCertified = false;
+  final gdpCertificationNumberController = TextEditingController();
+  DateTime? gdpCertificationExpiry;
 
-  bool _isClinicalTrialSite = false;
-  final _clinicalTrialPhaseAuthorizedController = TextEditingController();
-  final _irbApprovalNumberController = TextEditingController();
-  DateTime? _irbApprovalExpiry;
+  bool isClinicalTrialSite = false;
+  final clinicalTrialPhaseAuthorizedController = TextEditingController();
+  final irbApprovalNumberController = TextEditingController();
+  DateTime? irbApprovalExpiry;
 
-  bool _isDscsaCompliant = false;
-  DateTime? _dscsaComplianceDate;
-  bool _hasSerializationCapability = false;
-  bool _hasAggregationCapability = false;
-  final _interoperabilitySystemController = TextEditingController();
+  bool isDscsaCompliant = false;
+  DateTime? dscsaComplianceDate;
+  bool hasSerializationCapability = false;
+  bool hasAggregationCapability = false;
+  final interoperabilitySystemController = TextEditingController();
 
-  final _npiNumberController = TextEditingController();
-  final _ncpdpIdController = TextEditingController();
-  final _medicareProviderNumberController = TextEditingController();
-  final _medicaidProviderNumberController = TextEditingController();
+  final npiNumberController = TextEditingController();
+  final ncpdpIdController = TextEditingController();
+  final medicareProviderNumberController = TextEditingController();
+  final medicaidProviderNumberController = TextEditingController();
 
-  bool _isIsoCertified = false;
-  final _isoCertificationTypeController = TextEditingController();
-  final _isoCertificationNumberController = TextEditingController();
-  DateTime? _isoCertificationExpiry;
-  bool _jcahoAccredited = false;
-  final _jcahoAccreditationNumberController = TextEditingController();
-  DateTime? _jcahoAccreditationExpiry;
+  bool isIsoCertified = false;
+  final isoCertificationTypeController = TextEditingController();
+  final isoCertificationNumberController = TextEditingController();
+  DateTime? isoCertificationExpiry;
+  bool jcahoAccredited = false;
+  final jcahoAccreditationNumberController = TextEditingController();
+  DateTime? jcahoAccreditationExpiry;
 
-  final _emaSiteIdController = TextEditingController();
-  final _pmdaSiteIdController = TextEditingController();
-  final _anvisaSiteIdController = TextEditingController();
-  final _nmpaSiteIdController = TextEditingController();
+  final emaSiteIdController = TextEditingController();
+  final pmdaSiteIdController = TextEditingController();
+  final anvisaSiteIdController = TextEditingController();
+  final nmpaSiteIdController = TextEditingController();
 
-  final _receivingHoursController = TextEditingController();
-  final _dispatchHoursController = TextEditingController();
-  bool _hasWeighbridge = false;
-  bool _hasLoadingDock = false;
-  bool _hasForkliftCapability = false;
-  bool _canReceiveHazmat = false;
+  final receivingHoursController = TextEditingController();
+  final dispatchHoursController = TextEditingController();
+  bool hasWeighbridge = false;
+  bool hasLoadingDock = false;
+  bool hasForkliftCapability = false;
+  bool canReceiveHazmat = false;
 
-  final _pharmacistInChargeController = TextEditingController();
-  final _picLicenseNumberController = TextEditingController();
-  final _responsiblePersonNameController = TextEditingController();
-  final _responsiblePersonEmailController = TextEditingController();
-  final _responsiblePersonPhoneController = TextEditingController();
-  final _qualityContactNameController = TextEditingController();
-  final _qualityContactEmailController = TextEditingController();
-  final _qualityContactPhoneController = TextEditingController();
-  final _regulatoryContactNameController = TextEditingController();
-  final _regulatoryContactEmailController = TextEditingController();
-  final _regulatoryContactPhoneController = TextEditingController();
+  final pharmacistInChargeController = TextEditingController();
+  final picLicenseNumberController = TextEditingController();
+  final responsiblePersonNameController = TextEditingController();
+  final responsiblePersonEmailController = TextEditingController();
+  final responsiblePersonPhoneController = TextEditingController();
+  final qualityContactNameController = TextEditingController();
+  final qualityContactEmailController = TextEditingController();
+  final qualityContactPhoneController = TextEditingController();
+  final regulatoryContactNameController = TextEditingController();
+  final regulatoryContactEmailController = TextEditingController();
+  final regulatoryContactPhoneController = TextEditingController();
 
-  final _brandsyncPartyIdController = TextEditingController();
-  final _tatmeenPartyCodeController = TextEditingController();
-  final _pharmacovigilanceEmailController = TextEditingController();
-  final _recallContactEmailController = TextEditingController();
-  final _recallContactPhoneController = TextEditingController();
-  final _epcisCaptureEndpointUrlController = TextEditingController();
-  final _licensedAgentAuthorisationController = TextEditingController();
-  final _authorisedPrincipalMahGlnsController = TextEditingController();
+  final brandsyncPartyIdController = TextEditingController();
+  final tatmeenPartyCodeController = TextEditingController();
+  final pharmacovigilanceEmailController = TextEditingController();
+  final recallContactEmailController = TextEditingController();
+  final recallContactPhoneController = TextEditingController();
+  final epcisCaptureEndpointUrlController = TextEditingController();
+  final licensedAgentAuthorisationController = TextEditingController();
+  final authorisedPrincipalMahGlnsController = TextEditingController();
 
-  bool _mahQualificationIndicator = false;
-  final _mahTargetMarketsController = TextEditingController();
-  final _mahRegulatoryRegistrationNumberController = TextEditingController();
+  bool mahQualificationIndicator = false;
+  final mahTargetMarketsController = TextEditingController();
+  final mahRegulatoryRegistrationNumberController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadExtension();
+    loadExtension();
   }
 
   @override
@@ -158,77 +159,77 @@ class GLNPharmaceuticalExtensionWidgetState
     super.didUpdateWidget(oldWidget);
     if (widget.initialExtension != oldWidget.initialExtension &&
         widget.initialExtension != null) {
-      _populateFormFromExtension(widget.initialExtension!);
+      populateFormFromExtension(widget.initialExtension!);
       setState(() {
-        _extension = widget.initialExtension;
+        extension = widget.initialExtension;
       });
     }
   }
 
   @override
   void dispose() {
-    _fdaEstablishmentIdController.dispose();
-    _fdaRegistrationNumberController.dispose();
-    _fdaEstablishmentTypeController.dispose();
-    _deaRegistrationNumberController.dispose();
-    _deaScheduleAuthorizationController.dispose();
-    _deaBusinessActivityController.dispose();
-    _stateLicenseNumberController.dispose();
-    _stateLicenseTypeController.dispose();
-    _wholesaleLicenseNumberController.dispose();
-    _vawdAccreditationNumberController.dispose();
-    _coldStorageMinTempController.dispose();
-    _coldStorageMaxTempController.dispose();
-    _freezerMinTempController.dispose();
-    _freezerMaxTempController.dispose();
-    _crtMinTempController.dispose();
-    _crtMaxTempController.dispose();
-    _humidityRangeMinController.dispose();
-    _humidityRangeMaxController.dispose();
-    _gdpCertificationNumberController.dispose();
-    _clinicalTrialPhaseAuthorizedController.dispose();
-    _irbApprovalNumberController.dispose();
-    _interoperabilitySystemController.dispose();
-    _npiNumberController.dispose();
-    _ncpdpIdController.dispose();
-    _medicareProviderNumberController.dispose();
-    _medicaidProviderNumberController.dispose();
-    _isoCertificationTypeController.dispose();
-    _isoCertificationNumberController.dispose();
-    _jcahoAccreditationNumberController.dispose();
-    _emaSiteIdController.dispose();
-    _pmdaSiteIdController.dispose();
-    _anvisaSiteIdController.dispose();
-    _nmpaSiteIdController.dispose();
-    _receivingHoursController.dispose();
-    _dispatchHoursController.dispose();
-    _pharmacistInChargeController.dispose();
-    _picLicenseNumberController.dispose();
-    _responsiblePersonNameController.dispose();
-    _responsiblePersonEmailController.dispose();
-    _responsiblePersonPhoneController.dispose();
-    _qualityContactNameController.dispose();
-    _qualityContactEmailController.dispose();
-    _qualityContactPhoneController.dispose();
-    _regulatoryContactNameController.dispose();
-    _regulatoryContactEmailController.dispose();
-    _regulatoryContactPhoneController.dispose();
-    _brandsyncPartyIdController.dispose();
-    _tatmeenPartyCodeController.dispose();
-    _pharmacovigilanceEmailController.dispose();
-    _recallContactEmailController.dispose();
-    _recallContactPhoneController.dispose();
-    _epcisCaptureEndpointUrlController.dispose();
-    _licensedAgentAuthorisationController.dispose();
-    _authorisedPrincipalMahGlnsController.dispose();
-    _mahTargetMarketsController.dispose();
-    _mahRegulatoryRegistrationNumberController.dispose();
+    fdaEstablishmentIdController.dispose();
+    fdaRegistrationNumberController.dispose();
+    fdaEstablishmentTypeController.dispose();
+    deaRegistrationNumberController.dispose();
+    deaScheduleAuthorizationController.dispose();
+    deaBusinessActivityController.dispose();
+    stateLicenseNumberController.dispose();
+    stateLicenseTypeController.dispose();
+    wholesaleLicenseNumberController.dispose();
+    vawdAccreditationNumberController.dispose();
+    coldStorageMinTempController.dispose();
+    coldStorageMaxTempController.dispose();
+    freezerMinTempController.dispose();
+    freezerMaxTempController.dispose();
+    crtMinTempController.dispose();
+    crtMaxTempController.dispose();
+    humidityRangeMinController.dispose();
+    humidityRangeMaxController.dispose();
+    gdpCertificationNumberController.dispose();
+    clinicalTrialPhaseAuthorizedController.dispose();
+    irbApprovalNumberController.dispose();
+    interoperabilitySystemController.dispose();
+    npiNumberController.dispose();
+    ncpdpIdController.dispose();
+    medicareProviderNumberController.dispose();
+    medicaidProviderNumberController.dispose();
+    isoCertificationTypeController.dispose();
+    isoCertificationNumberController.dispose();
+    jcahoAccreditationNumberController.dispose();
+    emaSiteIdController.dispose();
+    pmdaSiteIdController.dispose();
+    anvisaSiteIdController.dispose();
+    nmpaSiteIdController.dispose();
+    receivingHoursController.dispose();
+    dispatchHoursController.dispose();
+    pharmacistInChargeController.dispose();
+    picLicenseNumberController.dispose();
+    responsiblePersonNameController.dispose();
+    responsiblePersonEmailController.dispose();
+    responsiblePersonPhoneController.dispose();
+    qualityContactNameController.dispose();
+    qualityContactEmailController.dispose();
+    qualityContactPhoneController.dispose();
+    regulatoryContactNameController.dispose();
+    regulatoryContactEmailController.dispose();
+    regulatoryContactPhoneController.dispose();
+    brandsyncPartyIdController.dispose();
+    tatmeenPartyCodeController.dispose();
+    pharmacovigilanceEmailController.dispose();
+    recallContactEmailController.dispose();
+    recallContactPhoneController.dispose();
+    epcisCaptureEndpointUrlController.dispose();
+    licensedAgentAuthorisationController.dispose();
+    authorisedPrincipalMahGlnsController.dispose();
+    mahTargetMarketsController.dispose();
+    mahRegulatoryRegistrationNumberController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -236,245 +237,245 @@ class GLNPharmaceuticalExtensionWidgetState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GlnPharmaceuticalRegistrySafetySection(
-          brandsyncPartyIdController: _brandsyncPartyIdController,
-          tatmeenPartyCodeController: _tatmeenPartyCodeController,
-          mahTargetMarketsController: _mahTargetMarketsController,
+          brandsyncPartyIdController: brandsyncPartyIdController,
+          tatmeenPartyCodeController: tatmeenPartyCodeController,
+          mahTargetMarketsController: mahTargetMarketsController,
           mahRegistrationNumberController:
-              _mahRegulatoryRegistrationNumberController,
+              mahRegulatoryRegistrationNumberController,
           licensedAgentAuthorisationController:
-              _licensedAgentAuthorisationController,
+              licensedAgentAuthorisationController,
           authorisedPrincipalMahGlnsController:
-              _authorisedPrincipalMahGlnsController,
-          pharmacovigilanceEmailController: _pharmacovigilanceEmailController,
-          recallContactEmailController: _recallContactEmailController,
-          recallContactPhoneController: _recallContactPhoneController,
-          epcisCaptureEndpointUrlController: _epcisCaptureEndpointUrlController,
-          mahQualificationIndicator: _mahQualificationIndicator,
+              authorisedPrincipalMahGlnsController,
+          pharmacovigilanceEmailController: pharmacovigilanceEmailController,
+          recallContactEmailController: recallContactEmailController,
+          recallContactPhoneController: recallContactPhoneController,
+          epcisCaptureEndpointUrlController: epcisCaptureEndpointUrlController,
+          mahQualificationIndicator: mahQualificationIndicator,
           isEditing: widget.isEditing,
           onMahQualificationChanged: (value) {
-            setState(() => _mahQualificationIndicator = value);
+            setState(() => mahQualificationIndicator = value);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalFacilitySection(
-          facilityType: _healthcareFacilityType,
+          facilityType: healthcareFacilityType,
           isEditing: widget.isEditing,
           onChanged: (value) {
-            setState(() => _healthcareFacilityType = value);
+            setState(() => healthcareFacilityType = value);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalFdaSection(
-          establishmentIdController: _fdaEstablishmentIdController,
-          registrationNumberController: _fdaRegistrationNumberController,
-          establishmentTypeController: _fdaEstablishmentTypeController,
-          registrationDate: _fdaRegistrationDate,
-          registrationExpiry: _fdaRegistrationExpiry,
+          establishmentIdController: fdaEstablishmentIdController,
+          registrationNumberController: fdaRegistrationNumberController,
+          establishmentTypeController: fdaEstablishmentTypeController,
+          registrationDate: fdaRegistrationDate,
+          registrationExpiry: fdaRegistrationExpiry,
           isEditing: widget.isEditing,
           onRegistrationDateChanged: (date) {
-            setState(() => _fdaRegistrationDate = date);
+            setState(() => fdaRegistrationDate = date);
           },
           onRegistrationExpiryChanged: (date) {
-            setState(() => _fdaRegistrationExpiry = date);
+            setState(() => fdaRegistrationExpiry = date);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalDeaSection(
-          registrationNumberController: _deaRegistrationNumberController,
-          scheduleAuthorizationController: _deaScheduleAuthorizationController,
-          businessActivityController: _deaBusinessActivityController,
-          registrationExpiry: _deaRegistrationExpiry,
+          registrationNumberController: deaRegistrationNumberController,
+          scheduleAuthorizationController: deaScheduleAuthorizationController,
+          businessActivityController: deaBusinessActivityController,
+          registrationExpiry: deaRegistrationExpiry,
           isEditing: widget.isEditing,
           onRegistrationExpiryChanged: (date) {
-            setState(() => _deaRegistrationExpiry = date);
+            setState(() => deaRegistrationExpiry = date);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalStateLicenseSection(
-          licenseNumberController: _stateLicenseNumberController,
-          licenseTypeController: _stateLicenseTypeController,
-          selectedState: _stateLicenseState,
-          licenseExpiry: _stateLicenseExpiry,
+          licenseNumberController: stateLicenseNumberController,
+          licenseTypeController: stateLicenseTypeController,
+          selectedState: stateLicenseState,
+          licenseExpiry: stateLicenseExpiry,
           isEditing: widget.isEditing,
           onStateChanged: (value) {
-            setState(() => _stateLicenseState = value);
+            setState(() => stateLicenseState = value);
           },
           onLicenseExpiryChanged: (date) {
-            setState(() => _stateLicenseExpiry = date);
+            setState(() => stateLicenseExpiry = date);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalWholesaleSection(
-          licenseNumberController: _wholesaleLicenseNumberController,
-          vawdAccreditationNumberController: _vawdAccreditationNumberController,
-          licenseExpiry: _wholesaleLicenseExpiry,
-          isAuthorizedTradingPartner: _isAuthorizedTradingPartner,
-          atpVerificationDate: _atpVerificationDate,
-          vawdAccredited: _vawdAccredited,
-          vawdExpiryDate: _vawdExpiryDate,
+          licenseNumberController: wholesaleLicenseNumberController,
+          vawdAccreditationNumberController: vawdAccreditationNumberController,
+          licenseExpiry: wholesaleLicenseExpiry,
+          isAuthorizedTradingPartner: isAuthorizedTradingPartner,
+          atpVerificationDate: atpVerificationDate,
+          vawdAccredited: vawdAccredited,
+          vawdExpiryDate: vawdExpiryDate,
           isEditing: widget.isEditing,
           onLicenseExpiryChanged: (date) {
-            setState(() => _wholesaleLicenseExpiry = date);
+            setState(() => wholesaleLicenseExpiry = date);
           },
           onAuthorizedTradingPartnerChanged: (value) {
-            setState(() => _isAuthorizedTradingPartner = value);
+            setState(() => isAuthorizedTradingPartner = value);
           },
           onAtpVerificationDateChanged: (date) {
-            setState(() => _atpVerificationDate = date);
+            setState(() => atpVerificationDate = date);
           },
           onVawdAccreditedChanged: (value) {
-            setState(() => _vawdAccredited = value);
+            setState(() => vawdAccredited = value);
           },
           onVawdExpiryDateChanged: (date) {
-            setState(() => _vawdExpiryDate = date);
+            setState(() => vawdExpiryDate = date);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalColdChainSection(
-          coldStorageMinController: _coldStorageMinTempController,
-          coldStorageMaxController: _coldStorageMaxTempController,
-          freezerMinController: _freezerMinTempController,
-          freezerMaxController: _freezerMaxTempController,
-          crtMinController: _crtMinTempController,
-          crtMaxController: _crtMaxTempController,
-          humidityMinController: _humidityRangeMinController,
-          humidityMaxController: _humidityRangeMaxController,
-          gdpCertificationNumberController: _gdpCertificationNumberController,
-          hasColdChainCapability: _hasColdChainCapability,
-          hasFreezerCapability: _hasFreezerCapability,
-          hasControlledRoomTemp: _hasControlledRoomTemp,
-          hasHumidityControl: _hasHumidityControl,
-          gdpCertified: _gdpCertified,
-          gdpCertificationExpiry: _gdpCertificationExpiry,
+          coldStorageMinController: coldStorageMinTempController,
+          coldStorageMaxController: coldStorageMaxTempController,
+          freezerMinController: freezerMinTempController,
+          freezerMaxController: freezerMaxTempController,
+          crtMinController: crtMinTempController,
+          crtMaxController: crtMaxTempController,
+          humidityMinController: humidityRangeMinController,
+          humidityMaxController: humidityRangeMaxController,
+          gdpCertificationNumberController: gdpCertificationNumberController,
+          hasColdChainCapability: hasColdChainCapability,
+          hasFreezerCapability: hasFreezerCapability,
+          hasControlledRoomTemp: hasControlledRoomTemp,
+          hasHumidityControl: hasHumidityControl,
+          gdpCertified: gdpCertified,
+          gdpCertificationExpiry: gdpCertificationExpiry,
           isEditing: widget.isEditing,
           onColdChainCapabilityChanged: (value) {
-            setState(() => _hasColdChainCapability = value);
+            setState(() => hasColdChainCapability = value);
           },
           onFreezerCapabilityChanged: (value) {
-            setState(() => _hasFreezerCapability = value);
+            setState(() => hasFreezerCapability = value);
           },
           onControlledRoomTempChanged: (value) {
-            setState(() => _hasControlledRoomTemp = value);
+            setState(() => hasControlledRoomTemp = value);
           },
           onHumidityControlChanged: (value) {
-            setState(() => _hasHumidityControl = value);
+            setState(() => hasHumidityControl = value);
           },
           onGdpCertifiedChanged: (value) {
-            setState(() => _gdpCertified = value);
+            setState(() => gdpCertified = value);
           },
           onGdpCertificationExpiryChanged: (date) {
-            setState(() => _gdpCertificationExpiry = date);
+            setState(() => gdpCertificationExpiry = date);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalClinicalTrialSection(
-          phaseAuthorizedController: _clinicalTrialPhaseAuthorizedController,
-          irbApprovalNumberController: _irbApprovalNumberController,
-          isClinicalTrialSite: _isClinicalTrialSite,
-          irbApprovalExpiry: _irbApprovalExpiry,
+          phaseAuthorizedController: clinicalTrialPhaseAuthorizedController,
+          irbApprovalNumberController: irbApprovalNumberController,
+          isClinicalTrialSite: isClinicalTrialSite,
+          irbApprovalExpiry: irbApprovalExpiry,
           isEditing: widget.isEditing,
           onClinicalTrialSiteChanged: (value) {
-            setState(() => _isClinicalTrialSite = value);
+            setState(() => isClinicalTrialSite = value);
           },
           onIrbApprovalExpiryChanged: (date) {
-            setState(() => _irbApprovalExpiry = date);
+            setState(() => irbApprovalExpiry = date);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalDscsaSection(
-          interoperabilitySystemController: _interoperabilitySystemController,
-          isDscsaCompliant: _isDscsaCompliant,
-          complianceDate: _dscsaComplianceDate,
-          hasSerializationCapability: _hasSerializationCapability,
-          hasAggregationCapability: _hasAggregationCapability,
+          interoperabilitySystemController: interoperabilitySystemController,
+          isDscsaCompliant: isDscsaCompliant,
+          complianceDate: dscsaComplianceDate,
+          hasSerializationCapability: hasSerializationCapability,
+          hasAggregationCapability: hasAggregationCapability,
           isEditing: widget.isEditing,
           onDscsaCompliantChanged: (value) {
-            setState(() => _isDscsaCompliant = value);
+            setState(() => isDscsaCompliant = value);
           },
           onComplianceDateChanged: (date) {
-            setState(() => _dscsaComplianceDate = date);
+            setState(() => dscsaComplianceDate = date);
           },
           onSerializationCapabilityChanged: (value) {
-            setState(() => _hasSerializationCapability = value);
+            setState(() => hasSerializationCapability = value);
           },
           onAggregationCapabilityChanged: (value) {
-            setState(() => _hasAggregationCapability = value);
+            setState(() => hasAggregationCapability = value);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalHealthcareIdsSection(
-          npiNumberController: _npiNumberController,
-          ncpdpIdController: _ncpdpIdController,
-          medicareProviderNumberController: _medicareProviderNumberController,
-          medicaidProviderNumberController: _medicaidProviderNumberController,
+          npiNumberController: npiNumberController,
+          ncpdpIdController: ncpdpIdController,
+          medicareProviderNumberController: medicareProviderNumberController,
+          medicaidProviderNumberController: medicaidProviderNumberController,
           isEditing: widget.isEditing,
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalCertificationsSection(
-          isoTypeController: _isoCertificationTypeController,
-          isoNumberController: _isoCertificationNumberController,
-          jcahoNumberController: _jcahoAccreditationNumberController,
-          isIsoCertified: _isIsoCertified,
-          isoExpiry: _isoCertificationExpiry,
-          isJcahoAccredited: _jcahoAccredited,
-          jcahoExpiry: _jcahoAccreditationExpiry,
+          isoTypeController: isoCertificationTypeController,
+          isoNumberController: isoCertificationNumberController,
+          jcahoNumberController: jcahoAccreditationNumberController,
+          isIsoCertified: isIsoCertified,
+          isoExpiry: isoCertificationExpiry,
+          isJcahoAccredited: jcahoAccredited,
+          jcahoExpiry: jcahoAccreditationExpiry,
           isEditing: widget.isEditing,
           onIsoCertifiedChanged: (value) {
-            setState(() => _isIsoCertified = value);
+            setState(() => isIsoCertified = value);
           },
           onIsoExpiryChanged: (date) {
-            setState(() => _isoCertificationExpiry = date);
+            setState(() => isoCertificationExpiry = date);
           },
           onJcahoAccreditedChanged: (value) {
-            setState(() => _jcahoAccredited = value);
+            setState(() => jcahoAccredited = value);
           },
           onJcahoExpiryChanged: (date) {
-            setState(() => _jcahoAccreditationExpiry = date);
+            setState(() => jcahoAccreditationExpiry = date);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalInternationalSection(
-          emaSiteIdController: _emaSiteIdController,
-          pmdaSiteIdController: _pmdaSiteIdController,
-          anvisaSiteIdController: _anvisaSiteIdController,
-          nmpaSiteIdController: _nmpaSiteIdController,
+          emaSiteIdController: emaSiteIdController,
+          pmdaSiteIdController: pmdaSiteIdController,
+          anvisaSiteIdController: anvisaSiteIdController,
+          nmpaSiteIdController: nmpaSiteIdController,
           isEditing: widget.isEditing,
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalOperationalSection(
-          receivingHoursController: _receivingHoursController,
-          dispatchHoursController: _dispatchHoursController,
-          hasWeighbridge: _hasWeighbridge,
-          hasLoadingDock: _hasLoadingDock,
-          hasForkliftCapability: _hasForkliftCapability,
-          canReceiveHazmat: _canReceiveHazmat,
+          receivingHoursController: receivingHoursController,
+          dispatchHoursController: dispatchHoursController,
+          hasWeighbridge: hasWeighbridge,
+          hasLoadingDock: hasLoadingDock,
+          hasForkliftCapability: hasForkliftCapability,
+          canReceiveHazmat: canReceiveHazmat,
           isEditing: widget.isEditing,
           onWeighbridgeChanged: (value) {
-            setState(() => _hasWeighbridge = value);
+            setState(() => hasWeighbridge = value);
           },
           onLoadingDockChanged: (value) {
-            setState(() => _hasLoadingDock = value);
+            setState(() => hasLoadingDock = value);
           },
           onForkliftCapabilityChanged: (value) {
-            setState(() => _hasForkliftCapability = value);
+            setState(() => hasForkliftCapability = value);
           },
           onReceiveHazmatChanged: (value) {
-            setState(() => _canReceiveHazmat = value);
+            setState(() => canReceiveHazmat = value);
           },
         ),
         const SizedBox(height: 16),
         GlnPharmaceuticalContactsSection(
-          pharmacistInChargeController: _pharmacistInChargeController,
-          picLicenseNumberController: _picLicenseNumberController,
-          responsibleNameController: _responsiblePersonNameController,
-          responsibleEmailController: _responsiblePersonEmailController,
-          responsiblePhoneController: _responsiblePersonPhoneController,
-          qualityNameController: _qualityContactNameController,
-          qualityEmailController: _qualityContactEmailController,
-          qualityPhoneController: _qualityContactPhoneController,
-          regulatoryNameController: _regulatoryContactNameController,
-          regulatoryEmailController: _regulatoryContactEmailController,
-          regulatoryPhoneController: _regulatoryContactPhoneController,
+          pharmacistInChargeController: pharmacistInChargeController,
+          picLicenseNumberController: picLicenseNumberController,
+          responsibleNameController: responsiblePersonNameController,
+          responsibleEmailController: responsiblePersonEmailController,
+          responsiblePhoneController: responsiblePersonPhoneController,
+          qualityNameController: qualityContactNameController,
+          qualityEmailController: qualityContactEmailController,
+          qualityPhoneController: qualityContactPhoneController,
+          regulatoryNameController: regulatoryContactNameController,
+          regulatoryEmailController: regulatoryContactEmailController,
+          regulatoryPhoneController: regulatoryContactPhoneController,
           isEditing: widget.isEditing,
         ),
       ],

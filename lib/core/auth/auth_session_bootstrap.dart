@@ -1,8 +1,8 @@
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/auth/browser_document_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/auth/browser_document_web.dart'
     as html;
-import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';

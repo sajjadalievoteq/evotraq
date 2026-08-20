@@ -1,5 +1,5 @@
+import 'package:traqtrace_app/core/animation/traq_fade_scale_entrance.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_surface_card.dart';

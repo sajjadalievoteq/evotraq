@@ -5,17 +5,17 @@ import 'package:traqtrace_app/data/models/epcis/epcis_document_dto.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters_dto.dart';
 
 class EPCISSerializationService {
-  
   final DioService _dioService;
   late final String _baseUrl;
-  
-  EPCISSerializationService({
-    required DioService dioService,
-  }) : _dioService = dioService {
+
+  EPCISSerializationService({required DioService dioService})
+    : _dioService = dioService {
     _baseUrl = '${_dioService.baseUrl}/events/serialization';
   }
-  
-  Future<Map<String, String>> _getHeaders({String contentType = 'application/json'}) async {
+
+  Future<Map<String, String>> _getHeaders({
+    String contentType = 'application/json',
+  }) async {
     final token = await _dioService.getAuthToken();
     return {
       'Content-Type': contentType,
@@ -23,7 +23,7 @@ class EPCISSerializationService {
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
-  
+
   Future<Map<String, dynamic>> convertXmlToJsonLd(String xmlContent) async {
     try {
       final headers = await _getHeaders(contentType: 'application/xml');
@@ -38,13 +38,15 @@ class EPCISSerializationService {
       if (response.statusCode == 200) {
         return json.decode(response.data) as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to convert XML to JSON-LD: ${response.statusCode}');
+        throw Exception(
+          'Failed to convert XML to JSON-LD: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error converting XML to JSON-LD: $e');
     }
   }
-  
+
   Future<String> convertJsonLdToXml(Map<String, dynamic> jsonLdContent) async {
     try {
       final headers = await _getHeaders();
@@ -59,13 +61,15 @@ class EPCISSerializationService {
       if (response.statusCode == 200) {
         return response.data;
       } else {
-        throw Exception('Failed to convert JSON-LD to XML: ${response.statusCode}');
+        throw Exception(
+          'Failed to convert JSON-LD to XML: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error converting JSON-LD to XML: $e');
     }
   }
-  
+
   Future<String> serializeToXml(EPCISDocumentDTO document) async {
     try {
       final headers = await _getHeaders();
@@ -86,8 +90,10 @@ class EPCISSerializationService {
       throw Exception('Error serializing to XML: $e');
     }
   }
-  
-  Future<Map<String, dynamic>> serializeToJsonLd(EPCISDocumentDTO document) async {
+
+  Future<Map<String, dynamic>> serializeToJsonLd(
+    EPCISDocumentDTO document,
+  ) async {
     try {
       final headers = await _getHeaders();
       final response = await _dioService.post(
@@ -101,13 +107,15 @@ class EPCISSerializationService {
       if (response.statusCode == 200) {
         return json.decode(response.data) as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to serialize to JSON-LD: ${response.statusCode}');
+        throw Exception(
+          'Failed to serialize to JSON-LD: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error serializing to JSON-LD: $e');
     }
   }
-  
+
   Future<EPCISDocumentDTO> deserializeXml(String xmlContent) async {
     try {
       final headers = await _getHeaders(contentType: 'application/xml');
@@ -129,8 +137,10 @@ class EPCISSerializationService {
       throw Exception('Error deserializing XML: $e');
     }
   }
-  
-  Future<EPCISDocumentDTO> deserializeJsonLd(Map<String, dynamic> jsonLdContent) async {
+
+  Future<EPCISDocumentDTO> deserializeJsonLd(
+    Map<String, dynamic> jsonLdContent,
+  ) async {
     final jsonData = await deserializeJsonLdRaw(jsonLdContent);
     return EPCISDocumentDTO.fromJson(jsonData);
   }
@@ -153,13 +163,15 @@ class EPCISSerializationService {
       if (response.statusCode == 200) {
         return json.decode(response.data) as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to deserialize JSON-LD: ${response.statusCode}');
+        throw Exception(
+          'Failed to deserialize JSON-LD: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error deserializing JSON-LD: $e');
     }
   }
-  
+
   Future<Map<String, dynamic>> validateXmlSchema(String xmlContent) async {
     try {
       final headers = await _getHeaders(contentType: 'application/xml');
@@ -174,14 +186,18 @@ class EPCISSerializationService {
       if (response.statusCode == 200) {
         return json.decode(response.data) as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to validate XML schema: ${response.statusCode}');
+        throw Exception(
+          'Failed to validate XML schema: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error validating XML schema: $e');
     }
   }
-  
-  Future<Map<String, dynamic>> validateJsonSchema(Map<String, dynamic> jsonContent) async {
+
+  Future<Map<String, dynamic>> validateJsonSchema(
+    Map<String, dynamic> jsonContent,
+  ) async {
     try {
       final headers = await _getHeaders();
       final response = await _dioService.post(
@@ -195,14 +211,19 @@ class EPCISSerializationService {
       if (response.statusCode == 200) {
         return json.decode(response.data) as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to validate JSON schema: ${response.statusCode}');
+        throw Exception(
+          'Failed to validate JSON schema: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error validating JSON schema: $e');
     }
   }
-  
-  Future<String> exportToCsv(EPCISQueryParametersDTO queryParams, {bool includeHeaders = true}) async {
+
+  Future<String> exportToCsv(
+    EPCISQueryParametersDTO queryParams, {
+    bool includeHeaders = true,
+  }) async {
     try {
       final headers = await _getHeaders();
       headers['Accept'] = 'text/csv';
@@ -224,8 +245,11 @@ class EPCISSerializationService {
       throw Exception('Error exporting to CSV: $e');
     }
   }
-  
-  Future<List<int>> exportToPdf(EPCISQueryParametersDTO queryParams, {String templateName = 'default'}) async {
+
+  Future<List<int>> exportToPdf(
+    EPCISQueryParametersDTO queryParams, {
+    String templateName = 'default',
+  }) async {
     try {
       final headers = await _getHeaders();
       headers['Accept'] = 'application/pdf';
@@ -237,7 +261,7 @@ class EPCISSerializationService {
         responseType: ResponseType.bytes,
         acceptAllStatusCodes: true,
       );
-      
+
       if (response.statusCode == 200) {
         return List<int>.from(response.data as List);
       } else {
@@ -247,7 +271,7 @@ class EPCISSerializationService {
       throw Exception('Error exporting to PDF: $e');
     }
   }
-  
+
   Future<String> exportToHtml(EPCISQueryParametersDTO queryParams) async {
     try {
       final headers = await _getHeaders();
@@ -269,11 +293,12 @@ class EPCISSerializationService {
       throw Exception('Error exporting to HTML: $e');
     }
   }
-  
+
   Future<List<int>> exportToExcel(EPCISQueryParametersDTO queryParams) async {
     try {
       final headers = await _getHeaders();
-      headers['Accept'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      headers['Accept'] =
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
       final response = await _dioService.post(
         '$_baseUrl/export/excel',
         headers: headers,
@@ -281,7 +306,7 @@ class EPCISSerializationService {
         responseType: ResponseType.bytes,
         acceptAllStatusCodes: true,
       );
-      
+
       if (response.statusCode == 200) {
         return List<int>.from(response.data as List);
       } else {
@@ -291,7 +316,7 @@ class EPCISSerializationService {
       throw Exception('Error exporting to Excel: $e');
     }
   }
-  
+
   Future<Map<String, String>> getSupportedFormats() async {
     try {
       final headers = await _getHeaders();
@@ -306,14 +331,19 @@ class EPCISSerializationService {
         final jsonData = json.decode(response.data) as Map<String, dynamic>;
         return jsonData.cast<String, String>();
       } else {
-        throw Exception('Failed to get supported formats: ${response.statusCode}');
+        throw Exception(
+          'Failed to get supported formats: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error getting supported formats: $e');
     }
   }
-  
-  Future<String> negotiateFormat(String acceptHeader, List<String> supportedFormats) async {
+
+  Future<String> negotiateFormat(
+    String acceptHeader,
+    List<String> supportedFormats,
+  ) async {
     try {
       final headers = await _getHeaders();
       headers['Accept'] = acceptHeader;
@@ -334,7 +364,7 @@ class EPCISSerializationService {
       throw Exception('Error negotiating format: $e');
     }
   }
-  
+
   /// Posts a JSON **array** of [EPCISEventDTO]-shaped maps to bulk import.
   Future<Map<String, dynamic>> importEventMaps(List<dynamic> events) async {
     try {
@@ -359,7 +389,9 @@ class EPCISSerializationService {
     }
   }
 
-  Future<Map<String, dynamic>> importEvents(EPCISDocumentDTO epcisDocument) async {
+  Future<Map<String, dynamic>> importEvents(
+    EPCISDocumentDTO epcisDocument,
+  ) async {
     final events = epcisDocument.events.map((e) => e.toJson()).toList();
     return importEventMaps(events);
   }

@@ -1,10 +1,10 @@
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_batch_models.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart'
     as status_rules;
 import 'package:flutter/services.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_navigation.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';

@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -12,7 +13,6 @@ import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_list/widgets/gtin_a
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_filter_value.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';

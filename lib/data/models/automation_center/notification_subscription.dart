@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
-part 'notification_subscription.g.dart';
+import 'package:traqtrace_app/data/models/automation_center/notification_subscription.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class NotificationSubscription extends Equatable {
@@ -41,9 +41,9 @@ class NotificationSubscription extends Equatable {
   });
 
   factory NotificationSubscription.fromJson(Map<String, dynamic> json) =>
-      _$NotificationSubscriptionFromJson(json);
+      notificationSubscriptionFromJson(json);
 
-  Map<String, dynamic> toJson() => _$NotificationSubscriptionToJson(this);
+  Map<String, dynamic> toJson() => notificationSubscriptionToJson(this);
 
   @override
   List<Object?> get props => [
@@ -122,9 +122,9 @@ class NotificationStats extends Equatable {
   });
 
   factory NotificationStats.fromJson(Map<String, dynamic> json) =>
-      _$NotificationStatsFromJson(json);
+      notificationStatsFromJson(json);
 
-  Map<String, dynamic> toJson() => _$NotificationStatsToJson(this);
+  Map<String, dynamic> toJson() => notificationStatsToJson(this);
 
   @override
   List<Object?> get props => [
@@ -176,9 +176,9 @@ class CreateSubscriptionRequest extends Equatable {
   });
 
   factory CreateSubscriptionRequest.fromJson(Map<String, dynamic> json) =>
-      _$CreateSubscriptionRequestFromJson(json);
+      createSubscriptionRequestFromJson(json);
 
-  Map<String, dynamic> toJson() => _$CreateSubscriptionRequestToJson(this);
+  Map<String, dynamic> toJson() => createSubscriptionRequestToJson(this);
 
   @override
   List<Object?> get props => [
@@ -274,7 +274,7 @@ class WebhookNotification extends Equatable {
     return url.contains('@');
   }
 
-  Map<String, dynamic> toJson() => _$WebhookNotificationToJson(this);
+  Map<String, dynamic> toJson() => webhookNotificationToJson(this);
 
   @override
   List<Object?> get props => [

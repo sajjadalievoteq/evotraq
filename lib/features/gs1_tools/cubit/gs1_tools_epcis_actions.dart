@@ -1,4 +1,10 @@
-part of 'gs1_tools_cubit.dart';
+import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validation_result.dart';
+import 'dart:convert';
+import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters_dto.dart';
+import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
+import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
+import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validator.dart';
+import 'package:traqtrace_app/features/shared/workbench/workbench_slice.dart';
 
 extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
   Future<void> convertEpcisFormat({
@@ -8,17 +14,17 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
   }) async {
     final text = input.trim();
     if (text.isEmpty) {
-      _emitError(Gs1ToolKind.serializeConvert, 'Enter input data to convert');
+      emitError(Gs1ToolKind.serializeConvert, 'Enter input data to convert');
       return;
     }
-    await _run(Gs1ToolKind.serializeConvert, () async {
+    await run(Gs1ToolKind.serializeConvert, () async {
       late final String result;
       if (inputFormat == 'XML' && outputFormat == 'JSON-LD') {
-        final jsonLd = await _serialization.convertXmlToJsonLd(text);
+        final jsonLd = await serialization.convertXmlToJsonLd(text);
         result = const JsonEncoder.withIndent('  ').convert(jsonLd);
       } else if (inputFormat == 'JSON-LD' && outputFormat == 'XML') {
         final jsonInput = jsonDecode(text) as Map<String, dynamic>;
-        result = await _serialization.convertJsonLdToXml(jsonInput);
+        result = await serialization.convertJsonLdToXml(jsonInput);
       } else {
         throw Exception(
           'Conversion from $inputFormat to $outputFormat is not supported. '
@@ -39,16 +45,16 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
   }) async {
     final text = input.trim();
     if (text.isEmpty) {
-      _emitError(Gs1ToolKind.serializeConvert, 'Enter data to validate');
+      emitError(Gs1ToolKind.serializeConvert, 'Enter data to validate');
       return;
     }
-    await _run(Gs1ToolKind.serializeConvert, () async {
+    await run(Gs1ToolKind.serializeConvert, () async {
       late final Map<String, dynamic> response;
       if (format.toUpperCase() == 'XML') {
-        response = await _serialization.validateXmlSchema(text);
+        response = await serialization.validateXmlSchema(text);
       } else {
         final jsonInput = jsonDecode(text) as Map<String, dynamic>;
-        response = await _serialization.validateJsonSchema(jsonInput);
+        response = await serialization.validateJsonSchema(jsonInput);
       }
       final valid = response['valid'] == true;
       final errors = response['errors'];
@@ -81,7 +87,7 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
     String? businessLocations,
     String? limit,
   }) async {
-    await _run(Gs1ToolKind.serializeExport, () async {
+    await run(Gs1ToolKind.serializeExport, () async {
       DateTime? startTime;
       DateTime? endTime;
       int? limitValue;
@@ -121,21 +127,21 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
       );
       switch (format.toUpperCase()) {
         case 'CSV':
-          final csv = await _serialization.exportToCsv(queryParams);
+          final csv = await serialization.exportToCsv(queryParams);
           return WorkbenchSlice(
             status: WorkbenchActionStatus.success,
             resultText: csv,
             resultFields: {'Format': 'CSV'},
           );
         case 'HTML':
-          final html = await _serialization.exportToHtml(queryParams);
+          final html = await serialization.exportToHtml(queryParams);
           return WorkbenchSlice(
             status: WorkbenchActionStatus.success,
             resultText: html,
             resultFields: {'Format': 'HTML'},
           );
         case 'PDF':
-          final bytes = await _serialization.exportToPdf(queryParams);
+          final bytes = await serialization.exportToPdf(queryParams);
           return WorkbenchSlice(
             status: WorkbenchActionStatus.success,
             resultText: 'PDF export (${bytes.length} bytes)',
@@ -143,7 +149,7 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
             meta: {'bytes': bytes},
           );
         case 'EXCEL':
-          final bytes = await _serialization.exportToExcel(queryParams);
+          final bytes = await serialization.exportToExcel(queryParams);
           return WorkbenchSlice(
             status: WorkbenchActionStatus.success,
             resultText: 'Excel export (${bytes.length} bytes)',
@@ -169,8 +175,8 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
 
   /// Runs format → schema → content gates. Does not write to the DB.
   Future<void> validateEpcisImport({required String input}) async {
-    await _run(Gs1ToolKind.serializeImport, () async {
-      final cbvSets = await _loadCbvSets();
+    await run(Gs1ToolKind.serializeImport, () async {
+      final cbvSets = await loadCbvSets();
       final local = EpcisImportValidator.validate(
         input,
         validBizSteps: cbvSets.bizSteps,
@@ -196,7 +202,7 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
       }
 
       // Official EPCIS JSON schema (backend) — second schema confirmation.
-      final schemaResponse = await _serialization.validateJsonSchema(
+      final schemaResponse = await serialization.validateJsonSchema(
         local.document!,
       );
       final schemaValid = schemaResponse['valid'] == true;
@@ -233,11 +239,11 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
   Future<void> importEpcisEvents({required String input}) async {
     final text = input.trim();
     if (text.isEmpty) {
-      _emitError(Gs1ToolKind.serializeImport, 'Enter an EPCIS document');
+      emitError(Gs1ToolKind.serializeImport, 'Enter an EPCIS document');
       return;
     }
-    await _run(Gs1ToolKind.serializeImport, () async {
-      final cbvSets = await _loadCbvSets();
+    await run(Gs1ToolKind.serializeImport, () async {
+      final cbvSets = await loadCbvSets();
       final local = EpcisImportValidator.validate(
         text,
         validBizSteps: cbvSets.bizSteps,
@@ -249,7 +255,7 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
         );
       }
 
-      final schemaResponse = await _serialization.validateJsonSchema(
+      final schemaResponse = await serialization.validateJsonSchema(
         local.document!,
       );
       if (schemaResponse['valid'] != true) {
@@ -260,7 +266,7 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
         throw Exception('Import blocked — schema gate failed: $errorText');
       }
 
-      final result = await _serialization.importEventsFromJsonLd(
+      final result = await serialization.importEventsFromJsonLd(
         local.document!,
       );
 
@@ -293,10 +299,10 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
                   : errorList.join('; ')),
         resultText: const JsonEncoder.withIndent('  ').convert(result),
         resultFields: {
-          'Imported': _safe(processed),
-          'Total': _safe(total),
-          'Failed': _safe(failed),
-          'Status': _safe(status),
+          'Imported': safe(processed),
+          'Total': safe(total),
+          'Failed': safe(failed),
+          'Status': safe(status),
           'Format': 'JSON-LD',
           if (errorList.isNotEmpty) 'Errors': errorList.join('; '),
         },

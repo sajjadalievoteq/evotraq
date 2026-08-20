@@ -1,4 +1,5 @@
-part of 'gln_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_types.dart';
 
 extension GlnPharmaceuticalMutationSerialization on GLNPharmaceuticalExtension {
   Map<String, dynamic> toJson() {

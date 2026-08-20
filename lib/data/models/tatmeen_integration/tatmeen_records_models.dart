@@ -235,3 +235,18 @@ class TatmeenRecordsQuery {
   final int page;
   final int pageSize;
 }
+
+/// Result of a manual Tatmeen retry attempt, with a ready-to-display user message.
+class TatmeenRetryOutcome {
+  const TatmeenRetryOutcome._({required this.succeeded, required this.message});
+
+  final bool succeeded;
+  final String message;
+
+  const TatmeenRetryOutcome.success()
+      : succeeded = true,
+        message = 'Retry successful! The record has been synced to Tatmeen.';
+
+  factory TatmeenRetryOutcome.failure(String message) =>
+      TatmeenRetryOutcome._(succeeded: false, message: message);
+}

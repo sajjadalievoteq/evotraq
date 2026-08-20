@@ -1,19 +1,17 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/services/automation_center/notification_api_service.dart'
     as api;
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
-import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart'
-    hide NotificationBatch;
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/notification_activity_controller.dart';
 
-part 'notification_cubit_realtime.dart';
+import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit_realtime.dart';
 
 class NotificationCubit extends Cubit<NotificationState> {
   final api.NotificationApiService _apiService;
-  final WebSocketService _webSocketService;
+  final WebSocketService webSocketService;
   StreamSubscription? _realtimeSubscription;
   StreamSubscription? _connectionSubscription;
 
@@ -23,24 +21,33 @@ class NotificationCubit extends Cubit<NotificationState> {
   bool _subscriptionsLoaded = false;
   bool _loadInFlight = false;
   bool _forceReloadPending = false;
+  late final NotificationActivityController _activityController;
 
   NotificationCubit({
     required api.NotificationApiService apiService,
     required WebSocketService webSocketService,
   }) : _apiService = apiService,
-       _webSocketService = webSocketService,
+       webSocketService = webSocketService,
        super(const NotificationState()) {
+    _activityController = NotificationActivityController(
+      apiService: _apiService,
+      loadSubscriptions: loadSubscriptions,
+      subscriptionsLoading: () => _loadInFlight,
+      isClosed: () => isClosed,
+      state: () => state,
+      emit: emit,
+    );
     _initializeWebSocketListeners();
     _syncConnectionFromService();
   }
 
   void _initializeWebSocketListeners() {
-    _realtimeSubscription = _webSocketService.notificationStream.listen((
+    _realtimeSubscription = webSocketService.notificationStream.listen((
       notification,
     ) {
-      _onRealtimeNotificationReceived(notification.toJson());
+      onRealtimeNotificationReceived(notification.toJson());
     });
-    _connectionSubscription = _webSocketService.connectionStream.listen((
+    _connectionSubscription = webSocketService.connectionStream.listen((
       connected,
     ) {
       if (isClosed) return;
@@ -66,13 +73,13 @@ class NotificationCubit extends Cubit<NotificationState> {
   }
 
   void _syncConnectionFromService() {
-    if (_webSocketService.isConnected) {
+    if (webSocketService.isConnected) {
       emit(
         state.copyWith(
           connectionStatus: NotificationConnectionStatus.connected,
         ),
       );
-    } else if (_webSocketService.isConnecting) {
+    } else if (webSocketService.isConnecting) {
       emit(
         state.copyWith(
           connectionStatus: NotificationConnectionStatus.connecting,
@@ -361,229 +368,39 @@ class NotificationCubit extends Cubit<NotificationState> {
     }
   }
 
-  static const int _deliveryActivityPageSize = 20;
-
-  bool _deliveryActivityLoadInFlight = false;
-
-  /// Loads per-event delivery history across all subscriptions for Activity.
-  ///
-  /// Pass [outcome] to match Activity filter chips (`all` | `delivered` |
-  /// `failed` | `pending`). Resets to page 0.
   Future<void> loadDeliveryActivity({
     String? outcome,
     bool forceSubscriptions = false,
-  }) async {
-    final resolvedOutcome = outcome ?? state.deliveryActivityOutcome;
-    emit(
-      state.copyWith(
-        deliveryActivityLoading: true,
-        deliveryActivityLoadingMore: false,
-        deliveryActivityError: null,
-        deliveryActivityOutcome: resolvedOutcome,
-      ),
-    );
+  }) => _activityController.loadDeliveryActivity(
+    outcome: outcome,
+    forceSubscriptions: forceSubscriptions,
+  );
 
-    try {
-      await loadSubscriptions(force: forceSubscriptions);
-      // If a concurrent load was in flight, wait briefly for it to settle.
-      var spins = 0;
-      while (_loadInFlight && !isClosed && spins < 40) {
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        spins++;
-      }
-      if (isClosed) return;
+  Future<void> loadMoreDeliveryActivity() =>
+      _activityController.loadMoreDeliveryActivity();
 
-      _deliveryActivityLoadInFlight = true;
-      final page = await _apiService.getDeliveryActivity(
-        page: 0,
-        size: _deliveryActivityPageSize,
-        outcome: resolvedOutcome,
-      );
-      if (isClosed) return;
-      emit(
-        state.copyWith(
-          deliveryActivity: page.items,
-          deliveryActivityLoading: false,
-          deliveryActivityLoadingMore: false,
-          deliveryActivityHasMore: page.hasMore,
-          deliveryActivityPage: page.page,
-          deliveryActivityOutcome: resolvedOutcome,
-          deliveryActivityError: null,
-        ),
-      );
-    } catch (e) {
-      if (isClosed) return;
-      emit(
-        state.copyWith(
-          deliveryActivityLoading: false,
-          deliveryActivityLoadingMore: false,
-          deliveryActivityError: 'Failed to load delivery events: $e',
-        ),
-      );
-    } finally {
-      _deliveryActivityLoadInFlight = false;
-    }
-  }
+  Future<void> loadFailedBatches() => _activityController.loadFailedBatches();
 
-  /// Appends the next Activity page when the user scrolls near the end.
-  Future<void> loadMoreDeliveryActivity() async {
-    if (isClosed ||
-        _deliveryActivityLoadInFlight ||
-        state.deliveryActivityLoading ||
-        state.deliveryActivityLoadingMore ||
-        !state.deliveryActivityHasMore) {
-      return;
-    }
+  Future<void> retryBatch(String batchId) =>
+      _activityController.retryBatch(batchId);
 
-    _deliveryActivityLoadInFlight = true;
-    emit(state.copyWith(deliveryActivityLoadingMore: true));
-    try {
-      final nextPage = state.deliveryActivityPage + 1;
-      final page = await _apiService.getDeliveryActivity(
-        page: nextPage,
-        size: _deliveryActivityPageSize,
-        outcome: state.deliveryActivityOutcome,
-      );
-      if (isClosed) return;
+  Future<void> retryWebhook(String notificationId) =>
+      _activityController.retryWebhook(notificationId);
 
-      final seen = state.deliveryActivity.map((e) => e.id).toSet();
-      final appended = [
-        ...state.deliveryActivity,
-        for (final item in page.items)
-          if (!seen.contains(item.id)) item,
-      ];
+  Future<void> loadSubscriptionStats(String subscriptionId) =>
+      _activityController.loadSubscriptionStats(subscriptionId);
 
-      emit(
-        state.copyWith(
-          deliveryActivity: appended,
-          deliveryActivityLoadingMore: false,
-          deliveryActivityHasMore: page.hasMore,
-          deliveryActivityPage: page.page,
-          deliveryActivityError: null,
-        ),
-      );
-    } catch (e) {
-      if (isClosed) return;
-      emit(
-        state.copyWith(
-          deliveryActivityLoadingMore: false,
-          deliveryActivityError: 'Failed to load more delivery events: $e',
-        ),
-      );
-    } finally {
-      _deliveryActivityLoadInFlight = false;
-    }
-  }
-
-  Future<void> loadFailedBatches() async {
-    if (isClosed) return;
-    emit(state.copyWith(failedBatchesLoading: true, failedBatchesError: null));
-    try {
-      await loadSubscriptions();
-      var spins = 0;
-      while (_loadInFlight && !isClosed && spins < 40) {
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        spins++;
-      }
-      if (isClosed) return;
-
-      final chunks = await Future.wait(
-        state.subscriptions.map((sub) => _apiService.getBatchHistory(sub.id)),
-      );
-      final failed =
-          chunks.expand((e) => e).where((b) => b.isExhausted).toList()
-            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      if (isClosed) return;
-      emit(state.copyWith(failedBatches: failed, failedBatchesLoading: false));
-    } catch (e) {
-      if (isClosed) return;
-      emit(
-        state.copyWith(
-          failedBatchesLoading: false,
-          failedBatchesError: 'Failed to load failed batches: $e',
-        ),
-      );
-    }
-  }
-
-  Future<void> retryBatch(String batchId) async {
-    try {
-      await _apiService.retryBatch(batchId);
-      // Refresh both activity and failed batches
-      await loadDeliveryActivity(forceSubscriptions: false);
-      await loadFailedBatches();
-    } catch (e) {
-      if (!isClosed) {
-        emit(
-          state.copyWith(
-            status: NotificationStatus.error,
-            error: e is ApiException
-                ? e.getUserFriendlyMessage()
-                : "Couldn't retry this batch. Please try again.",
-          ),
-        );
-      }
-      rethrow;
-    }
-  }
-
-  Future<void> retryWebhook(String notificationId) async {
-    try {
-      await _apiService.retryWebhook(notificationId);
-      await loadDeliveryActivity(forceSubscriptions: false);
-    } catch (e) {
-      if (!isClosed) {
-        emit(
-          state.copyWith(
-            status: NotificationStatus.error,
-            error: e is ApiException
-                ? e.getUserFriendlyMessage()
-                : "Couldn't retry this delivery. Please try again.",
-          ),
-        );
-      }
-      rethrow;
-    }
-  }
-
-  Future<void> loadSubscriptionStats(String subscriptionId) async {
-    try {
-      final stats = await _apiService.getSubscriptionStats(subscriptionId);
-      if (isClosed) return;
-      emit(
-        state.copyWith(
-          status: NotificationStatus.success,
-          lastLoadedStats: stats,
-          lastLoadedStatsSubscriptionId: subscriptionId,
-          error: null,
-        ),
-      );
-    } catch (e) {
-      if (isClosed) return;
-      emit(
-        state.copyWith(
-          status: NotificationStatus.error,
-          error: 'Failed to load subscription stats: $e',
-        ),
-      );
-    }
-  }
-
-  /// Ensures the shared application socket is connecting/connected and enables
-  /// local Delivery Activity consumption of notification pushes.
-  ///
-  /// Does not claim ownership of the shared [WebSocketService]; never disconnects it.
   void enableNotificationLive() {
     if (isClosed) return;
     emit(
       state.copyWith(
         notificationLiveEnabled: true,
-        connectionStatus: _webSocketService.isConnected
+        connectionStatus: webSocketService.isConnected
             ? NotificationConnectionStatus.connected
             : NotificationConnectionStatus.connecting,
       ),
     );
-    _webSocketService.connect();
+    webSocketService.connect();
   }
 
   /// Stops applying notification pushes locally. Job-queue and home consumers

@@ -1,14 +1,20 @@
-part of 'sgtin_service.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
+import 'sgtin_service_constants.dart';
 
 extension SgtinServiceOperations on SGTINService {
   Future<SGTIN> updateSGTINStatus(
     String serialNumber,
     ItemStatus newStatus,
   ) async {
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemStatus}',
+    final response = await dioService.put(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathItemStatus}',
       queryParameters: {SgtinServiceConstants.qSerialNumber: serialNumber},
-      headers: SGTINService._headers,
+      headers: SGTINService.headers,
       data: json.encode({SgtinServiceConstants.bStatus: newStatus.name}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -29,9 +35,9 @@ extension SgtinServiceOperations on SGTINService {
     String serialNumber,
     String glnCode,
   ) async {
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemLocation(serialNumber)}',
-      headers: SGTINService._headers,
+    final response = await dioService.put(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathItemLocation(serialNumber)}',
+      headers: SGTINService.headers,
       data: json.encode({SgtinServiceConstants.bGlnCode: glnCode}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -49,9 +55,9 @@ extension SgtinServiceOperations on SGTINService {
   }
 
   Future<SGTIN> packSGTINIntoSSCC(String serialNumber, String ssccCode) async {
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemPack(serialNumber)}',
-      headers: SGTINService._headers,
+    final response = await dioService.put(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathItemPack(serialNumber)}',
+      headers: SGTINService.headers,
       data: json.encode({SgtinServiceConstants.bSsccCode: ssccCode}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -71,12 +77,12 @@ extension SgtinServiceOperations on SGTINService {
     String gtinCode, {
     bool randomized = true,
   }) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathGenerateSerial(gtinCode)}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathGenerateSerial(gtinCode)}',
       queryParameters: {
         SgtinServiceConstants.qRandomized: randomized.toString(),
       },
-      headers: SGTINService._headers,
+      headers: SGTINService.headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -94,9 +100,9 @@ extension SgtinServiceOperations on SGTINService {
   }
 
   Future<bool> validateSGTIN(String gtinCode, String serialNumber) async {
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathValidate}',
-      headers: SGTINService._headers,
+    final response = await dioService.post(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathValidate}',
+      headers: SGTINService.headers,
       data: json.encode({
         SgtinServiceConstants.bGtinCode: gtinCode,
         SgtinServiceConstants.bSerialNumber: serialNumber,
@@ -121,10 +127,10 @@ extension SgtinServiceOperations on SGTINService {
     String gtinCode,
     ItemStatus status,
   ) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathCount(gtinCode)}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathCount(gtinCode)}',
       queryParameters: {SgtinServiceConstants.qStatus: status.name},
-      headers: SGTINService._headers,
+      headers: SGTINService.headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -149,9 +155,9 @@ extension SgtinServiceOperations on SGTINService {
   }) async {
     final expiryDateStr = DateFormat('yyyy-MM-dd').format(expiryDate);
 
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathCommission}',
-      headers: SGTINService._headers,
+    final response = await dioService.post(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathCommission}',
+      headers: SGTINService.headers,
       data: json.encode({
         SgtinServiceConstants.bGtinCode: gtinCode,
         SgtinServiceConstants.bQuantity: quantity,
@@ -177,10 +183,10 @@ extension SgtinServiceOperations on SGTINService {
   }
 
   Future<SGTIN> decommissionSGTIN(String serialNumber, String reason) async {
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemDecommission}',
+    final response = await dioService.post(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathItemDecommission}',
       queryParameters: {SgtinServiceConstants.qSerialNumber: serialNumber},
-      headers: SGTINService._headers,
+      headers: SGTINService.headers,
       data: json.encode({SgtinServiceConstants.bReason: reason}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -198,9 +204,9 @@ extension SgtinServiceOperations on SGTINService {
   }
 
   Future<List<String>> getAvailableTransitions(String id) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemTransitions(id)}',
-      headers: SGTINService._headers,
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SgtinServiceConstants.pathItemTransitions(id)}',
+      headers: SGTINService.headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );

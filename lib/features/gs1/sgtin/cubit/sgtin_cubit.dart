@@ -2,9 +2,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 
 import '../../../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
+import '../../../../data/services/gs1/serialization/sgtin/sgtin_service_operations.dart';
 
 import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_state.dart';
-export 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_state.dart';
 
 class SGTINCubit extends Cubit<SGTINState> {
   final SGTINService _sgtinService;

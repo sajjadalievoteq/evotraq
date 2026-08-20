@@ -1,347 +1,344 @@
-part of 'gln_pharmaceutical_extension_widget.dart';
-
+import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_types.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
 extension GLNPharmaceuticalExtensionActions
     on GLNPharmaceuticalExtensionWidgetState {
-  Future<void> _loadExtension() async {
+  Future<void> loadExtension() async {
     if (widget.initialExtension != null) {
-      _populateFormFromExtension(widget.initialExtension!);
+      populateFormFromExtension(widget.initialExtension!);
       if (mounted) {
         setState(() {
-          _extension = widget.initialExtension;
-          _isLoading = false;
+          extension = widget.initialExtension;
+          isLoading = false;
         });
       }
       return;
     }
-
     if (mounted) {
       setState(() {
-        _isLoading = false;
+        isLoading = false;
       });
     }
   }
-
-  void _populateFormFromExtension(GLNPharmaceuticalExtension ext) {
-    _healthcareFacilityType =
+  void populateFormFromExtension(GLNPharmaceuticalExtension ext) {
+    healthcareFacilityType =
         ext.healthcareFacilityType ?? HealthcareFacilityType.other;
-
-    _fdaEstablishmentIdController.text = ext.fdaEstablishmentId ?? '';
-    _fdaRegistrationNumberController.text = ext.fdaRegistrationNumber ?? '';
-    _fdaRegistrationDate = ext.fdaRegistrationDate;
-    _fdaRegistrationExpiry = ext.fdaRegistrationExpiry;
-    _fdaEstablishmentTypeController.text = ext.fdaEstablishmentType ?? '';
-
-    _deaRegistrationNumberController.text = ext.deaRegistrationNumber ?? '';
-    _deaRegistrationExpiry = ext.deaRegistrationExpiry;
-    _deaScheduleAuthorizationController.text =
+    fdaEstablishmentIdController.text = ext.fdaEstablishmentId ?? '';
+    fdaRegistrationNumberController.text = ext.fdaRegistrationNumber ?? '';
+    fdaRegistrationDate = ext.fdaRegistrationDate;
+    fdaRegistrationExpiry = ext.fdaRegistrationExpiry;
+    fdaEstablishmentTypeController.text = ext.fdaEstablishmentType ?? '';
+    deaRegistrationNumberController.text = ext.deaRegistrationNumber ?? '';
+    deaRegistrationExpiry = ext.deaRegistrationExpiry;
+    deaScheduleAuthorizationController.text =
         ext.deaScheduleAuthorization ?? '';
-    _deaBusinessActivityController.text = ext.deaBusinessActivity ?? '';
+    deaBusinessActivityController.text = ext.deaBusinessActivity ?? '';
 
-    _stateLicenseNumberController.text = ext.stateLicenseNumber ?? '';
-    _stateLicenseTypeController.text = ext.stateLicenseType ?? '';
-    _stateLicenseExpiry = ext.stateLicenseExpiry;
-    _stateLicenseState = ext.stateLicenseState;
+    stateLicenseNumberController.text = ext.stateLicenseNumber ?? '';
+    stateLicenseTypeController.text = ext.stateLicenseType ?? '';
+    stateLicenseExpiry = ext.stateLicenseExpiry;
+    stateLicenseState = ext.stateLicenseState;
 
-    _wholesaleLicenseNumberController.text = ext.wholesaleLicenseNumber ?? '';
-    _wholesaleLicenseExpiry = ext.wholesaleLicenseExpiry;
-    _isAuthorizedTradingPartner = ext.isAuthorizedTradingPartner;
-    _atpVerificationDate = ext.atpVerificationDate;
-    _vawdAccredited = ext.vawdAccredited;
-    _vawdAccreditationNumberController.text = ext.vawdAccreditationNumber ?? '';
-    _vawdExpiryDate = ext.vawdExpiryDate;
+    wholesaleLicenseNumberController.text = ext.wholesaleLicenseNumber ?? '';
+    wholesaleLicenseExpiry = ext.wholesaleLicenseExpiry;
+    isAuthorizedTradingPartner = ext.isAuthorizedTradingPartner;
+    atpVerificationDate = ext.atpVerificationDate;
+    vawdAccredited = ext.vawdAccredited;
+    vawdAccreditationNumberController.text = ext.vawdAccreditationNumber ?? '';
+    vawdExpiryDate = ext.vawdExpiryDate;
 
-    _hasColdChainCapability = ext.hasColdChainCapability;
-    _coldStorageMinTempController.text =
+    hasColdChainCapability = ext.hasColdChainCapability;
+    coldStorageMinTempController.text =
         ext.coldStorageMinTempCelsius?.toString() ?? '';
-    _coldStorageMaxTempController.text =
+    coldStorageMaxTempController.text =
         ext.coldStorageMaxTempCelsius?.toString() ?? '';
-    _hasFreezerCapability = ext.hasFreezerCapability;
-    _freezerMinTempController.text =
+    hasFreezerCapability = ext.hasFreezerCapability;
+    freezerMinTempController.text =
         ext.freezerMinTempCelsius?.toString() ?? '';
-    _freezerMaxTempController.text =
+    freezerMaxTempController.text =
         ext.freezerMaxTempCelsius?.toString() ?? '';
-    _hasControlledRoomTemp = ext.hasControlledRoomTemp;
-    _crtMinTempController.text = ext.crtMinTempCelsius?.toString() ?? '';
-    _crtMaxTempController.text = ext.crtMaxTempCelsius?.toString() ?? '';
-    _hasHumidityControl = ext.hasHumidityControl;
-    _humidityRangeMinController.text = ext.humidityRangeMin?.toString() ?? '';
-    _humidityRangeMaxController.text = ext.humidityRangeMax?.toString() ?? '';
-    _gdpCertified = ext.gdpCertified;
-    _gdpCertificationNumberController.text = ext.gdpCertificationNumber ?? '';
-    _gdpCertificationExpiry = ext.gdpCertificationExpiry;
+    hasControlledRoomTemp = ext.hasControlledRoomTemp;
+    crtMinTempController.text = ext.crtMinTempCelsius?.toString() ?? '';
+    crtMaxTempController.text = ext.crtMaxTempCelsius?.toString() ?? '';
+    hasHumidityControl = ext.hasHumidityControl;
+    humidityRangeMinController.text = ext.humidityRangeMin?.toString() ?? '';
+    humidityRangeMaxController.text = ext.humidityRangeMax?.toString() ?? '';
+    gdpCertified = ext.gdpCertified;
+    gdpCertificationNumberController.text = ext.gdpCertificationNumber ?? '';
+    gdpCertificationExpiry = ext.gdpCertificationExpiry;
 
-    _isClinicalTrialSite = ext.isClinicalTrialSite;
-    _clinicalTrialPhaseAuthorizedController.text =
+    isClinicalTrialSite = ext.isClinicalTrialSite;
+    clinicalTrialPhaseAuthorizedController.text =
         ext.clinicalTrialPhaseAuthorized ?? '';
-    _irbApprovalNumberController.text = ext.irbApprovalNumber ?? '';
-    _irbApprovalExpiry = ext.irbApprovalExpiry;
+    irbApprovalNumberController.text = ext.irbApprovalNumber ?? '';
+    irbApprovalExpiry = ext.irbApprovalExpiry;
 
-    _isDscsaCompliant = ext.isDscsaCompliant;
-    _dscsaComplianceDate = ext.dscsaComplianceDate;
-    _hasSerializationCapability = ext.hasSerializationCapability;
-    _hasAggregationCapability = ext.hasAggregationCapability;
-    _interoperabilitySystemController.text = ext.interoperabilitySystem ?? '';
+    isDscsaCompliant = ext.isDscsaCompliant;
+    dscsaComplianceDate = ext.dscsaComplianceDate;
+    hasSerializationCapability = ext.hasSerializationCapability;
+    hasAggregationCapability = ext.hasAggregationCapability;
+    interoperabilitySystemController.text = ext.interoperabilitySystem ?? '';
 
-    _npiNumberController.text = ext.npiNumber ?? '';
-    _ncpdpIdController.text = ext.ncpdpId ?? '';
-    _medicareProviderNumberController.text = ext.medicareProviderNumber ?? '';
-    _medicaidProviderNumberController.text = ext.medicaidProviderNumber ?? '';
+    npiNumberController.text = ext.npiNumber ?? '';
+    ncpdpIdController.text = ext.ncpdpId ?? '';
+    medicareProviderNumberController.text = ext.medicareProviderNumber ?? '';
+    medicaidProviderNumberController.text = ext.medicaidProviderNumber ?? '';
 
-    _isIsoCertified = ext.isIsoCertified;
-    _isoCertificationTypeController.text = ext.isoCertificationType ?? '';
-    _isoCertificationNumberController.text = ext.isoCertificationNumber ?? '';
-    _isoCertificationExpiry = ext.isoCertificationExpiry;
+    isIsoCertified = ext.isIsoCertified;
+    isoCertificationTypeController.text = ext.isoCertificationType ?? '';
+    isoCertificationNumberController.text = ext.isoCertificationNumber ?? '';
+    isoCertificationExpiry = ext.isoCertificationExpiry;
 
-    _jcahoAccredited = ext.jcahoAccredited;
-    _jcahoAccreditationNumberController.text =
+    jcahoAccredited = ext.jcahoAccredited;
+    jcahoAccreditationNumberController.text =
         ext.jcahoAccreditationNumber ?? '';
-    _jcahoAccreditationExpiry = ext.jcahoAccreditationExpiry;
+    jcahoAccreditationExpiry = ext.jcahoAccreditationExpiry;
 
-    _emaSiteIdController.text = ext.emaSiteId ?? '';
-    _pmdaSiteIdController.text = ext.pmdaSiteId ?? '';
-    _anvisaSiteIdController.text = ext.anvisaSiteId ?? '';
-    _nmpaSiteIdController.text = ext.nmpaSiteId ?? '';
+    emaSiteIdController.text = ext.emaSiteId ?? '';
+    pmdaSiteIdController.text = ext.pmdaSiteId ?? '';
+    anvisaSiteIdController.text = ext.anvisaSiteId ?? '';
+    nmpaSiteIdController.text = ext.nmpaSiteId ?? '';
 
-    _receivingHoursController.text = ext.receivingHours ?? '';
-    _dispatchHoursController.text = ext.dispatchHours ?? '';
-    _hasWeighbridge = ext.hasWeighbridge;
-    _hasLoadingDock = ext.hasLoadingDock;
-    _hasForkliftCapability = ext.hasForkliftCapability;
-    _canReceiveHazmat = ext.canReceiveHazmat;
+    receivingHoursController.text = ext.receivingHours ?? '';
+    dispatchHoursController.text = ext.dispatchHours ?? '';
+    hasWeighbridge = ext.hasWeighbridge;
+    hasLoadingDock = ext.hasLoadingDock;
+    hasForkliftCapability = ext.hasForkliftCapability;
+    canReceiveHazmat = ext.canReceiveHazmat;
 
-    _pharmacistInChargeController.text = ext.pharmacistInCharge ?? '';
-    _picLicenseNumberController.text = ext.picLicenseNumber ?? '';
-    _responsiblePersonNameController.text = ext.responsiblePersonName ?? '';
-    _responsiblePersonEmailController.text = ext.responsiblePersonEmail ?? '';
-    _responsiblePersonPhoneController.text = ext.responsiblePersonPhone ?? '';
-    _qualityContactNameController.text = ext.qualityContactName ?? '';
-    _qualityContactEmailController.text = ext.qualityContactEmail ?? '';
-    _qualityContactPhoneController.text = ext.qualityContactPhone ?? '';
-    _regulatoryContactNameController.text = ext.regulatoryContactName ?? '';
-    _regulatoryContactEmailController.text = ext.regulatoryContactEmail ?? '';
-    _regulatoryContactPhoneController.text = ext.regulatoryContactPhone ?? '';
+    pharmacistInChargeController.text = ext.pharmacistInCharge ?? '';
+    picLicenseNumberController.text = ext.picLicenseNumber ?? '';
+    responsiblePersonNameController.text = ext.responsiblePersonName ?? '';
+    responsiblePersonEmailController.text = ext.responsiblePersonEmail ?? '';
+    responsiblePersonPhoneController.text = ext.responsiblePersonPhone ?? '';
+    qualityContactNameController.text = ext.qualityContactName ?? '';
+    qualityContactEmailController.text = ext.qualityContactEmail ?? '';
+    qualityContactPhoneController.text = ext.qualityContactPhone ?? '';
+    regulatoryContactNameController.text = ext.regulatoryContactName ?? '';
+    regulatoryContactEmailController.text = ext.regulatoryContactEmail ?? '';
+    regulatoryContactPhoneController.text = ext.regulatoryContactPhone ?? '';
 
-    _mahQualificationIndicator = ext.mahQualificationIndicator;
-    _mahTargetMarketsController.text = ext.mahTargetMarkets?.join(', ') ?? '';
-    _mahRegulatoryRegistrationNumberController.text =
+    mahQualificationIndicator = ext.mahQualificationIndicator;
+    mahTargetMarketsController.text = ext.mahTargetMarkets?.join(', ') ?? '';
+    mahRegulatoryRegistrationNumberController.text =
         ext.mahRegulatoryRegistrationNumber ?? '';
 
-    _brandsyncPartyIdController.text = ext.brandsyncPartyId ?? '';
-    _tatmeenPartyCodeController.text = ext.tatmeenPartyCode ?? '';
-    _pharmacovigilanceEmailController.text = ext.pharmacovigilanceEmail ?? '';
-    _recallContactEmailController.text = ext.recallContactEmail ?? '';
-    _recallContactPhoneController.text = ext.recallContactPhone ?? '';
-    _epcisCaptureEndpointUrlController.text = ext.epcisCaptureEndpointUrl ?? '';
-    _licensedAgentAuthorisationController.text =
+    brandsyncPartyIdController.text = ext.brandsyncPartyId ?? '';
+    tatmeenPartyCodeController.text = ext.tatmeenPartyCode ?? '';
+    pharmacovigilanceEmailController.text = ext.pharmacovigilanceEmail ?? '';
+    recallContactEmailController.text = ext.recallContactEmail ?? '';
+    recallContactPhoneController.text = ext.recallContactPhone ?? '';
+    epcisCaptureEndpointUrlController.text = ext.epcisCaptureEndpointUrl ?? '';
+    licensedAgentAuthorisationController.text =
         ext.licensedAgentAuthorisationNumber ?? '';
-    _authorisedPrincipalMahGlnsController.text =
+    authorisedPrincipalMahGlnsController.text =
         ext.authorisedPrincipalMahGlns ?? '';
   }
 
   GLNPharmaceuticalExtension _buildExtensionFromForm() {
     return GLNPharmaceuticalExtension(
-      id: _extension?.id,
+      id: extension?.id,
       glnId: widget.glnId ?? 0,
       glnCode: widget.glnCode,
-      healthcareFacilityType: _healthcareFacilityType,
-      fdaEstablishmentId: _fdaEstablishmentIdController.text.isNotEmpty
-          ? _fdaEstablishmentIdController.text
+      healthcareFacilityType: healthcareFacilityType,
+      fdaEstablishmentId: fdaEstablishmentIdController.text.isNotEmpty
+          ? fdaEstablishmentIdController.text
           : null,
-      fdaRegistrationNumber: _fdaRegistrationNumberController.text.isNotEmpty
-          ? _fdaRegistrationNumberController.text
+      fdaRegistrationNumber: fdaRegistrationNumberController.text.isNotEmpty
+          ? fdaRegistrationNumberController.text
           : null,
-      fdaRegistrationDate: _fdaRegistrationDate,
-      fdaRegistrationExpiry: _fdaRegistrationExpiry,
-      fdaEstablishmentType: _fdaEstablishmentTypeController.text.isNotEmpty
-          ? _fdaEstablishmentTypeController.text
+      fdaRegistrationDate: fdaRegistrationDate,
+      fdaRegistrationExpiry: fdaRegistrationExpiry,
+      fdaEstablishmentType: fdaEstablishmentTypeController.text.isNotEmpty
+          ? fdaEstablishmentTypeController.text
           : null,
-      deaRegistrationNumber: _deaRegistrationNumberController.text.isNotEmpty
-          ? _deaRegistrationNumberController.text
+      deaRegistrationNumber: deaRegistrationNumberController.text.isNotEmpty
+          ? deaRegistrationNumberController.text
           : null,
-      deaRegistrationExpiry: _deaRegistrationExpiry,
+      deaRegistrationExpiry: deaRegistrationExpiry,
       deaScheduleAuthorization:
-          _deaScheduleAuthorizationController.text.isNotEmpty
-          ? _deaScheduleAuthorizationController.text
+          deaScheduleAuthorizationController.text.isNotEmpty
+          ? deaScheduleAuthorizationController.text
           : null,
-      deaBusinessActivity: _deaBusinessActivityController.text.isNotEmpty
-          ? _deaBusinessActivityController.text
+      deaBusinessActivity: deaBusinessActivityController.text.isNotEmpty
+          ? deaBusinessActivityController.text
           : null,
-      stateLicenseNumber: _stateLicenseNumberController.text.isNotEmpty
-          ? _stateLicenseNumberController.text
+      stateLicenseNumber: stateLicenseNumberController.text.isNotEmpty
+          ? stateLicenseNumberController.text
           : null,
-      stateLicenseType: _stateLicenseTypeController.text.isNotEmpty
-          ? _stateLicenseTypeController.text
+      stateLicenseType: stateLicenseTypeController.text.isNotEmpty
+          ? stateLicenseTypeController.text
           : null,
-      stateLicenseExpiry: _stateLicenseExpiry,
-      stateLicenseState: _stateLicenseState,
-      wholesaleLicenseNumber: _wholesaleLicenseNumberController.text.isNotEmpty
-          ? _wholesaleLicenseNumberController.text
+      stateLicenseExpiry: stateLicenseExpiry,
+      stateLicenseState: stateLicenseState,
+      wholesaleLicenseNumber: wholesaleLicenseNumberController.text.isNotEmpty
+          ? wholesaleLicenseNumberController.text
           : null,
-      wholesaleLicenseExpiry: _wholesaleLicenseExpiry,
-      isAuthorizedTradingPartner: _isAuthorizedTradingPartner,
-      atpVerificationDate: _atpVerificationDate,
-      vawdAccredited: _vawdAccredited,
+      wholesaleLicenseExpiry: wholesaleLicenseExpiry,
+      isAuthorizedTradingPartner: isAuthorizedTradingPartner,
+      atpVerificationDate: atpVerificationDate,
+      vawdAccredited: vawdAccredited,
       vawdAccreditationNumber:
-          _vawdAccreditationNumberController.text.isNotEmpty
-          ? _vawdAccreditationNumberController.text
+          vawdAccreditationNumberController.text.isNotEmpty
+          ? vawdAccreditationNumberController.text
           : null,
-      vawdExpiryDate: _vawdExpiryDate,
-      hasColdChainCapability: _hasColdChainCapability,
+      vawdExpiryDate: vawdExpiryDate,
+      hasColdChainCapability: hasColdChainCapability,
       coldStorageMinTempCelsius: double.tryParse(
-        _coldStorageMinTempController.text,
+        coldStorageMinTempController.text,
       ),
       coldStorageMaxTempCelsius: double.tryParse(
-        _coldStorageMaxTempController.text,
+        coldStorageMaxTempController.text,
       ),
-      hasFreezerCapability: _hasFreezerCapability,
-      freezerMinTempCelsius: double.tryParse(_freezerMinTempController.text),
-      freezerMaxTempCelsius: double.tryParse(_freezerMaxTempController.text),
-      hasControlledRoomTemp: _hasControlledRoomTemp,
-      crtMinTempCelsius: double.tryParse(_crtMinTempController.text),
-      crtMaxTempCelsius: double.tryParse(_crtMaxTempController.text),
-      hasHumidityControl: _hasHumidityControl,
-      humidityRangeMin: double.tryParse(_humidityRangeMinController.text),
-      humidityRangeMax: double.tryParse(_humidityRangeMaxController.text),
-      gdpCertified: _gdpCertified,
-      gdpCertificationNumber: _gdpCertificationNumberController.text.isNotEmpty
-          ? _gdpCertificationNumberController.text
+      hasFreezerCapability: hasFreezerCapability,
+      freezerMinTempCelsius: double.tryParse(freezerMinTempController.text),
+      freezerMaxTempCelsius: double.tryParse(freezerMaxTempController.text),
+      hasControlledRoomTemp: hasControlledRoomTemp,
+      crtMinTempCelsius: double.tryParse(crtMinTempController.text),
+      crtMaxTempCelsius: double.tryParse(crtMaxTempController.text),
+      hasHumidityControl: hasHumidityControl,
+      humidityRangeMin: double.tryParse(humidityRangeMinController.text),
+      humidityRangeMax: double.tryParse(humidityRangeMaxController.text),
+      gdpCertified: gdpCertified,
+      gdpCertificationNumber: gdpCertificationNumberController.text.isNotEmpty
+          ? gdpCertificationNumberController.text
           : null,
-      gdpCertificationExpiry: _gdpCertificationExpiry,
-      isClinicalTrialSite: _isClinicalTrialSite,
+      gdpCertificationExpiry: gdpCertificationExpiry,
+      isClinicalTrialSite: isClinicalTrialSite,
       clinicalTrialPhaseAuthorized:
-          _clinicalTrialPhaseAuthorizedController.text.isNotEmpty
-          ? _clinicalTrialPhaseAuthorizedController.text
+          clinicalTrialPhaseAuthorizedController.text.isNotEmpty
+          ? clinicalTrialPhaseAuthorizedController.text
           : null,
-      irbApprovalNumber: _irbApprovalNumberController.text.isNotEmpty
-          ? _irbApprovalNumberController.text
+      irbApprovalNumber: irbApprovalNumberController.text.isNotEmpty
+          ? irbApprovalNumberController.text
           : null,
-      irbApprovalExpiry: _irbApprovalExpiry,
-      isDscsaCompliant: _isDscsaCompliant,
-      dscsaComplianceDate: _dscsaComplianceDate,
-      hasSerializationCapability: _hasSerializationCapability,
-      hasAggregationCapability: _hasAggregationCapability,
-      interoperabilitySystem: _interoperabilitySystemController.text.isNotEmpty
-          ? _interoperabilitySystemController.text
+      irbApprovalExpiry: irbApprovalExpiry,
+      isDscsaCompliant: isDscsaCompliant,
+      dscsaComplianceDate: dscsaComplianceDate,
+      hasSerializationCapability: hasSerializationCapability,
+      hasAggregationCapability: hasAggregationCapability,
+      interoperabilitySystem: interoperabilitySystemController.text.isNotEmpty
+          ? interoperabilitySystemController.text
           : null,
-      npiNumber: _npiNumberController.text.isNotEmpty
-          ? _npiNumberController.text
+      npiNumber: npiNumberController.text.isNotEmpty
+          ? npiNumberController.text
           : null,
-      ncpdpId: _ncpdpIdController.text.isNotEmpty
-          ? _ncpdpIdController.text
+      ncpdpId: ncpdpIdController.text.isNotEmpty
+          ? ncpdpIdController.text
           : null,
-      medicareProviderNumber: _medicareProviderNumberController.text.isNotEmpty
-          ? _medicareProviderNumberController.text
+      medicareProviderNumber: medicareProviderNumberController.text.isNotEmpty
+          ? medicareProviderNumberController.text
           : null,
-      medicaidProviderNumber: _medicaidProviderNumberController.text.isNotEmpty
-          ? _medicaidProviderNumberController.text
+      medicaidProviderNumber: medicaidProviderNumberController.text.isNotEmpty
+          ? medicaidProviderNumberController.text
           : null,
-      isIsoCertified: _isIsoCertified,
-      isoCertificationType: _isoCertificationTypeController.text.isNotEmpty
-          ? _isoCertificationTypeController.text
+      isIsoCertified: isIsoCertified,
+      isoCertificationType: isoCertificationTypeController.text.isNotEmpty
+          ? isoCertificationTypeController.text
           : null,
-      isoCertificationNumber: _isoCertificationNumberController.text.isNotEmpty
-          ? _isoCertificationNumberController.text
+      isoCertificationNumber: isoCertificationNumberController.text.isNotEmpty
+          ? isoCertificationNumberController.text
           : null,
-      isoCertificationExpiry: _isoCertificationExpiry,
-      jcahoAccredited: _jcahoAccredited,
+      isoCertificationExpiry: isoCertificationExpiry,
+      jcahoAccredited: jcahoAccredited,
       jcahoAccreditationNumber:
-          _jcahoAccreditationNumberController.text.isNotEmpty
-          ? _jcahoAccreditationNumberController.text
+          jcahoAccreditationNumberController.text.isNotEmpty
+          ? jcahoAccreditationNumberController.text
           : null,
-      jcahoAccreditationExpiry: _jcahoAccreditationExpiry,
-      emaSiteId: _emaSiteIdController.text.isNotEmpty
-          ? _emaSiteIdController.text
+      jcahoAccreditationExpiry: jcahoAccreditationExpiry,
+      emaSiteId: emaSiteIdController.text.isNotEmpty
+          ? emaSiteIdController.text
           : null,
-      pmdaSiteId: _pmdaSiteIdController.text.isNotEmpty
-          ? _pmdaSiteIdController.text
+      pmdaSiteId: pmdaSiteIdController.text.isNotEmpty
+          ? pmdaSiteIdController.text
           : null,
-      anvisaSiteId: _anvisaSiteIdController.text.isNotEmpty
-          ? _anvisaSiteIdController.text
+      anvisaSiteId: anvisaSiteIdController.text.isNotEmpty
+          ? anvisaSiteIdController.text
           : null,
-      nmpaSiteId: _nmpaSiteIdController.text.isNotEmpty
-          ? _nmpaSiteIdController.text
+      nmpaSiteId: nmpaSiteIdController.text.isNotEmpty
+          ? nmpaSiteIdController.text
           : null,
-      receivingHours: _receivingHoursController.text.isNotEmpty
-          ? _receivingHoursController.text
+      receivingHours: receivingHoursController.text.isNotEmpty
+          ? receivingHoursController.text
           : null,
-      dispatchHours: _dispatchHoursController.text.isNotEmpty
-          ? _dispatchHoursController.text
+      dispatchHours: dispatchHoursController.text.isNotEmpty
+          ? dispatchHoursController.text
           : null,
-      hasWeighbridge: _hasWeighbridge,
-      hasLoadingDock: _hasLoadingDock,
-      hasForkliftCapability: _hasForkliftCapability,
-      canReceiveHazmat: _canReceiveHazmat,
-      pharmacistInCharge: _pharmacistInChargeController.text.isNotEmpty
-          ? _pharmacistInChargeController.text
+      hasWeighbridge: hasWeighbridge,
+      hasLoadingDock: hasLoadingDock,
+      hasForkliftCapability: hasForkliftCapability,
+      canReceiveHazmat: canReceiveHazmat,
+      pharmacistInCharge: pharmacistInChargeController.text.isNotEmpty
+          ? pharmacistInChargeController.text
           : null,
-      picLicenseNumber: _picLicenseNumberController.text.isNotEmpty
-          ? _picLicenseNumberController.text
+      picLicenseNumber: picLicenseNumberController.text.isNotEmpty
+          ? picLicenseNumberController.text
           : null,
-      responsiblePersonName: _responsiblePersonNameController.text.isNotEmpty
-          ? _responsiblePersonNameController.text
+      responsiblePersonName: responsiblePersonNameController.text.isNotEmpty
+          ? responsiblePersonNameController.text
           : null,
-      responsiblePersonEmail: _responsiblePersonEmailController.text.isNotEmpty
-          ? _responsiblePersonEmailController.text
+      responsiblePersonEmail: responsiblePersonEmailController.text.isNotEmpty
+          ? responsiblePersonEmailController.text
           : null,
-      responsiblePersonPhone: _responsiblePersonPhoneController.text.isNotEmpty
-          ? _responsiblePersonPhoneController.text
+      responsiblePersonPhone: responsiblePersonPhoneController.text.isNotEmpty
+          ? responsiblePersonPhoneController.text
           : null,
-      qualityContactName: _qualityContactNameController.text.isNotEmpty
-          ? _qualityContactNameController.text
+      qualityContactName: qualityContactNameController.text.isNotEmpty
+          ? qualityContactNameController.text
           : null,
-      qualityContactEmail: _qualityContactEmailController.text.isNotEmpty
-          ? _qualityContactEmailController.text
+      qualityContactEmail: qualityContactEmailController.text.isNotEmpty
+          ? qualityContactEmailController.text
           : null,
-      qualityContactPhone: _qualityContactPhoneController.text.isNotEmpty
-          ? _qualityContactPhoneController.text
+      qualityContactPhone: qualityContactPhoneController.text.isNotEmpty
+          ? qualityContactPhoneController.text
           : null,
-      regulatoryContactName: _regulatoryContactNameController.text.isNotEmpty
-          ? _regulatoryContactNameController.text
+      regulatoryContactName: regulatoryContactNameController.text.isNotEmpty
+          ? regulatoryContactNameController.text
           : null,
-      regulatoryContactEmail: _regulatoryContactEmailController.text.isNotEmpty
-          ? _regulatoryContactEmailController.text
+      regulatoryContactEmail: regulatoryContactEmailController.text.isNotEmpty
+          ? regulatoryContactEmailController.text
           : null,
-      regulatoryContactPhone: _regulatoryContactPhoneController.text.isNotEmpty
-          ? _regulatoryContactPhoneController.text
+      regulatoryContactPhone: regulatoryContactPhoneController.text.isNotEmpty
+          ? regulatoryContactPhoneController.text
           : null,
-      brandsyncPartyId: _brandsyncPartyIdController.text.isNotEmpty
-          ? _brandsyncPartyIdController.text
+      brandsyncPartyId: brandsyncPartyIdController.text.isNotEmpty
+          ? brandsyncPartyIdController.text
           : null,
-      tatmeenPartyCode: _tatmeenPartyCodeController.text.isNotEmpty
-          ? _tatmeenPartyCodeController.text
+      tatmeenPartyCode: tatmeenPartyCodeController.text.isNotEmpty
+          ? tatmeenPartyCodeController.text
           : null,
-      pharmacovigilanceEmail: _pharmacovigilanceEmailController.text.isNotEmpty
-          ? _pharmacovigilanceEmailController.text
+      pharmacovigilanceEmail: pharmacovigilanceEmailController.text.isNotEmpty
+          ? pharmacovigilanceEmailController.text
           : null,
-      recallContactEmail: _recallContactEmailController.text.isNotEmpty
-          ? _recallContactEmailController.text
+      recallContactEmail: recallContactEmailController.text.isNotEmpty
+          ? recallContactEmailController.text
           : null,
-      recallContactPhone: _recallContactPhoneController.text.isNotEmpty
-          ? _recallContactPhoneController.text
+      recallContactPhone: recallContactPhoneController.text.isNotEmpty
+          ? recallContactPhoneController.text
           : null,
       epcisCaptureEndpointUrl:
-          _epcisCaptureEndpointUrlController.text.isNotEmpty
-          ? _epcisCaptureEndpointUrlController.text
+          epcisCaptureEndpointUrlController.text.isNotEmpty
+          ? epcisCaptureEndpointUrlController.text
           : null,
       licensedAgentAuthorisationNumber:
-          _licensedAgentAuthorisationController.text.isNotEmpty
-          ? _licensedAgentAuthorisationController.text
+          licensedAgentAuthorisationController.text.isNotEmpty
+          ? licensedAgentAuthorisationController.text
           : null,
       authorisedPrincipalMahGlns:
-          _authorisedPrincipalMahGlnsController.text.isNotEmpty
-          ? _authorisedPrincipalMahGlnsController.text
+          authorisedPrincipalMahGlnsController.text.isNotEmpty
+          ? authorisedPrincipalMahGlnsController.text
           : null,
-      mahQualificationIndicator: _mahQualificationIndicator,
+      mahQualificationIndicator: mahQualificationIndicator,
       mahTargetMarkets: _mahMarketsFromForm(),
       mahRegulatoryRegistrationNumber:
-          _mahRegulatoryRegistrationNumberController.text.isNotEmpty
-          ? _mahRegulatoryRegistrationNumberController.text
+          mahRegulatoryRegistrationNumberController.text.isNotEmpty
+          ? mahRegulatoryRegistrationNumberController.text
           : null,
     );
   }
 
   List<String>? _mahMarketsFromForm() {
-    final t = _mahTargetMarketsController.text.trim();
+    final t = mahTargetMarketsController.text.trim();
     if (t.isEmpty) return null;
     final parts = t
         .split(',')
@@ -352,30 +349,30 @@ extension GLNPharmaceuticalExtensionActions
   }
 
   bool get hasData =>
-      _fdaEstablishmentIdController.text.isNotEmpty ||
-      _fdaRegistrationNumberController.text.isNotEmpty ||
-      _deaRegistrationNumberController.text.isNotEmpty ||
-      _stateLicenseNumberController.text.isNotEmpty ||
-      _wholesaleLicenseNumberController.text.isNotEmpty ||
-      _isAuthorizedTradingPartner ||
-      _vawdAccredited ||
-      _hasColdChainCapability ||
-      _gdpCertified ||
-      _isClinicalTrialSite ||
-      _isDscsaCompliant ||
-      _npiNumberController.text.isNotEmpty ||
-      _healthcareFacilityType != HealthcareFacilityType.other ||
-      _brandsyncPartyIdController.text.isNotEmpty ||
-      _tatmeenPartyCodeController.text.isNotEmpty ||
-      _pharmacovigilanceEmailController.text.isNotEmpty ||
-      _recallContactEmailController.text.isNotEmpty ||
-      _recallContactPhoneController.text.isNotEmpty ||
-      _epcisCaptureEndpointUrlController.text.isNotEmpty ||
-      _licensedAgentAuthorisationController.text.isNotEmpty ||
-      _authorisedPrincipalMahGlnsController.text.isNotEmpty ||
-      _mahQualificationIndicator ||
-      _mahTargetMarketsController.text.isNotEmpty ||
-      _mahRegulatoryRegistrationNumberController.text.isNotEmpty;
+      fdaEstablishmentIdController.text.isNotEmpty ||
+      fdaRegistrationNumberController.text.isNotEmpty ||
+      deaRegistrationNumberController.text.isNotEmpty ||
+      stateLicenseNumberController.text.isNotEmpty ||
+      wholesaleLicenseNumberController.text.isNotEmpty ||
+      isAuthorizedTradingPartner ||
+      vawdAccredited ||
+      hasColdChainCapability ||
+      gdpCertified ||
+      isClinicalTrialSite ||
+      isDscsaCompliant ||
+      npiNumberController.text.isNotEmpty ||
+      healthcareFacilityType != HealthcareFacilityType.other ||
+      brandsyncPartyIdController.text.isNotEmpty ||
+      tatmeenPartyCodeController.text.isNotEmpty ||
+      pharmacovigilanceEmailController.text.isNotEmpty ||
+      recallContactEmailController.text.isNotEmpty ||
+      recallContactPhoneController.text.isNotEmpty ||
+      epcisCaptureEndpointUrlController.text.isNotEmpty ||
+      licensedAgentAuthorisationController.text.isNotEmpty ||
+      authorisedPrincipalMahGlnsController.text.isNotEmpty ||
+      mahQualificationIndicator ||
+      mahTargetMarketsController.text.isNotEmpty ||
+      mahRegulatoryRegistrationNumberController.text.isNotEmpty;
 
   GLNPharmaceuticalExtension? buildExtension({int? glnId, String? glnCode}) {
     if (!hasData) return null;

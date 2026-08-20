@@ -1,31 +1,24 @@
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
-import 'package:traqtrace_app/core/models/scan_result.dart';
-import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
-import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
-import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/utils/aggregation_pharma_readiness_checker.dart';
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/utils/unpacking_container_contents_loader.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/utils/unpacking_operation_step_validator.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_item_scan_step.dart';
-import 'package:traqtrace_app/features/operations/shared/utils/operation_parent_container_epc.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_items_step_content.dart';
@@ -33,21 +26,20 @@ import 'package:traqtrace_app/features/operations/shared/widgets/operation/opera
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_review_step.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
-import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 
-part 'unpacking_operation_scanning.dart';
+import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/unpacking_operation_scanning.dart';
 
 class UnpackingOperationScreen extends StatefulWidget {
   const UnpackingOperationScreen({super.key});
 
   @override
   State<UnpackingOperationScreen> createState() =>
-      _UnpackingOperationScreenState();
+      UnpackingOperationScreenState();
 }
 
-class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
+class UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
   static const _wizardSteps = [
     OperationStepConfig.details,
     OperationStepConfig.items,
@@ -63,12 +55,12 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
 
   GLN? _unpackingLocationGLN;
   String? _unpackingLocationGLNError;
-  String? _parentContainerId;
-  final Set<String> _selectedEpcs = {};
-  List<HierarchyNode> _containerContents = [];
-  bool _isLoadingContents = false;
-  String? _contentsLoadError;
-  UnpackingScope _unpackingScope = UnpackingScope.partial;
+  String? parentContainerId;
+  final Set<String> selectedEpcs = {};
+  List<HierarchyNode> containerContents = [];
+  bool isLoadingContents = false;
+  String? contentsLoadError;
+  UnpackingScope unpackingScope = UnpackingScope.partial;
   bool _isLoading = false;
   DateTime? _eventTime;
 
@@ -79,9 +71,9 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
 
   bool _validateStep0Silent() => _unpackingLocationGLN != null;
 
-  List<String> get _scannedEPCs => _selectedEpcs.toList();
+  List<String> get _scannedEPCs => selectedEpcs.toList();
 
-  bool get _hasItemsToUnpack => _selectedEpcs.isNotEmpty;
+  bool get _hasItemsToUnpack => selectedEpcs.isNotEmpty;
 
   UnpackingReferenceDetailsStep _referenceDetailsStep({
     bool embeddedInPanel = false,
@@ -100,17 +92,17 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
         _unpackingLocationGLN = gln;
         _unpackingLocationGLNError = null;
       }),
-      parentContainerId: _parentContainerId,
+      parentContainerId: parentContainerId,
       scanningMode: _containerScanningMode,
       onScanningModeChanged: (mode) =>
           setState(() => _containerScanningMode = mode),
-      onContainerScanResult: _onContainerScanResult,
-      onContainerAdded: _onManualContainerAdded,
+      onContainerScanResult: onContainerScanResult,
+      onContainerAdded: onManualContainerAdded,
       onClearContainer: () => setState(() {
-        _parentContainerId = null;
-        _containerContents = [];
-        _selectedEpcs.clear();
-        _contentsLoadError = null;
+        parentContainerId = null;
+        containerContents = [];
+        selectedEpcs.clear();
+        contentsLoadError = null;
       }),
       eventTime: _eventTime,
       onEventTimeChanged: (dt) => setState(() => _eventTime = dt),
@@ -127,19 +119,19 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
     bool? fillHeight,
   }) {
     return UnpackingItemScanStep(
-      parentContainerId: _parentContainerId,
-      scope: _unpackingScope,
-      onScopeChanged: _onUnpackingScopeChanged,
-      containerContents: _containerContents,
-      selectedEpcs: _selectedEpcs,
-      onItemSelectionChanged: _onItemSelectionChanged,
+      parentContainerId: parentContainerId,
+      scope: unpackingScope,
+      onScopeChanged: onUnpackingScopeChanged,
+      containerContents: containerContents,
+      selectedEpcs: selectedEpcs,
+      onItemSelectionChanged: onItemSelectionChanged,
       itemScanningMode: _itemScanningMode,
       onItemScanningModeChanged: (mode) =>
           setState(() => _itemScanningMode = mode),
-      onItemAdded: _onItemAdded,
-      isLoadingContents: _isLoadingContents,
-      contentsLoadError: _contentsLoadError,
-      onRetryLoadContents: _loadContainerContents,
+      onItemAdded: onItemAdded,
+      isLoadingContents: isLoadingContents,
+      contentsLoadError: contentsLoadError,
+      onRetryLoadContents: loadContainerContents,
       fillHeight: fillHeight ?? embeddedInPanel,
       showPageHeader: !embeddedInPanel,
     );
@@ -152,9 +144,9 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
       workOrder: _workOrderController.text,
       batchNumber: _batchNumberController.text,
       productionOrder: _productionOrderController.text,
-      parentContainerId: _parentContainerId,
+      parentContainerId: parentContainerId,
       scannedEpcs: _scannedEPCs,
-      unpackingScope: _unpackingScope,
+      unpackingScope: unpackingScope,
       showPageHeader: !embeddedInPanel,
     );
   }
@@ -171,7 +163,7 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
   Future<void> _nextStep() async {
     final lastStepIndex = _wizardSteps.length - 1;
     if (_currentStep == 0 && _validateCurrentStep()) {
-      await _loadContainerContents();
+      await loadContainerContents();
     }
     if (_currentStep < lastStepIndex && _validateCurrentStep()) {
       await _pageController.nextPage(
@@ -209,7 +201,7 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
         }
         final containerError =
             UnpackingOperationStepValidator.validateContainerStep(
-              _parentContainerId,
+              parentContainerId,
             );
         if (containerError != null) {
           context.showError(containerError);
@@ -218,9 +210,9 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
         return true;
       case 1:
         final itemsError = UnpackingOperationStepValidator.validateItemsStep(
-          selectedEpcs: _selectedEpcs,
-          scope: _unpackingScope,
-          containerContents: _containerContents,
+          selectedEpcs: selectedEpcs,
+          scope: unpackingScope,
+          containerContents: containerContents,
         );
         if (itemsError != null) {
           context.showError(itemsError);
@@ -264,7 +256,7 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
       }
 
       final containerEpc =
-          Gs1Converter.barcodeToEpc(_parentContainerId!) ?? _parentContainerId!;
+          Gs1Converter.barcodeToEpc(parentContainerId!) ?? parentContainerId!;
 
       _pharmaReadinessChecker ??= AggregationPharmaReadinessChecker(
         glnService: getIt<GLNService>(),

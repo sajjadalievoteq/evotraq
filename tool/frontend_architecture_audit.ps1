@@ -30,6 +30,16 @@ foreach ($file in $dartFiles) {
         $text,
         '(?m)^\s*(?:static\s+)?(?:Widget|List<Widget>|Iterable<Widget>)\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*\('
     ) | Where-Object { $_.Groups['name'].Value -ne 'build' }
+    $forbiddenDirectiveMatches = [regex]::Matches(
+        $text,
+        '(?m)^\s*(?<directive>part of|part|export)\s+'
+    )
+    $passThroughWidgetLocalMatches = [regex]::Matches(
+        $text,
+        '(?m)^\s*(?:final|Widget)\s+(?<name>[A-Za-z_][A-Za-z0-9_]*(?:body|content|child|widget|card|row|column|list|sheet|chart|legend|panel|view|section|tile|scaffold|layout|skeleton)[A-Za-z0-9_]*)\s*=\s*(?:const\s+)?[A-Z][A-Za-z0-9_<>]*\s*\('
+    ) | Where-Object {
+        $_.Groups['name'].Value -notmatch '(Controller|Key|Node|Model|Request|Response|Service|Cubit|Bloc)$'
+    }
 
     if ($widgetMatches.Count -gt 1) {
         $widgetNames = @($widgetMatches | ForEach-Object { $_.Groups['name'].Value }) -join ', '
@@ -45,6 +55,22 @@ foreach ($file in $dartFiles) {
             Rule = 'no-widget-build-helpers'
             Path = $relativePath
             Detail = "Extract widget-returning function $($match.Groups['name'].Value) into an independent widget"
+        })
+    }
+
+    foreach ($match in $forbiddenDirectiveMatches) {
+        $findings.Add([pscustomobject]@{
+            Rule = 'no-part-or-export-directives'
+            Path = $relativePath
+            Detail = "Replace $($match.Groups['directive'].Value) with direct imports and standalone files"
+        })
+    }
+
+    foreach ($match in $passThroughWidgetLocalMatches) {
+        $findings.Add([pscustomobject]@{
+            Rule = 'no-pass-through-widget-locals'
+            Path = $relativePath
+            Detail = "Inline or extract intermediate widget local $($match.Groups['name'].Value)"
         })
     }
 
@@ -72,6 +98,8 @@ $summary = [pscustomobject]@{
     WidgetBuildHelpers = @($findings | Where-Object Rule -eq 'no-widget-build-helpers').Count
     OversizedFiles = @($findings | Where-Object Rule -eq 'max-file-lines').Count
     OverNestedFiles = @($findings | Where-Object Rule -eq 'max-path-depth').Count
+    ForbiddenDirectives = @($findings | Where-Object Rule -eq 'no-part-or-export-directives').Count
+    PassThroughWidgetLocals = @($findings | Where-Object Rule -eq 'no-pass-through-widget-locals').Count
 }
 
 $summary | Format-List

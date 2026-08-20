@@ -1,4 +1,4 @@
-part of 'traq_theme.dart';
+import 'package:flutter/material.dart';
 
 @immutable
 class TraqColors extends ThemeExtension<TraqColors> {
@@ -160,35 +160,34 @@ class TraqColors extends ThemeExtension<TraqColors> {
     Color? identifierSgtin,
     Color? identifierSscc,
     Color? identifierEvent,
-  }) =>
-      TraqColors(
-        background: background ?? this.background,
-        surface: surface ?? this.surface,
-        surfaceMuted: surfaceMuted ?? this.surfaceMuted,
-        surfaceElevated: surfaceElevated ?? this.surfaceElevated,
-        inverseSurface: inverseSurface ?? this.inverseSurface,
-        border: border ?? this.border,
-        borderVariant: borderVariant ?? this.borderVariant,
-        borderStrong: borderStrong ?? this.borderStrong,
-        textPrimary: textPrimary ?? this.textPrimary,
-        textSecondary: textSecondary ?? this.textSecondary,
-        textMuted: textMuted ?? this.textMuted,
-        textFaint: textFaint ?? this.textFaint,
-        textOnInverse: textOnInverse ?? this.textOnInverse,
-        primary: primary ?? this.primary,
-        onPrimary: onPrimary ?? this.onPrimary,
-        primaryMuted: primaryMuted ?? this.primaryMuted,
-        primaryGlow: primaryGlow ?? this.primaryGlow,
-        secondary: secondary ?? this.secondary,
-        success: success ?? this.success,
-        warning: warning ?? this.warning,
-        error: error ?? this.error,
-        identifierGtin: identifierGtin ?? this.identifierGtin,
-        identifierGln: identifierGln ?? this.identifierGln,
-        identifierSgtin: identifierSgtin ?? this.identifierSgtin,
-        identifierSscc: identifierSscc ?? this.identifierSscc,
-        identifierEvent: identifierEvent ?? this.identifierEvent,
-      );
+  }) => TraqColors(
+    background: background ?? this.background,
+    surface: surface ?? this.surface,
+    surfaceMuted: surfaceMuted ?? this.surfaceMuted,
+    surfaceElevated: surfaceElevated ?? this.surfaceElevated,
+    inverseSurface: inverseSurface ?? this.inverseSurface,
+    border: border ?? this.border,
+    borderVariant: borderVariant ?? this.borderVariant,
+    borderStrong: borderStrong ?? this.borderStrong,
+    textPrimary: textPrimary ?? this.textPrimary,
+    textSecondary: textSecondary ?? this.textSecondary,
+    textMuted: textMuted ?? this.textMuted,
+    textFaint: textFaint ?? this.textFaint,
+    textOnInverse: textOnInverse ?? this.textOnInverse,
+    primary: primary ?? this.primary,
+    onPrimary: onPrimary ?? this.onPrimary,
+    primaryMuted: primaryMuted ?? this.primaryMuted,
+    primaryGlow: primaryGlow ?? this.primaryGlow,
+    secondary: secondary ?? this.secondary,
+    success: success ?? this.success,
+    warning: warning ?? this.warning,
+    error: error ?? this.error,
+    identifierGtin: identifierGtin ?? this.identifierGtin,
+    identifierGln: identifierGln ?? this.identifierGln,
+    identifierSgtin: identifierSgtin ?? this.identifierSgtin,
+    identifierSscc: identifierSscc ?? this.identifierSscc,
+    identifierEvent: identifierEvent ?? this.identifierEvent,
+  );
 
   @override
   TraqColors lerp(ThemeExtension<TraqColors>? other, double t) {

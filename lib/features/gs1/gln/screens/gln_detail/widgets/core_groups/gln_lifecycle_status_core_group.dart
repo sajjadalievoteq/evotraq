@@ -1,7 +1,7 @@
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_outline_field.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_date_picker_field.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
-import '../../../../../widgets/gs1_date_field.dart';
 import '../../../../../widgets/gs1_group_card.dart';
 import '../../../../utils/gln_ui_constants.dart';
 

@@ -1,4 +1,9 @@
-part of 'gs1_tools_cubit.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_anatomy.dart';
+import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
+import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
+import 'package:traqtrace_app/features/shared/validation/gs1_batch_validator.dart';
+import 'package:traqtrace_app/features/shared/workbench/workbench_slice.dart';
 
 extension Gs1ToolsValidationActions on Gs1ToolsCubit {
   Future<void> validateTool({
@@ -118,12 +123,12 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
   void _validateBatch(String paste) {
     final trimmed = paste.trim();
     if (trimmed.isEmpty) {
-      _emitError(Gs1ToolKind.validate, 'Paste one or more identifiers');
+      emitError(Gs1ToolKind.validate, 'Paste one or more identifiers');
       return;
     }
     final rows = Gs1BatchValidator.validatePaste(trimmed);
     if (rows.isEmpty) {
-      _emitError(Gs1ToolKind.validate, 'No identifiers found');
+      emitError(Gs1ToolKind.validate, 'No identifiers found');
       return;
     }
     final fields = <String, String>{};
@@ -156,7 +161,7 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
     };
     final result = CheckDigitUtils.compute(input: input, fullLengths: lengths);
     if (result.checkDigit < 0 || result.fullNumber.isEmpty) {
-      _emitError(
+      emitError(
         Gs1ToolKind.validate,
         'Enter a valid-length body or full identifier.',
       );
@@ -183,7 +188,7 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
     await Gs1Anatomy.ensureLoaded();
     final digits = CheckDigitUtils.digitsOnly(value);
     if (digits.isEmpty) {
-      _emitError(Gs1ToolKind.validate, 'Enter an identifier to decompose');
+      emitError(Gs1ToolKind.validate, 'Enter an identifier to decompose');
       return;
     }
     final fields = Gs1Anatomy.decompose(value, kind: kind);
@@ -217,19 +222,16 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
       final ext = CheckDigitUtils.digitsOnly(extensionDigit);
       final serial = CheckDigitUtils.digitsOnly(serialReference);
       if (ext.length != 1) {
-        _emitError(
-          Gs1ToolKind.build,
-          'Extension digit must be one digit (0–9)',
-        );
+        emitError(Gs1ToolKind.build, 'Extension digit must be one digit (0–9)');
         return;
       }
       if (gcp.length < 6 || gcp.length > 12) {
-        _emitError(Gs1ToolKind.build, 'Company prefix must be 6–12 digits');
+        emitError(Gs1ToolKind.build, 'Company prefix must be 6–12 digits');
         return;
       }
       final serialLen = 16 - gcp.length;
       if (serial.length != serialLen) {
-        _emitError(
+        emitError(
           Gs1ToolKind.build,
           'Serial reference must be $serialLen digits for GCP length ${gcp.length}',
         );
@@ -237,7 +239,7 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
       }
       final body = '$ext$gcp$serial';
       if (body.length != 17) {
-        _emitError(Gs1ToolKind.build, 'Internal SSCC body length error');
+        emitError(Gs1ToolKind.build, 'Internal SSCC body length error');
         return;
       }
       final cd = CheckDigitUtils.calculateMod10String(body);
@@ -264,7 +266,7 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
     // GTIN packaging / indicator
     final digits = CheckDigitUtils.digitsOnly(gtin);
     if (digits.isEmpty) {
-      _emitError(Gs1ToolKind.build, 'Enter a GTIN');
+      emitError(Gs1ToolKind.build, 'Enter a GTIN');
       return;
     }
     // Strip check digit if present at a known full length
@@ -277,7 +279,7 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
     } else if (CheckDigitUtils.gtinLengths.contains(digits.length)) {
       body = digits.substring(0, digits.length - 1);
     } else {
-      _emitError(Gs1ToolKind.build, 'GTIN length not recognized');
+      emitError(Gs1ToolKind.build, 'GTIN length not recognized');
       return;
     }
 

@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_load_more_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/constrained_section_content.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,7 +13,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shi
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 
 class GlnResultsList extends StatelessWidget {
   const GlnResultsList({

@@ -1,4 +1,12 @@
-part of 'sscc_service.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/utils/gs1_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 
 extension SsccServiceOperations on SSCCService {
   Future<String> generateSSCCCode(
@@ -13,9 +21,9 @@ extension SsccServiceOperations on SSCCService {
       requestBody['extensionDigit'] = extensionDigit;
     }
 
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathGenerate}',
-      headers: SSCCService._headers,
+    final response = await dioService.post(
+      '${dioService.baseUrl}${SsccServiceConstants.pathGenerate}',
+      headers: SSCCService.headers,
       data: json.encode(requestBody),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -64,10 +72,10 @@ extension SsccServiceOperations on SSCCService {
   }
 
   Future<bool> validateSSCCCode(String ssccCode) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathValidate}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SsccServiceConstants.pathValidate}',
       queryParameters: {'ssccCode': ssccCode},
-      headers: SSCCService._headers,
+      headers: SSCCService.headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -87,10 +95,10 @@ extension SsccServiceOperations on SSCCService {
   Future<List<SsccAggregationLink>> getAggregationLinksByCode(
     String ssccCode,
   ) async {
-    final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathAggregationByCode}',
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SsccServiceConstants.pathAggregationByCode}',
       queryParameters: {SsccServiceConstants.qSsccCode: ssccCode},
-      headers: SSCCService._headers,
+      headers: SSCCService.headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -118,9 +126,9 @@ extension SsccServiceOperations on SSCCService {
     required String childKind,
     required String aggregationEventId,
   }) async {
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathAggregation(ssccId)}',
-      headers: SSCCService._headers,
+    final response = await dioService.post(
+      '${dioService.baseUrl}${SsccServiceConstants.pathAggregation(ssccId)}',
+      headers: SSCCService.headers,
       data: json.encode({
         'childEpc': childEpc,
         'childKind': childKind,
@@ -148,9 +156,9 @@ extension SsccServiceOperations on SSCCService {
     int linkId, {
     required String disaggregationEventId,
   }) async {
-    final response = await _dioService.patch(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathDisaggregate(linkId)}',
-      headers: SSCCService._headers,
+    final response = await dioService.patch(
+      '${dioService.baseUrl}${SsccServiceConstants.pathDisaggregate(linkId)}',
+      headers: SSCCService.headers,
       data: json.encode({'disaggregationEventId': disaggregationEventId}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -238,7 +246,7 @@ extension SsccServiceOperations on SSCCService {
     return CheckDigitUtils.calculateMod10String(digits);
   }
 
-  static void _normalizeFields(Map<String, dynamic> data) {
+  static void normalizeFields(Map<String, dynamic> data) {
     if (data.containsKey('sscc') && !data.containsKey('ssccCode')) {
       data['ssccCode'] = data['sscc'];
     }

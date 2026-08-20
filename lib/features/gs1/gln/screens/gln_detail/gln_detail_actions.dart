@@ -1,38 +1,47 @@
-part of 'gln_detail_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/gln_detail_screen.dart';
+import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/utils/gln_location_type_mapper.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
+import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_actions.dart';
 
-extension GlnDetailActions on _GLNDetailScreenState {
-  Future<void> _refresh() async {
+extension GlnDetailActions on GLNDetailScreenState {
+  Future<void> refresh() async {
     if (widget.glnId != null) {
-      _glnCubit?.fetchGLNById(widget.glnId!);
+      glnCubit?.fetchGLNById(widget.glnId!);
     }
   }
 
   void _applyGlnToLocalState(GLN g) {
-    _licenseValidFrom = g.licenseValidFrom;
-    _licenseExpiry = g.licenseExpiry;
-    _effectiveFrom = g.effectiveFrom;
-    _effectiveTo = g.effectiveTo;
-    _nonReuseUntil = g.nonReuseUntil;
-    _coordinates = g.coordinates;
+    licenseValidFrom = g.licenseValidFrom;
+    licenseExpiry = g.licenseExpiry;
+    effectiveFrom = g.effectiveFrom;
+    effectiveTo = g.effectiveTo;
+    nonReuseUntil = g.nonReuseUntil;
+    coordinates = g.coordinates;
   }
 
   void _populateFromGln(GLN? g) {
     if (g == null) {
       clearGlnFieldTexts();
 
-      _operatingStatus = 'ACTIVE';
-      _industryClassification = 'HEALTHCARE';
-      _glnSource = 'SELF_ALLOCATED';
-      _mobility = 'FIXED';
-      _digitalAddressType = 'URL';
-      _locationTypeLabel = 'Other';
-      _glnTypes = ['FIXED_PHYSICAL'];
-      _licenseValidFrom = null;
-      _licenseExpiry = null;
-      _effectiveFrom = null;
-      _effectiveTo = null;
-      _nonReuseUntil = null;
-      _coordinates = null;
+      operatingStatus = 'ACTIVE';
+      industryClassification = 'HEALTHCARE';
+      glnSource = 'SELF_ALLOCATED';
+      mobility = 'FIXED';
+      digitalAddressType = 'URL';
+      locationTypeLabel = 'Other';
+      glnTypes = ['FIXED_PHYSICAL'];
+      licenseValidFrom = null;
+      licenseExpiry = null;
+      effectiveFrom = null;
+      effectiveTo = null;
+      nonReuseUntil = null;
+      coordinates = null;
       return;
     }
 
@@ -67,30 +76,30 @@ extension GlnDetailActions on _GLNDetailScreenState {
       licenseType: g.licenseType ?? '',
     );
 
-    _operatingStatus = (g.operatingStatus ?? 'ACTIVE').toUpperCase();
-    _industryClassification = g.industryClassification ?? 'HEALTHCARE';
-    _glnSource = g.glnSource ?? 'SELF_ALLOCATED';
-    _mobility = g.mobility ?? 'FIXED';
-    _digitalAddressType = g.digitalAddressType ?? 'URL';
-    _locationTypeLabel = GlnLocationTypeMapper.toDropdownLabel(g.locationType);
-    _glnTypes = g.glnTypes.isEmpty
+    operatingStatus = (g.operatingStatus ?? 'ACTIVE').toUpperCase();
+    industryClassification = g.industryClassification ?? 'HEALTHCARE';
+    glnSource = g.glnSource ?? 'SELF_ALLOCATED';
+    mobility = g.mobility ?? 'FIXED';
+    digitalAddressType = g.digitalAddressType ?? 'URL';
+    locationTypeLabel = GlnLocationTypeMapper.toDropdownLabel(g.locationType);
+    glnTypes = g.glnTypes.isEmpty
         ? ['FIXED_PHYSICAL']
         : List<String>.from(g.glnTypes);
 
     _applyGlnToLocalState(g);
   }
 
-  void _maybeHydrateFromGln(GLN? g) {
+  void maybeHydrateFromGln(GLN? g) {
     if (widget.glnId != null && g == null) {
       return;
     }
     final tag = widget.glnId == null ? 'create' : g!.glnCode;
-    if (_hydratedTag == tag) {
+    if (hydratedTag == tag) {
       return;
     }
-    _hydratedTag = tag;
+    hydratedTag = tag;
     _populateFromGln(g);
-    _formFieldsHydrated = true;
+    formFieldsHydrated = true;
     setState(() {});
   }
 
@@ -103,7 +112,7 @@ extension GlnDetailActions on _GLNDetailScreenState {
         .toList();
   }
 
-  Future<void> _pickDate(
+  Future<void> pickDate(
     ValueChanged<DateTime?> onPick,
     DateTime? current,
   ) async {
@@ -119,26 +128,26 @@ extension GlnDetailActions on _GLNDetailScreenState {
     }
   }
 
-  Future<void> _submitForm() async {
+  Future<void> submitForm() async {
     if (widget.awaitingListSelection) return;
-    if (_glnTypes.isEmpty) {
+    if (glnTypes.isEmpty) {
       setState(() {
-        _glnTypesErrorText = GlnUiConstants.errorSelectGlnType;
+        glnTypesErrorText = GlnUiConstants.errorSelectGlnType;
       });
       context.showError(GlnUiConstants.errorFixForm);
       return;
     }
-    setState(() => _glnTypesErrorText = null);
+    setState(() => glnTypesErrorText = null);
 
-    if (!_forceMountAllSections) {
-      setState(() => _forceMountAllSections = true);
+    if (!forceMountAllSections) {
+      setState(() => forceMountAllSections = true);
       await Future<void>.delayed(Duration.zero);
       if (!mounted) return;
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted) return;
     }
 
-    if (!(_formKey.currentState?.validate() ?? false)) {
+    if (!(formKey.currentState?.validate() ?? false)) {
       context.showError(GlnUiConstants.errorFixForm);
       return;
     }
@@ -151,7 +160,7 @@ extension GlnDetailActions on _GLNDetailScreenState {
     final postalCode = glnFieldText('postalCode');
     final country = glnFieldText('country');
 
-    final isValid = _validationCubit.validateAllFields({
+    final isValid = validationCubit.validateAllFields({
       'glnCode': {
         'value': glnCode,
         'validator': GlnFieldValidators.validateGlnCode,
@@ -184,14 +193,14 @@ extension GlnDetailActions on _GLNDetailScreenState {
 
     if (!isValid) return;
 
-    final operatingStatus = _operatingStatus.toUpperCase();
-    final active = operatingStatus == 'ACTIVE';
+    final normalizedOperatingStatus = operatingStatus.toUpperCase();
+    final active = normalizedOperatingStatus == 'ACTIVE';
 
     final parentRaw = GlnFormat.stripGlnInput(glnFieldText('parentGlnCode'));
     final parentGln = parentRaw.length == 13 ? GLN.fromCode(parentRaw) : null;
 
     GLNPharmaceuticalExtension? pharmaceuticalExtension;
-    final pharmaSt = _pharmaExtensionKey.currentState;
+    final pharmaSt = pharmaExtensionKey.currentState;
     if (pharmaSt != null && pharmaSt.hasData) {
       pharmaceuticalExtension = pharmaSt.buildExtension(
         glnId: null,
@@ -203,61 +212,61 @@ extension GlnDetailActions on _GLNDetailScreenState {
       glnCode: glnCode,
       locationName: locationName,
       addressLine1: addressLine1,
-      addressLine2: _nonEmptyOrNull(glnFieldText('addressLine2')),
+      addressLine2: nonEmptyOrNull(glnFieldText('addressLine2')),
       city: city,
       stateProvince: stateProvince,
       postalCode: postalCode,
       country: country,
-      contactName: _nonEmptyOrNull(glnFieldText('contactName')),
-      contactEmail: _nonEmptyOrNull(glnFieldText('contactEmail')),
-      contactPhone: _nonEmptyOrNull(glnFieldText('contactPhone')),
-      locationType: GlnLocationTypeMapper.parseDropdown(_locationTypeLabel),
+      contactName: nonEmptyOrNull(glnFieldText('contactName')),
+      contactEmail: nonEmptyOrNull(glnFieldText('contactEmail')),
+      contactPhone: nonEmptyOrNull(glnFieldText('contactPhone')),
+      locationType: GlnLocationTypeMapper.parseDropdown(locationTypeLabel),
       parentGln: parentGln,
-      licenseNumber: _nonEmptyOrNull(glnFieldText('licenseNumber')),
-      licenseType: _nonEmptyOrNull(glnFieldText('licenseType')),
-      licenseValidFrom: _licenseValidFrom,
-      licenseExpiry: _licenseExpiry,
+      licenseNumber: nonEmptyOrNull(glnFieldText('licenseNumber')),
+      licenseType: nonEmptyOrNull(glnFieldText('licenseType')),
+      licenseValidFrom: licenseValidFrom,
+      licenseExpiry: licenseExpiry,
       active: active,
-      coordinates: _coordinates,
+      coordinates: coordinates,
       operatingStatus: operatingStatus,
-      effectiveFrom: _effectiveFrom,
-      effectiveTo: _effectiveTo,
-      nonReuseUntil: _nonReuseUntil,
-      gs1CompanyPrefix: _nonEmptyOrNull(glnFieldText('gs1CompanyPrefix')),
-      locationReferenceDigits: _nonEmptyOrNull(
+      effectiveFrom: effectiveFrom,
+      effectiveTo: effectiveTo,
+      nonReuseUntil: nonReuseUntil,
+      gs1CompanyPrefix: nonEmptyOrNull(glnFieldText('gs1CompanyPrefix')),
+      locationReferenceDigits: nonEmptyOrNull(
         glnFieldText('locationReferenceDigits'),
       ),
-      checkDigit: _nonEmptyOrNull(glnFieldText('checkDigit')),
-      registeredLegalName: _nonEmptyOrNull(glnFieldText('registeredLegalName')),
-      tradingName: _nonEmptyOrNull(glnFieldText('tradingName')),
-      leiCode: _nonEmptyOrNull(glnFieldText('leiCode')),
-      taxRegistrationNumber: _nonEmptyOrNull(
+      checkDigit: nonEmptyOrNull(glnFieldText('checkDigit')),
+      registeredLegalName: nonEmptyOrNull(glnFieldText('registeredLegalName')),
+      tradingName: nonEmptyOrNull(glnFieldText('tradingName')),
+      leiCode: nonEmptyOrNull(glnFieldText('leiCode')),
+      taxRegistrationNumber: nonEmptyOrNull(
         glnFieldText('taxRegistrationNumber'),
       ),
-      countryOfIncorporationNumeric: _nonEmptyOrNull(
+      countryOfIncorporationNumeric: nonEmptyOrNull(
         glnFieldText('countryOfIncorporationNumeric').trim(),
       ),
-      website: _nonEmptyOrNull(glnFieldText('website')),
-      digitalAddressType: _digitalAddressType,
-      digitalAddressValue: _nonEmptyOrNull(glnFieldText('digitalAddressValue')),
-      glnExtensionComponent: _nonEmptyOrNull(
+      website: nonEmptyOrNull(glnFieldText('website')),
+      digitalAddressType: digitalAddressType,
+      digitalAddressValue: nonEmptyOrNull(glnFieldText('digitalAddressValue')),
+      glnExtensionComponent: nonEmptyOrNull(
         glnFieldText('glnExtensionComponent'),
       ),
-      industryClassification: _industryClassification,
-      glnSource: _glnSource,
-      mobility: _mobility,
-      mobileLocationIdentifier: _nonEmptyOrNull(
+      industryClassification: industryClassification,
+      glnSource: glnSource,
+      mobility: mobility,
+      mobileLocationIdentifier: nonEmptyOrNull(
         glnFieldText('mobileLocationIdentifier'),
       ),
-      glnTypes: List<String>.from(_glnTypes),
+      glnTypes: List<String>.from(glnTypes),
       supplyChainRoles: _splitRoles(glnFieldText('supplyChainRoles')),
       locationRoles: _splitRoles(glnFieldText('locationRoles')),
       pharmaceuticalExtension: pharmaceuticalExtension,
     );
 
-    setState(() => _hasSubmittedForm = true);
+    setState(() => hasSubmittedForm = true);
 
-    final cubit = _glnCubit;
+    final cubit = glnCubit;
     if (cubit == null) {
       return;
     }

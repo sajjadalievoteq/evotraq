@@ -1,4 +1,8 @@
-part of 'transaction_event_service.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
+import 'package:traqtrace_app/data/services/epcis/transaction_event_service.dart';
+import 'package:uuid/uuid.dart';
 
 extension TransactionEventServiceOperations on TransactionEventService {
   Future<TransactionEvent> createAddTransactionEvent(
@@ -11,7 +15,7 @@ extension TransactionEventServiceOperations on TransactionEventService {
     Map<String, String> bizData,
     DateTime eventTime,
   ) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final bizTransactionList = [
       {'type': bizTransactionType, 'id': bizTransactionId},
@@ -47,8 +51,8 @@ extension TransactionEventServiceOperations on TransactionEventService {
 
     final body = json.encode(requestData);
 
-    final response = await _dioService.post(
-      '$_baseUrl/add',
+    final response = await dioService.post(
+      '$baseUrl/add',
       headers: headers,
       data: body,
       responseType: ResponseType.plain,
@@ -82,7 +86,7 @@ extension TransactionEventServiceOperations on TransactionEventService {
     Map<String, String> bizData,
     DateTime eventTime,
   ) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final bizTransactionList = [
       {'type': bizTransactionType, 'id': bizTransactionId},
@@ -118,8 +122,8 @@ extension TransactionEventServiceOperations on TransactionEventService {
 
     final body = json.encode(requestData);
 
-    final response = await _dioService.post(
-      '$_baseUrl/delete',
+    final response = await dioService.post(
+      '$baseUrl/delete',
       headers: headers,
       data: body,
       responseType: ResponseType.plain,
@@ -153,7 +157,7 @@ extension TransactionEventServiceOperations on TransactionEventService {
     Map<String, String> bizData,
     DateTime eventTime,
   ) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final bizTransactionList = [
       {'type': bizTransactionType, 'id': bizTransactionId},
@@ -190,8 +194,8 @@ extension TransactionEventServiceOperations on TransactionEventService {
 
     final body = json.encode(requestData);
 
-    final response = await _dioService.post(
-      _baseUrl,
+    final response = await dioService.post(
+      baseUrl,
       headers: headers,
       data: body,
       responseType: ResponseType.plain,

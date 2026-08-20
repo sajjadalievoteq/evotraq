@@ -1,7 +1,14 @@
-part of 'data_consistency_integrity_dashboard_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/correction_workflow_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/data_consistency_integrity_dashboard_screen.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_detail_row.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_violation_item.dart';
 
-extension IntegrityViolationActions on _DataConsistencyIntegrityDashboardState {
-  void _showIntegrityViolations(String jobId, Map<String, dynamic> results) {
+extension IntegrityViolationActions on DataConsistencyIntegrityDashboardState {
+  void showIntegrityViolations(String jobId, Map<String, dynamic> results) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -107,7 +114,7 @@ extension IntegrityViolationActions on _DataConsistencyIntegrityDashboardState {
         },
       ];
 
-      await _correctionService.registerIntegrityViolations(
+      await correctionService.registerIntegrityViolations(
         jobId,
         violations,
         results['overall_integrity_score']?.toDouble() ?? 0.0,
@@ -123,7 +130,7 @@ extension IntegrityViolationActions on _DataConsistencyIntegrityDashboardState {
 
       const currentUserId = 'admin_user';
 
-      final workflowResult = await _correctionService
+      final workflowResult = await correctionService
           .initiateErrorCorrectionWorkflow(
             errorId,
             'INTEGRITY_VIOLATION_CORRECTION',
@@ -135,7 +142,7 @@ extension IntegrityViolationActions on _DataConsistencyIntegrityDashboardState {
 
       setState(() {
         final workflowId = workflowResult['workflow_id'];
-        final existingIndex = _correctionWorkflows.indexWhere(
+        final existingIndex = correctionWorkflows.indexWhere(
           (w) => w['workflow_id'] == workflowId,
         );
 
@@ -149,9 +156,9 @@ extension IntegrityViolationActions on _DataConsistencyIntegrityDashboardState {
         };
 
         if (existingIndex >= 0) {
-          _correctionWorkflows[existingIndex] = newWorkflow;
+          correctionWorkflows[existingIndex] = newWorkflow;
         } else {
-          _correctionWorkflows.insert(0, newWorkflow);
+          correctionWorkflows.insert(0, newWorkflow);
         }
       });
 
@@ -163,9 +170,9 @@ extension IntegrityViolationActions on _DataConsistencyIntegrityDashboardState {
         'created_time': DateTime.now(),
         'requires_approval': workflowResult['requires_approval'] ?? false,
       };
-      _persistenceService.addCorrectionWorkflow(persistedWorkflow);
+      persistenceService.addCorrectionWorkflow(persistedWorkflow);
 
-      _pollWorkflowStatus(workflowResult['workflow_id']);
+      pollWorkflowStatus(workflowResult['workflow_id']);
 
       showDialog(
         context: context,
@@ -207,7 +214,7 @@ extension IntegrityViolationActions on _DataConsistencyIntegrityDashboardState {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  _navigateToWorkflowDetails(workflowResult['workflow_id']);
+                  navigateToWorkflowDetails(workflowResult['workflow_id']);
                 },
                 child: const Text('View Workflow'),
               ),
@@ -245,7 +252,7 @@ extension IntegrityViolationActions on _DataConsistencyIntegrityDashboardState {
     }
   }
 
-  void _showAnomalyDetails(Map<String, dynamic> anomaly) {
+  void showAnomalyDetails(Map<String, dynamic> anomaly) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

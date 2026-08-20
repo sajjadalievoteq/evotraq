@@ -17,7 +17,8 @@ class TransformationEventsState extends Equatable {
     required this.selectedEvent,
   });
 
-  factory TransformationEventsState.initial() => const TransformationEventsState(
+  factory TransformationEventsState.initial() =>
+      const TransformationEventsState(
         transformationEvents: [],
         isLoading: false,
         errorMessage: null,
@@ -36,38 +37,33 @@ class TransformationEventsState extends Equatable {
       transformationEvents: transformationEvents ?? this.transformationEvents,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      selectedEvent:
-          clearSelectedEvent ? null : (selectedEvent ?? this.selectedEvent),
+      selectedEvent: clearSelectedEvent
+          ? null
+          : (selectedEvent ?? this.selectedEvent),
     );
   }
 
   @override
   List<Object?> get props => [
-        transformationEvents,
-        isLoading,
-        errorMessage,
-        selectedEvent,
-      ];
+    transformationEvents,
+    isLoading,
+    errorMessage,
+    selectedEvent,
+  ];
 }
 
 class TransformationEventsCubit extends Cubit<TransformationEventsState> {
   final TransformationEventService _service;
 
-  TransformationEventsCubit({
-    TransformationEventService? service,
-  })  : _service = service ?? getIt<TransformationEventService>(),
-        super(TransformationEventsState.initial());
+  TransformationEventsCubit({TransformationEventService? service})
+    : _service = service ?? getIt<TransformationEventService>(),
+      super(TransformationEventsState.initial());
 
   Future<void> loadTransformationEvents() async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
       final events = await _service.getTransformationEvents();
-      emit(
-        state.copyWith(
-          transformationEvents: events,
-          isLoading: false,
-        ),
-      );
+      emit(state.copyWith(transformationEvents: events, isLoading: false));
     } catch (e) {
       emit(
         state.copyWith(
@@ -78,15 +74,16 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
 
-  Future<TransformationEvent> createTransformationProcess(
-      {required String transformationId,
-      required Set<String> inputEPCs,
-      required Set<String> outputEPCs,
-      required String locationGLN,
-      required String businessStep,
-      required String disposition,
-      required Map<String, String> parameters,
-      required Map<String, String> bizData}) async {
+  Future<TransformationEvent> createTransformationProcess({
+    required String transformationId,
+    required Set<String> inputEPCs,
+    required Set<String> outputEPCs,
+    required String locationGLN,
+    required String businessStep,
+    required String disposition,
+    required Map<String, String> parameters,
+    required Map<String, String> bizData,
+  }) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
       final newEvent = await _service.createTransformationProcess(
@@ -111,14 +108,17 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
       emit(
         state.copyWith(
           isLoading: false,
-          errorMessage: 'Failed to create transformation process: ${e.toString()}',
+          errorMessage:
+              'Failed to create transformation process: ${e.toString()}',
         ),
       );
       rethrow;
     }
   }
 
-  Future<TransformationEvent> createTransformationEvent(TransformationEvent event) async {
+  Future<TransformationEvent> createTransformationEvent(
+    TransformationEvent event,
+  ) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
       final newEvent = await _service.createTransformationEvent(event);
@@ -134,17 +134,22 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
       emit(
         state.copyWith(
           isLoading: false,
-          errorMessage: 'Failed to create transformation event: ${e.toString()}',
+          errorMessage:
+              'Failed to create transformation event: ${e.toString()}',
         ),
       );
       rethrow;
     }
   }
 
-  Future<List<TransformationEvent>> findByTransformationId(String transformationId) async {
+  Future<List<TransformationEvent>> findByTransformationId(
+    String transformationId,
+  ) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
-      final events = await _service.findTransformationEventsByTransformationId(transformationId);
+      final events = await _service.findTransformationEventsByTransformationId(
+        transformationId,
+      );
       emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
@@ -161,7 +166,9 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
   Future<List<TransformationEvent>> findByInputEPC(String inputEPC) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
-      final events = await _service.findTransformationEventsByInputEPC(inputEPC);
+      final events = await _service.findTransformationEventsByInputEPC(
+        inputEPC,
+      );
       emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
@@ -178,7 +185,9 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
   Future<List<TransformationEvent>> findByOutputEPC(String outputEPC) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
-      final events = await _service.findTransformationEventsByOutputEPC(outputEPC);
+      final events = await _service.findTransformationEventsByOutputEPC(
+        outputEPC,
+      );
       emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
@@ -192,10 +201,14 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
 
-  Future<List<TransformationEvent>> findByInputEPCClass(String inputEPCClass) async {
+  Future<List<TransformationEvent>> findByInputEPCClass(
+    String inputEPCClass,
+  ) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
-      final events = await _service.findTransformationEventsByInputEPCClass(inputEPCClass);
+      final events = await _service.findTransformationEventsByInputEPCClass(
+        inputEPCClass,
+      );
       emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
@@ -209,10 +222,14 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
 
-  Future<List<TransformationEvent>> findByOutputEPCClass(String outputEPCClass) async {
+  Future<List<TransformationEvent>> findByOutputEPCClass(
+    String outputEPCClass,
+  ) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
-      final events = await _service.findTransformationEventsByOutputEPCClass(outputEPCClass);
+      final events = await _service.findTransformationEventsByOutputEPCClass(
+        outputEPCClass,
+      );
       emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
@@ -226,17 +243,22 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
 
-  Future<List<TransformationEvent>> findTransformationHistory(String outputEPC) async {
+  Future<List<TransformationEvent>> findTransformationHistory(
+    String outputEPC,
+  ) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
-      final events = await _service.findTransformationHistoryForOutput(outputEPC);
+      final events = await _service.findTransformationHistoryForOutput(
+        outputEPC,
+      );
       emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
       emit(
         state.copyWith(
           isLoading: false,
-          errorMessage: 'Failed to find transformation history: ${e.toString()}',
+          errorMessage:
+              'Failed to find transformation history: ${e.toString()}',
         ),
       );
       rethrow;
@@ -267,7 +289,10 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
         throw Exception('Cannot update transformation event without an ID');
       }
 
-      final updatedEvent = await _service.updateTransformationEvent(event.id!, event);
+      final updatedEvent = await _service.updateTransformationEvent(
+        event.id!,
+        event,
+      );
 
       final updatedEvents = state.transformationEvents
           .map((e) => e.id == updatedEvent.id ? updatedEvent : e)
@@ -288,7 +313,8 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
       emit(
         state.copyWith(
           isLoading: false,
-          errorMessage: 'Failed to update transformation event: ${e.toString()}',
+          errorMessage:
+              'Failed to update transformation event: ${e.toString()}',
         ),
       );
       rethrow;
@@ -315,14 +341,17 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
       emit(
         state.copyWith(
           isLoading: false,
-          errorMessage: 'Failed to delete transformation event: ${e.toString()}',
+          errorMessage:
+              'Failed to delete transformation event: ${e.toString()}',
         ),
       );
       rethrow;
     }
   }
 
-  Future<List<TransformationEvent>> trackTransformationsByEPC(String epc) async {
+  Future<List<TransformationEvent>> trackTransformationsByEPC(
+    String epc,
+  ) async {
     try {
       final events = await _service.findTransformationsByEPC(epc);
       return events;
@@ -332,18 +361,27 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
   }
 
   Future<List<TransformationEvent>> findTransformationsByInputOutput(
-      String inputEPC, String outputEPC) async {
+    String inputEPC,
+    String outputEPC,
+  ) async {
     try {
-      final events = await _service.findTransformationsByInputAndOutputEPC(inputEPC, outputEPC);
+      final events = await _service.findTransformationsByInputAndOutputEPC(
+        inputEPC,
+        outputEPC,
+      );
       return events;
     } catch (e) {
       return [];
     }
   }
 
-  Future<List<TransformationEvent>> getTransformationsByTransformationId(String transformationId) async {
+  Future<List<TransformationEvent>> getTransformationsByTransformationId(
+    String transformationId,
+  ) async {
     try {
-      final events = await _service.findTransformationEventsByTransformationId(transformationId);
+      final events = await _service.findTransformationEventsByTransformationId(
+        transformationId,
+      );
       return events;
     } catch (e) {
       return [];

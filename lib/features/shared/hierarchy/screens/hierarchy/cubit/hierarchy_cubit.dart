@@ -6,7 +6,7 @@ import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 
-part 'hierarchy_state.dart';
+import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/cubit/hierarchy_state.dart';
 
 class HierarchyCubit extends Cubit<HierarchyState> {
   HierarchyCubit() : super(const HierarchyLoading());
@@ -53,11 +53,9 @@ class HierarchyCubit extends Cubit<HierarchyState> {
         directChildCount: page.total,
       );
 
-      emit(HierarchyLoaded(
-        rootState,
-        summary: summary,
-        highlightEpc: highlight,
-      ));
+      emit(
+        HierarchyLoaded(rootState, summary: summary, highlightEpc: highlight),
+      );
     } catch (e) {
       emit(HierarchyError(e.toString()));
     }
@@ -133,11 +131,13 @@ class HierarchyCubit extends Cubit<HierarchyState> {
     final current = state;
     if (current is HierarchyLoaded) {
       fn(target);
-      emit(HierarchyLoaded(
-        current.root,
-        summary: current.summary,
-        highlightEpc: current.highlightEpc,
-      ));
+      emit(
+        HierarchyLoaded(
+          current.root,
+          summary: current.summary,
+          highlightEpc: current.highlightEpc,
+        ),
+      );
     }
   }
 }

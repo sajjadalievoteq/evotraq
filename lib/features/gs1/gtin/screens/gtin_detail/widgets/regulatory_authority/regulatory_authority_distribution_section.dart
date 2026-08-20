@@ -1,6 +1,7 @@
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_skeleton_mask.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_outline_field.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_extension_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
 class RegulatoryAuthorityDistributionSection extends StatelessWidget {

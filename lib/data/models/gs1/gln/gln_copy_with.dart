@@ -1,4 +1,6 @@
-part of 'gln_model.dart';
+import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 
 extension GlnCopyWith on GLN {
   GLN copyWith({

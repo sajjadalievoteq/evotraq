@@ -1,4 +1,7 @@
-part of 'tatmeen_recent_activity.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
 class TatmeenActivityRowsSkeleton extends StatelessWidget {
   const TatmeenActivityRowsSkeleton({super.key});

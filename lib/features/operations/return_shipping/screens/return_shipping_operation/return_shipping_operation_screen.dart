@@ -1,9 +1,10 @@
+import 'package:traqtrace_app/features/operations/shared/operation_epc_type.dart';
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
@@ -25,7 +26,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/operation/opera
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/widgets/return_shipping_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/widgets/return_shipping_review_step.dart';
 import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/operations/shared/pharma_return_context.dart';
 import 'package:traqtrace_app/data/models/operations/shared/pharma_return_reason.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_context_builder.dart';

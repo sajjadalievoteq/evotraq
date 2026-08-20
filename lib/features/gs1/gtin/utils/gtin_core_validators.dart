@@ -1,6 +1,9 @@
-part of 'gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_validation_types.dart';
 
-abstract final class _GtinCoreValidators {
+import 'gtin_format.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+
+abstract final class GtinCoreValidators {
   static String? validateGtinCode(String? value) {
     final s = GtinFormat.stripGtinInput(value);
     if (s.isEmpty) {

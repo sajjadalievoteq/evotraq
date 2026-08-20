@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/inbound/system_user_form_field.dart';
 
 class CreatedSystemCredentials {
   const CreatedSystemCredentials({
@@ -104,18 +105,18 @@ class _CreateSystemUserDialogState extends State<CreateSystemUserDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _field(
-                  'username',
-                  'Username',
+                SystemUserFormField(
+                  name: 'username',
+                  label: 'Username',
                   validators: [
                     FormBuilderValidators.required(),
                     FormBuilderValidators.minLength(3),
                     FormBuilderValidators.maxLength(50),
                   ],
                 ),
-                _field(
-                  'email',
-                  'Email',
+                SystemUserFormField(
+                  name: 'email',
+                  label: 'Email',
                   validators: [
                     FormBuilderValidators.required(),
                     FormBuilderValidators.email(),
@@ -124,9 +125,19 @@ class _CreateSystemUserDialogState extends State<CreateSystemUserDialog> {
                 ),
                 Row(
                   children: [
-                    Expanded(child: _field('firstName', 'First name')),
+                    const Expanded(
+                      child: SystemUserFormField(
+                        name: 'firstName',
+                        label: 'First name',
+                      ),
+                    ),
                     const SizedBox(width: TraqSpacing.md),
-                    Expanded(child: _field('lastName', 'Last name')),
+                    const Expanded(
+                      child: SystemUserFormField(
+                        name: 'lastName',
+                        label: 'Last name',
+                      ),
+                    ),
                   ],
                 ),
                 FormBuilderTextField(
@@ -161,9 +172,9 @@ class _CreateSystemUserDialogState extends State<CreateSystemUserDialog> {
                     label: const Text('Generate strong password'),
                   ),
                 ),
-                _field(
-                  'partyGln',
-                  'Party GLN (optional)',
+                SystemUserFormField(
+                  name: 'partyGln',
+                  label: 'Party GLN (optional)',
                   validators: [
                     // Only enforce the 13-digit pattern once something has
                     // actually been typed - FormBuilderValidators.match runs
@@ -201,27 +212,4 @@ class _CreateSystemUserDialogState extends State<CreateSystemUserDialog> {
       ],
     );
   }
-
-  Widget _field(
-    String name,
-    String label, {
-    List<FormFieldValidator<String>> validators = const [],
-    TextInputType? keyboardType,
-    List<TextInputFormatter>? inputFormatters,
-  }) => Padding(
-    padding: const EdgeInsets.only(bottom: TraqSpacing.md),
-    child: FormBuilderTextField(
-      name: name,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      validator: FormBuilderValidators.compose([
-        if (name != 'partyGln') FormBuilderValidators.required(),
-        ...validators,
-      ]),
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-    ),
-  );
 }

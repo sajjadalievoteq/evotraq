@@ -1,10 +1,7 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/data/models/operations/packing/packing_request_model.dart';
-import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_request_model.dart';
 import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
@@ -14,14 +11,12 @@ import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_state.dart';
-export 'package:traqtrace_app/features/epcis/cubit/aggregation_events_state.dart';
 
-part 'aggregation_events_actions.dart';
 
 class AggregationEventsCubit extends Cubit<AggregationEventsState> {
-  final AggregationEventService _service;
-  final PackingOperationService _packingService;
-  final UnpackingOperationService _unpackingService;
+  final AggregationEventService service;
+  final PackingOperationService packingService;
+  final UnpackingOperationService unpackingService;
   final GLNService _glnService;
 
   final Map<String, GLN> _glnCache = {};
@@ -31,14 +26,14 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     PackingOperationService? packingService,
     UnpackingOperationService? unpackingService,
     GLNService? glnService,
-  }) : _service = service ?? getIt<AggregationEventService>(),
-       _packingService = packingService ?? getIt<PackingOperationService>(),
-       _unpackingService =
+  }) : service = service ?? getIt<AggregationEventService>(),
+       packingService = packingService ?? getIt<PackingOperationService>(),
+       unpackingService =
            unpackingService ?? getIt<UnpackingOperationService>(),
        _glnService = glnService ?? getIt<GLNService>(),
        super(const AggregationEventsState());
 
-  Future<List<AggregationEvent>> _enrichWithGlns(
+  Future<List<AggregationEvent>> enrichWithGlns(
     List<AggregationEvent> events,
   ) async {
     final codesToFetch = <String>{};
@@ -107,7 +102,7 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
   }
 
   Future<AggregationEvent> _enrichOne(AggregationEvent event) async {
-    final enriched = await _enrichWithGlns([event]);
+    final enriched = await enrichWithGlns([event]);
     return enriched.first;
   }
 
@@ -175,52 +170,52 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
       if (effectiveLocationGLN != null &&
           startTime != null &&
           endTime != null) {
-        events = await _service.findAggregationEventsByLocationAndTimeWindow(
+        events = await service.findAggregationEventsByLocationAndTimeWindow(
           effectiveLocationGLN,
           startTime,
           endTime,
         );
       } else if (effectiveBizStep != null && effectiveParentEPC != null) {
-        events = await _service.findAggregationEventsByBusinessStepAndParentEPC(
+        events = await service.findAggregationEventsByBusinessStepAndParentEPC(
           effectiveBizStep,
           effectiveParentEPC,
         );
       } else if (effectiveParentEPC != null && effectiveAction != null) {
-        events = await _service.findAggregationEventsByParentEPCAndAction(
+        events = await service.findAggregationEventsByParentEPCAndAction(
           effectiveParentEPC,
           effectiveAction,
         );
       } else if (effectiveChildEPC != null && effectiveAction != null) {
-        events = await _service.findAggregationEventsByChildEPCAndAction(
+        events = await service.findAggregationEventsByChildEPCAndAction(
           effectiveChildEPC,
           effectiveAction,
         );
       } else if (effectiveParentEPC != null) {
-        events = await _service.findAggregationEventsByParentEPC(
+        events = await service.findAggregationEventsByParentEPC(
           effectiveParentEPC,
         );
       } else if (effectiveChildEPC != null) {
-        events = await _service.findAggregationEventsByChildEPC(
+        events = await service.findAggregationEventsByChildEPC(
           effectiveChildEPC,
         );
       } else if (effectiveDisposition != null) {
-        events = await _service.findAggregationEventsByDisposition(
+        events = await service.findAggregationEventsByDisposition(
           effectiveDisposition,
         );
       } else if (effectiveBizStep != null) {
-        events = await _service.findAggregationEventsByBusinessStep(
+        events = await service.findAggregationEventsByBusinessStep(
           effectiveBizStep,
         );
       } else if (effectiveAction != null) {
-        events = await _service.findAggregationEventsByAction(effectiveAction);
+        events = await service.findAggregationEventsByAction(effectiveAction);
       } else {
-        final result = await _service.getAllAggregationEvents(
+        final result = await service.getAllAggregationEvents(
           page,
           effectiveSize,
           direction: state.sortOrder,
         );
         events = result['content'] as List<AggregationEvent>;
-        events = await _enrichWithGlns(events);
+        events = await enrichWithGlns(events);
 
         final nextEvents = isLoadMore
             ? [...state.aggregationEvents, ...events]
@@ -266,7 +261,7 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
         state.sortOrder,
       );
 
-      events = await _enrichWithGlns(events);
+      events = await enrichWithGlns(events);
 
       final nextEvents = isLoadMore
           ? [...state.aggregationEvents, ...events]
@@ -333,7 +328,7 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
       state.copyWith(status: AggregationEventsStatus.loading, clearError: true),
     );
     try {
-      final raw = await _service.getAggregationEventByIdentifier(id);
+      final raw = await service.getAggregationEventByIdentifier(id);
       final event = await _enrichOne(raw);
       emit(
         state.copyWith(

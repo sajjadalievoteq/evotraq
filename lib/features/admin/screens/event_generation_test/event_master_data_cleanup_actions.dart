@@ -1,8 +1,12 @@
-part of 'event_generation_test_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/features/admin/screens/event_generation_test/event_generation_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/event_generation_test/event_generation_test_screen.dart';
 
-extension EventMasterDataCleanupActions on _EventGenerationTestScreenState {
-  Future<void> _cleanGLNTestData() async {
-    if (_testService == null) return;
+extension EventMasterDataCleanupActions on EventGenerationTestScreenState {
+  Future<void> cleanGLNTestData() async {
+    if (testService == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -27,26 +31,26 @@ extension EventMasterDataCleanupActions on _EventGenerationTestScreenState {
     if (confirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanGLNTestData();
+      final result = await testService!.cleanGLNTestData();
 
       context.showSuccess('Cleaned ${result['deletedGLNs']} test GLNs');
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to clean GLN test data: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to clean GLN test data: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _cleanGTINTestData() async {
-    if (_testService == null) return;
+  Future<void> cleanGTINTestData() async {
+    if (testService == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -71,26 +75,26 @@ extension EventMasterDataCleanupActions on _EventGenerationTestScreenState {
     if (confirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanGTINTestData();
+      final result = await testService!.cleanGTINTestData();
 
       context.showSuccess('Cleaned ${result['deletedGTINs']} test GTINs');
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to clean GTIN test data: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to clean GTIN test data: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _cleanSGTINTestData() async {
-    if (_testService == null) return;
+  Future<void> cleanSGTINTestData() async {
+    if (testService == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -115,26 +119,26 @@ extension EventMasterDataCleanupActions on _EventGenerationTestScreenState {
     if (confirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanSGTINTestData();
+      final result = await testService!.cleanSGTINTestData();
 
       context.showSuccess('Cleaned ${result['deletedSGTINs']} test SGTINs');
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to clean SGTIN test data: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to clean SGTIN test data: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _cleanSSCCTestData() async {
-    if (_testService == null) return;
+  Future<void> cleanSSCCTestData() async {
+    if (testService == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -159,26 +163,26 @@ extension EventMasterDataCleanupActions on _EventGenerationTestScreenState {
     if (confirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanSSCCTestData();
+      final result = await testService!.cleanSSCCTestData();
 
       context.showSuccess('Cleaned ${result['deletedSSCCs']} test SSCCs');
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to clean SSCC test data: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to clean SSCC test data: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _cleanAllSSCCData() async {
-    if (_testService == null) return;
+  Future<void> cleanAllSSCCData() async {
+    if (testService == null) return;
 
     final firstConfirmed = await showDialog<bool>(
       context: context,
@@ -276,23 +280,23 @@ extension EventMasterDataCleanupActions on _EventGenerationTestScreenState {
     if (secondConfirmed != true) return;
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final result = await _testService!.cleanAllSSCCData();
+      final result = await testService!.cleanAllSSCCData();
 
       context.showError(
         'DANGER: Deleted ${result['deletedSSCCs']} SSCCs from system (ALL SSCCs!)',
         duration: const Duration(seconds: 5),
       );
 
-      await _loadDataManagementData();
+      await loadDataManagementData();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to delete all SSCC data: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Failed to delete all SSCC data: ${e.toString()}';
+        isLoading = false;
       });
     }
   }

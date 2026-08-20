@@ -1,23 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-import 'package:traqtrace_app/features/automation_center/cubit/job_queue_cubit.dart';
-import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
-import 'package:traqtrace_app/features/automation_center/screens/automation_center/utils/automation_center_sections.dart';
-import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_system_health_panel.dart';
-import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_center_tab_content.dart';
-import 'package:traqtrace_app/features/automation_center/screens/notification_center/notification_center_screen.dart';
-import 'package:traqtrace_app/features/automation_center/screens/subscription_management/subscription_management_screen.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/automation_workbench_panel.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_panel.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/lazy_indexed_stack.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/notifications_shell.dart';
-import 'package:traqtrace_app/features/shared/workbench/workbench_scaffold.dart';
 
 class WorkspaceTab {
   const WorkspaceTab({

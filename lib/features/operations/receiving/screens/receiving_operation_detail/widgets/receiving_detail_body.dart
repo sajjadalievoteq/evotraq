@@ -1,10 +1,11 @@
+import 'package:traqtrace_app/features/operations/shared/widgets/initiate_return_shipping_button.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_status_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/utils/receiving_detail_helpers.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_two_gln_location_card.dart';
-import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_shipped_items_card.dart';
+import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_received_items_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_transport_card.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_reference_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_comments_card.dart';
@@ -12,7 +13,6 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_messages_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_processing_stats_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_detail_buttons.dart';
 
 class ReceivingDetailBody extends StatelessWidget {
   const ReceivingDetailBody({

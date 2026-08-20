@@ -1,4 +1,5 @@
-part of 'traq_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_colors.dart';
 
 class TraqSpacing {
   static const double xs = 4;
@@ -11,8 +12,10 @@ class TraqSpacing {
 
   static const EdgeInsets cardPad = EdgeInsets.all(20);
   static const EdgeInsets surfacePad = EdgeInsets.all(16);
-  static const EdgeInsets pagePad =
-      EdgeInsets.symmetric(horizontal: 24, vertical: 24);
+  static const EdgeInsets pagePad = EdgeInsets.symmetric(
+    horizontal: 24,
+    vertical: 24,
+  );
 
   static const double buttonH = 36;
   static const double buttonHLarge = 44;
@@ -44,38 +47,38 @@ class TraqDuration {
 
 class TraqShadows {
   static List<BoxShadow> sm({required Brightness brightness}) => [
-        BoxShadow(
-          color: brightness == Brightness.dark
-              ? const Color(0x66000000)
-              : const Color(0x0F000000),
-          blurRadius: 2,
-          offset: const Offset(0, 1),
-        ),
-      ];
+    BoxShadow(
+      color: brightness == Brightness.dark
+          ? const Color(0x66000000)
+          : const Color(0x0F000000),
+      blurRadius: 2,
+      offset: const Offset(0, 1),
+    ),
+  ];
 
   static List<BoxShadow> md({required Brightness brightness}) => [
-        BoxShadow(
-          color: brightness == Brightness.dark
-              ? const Color(0x99000000)
-              : const Color(0x1F000000),
-          blurRadius: 24,
-          spreadRadius: -8,
-          offset: const Offset(0, 8),
-        ),
-      ];
+    BoxShadow(
+      color: brightness == Brightness.dark
+          ? const Color(0x99000000)
+          : const Color(0x1F000000),
+      blurRadius: 24,
+      spreadRadius: -8,
+      offset: const Offset(0, 8),
+    ),
+  ];
 
   static List<BoxShadow> lg({required Brightness brightness}) => [
-        BoxShadow(
-          color: brightness == Brightness.dark
-              ? const Color(0xB3000000)
-              : const Color(0x2E000000),
-          blurRadius: 48,
-          spreadRadius: -12,
-          offset: const Offset(0, 24),
-        ),
-      ];
+    BoxShadow(
+      color: brightness == Brightness.dark
+          ? const Color(0xB3000000)
+          : const Color(0x2E000000),
+      blurRadius: 48,
+      spreadRadius: -12,
+      offset: const Offset(0, 24),
+    ),
+  ];
 
   static List<BoxShadow> primaryGlow(TraqColors c) => [
-        BoxShadow(color: c.primaryGlow, blurRadius: 16, spreadRadius: -2),
-      ];
+    BoxShadow(color: c.primaryGlow, blurRadius: 16, spreadRadius: -2),
+  ];
 }

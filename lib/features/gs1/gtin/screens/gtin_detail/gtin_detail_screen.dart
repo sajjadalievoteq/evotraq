@@ -1,13 +1,10 @@
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_awaiting_selection_pane.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_document_unit_descriptor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
@@ -15,26 +12,21 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/gtin_detail_screen_fields.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharmaceutical_extension_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharmaceutical_extension_actions.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/regulatory_authority/regulatory_authority_extension.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_detail_form_body.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_detail_form_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
-
 class GTINDetailScreen extends StatefulWidget {
   final String? gtinCode;
   final bool isEditing;
   final GTIN? gtin;
   final bool embedded;
-
   final VoidCallback? onEmbeddedActionSuccess;
-
   final bool awaitingListSelection;
-
   const GTINDetailScreen({
     super.key,
     this.gtinCode,
@@ -44,7 +36,6 @@ class GTINDetailScreen extends StatefulWidget {
     this.onEmbeddedActionSuccess,
     this.awaitingListSelection = false,
   });
-
   @override
   State<GTINDetailScreen> createState() => _GTINDetailScreenState();
 }

@@ -1,9 +1,9 @@
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_skeleton_group_card.dart';
 
-import '../../../../../gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 
 class SsccDetailSkeleton extends StatelessWidget {
   const SsccDetailSkeleton({

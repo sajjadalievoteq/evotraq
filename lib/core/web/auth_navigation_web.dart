@@ -1,8 +1,8 @@
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'dart:html' as html;
 
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
 
 const String _frontendBaseUrl = String.fromEnvironment(
   'FRONTEND_BASE_URL',

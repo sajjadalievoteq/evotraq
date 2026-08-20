@@ -1,7 +1,19 @@
-part of 'unpacking_operation_screen.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
+import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_parent_container_epc.dart';
+import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/unpacking_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/utils/unpacking_container_contents_loader.dart';
+import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
+import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 
-extension UnpackingOperationScanning on _UnpackingOperationScreenState {
-  void _onContainerScanResult(ScanResult result) {
+extension UnpackingOperationScanning on UnpackingOperationScreenState {
+  void onContainerScanResult(ScanResult result) {
     if (!result.isValid) return;
 
     try {
@@ -12,7 +24,7 @@ extension UnpackingOperationScanning on _UnpackingOperationScreenState {
         );
         return;
       }
-      _onManualContainerAdded(parsed);
+      onManualContainerAdded(parsed);
       final label = parsed.type == EPCType.sscc
           ? 'SSCC: ${parsed.sscc ?? parsed.raw}'
           : 'SGTIN: ${parsed.epc}';
@@ -22,66 +34,66 @@ extension UnpackingOperationScanning on _UnpackingOperationScreenState {
     }
   }
 
-  Future<void> _loadContainerContents() async {
-    if (_parentContainerId == null || _parentContainerId!.isEmpty) return;
+  Future<void> loadContainerContents() async {
+    if (parentContainerId == null || parentContainerId!.isEmpty) return;
 
     setState(() {
-      _isLoadingContents = true;
-      _contentsLoadError = null;
+      isLoadingContents = true;
+      contentsLoadError = null;
     });
 
     try {
       final contents =
           await UnpackingContainerContentsLoader.loadDirectChildren(
             getIt<HierarchyService>(),
-            _parentContainerId!,
+            parentContainerId!,
           );
       if (!mounted) return;
       setState(() {
-        _containerContents = contents;
-        _isLoadingContents = false;
+        containerContents = contents;
+        isLoadingContents = false;
         _applyScopeSelection();
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _isLoadingContents = false;
-        _contentsLoadError =
+        isLoadingContents = false;
+        contentsLoadError =
             'Could not load container contents. Check your connection and try again.';
-        _containerContents = [];
-        _selectedEpcs.clear();
+        containerContents = [];
+        selectedEpcs.clear();
       });
     }
   }
 
-  void _onUnpackingScopeChanged(UnpackingScope scope) {
+  void onUnpackingScopeChanged(UnpackingScope scope) {
     setState(() {
-      _unpackingScope = scope;
+      unpackingScope = scope;
       _applyScopeSelection();
     });
   }
 
   void _applyScopeSelection() {
-    if (_unpackingScope == UnpackingScope.wholeContainer) {
-      _selectedEpcs
+    if (unpackingScope == UnpackingScope.wholeContainer) {
+      selectedEpcs
         ..clear()
-        ..addAll(_containerContents.map((node) => node.epc));
+        ..addAll(containerContents.map((node) => node.epc));
     } else {
-      _selectedEpcs.removeWhere(
-        (epc) => !_containerContents.any((node) => node.epc == epc),
+      selectedEpcs.removeWhere(
+        (epc) => !containerContents.any((node) => node.epc == epc),
       );
     }
   }
 
-  void _onItemSelectionChanged(String epc, bool selected) {
+  void onItemSelectionChanged(String epc, bool selected) {
     setState(() {
-      if (_unpackingScope == UnpackingScope.wholeContainer) {
-        _unpackingScope = UnpackingScope.partial;
+      if (unpackingScope == UnpackingScope.wholeContainer) {
+        unpackingScope = UnpackingScope.partial;
       }
       if (selected) {
-        _selectedEpcs.add(epc);
+        selectedEpcs.add(epc);
       } else {
-        _selectedEpcs.remove(epc);
+        selectedEpcs.remove(epc);
       }
     });
   }
@@ -89,7 +101,7 @@ extension UnpackingOperationScanning on _UnpackingOperationScreenState {
   String? _resolveContainerMemberEpc(String barcode) {
     final uri = Gs1Converter.barcodeToEpc(barcode) ?? barcode;
     final normalized = normalizeHierarchyEpc(uri);
-    for (final node in _containerContents) {
+    for (final node in containerContents) {
       if (normalizeHierarchyEpc(node.epc) == normalized) {
         return node.epc;
       }
@@ -97,19 +109,19 @@ extension UnpackingOperationScanning on _UnpackingOperationScreenState {
     return null;
   }
 
-  void _onItemAdded(EPCParseResult result) {
+  void onItemAdded(EPCParseResult result) {
     _tryAddItemByBarcode(result.epc);
   }
 
-  void _onManualContainerAdded(EPCParseResult result) {
+  void onManualContainerAdded(EPCParseResult result) {
     final validationError = validateParentContainerEpc(result);
     if (validationError != null) {
       context.showError(validationError);
       return;
     }
 
-    setState(() => _parentContainerId = parentContainerIdFromParsed(result));
-    _loadContainerContents();
+    setState(() => parentContainerId = parentContainerIdFromParsed(result));
+    loadContainerContents();
   }
 
   void _tryAddItemByBarcode(String barcode) {
@@ -118,12 +130,12 @@ extension UnpackingOperationScanning on _UnpackingOperationScreenState {
       context.showError(
         'This item is not packed in the selected container. '
         'Choose it from the table above or enter an EPC that belongs to '
-        'container $_parentContainerId.',
+        'container $parentContainerId.',
       );
       return;
     }
 
-    if (_selectedEpcs.contains(memberEpc)) {
+    if (selectedEpcs.contains(memberEpc)) {
       context.showError('This item is already selected for unpacking.');
       return;
     }
@@ -140,10 +152,10 @@ extension UnpackingOperationScanning on _UnpackingOperationScreenState {
     }
 
     setState(() {
-      if (_unpackingScope == UnpackingScope.wholeContainer) {
-        _unpackingScope = UnpackingScope.partial;
+      if (unpackingScope == UnpackingScope.wholeContainer) {
+        unpackingScope = UnpackingScope.partial;
       }
-      _selectedEpcs.add(memberEpc);
+      selectedEpcs.add(memberEpc);
     });
     context.showSuccess('Item added ✓');
   }

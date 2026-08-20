@@ -1,4 +1,5 @@
-part of 'traq_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_colors.dart';
 
 class TraqText {
   static const String fontFamily = 'Nekst';
@@ -59,16 +60,16 @@ class TraqText {
       letterSpacing: -0.08,
       fontWeight: FontWeight.w600,
     );
-    final body = base(14, FontWeight.w400, 1.5).copyWith(
-      fontSize: 14,
-      height: 1.5,
-      fontWeight: FontWeight.w400,
-    );
-    final bodySm = base(13, FontWeight.w400, 1.45).copyWith(
-      fontSize: 13,
-      height: 1.45,
-      fontWeight: FontWeight.w400,
-    );
+    final body = base(
+      14,
+      FontWeight.w400,
+      1.5,
+    ).copyWith(fontSize: 14, height: 1.5, fontWeight: FontWeight.w400);
+    final bodySm = base(
+      13,
+      FontWeight.w400,
+      1.45,
+    ).copyWith(fontSize: 13, height: 1.45, fontWeight: FontWeight.w400);
     final cap = base(14, FontWeight.w500, 1.3).copyWith(
       fontSize: 14,
       height: 1.3,
@@ -76,11 +77,11 @@ class TraqText {
       fontWeight: FontWeight.w500,
       color: c.textMuted,
     );
-    final monoBase = base(13, FontWeight.w400, 1.4).copyWith(
-      fontSize: 13,
-      height: 1.4,
-      fontWeight: FontWeight.w400,
-    );
+    final monoBase = base(
+      13,
+      FontWeight.w400,
+      1.4,
+    ).copyWith(fontSize: 13, height: 1.4, fontWeight: FontWeight.w400);
 
     return TraqText._(
       display: display,
@@ -99,26 +100,26 @@ class TraqText {
   }
 
   static TraqText of(BuildContext context) =>
-      Theme.of(context).extension<_TraqTextExt>()!.text;
+      Theme.of(context).extension<TraqTextExt>()!.text;
 
   static TextTheme materialTextTheme(TraqText text) => TextTheme(
-        displayLarge: text.display,
-        headlineLarge: text.h1,
-        headlineMedium: text.h2,
-        titleMedium: text.h3,
-        bodyMedium: text.body,
-        bodySmall: text.bodySm,
-        labelSmall: text.cap,
-      );
+    displayLarge: text.display,
+    headlineLarge: text.h1,
+    headlineMedium: text.h2,
+    titleMedium: text.h3,
+    bodyMedium: text.body,
+    bodySmall: text.bodySm,
+    labelSmall: text.cap,
+  );
 }
 
-class _TraqTextExt extends ThemeExtension<_TraqTextExt> {
+class TraqTextExt extends ThemeExtension<TraqTextExt> {
   final TraqText text;
-  const _TraqTextExt(this.text);
+  const TraqTextExt(this.text);
 
   @override
-  _TraqTextExt copyWith({TraqText? text}) => _TraqTextExt(text ?? this.text);
+  TraqTextExt copyWith({TraqText? text}) => TraqTextExt(text ?? this.text);
 
   @override
-  _TraqTextExt lerp(ThemeExtension<_TraqTextExt>? other, double t) => this;
+  TraqTextExt lerp(ThemeExtension<TraqTextExt>? other, double t) => this;
 }

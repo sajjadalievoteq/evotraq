@@ -1,31 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_list/cancel_receiving_operation_list_body.dart';
-import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
-import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_mapper.dart';
-import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_receiving/cancel_receiving_operation_service.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_list/utils/cancel_receiving_operation_list_filter.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_list/widgets/cancel_receiving_advanced_filters_panel.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_list/widgets/cancel_receiving_quick_filter_dialog.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/utils/cancel_receiving_ui_constants.dart';
-import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 
 class CancelReceivingOperationListScreen extends StatelessWidget {
   const CancelReceivingOperationListScreen({

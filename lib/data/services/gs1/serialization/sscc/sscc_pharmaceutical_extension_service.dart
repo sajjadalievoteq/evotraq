@@ -9,9 +9,8 @@ import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_
 class SSCCPharmaceuticalExtensionService {
   final DioService _dioService;
 
-  SSCCPharmaceuticalExtensionService({
-    required DioService dioService,
-  }) : _dioService = dioService;
+  SSCCPharmaceuticalExtensionService({required DioService dioService})
+    : _dioService = dioService;
 
   String get _specCrudBase =>
       '${_dioService.baseUrl}${SsccServiceConstants.pathBase}';
@@ -19,7 +18,8 @@ class SSCCPharmaceuticalExtensionService {
   String get _legacyQueryBase => '${_dioService.baseUrl}/pharmaceutical/sscc';
 
   static const _headers = {
-    SsccServiceConstants.headerContentType: SsccServiceConstants.contentTypeJson,
+    SsccServiceConstants.headerContentType:
+        SsccServiceConstants.contentTypeJson,
   };
 
   Future<SSCCPharmaceuticalExtension> createBySsccCode(
@@ -38,8 +38,9 @@ class SSCCPharmaceuticalExtensionService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.data));
     } else {
-      throw ApiException(message:
-        'Failed to create SSCC pharmaceutical extension: ${response.statusCode}',
+      throw ApiException(
+        message:
+            'Failed to create SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
   }
@@ -59,8 +60,9 @@ class SSCCPharmaceuticalExtensionService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.data));
     } else {
-      throw ApiException(message:
-        'Failed to save SSCC pharmaceutical extension: ${response.statusCode}',
+      throw ApiException(
+        message:
+            'Failed to save SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
   }
@@ -78,8 +80,9 @@ class SSCCPharmaceuticalExtensionService {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw ApiException(message:
-        'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}',
+      throw ApiException(
+        message:
+            'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
   }
@@ -98,8 +101,9 @@ class SSCCPharmaceuticalExtensionService {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw ApiException(message:
-        'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}',
+      throw ApiException(
+        message:
+            'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
   }
@@ -113,8 +117,9 @@ class SSCCPharmaceuticalExtensionService {
     );
 
     if (response.statusCode != 204 && response.statusCode != 200) {
-      throw ApiException(message:
-        'Failed to delete SSCC pharmaceutical extension: ${response.statusCode}',
+      throw ApiException(
+        message:
+            'Failed to delete SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
   }
@@ -130,8 +135,9 @@ class SSCCPharmaceuticalExtensionService {
     if (response.statusCode == 200) {
       return jsonDecode(response.data) as bool;
     } else {
-      throw ApiException(message:
-        'Failed to check SSCC pharmaceutical extension: ${response.statusCode}',
+      throw ApiException(
+        message:
+            'Failed to check SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
   }
@@ -156,7 +162,8 @@ class SSCCPharmaceuticalExtensionService {
       return PageResponseUtils.normalizeBody(jsonDecode(response.data));
     }
     throw ApiException(
-      message: 'Failed to fetch pharmaceutical extensions: ${response.statusCode}',
+      message:
+          'Failed to fetch pharmaceutical extensions: ${response.statusCode}',
     );
   }
 
@@ -164,11 +171,8 @@ class SSCCPharmaceuticalExtensionService {
     String path,
   ) {
     return PageResponseUtils.fetchAllPages(
-      fetchPage: (page, size) => _getPharmaExtensionPage(
-        path,
-        page: page,
-        size: size,
-      ),
+      fetchPage: (page, size) =>
+          _getPharmaExtensionPage(path, page: page, size: size),
       parseItem: SSCCPharmaceuticalExtension.fromJson,
     );
   }
@@ -178,7 +182,7 @@ class SSCCPharmaceuticalExtensionService {
   }
 
   Future<List<SSCCPharmaceuticalExtension>>
-      findTemperatureMonitoredShipments() async {
+  findTemperatureMonitoredShipments() async {
     return _fetchAllPharmaExtensions('$_legacyQueryBase/temperature-monitored');
   }
 
@@ -187,12 +191,13 @@ class SSCCPharmaceuticalExtensionService {
   }
 
   Future<List<SSCCPharmaceuticalExtension>>
-      findControlledSubstanceShipments() async {
+  findControlledSubstanceShipments() async {
     return _fetchAllPharmaExtensions('$_legacyQueryBase/controlled-substance');
   }
 
   Future<List<SSCCPharmaceuticalExtension>> findByDeaSchedule(
-      String deaSchedule) async {
+    String deaSchedule,
+  ) async {
     return _fetchAllPharmaExtensions(
       '$_legacyQueryBase/dea-schedule/$deaSchedule',
     );
@@ -202,12 +207,13 @@ class SSCCPharmaceuticalExtensionService {
     return _fetchAllPharmaExtensions('$_legacyQueryBase/hazmat');
   }
 
-  Future<List<SSCCPharmaceuticalExtension>> findChainOfCustodyShipments() async {
+  Future<List<SSCCPharmaceuticalExtension>>
+  findChainOfCustodyShipments() async {
     return _fetchAllPharmaExtensions('$_legacyQueryBase/chain-of-custody');
   }
 
   Future<List<SSCCPharmaceuticalExtension>>
-      findSignatureRequiredShipments() async {
+  findSignatureRequiredShipments() async {
     return _fetchAllPharmaExtensions('$_legacyQueryBase/signature-required');
   }
 

@@ -1,8 +1,12 @@
-part of 'sscc_pharmaceutical_extension_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_widget.dart';
 
 extension SSCCPharmaceuticalExtensionActions
     on SSCCPharmaceuticalExtensionWidgetState {
-  Future<void> _loadExtension() async {
+  Future<void> loadExtension() async {
     final hasValidSsccId = widget.ssccId != null;
     final hasValidSsccCode =
         widget.ssccCode != null && widget.ssccCode!.isNotEmpty;
@@ -10,7 +14,7 @@ extension SSCCPharmaceuticalExtensionActions
     if (!hasValidSsccId && !hasValidSsccCode) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          isLoading = false;
         });
       }
       return;
@@ -18,236 +22,233 @@ extension SSCCPharmaceuticalExtensionActions
 
     try {
       final service = getIt<SSCCPharmaceuticalExtensionService>();
-      SSCCPharmaceuticalExtension? extension;
+      SSCCPharmaceuticalExtension? loadedExtension;
 
       if (hasValidSsccId) {
-        extension = await service.getBySsccId(widget.ssccId!);
+        loadedExtension = await service.getBySsccId(widget.ssccId!);
       } else if (hasValidSsccCode) {
-        extension = await service.getBySsccCode(widget.ssccCode!);
+        loadedExtension = await service.getBySsccCode(widget.ssccCode!);
       }
 
       if (mounted) {
         setState(() {
-          _extension = extension;
-          _isLoading = false;
-          if (extension != null) {
-            _populateFields(extension);
+          extension = loadedExtension;
+          isLoading = false;
+          if (loadedExtension != null) {
+            _populateFields(loadedExtension);
           }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          isLoading = false;
         });
       }
     }
   }
 
   void _populateFields(SSCCPharmaceuticalExtension ext) {
-    _coldChainRequired = ext.coldChainRequired;
-    _setSeedOrController(
+    coldChainRequired = ext.coldChainRequired;
+    setSeedOrController(
       'minTemperatureCelsius',
       ext.minTemperatureCelsius?.toString() ?? '',
     );
-    _setSeedOrController(
+    setSeedOrController(
       'maxTemperatureCelsius',
       ext.maxTemperatureCelsius?.toString() ?? '',
     );
-    _temperatureMonitoringRequired = ext.temperatureMonitoringRequired;
-    _setSeedOrController(
+    temperatureMonitoringRequired = ext.temperatureMonitoringRequired;
+    setSeedOrController(
       'temperatureMonitoringDeviceId',
       ext.temperatureMonitoringDeviceId ?? '',
     );
-    _setSeedOrController(
+    setSeedOrController(
       'temperatureExcursionLimitMinutes',
       ext.temperatureExcursionLimitMinutes?.toString() ?? '',
     );
 
-    _gdpCompliant = ext.gdpCompliant;
-    _setSeedOrController(
-      'gdpCertificateNumber',
-      ext.gdpCertificateNumber ?? '',
-    );
-    _gdpCertificateExpiry = ext.gdpCertificateExpiry;
-    _setSeedOrController('gdpIssuingAuthority', ext.gdpIssuingAuthority ?? '');
+    gdpCompliant = ext.gdpCompliant;
+    setSeedOrController('gdpCertificateNumber', ext.gdpCertificateNumber ?? '');
+    gdpCertificateExpiry = ext.gdpCertificateExpiry;
+    setSeedOrController('gdpIssuingAuthority', ext.gdpIssuingAuthority ?? '');
 
-    _whoPqsRequired = ext.whoPqsRequired;
-    _setSeedOrController('whoPqsEquipmentCode', ext.whoPqsEquipmentCode ?? '');
+    whoPqsRequired = ext.whoPqsRequired;
+    setSeedOrController('whoPqsEquipmentCode', ext.whoPqsEquipmentCode ?? '');
 
-    _containsControlledSubstance = ext.containsControlledSubstance;
-    _deaSchedule = ext.deaSchedule;
-    _setSeedOrController('deaOrderFormNumber', ext.deaOrderFormNumber ?? '');
-    _setSeedOrController(
+    containsControlledSubstance = ext.containsControlledSubstance;
+    deaSchedule = ext.deaSchedule;
+    setSeedOrController('deaOrderFormNumber', ext.deaOrderFormNumber ?? '');
+    setSeedOrController(
       'incbAuthorizationNumber',
       ext.incbAuthorizationNumber ?? '',
     );
-    _setSeedOrController(
+    setSeedOrController(
       'narcoticTransitPermit',
       ext.narcoticTransitPermit ?? '',
     );
 
-    _hazmatClass = ext.hazmatClass;
-    _setSeedOrController('hazmatUnNumber', ext.hazmatUnNumber ?? '');
-    _hazmatPackingGroup = ext.hazmatPackingGroup;
-    _setSeedOrController(
+    hazmatClass = ext.hazmatClass;
+    setSeedOrController('hazmatUnNumber', ext.hazmatUnNumber ?? '');
+    hazmatPackingGroup = ext.hazmatPackingGroup;
+    setSeedOrController(
       'hazmatSpecialProvisions',
       ext.hazmatSpecialProvisions ?? '',
     );
 
-    _humidityControlled = ext.humidityControlled;
-    _setSeedOrController(
+    humidityControlled = ext.humidityControlled;
+    setSeedOrController(
       'minHumidityPercent',
       ext.minHumidityPercent?.toString() ?? '',
     );
-    _setSeedOrController(
+    setSeedOrController(
       'maxHumidityPercent',
       ext.maxHumidityPercent?.toString() ?? '',
     );
-    _lightSensitive = ext.lightSensitive;
-    _orientationSensitive = ext.orientationSensitive;
-    _shockSensitive = ext.shockSensitive;
+    lightSensitive = ext.lightSensitive;
+    orientationSensitive = ext.orientationSensitive;
+    shockSensitive = ext.shockSensitive;
 
-    _chainOfCustodyRequired = ext.chainOfCustodyRequired;
-    _requiresSignatureOnReceipt = ext.requiresSignatureOnReceipt;
-    _requiresPharmacistVerification = ext.requiresPharmacistVerification;
+    chainOfCustodyRequired = ext.chainOfCustodyRequired;
+    requiresSignatureOnReceipt = ext.requiresSignatureOnReceipt;
+    requiresPharmacistVerification = ext.requiresPharmacistVerification;
 
-    _setSeedOrController(
+    setSeedOrController(
       'carrierGdpQualificationNumber',
       ext.carrierGdpQualificationNumber ?? '',
     );
-    _carrierGdpQualificationExpiry = ext.carrierGdpQualificationExpiry;
-    _setSeedOrController(
+    carrierGdpQualificationExpiry = ext.carrierGdpQualificationExpiry;
+    setSeedOrController(
       'vehicleQualificationNumber',
       ext.vehicleQualificationNumber ?? '',
     );
-    _vehicleLastQualificationDate = ext.vehicleLastQualificationDate;
+    vehicleLastQualificationDate = ext.vehicleLastQualificationDate;
 
-    _clinicalTrialShipment = ext.clinicalTrialShipment;
-    _setSeedOrController(
+    clinicalTrialShipment = ext.clinicalTrialShipment;
+    setSeedOrController(
       'clinicalTrialProtocolNumber',
       ext.clinicalTrialProtocolNumber ?? '',
     );
-    _setSeedOrController('irbApprovalNumber', ext.irbApprovalNumber ?? '');
+    setSeedOrController('irbApprovalNumber', ext.irbApprovalNumber ?? '');
 
-    _setSeedOrController(
+    setSeedOrController(
       'specialHandlingInstructions',
       ext.specialHandlingInstructions ?? '',
     );
-    _fragile = ext.fragile;
-    _doNotStack = ext.doNotStack;
-    _thisSideUp = ext.thisSideUp;
+    fragile = ext.fragile;
+    doNotStack = ext.doNotStack;
+    thisSideUp = ext.thisSideUp;
   }
 
   bool get hasData =>
-      _coldChainRequired ||
-      _text('minTemperatureCelsius').isNotEmpty ||
-      _text('maxTemperatureCelsius').isNotEmpty ||
-      _temperatureMonitoringRequired ||
-      _gdpCompliant ||
-      _text('gdpCertificateNumber').isNotEmpty ||
-      _whoPqsRequired ||
-      _containsControlledSubstance ||
-      _deaSchedule != null ||
-      _hazmatClass != null ||
-      _clinicalTrialShipment;
+      coldChainRequired ||
+      text('minTemperatureCelsius').isNotEmpty ||
+      text('maxTemperatureCelsius').isNotEmpty ||
+      temperatureMonitoringRequired ||
+      gdpCompliant ||
+      text('gdpCertificateNumber').isNotEmpty ||
+      whoPqsRequired ||
+      containsControlledSubstance ||
+      deaSchedule != null ||
+      hazmatClass != null ||
+      clinicalTrialShipment;
 
   SSCCPharmaceuticalExtension? buildExtension({int? ssccId, String? ssccCode}) {
     if (!hasData) return null;
 
-    return _extensionFromFields().copyWith(
+    return extensionFromFields().copyWith(
       ssccId: ssccId ?? widget.ssccId,
       ssccCode: ssccCode ?? widget.ssccCode,
     );
   }
 
-  SSCCPharmaceuticalExtension _extensionFromFields() {
+  SSCCPharmaceuticalExtension extensionFromFields() {
     return SSCCPharmaceuticalExtension(
-      id: _extension?.id,
+      id: extension?.id,
       ssccId: widget.ssccId,
       ssccCode: widget.ssccCode,
-      coldChainRequired: _coldChainRequired,
-      minTemperatureCelsius: _text('minTemperatureCelsius').isEmpty
+      coldChainRequired: coldChainRequired,
+      minTemperatureCelsius: text('minTemperatureCelsius').isEmpty
           ? null
-          : double.tryParse(_text('minTemperatureCelsius')),
-      maxTemperatureCelsius: _text('maxTemperatureCelsius').isEmpty
+          : double.tryParse(text('minTemperatureCelsius')),
+      maxTemperatureCelsius: text('maxTemperatureCelsius').isEmpty
           ? null
-          : double.tryParse(_text('maxTemperatureCelsius')),
-      temperatureMonitoringRequired: _temperatureMonitoringRequired,
+          : double.tryParse(text('maxTemperatureCelsius')),
+      temperatureMonitoringRequired: temperatureMonitoringRequired,
       temperatureMonitoringDeviceId:
-          _text('temperatureMonitoringDeviceId').isEmpty
+          text('temperatureMonitoringDeviceId').isEmpty
           ? null
-          : _text('temperatureMonitoringDeviceId'),
+          : text('temperatureMonitoringDeviceId'),
       temperatureExcursionLimitMinutes:
-          _text('temperatureExcursionLimitMinutes').isEmpty
+          text('temperatureExcursionLimitMinutes').isEmpty
           ? null
-          : int.tryParse(_text('temperatureExcursionLimitMinutes')),
-      gdpCompliant: _gdpCompliant,
-      gdpCertificateNumber: _text('gdpCertificateNumber').isEmpty
+          : int.tryParse(text('temperatureExcursionLimitMinutes')),
+      gdpCompliant: gdpCompliant,
+      gdpCertificateNumber: text('gdpCertificateNumber').isEmpty
           ? null
-          : _text('gdpCertificateNumber'),
-      gdpCertificateExpiry: _gdpCertificateExpiry,
-      gdpIssuingAuthority: _text('gdpIssuingAuthority').isEmpty
+          : text('gdpCertificateNumber'),
+      gdpCertificateExpiry: gdpCertificateExpiry,
+      gdpIssuingAuthority: text('gdpIssuingAuthority').isEmpty
           ? null
-          : _text('gdpIssuingAuthority'),
-      whoPqsRequired: _whoPqsRequired,
-      whoPqsEquipmentCode: _text('whoPqsEquipmentCode').isEmpty
+          : text('gdpIssuingAuthority'),
+      whoPqsRequired: whoPqsRequired,
+      whoPqsEquipmentCode: text('whoPqsEquipmentCode').isEmpty
           ? null
-          : _text('whoPqsEquipmentCode'),
-      containsControlledSubstance: _containsControlledSubstance,
-      deaSchedule: _deaSchedule,
-      deaOrderFormNumber: _text('deaOrderFormNumber').isEmpty
+          : text('whoPqsEquipmentCode'),
+      containsControlledSubstance: containsControlledSubstance,
+      deaSchedule: deaSchedule,
+      deaOrderFormNumber: text('deaOrderFormNumber').isEmpty
           ? null
-          : _text('deaOrderFormNumber'),
-      incbAuthorizationNumber: _text('incbAuthorizationNumber').isEmpty
+          : text('deaOrderFormNumber'),
+      incbAuthorizationNumber: text('incbAuthorizationNumber').isEmpty
           ? null
-          : _text('incbAuthorizationNumber'),
-      narcoticTransitPermit: _text('narcoticTransitPermit').isEmpty
+          : text('incbAuthorizationNumber'),
+      narcoticTransitPermit: text('narcoticTransitPermit').isEmpty
           ? null
-          : _text('narcoticTransitPermit'),
-      hazmatClass: _hazmatClass,
-      hazmatUnNumber: _text('hazmatUnNumber').isEmpty
+          : text('narcoticTransitPermit'),
+      hazmatClass: hazmatClass,
+      hazmatUnNumber: text('hazmatUnNumber').isEmpty
           ? null
-          : _text('hazmatUnNumber'),
-      hazmatPackingGroup: _hazmatPackingGroup,
-      hazmatSpecialProvisions: _text('hazmatSpecialProvisions').isEmpty
+          : text('hazmatUnNumber'),
+      hazmatPackingGroup: hazmatPackingGroup,
+      hazmatSpecialProvisions: text('hazmatSpecialProvisions').isEmpty
           ? null
-          : _text('hazmatSpecialProvisions'),
-      humidityControlled: _humidityControlled,
-      minHumidityPercent: _text('minHumidityPercent').isEmpty
+          : text('hazmatSpecialProvisions'),
+      humidityControlled: humidityControlled,
+      minHumidityPercent: text('minHumidityPercent').isEmpty
           ? null
-          : int.tryParse(_text('minHumidityPercent')),
-      maxHumidityPercent: _text('maxHumidityPercent').isEmpty
+          : int.tryParse(text('minHumidityPercent')),
+      maxHumidityPercent: text('maxHumidityPercent').isEmpty
           ? null
-          : int.tryParse(_text('maxHumidityPercent')),
-      lightSensitive: _lightSensitive,
-      orientationSensitive: _orientationSensitive,
-      shockSensitive: _shockSensitive,
-      chainOfCustodyRequired: _chainOfCustodyRequired,
-      requiresSignatureOnReceipt: _requiresSignatureOnReceipt,
-      requiresPharmacistVerification: _requiresPharmacistVerification,
+          : int.tryParse(text('maxHumidityPercent')),
+      lightSensitive: lightSensitive,
+      orientationSensitive: orientationSensitive,
+      shockSensitive: shockSensitive,
+      chainOfCustodyRequired: chainOfCustodyRequired,
+      requiresSignatureOnReceipt: requiresSignatureOnReceipt,
+      requiresPharmacistVerification: requiresPharmacistVerification,
       carrierGdpQualificationNumber:
-          _text('carrierGdpQualificationNumber').isEmpty
+          text('carrierGdpQualificationNumber').isEmpty
           ? null
-          : _text('carrierGdpQualificationNumber'),
-      carrierGdpQualificationExpiry: _carrierGdpQualificationExpiry,
-      vehicleQualificationNumber: _text('vehicleQualificationNumber').isEmpty
+          : text('carrierGdpQualificationNumber'),
+      carrierGdpQualificationExpiry: carrierGdpQualificationExpiry,
+      vehicleQualificationNumber: text('vehicleQualificationNumber').isEmpty
           ? null
-          : _text('vehicleQualificationNumber'),
-      vehicleLastQualificationDate: _vehicleLastQualificationDate,
-      clinicalTrialShipment: _clinicalTrialShipment,
-      clinicalTrialProtocolNumber: _text('clinicalTrialProtocolNumber').isEmpty
+          : text('vehicleQualificationNumber'),
+      vehicleLastQualificationDate: vehicleLastQualificationDate,
+      clinicalTrialShipment: clinicalTrialShipment,
+      clinicalTrialProtocolNumber: text('clinicalTrialProtocolNumber').isEmpty
           ? null
-          : _text('clinicalTrialProtocolNumber'),
-      irbApprovalNumber: _text('irbApprovalNumber').isEmpty
+          : text('clinicalTrialProtocolNumber'),
+      irbApprovalNumber: text('irbApprovalNumber').isEmpty
           ? null
-          : _text('irbApprovalNumber'),
-      specialHandlingInstructions: _text('specialHandlingInstructions').isEmpty
+          : text('irbApprovalNumber'),
+      specialHandlingInstructions: text('specialHandlingInstructions').isEmpty
           ? null
-          : _text('specialHandlingInstructions'),
-      fragile: _fragile,
-      doNotStack: _doNotStack,
-      thisSideUp: _thisSideUp,
+          : text('specialHandlingInstructions'),
+      fragile: fragile,
+      doNotStack: doNotStack,
+      thisSideUp: thisSideUp,
     );
   }
 
@@ -257,7 +258,7 @@ extension SSCCPharmaceuticalExtensionActions
   ) async {
     try {
       final service = getIt<SSCCPharmaceuticalExtensionService>();
-      final extensionToSave = _extensionFromFields().copyWith(
+      final extensionToSave = extensionFromFields().copyWith(
         ssccId: ssccId,
         ssccCode: ssccCode,
       );
@@ -266,7 +267,7 @@ extension SSCCPharmaceuticalExtensionActions
 
       if (mounted) {
         setState(() {
-          _extension = saved;
+          extension = saved;
         });
       }
 
@@ -278,7 +279,7 @@ extension SSCCPharmaceuticalExtensionActions
     }
   }
 
-  Future<void> _selectDate(
+  Future<void> selectDate(
     BuildContext context,
     DateTime? currentDate,
     Function(DateTime?) onSelected,

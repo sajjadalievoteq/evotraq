@@ -13,10 +13,9 @@ class CbvMasterDataService {
   CbvVocabularySession? _enabledOnlyCache;
 
   CbvMasterDataService({required DioService dioService})
-      : _dioService = dioService;
+    : _dioService = dioService;
 
   String get _base => _dioService.baseUrl;
-
 
   Future<CbvVocabularySession> loadVocabularySession({
     bool forceRefresh = false,
@@ -65,17 +64,19 @@ class CbvMasterDataService {
         responseBody: response.data is String ? response.data as String? : null,
       );
     }
-    final session =
-        CbvVocabularySession.fromJson(Map<String, dynamic>.from(decoded));
+    final session = CbvVocabularySession.fromJson(
+      Map<String, dynamic>.from(decoded),
+    );
     if (enabledOnly) {
       _enabledOnlyCache = session;
     }
     return session;
   }
 
-
-  Future<void> toggleBizStepEnabled(String code,
-      {required bool enabled}) async {
+  Future<void> toggleBizStepEnabled(
+    String code, {
+    required bool enabled,
+  }) async {
     final url = '$_base${CbvMasterDataApiConsts.bizStepEnabledPath(code)}';
     final response = await _dioService.patch(
       url,
@@ -92,10 +93,11 @@ class CbvMasterDataService {
     _enabledOnlyCache = null;
   }
 
-  Future<void> toggleDispositionEnabled(String code,
-      {required bool enabled}) async {
-    final url =
-        '$_base${CbvMasterDataApiConsts.dispositionEnabledPath(code)}';
+  Future<void> toggleDispositionEnabled(
+    String code, {
+    required bool enabled,
+  }) async {
+    final url = '$_base${CbvMasterDataApiConsts.dispositionEnabledPath(code)}';
     final response = await _dioService.patch(
       url,
       data: {'enabled': enabled},
@@ -110,7 +112,6 @@ class CbvMasterDataService {
     }
     _enabledOnlyCache = null;
   }
-
 
   Future<CbvVocabularyItem> createBizStep({
     required String code,
@@ -141,7 +142,9 @@ class CbvMasterDataService {
     }
     _enabledOnlyCache = null;
     final decoded = json.decode(response.data as String);
-    return CbvVocabularyItem.fromJson(Map<String, dynamic>.from(decoded as Map));
+    return CbvVocabularyItem.fromJson(
+      Map<String, dynamic>.from(decoded as Map),
+    );
   }
 
   Future<CbvVocabularyItem> createDisposition({
@@ -173,16 +176,14 @@ class CbvMasterDataService {
     }
     _enabledOnlyCache = null;
     final decoded = json.decode(response.data as String);
-    return CbvVocabularyItem.fromJson(Map<String, dynamic>.from(decoded as Map));
+    return CbvVocabularyItem.fromJson(
+      Map<String, dynamic>.from(decoded as Map),
+    );
   }
-
 
   Future<void> deleteBizStep(String code) async {
     final url = '$_base${CbvMasterDataApiConsts.bizStepPath(code)}';
-    final response = await _dioService.delete(
-      url,
-      acceptAllStatusCodes: true,
-    );
+    final response = await _dioService.delete(url, acceptAllStatusCodes: true);
     if (response.statusCode != 204) {
       throw ApiException(
         statusCode: response.statusCode,
@@ -195,10 +196,7 @@ class CbvMasterDataService {
 
   Future<void> deleteDisposition(String code) async {
     final url = '$_base${CbvMasterDataApiConsts.dispositionPath(code)}';
-    final response = await _dioService.delete(
-      url,
-      acceptAllStatusCodes: true,
-    );
+    final response = await _dioService.delete(url, acceptAllStatusCodes: true);
     if (response.statusCode != 204) {
       throw ApiException(
         statusCode: response.statusCode,
@@ -209,13 +207,10 @@ class CbvMasterDataService {
     _enabledOnlyCache = null;
   }
 
-
   Future<void> addPair(String bizStepCode, String dispCode) async {
-    final url = '$_base${CbvMasterDataApiConsts.pairPath(bizStepCode, dispCode)}';
-    final response = await _dioService.post(
-      url,
-      acceptAllStatusCodes: true,
-    );
+    final url =
+        '$_base${CbvMasterDataApiConsts.pairPath(bizStepCode, dispCode)}';
+    final response = await _dioService.post(url, acceptAllStatusCodes: true);
     if (response.statusCode != 204) {
       throw ApiException(
         statusCode: response.statusCode,
@@ -227,11 +222,9 @@ class CbvMasterDataService {
   }
 
   Future<void> removePair(String bizStepCode, String dispCode) async {
-    final url = '$_base${CbvMasterDataApiConsts.pairPath(bizStepCode, dispCode)}';
-    final response = await _dioService.delete(
-      url,
-      acceptAllStatusCodes: true,
-    );
+    final url =
+        '$_base${CbvMasterDataApiConsts.pairPath(bizStepCode, dispCode)}';
+    final response = await _dioService.delete(url, acceptAllStatusCodes: true);
     if (response.statusCode != 204) {
       throw ApiException(
         statusCode: response.statusCode,

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class OperationStepperConnector extends StatelessWidget {
-  const OperationStepperConnector({
+  const OperationStepperConnector({super.key,
     required this.connectorIndex,
     required this.currentStep,
     required this.previousStep,

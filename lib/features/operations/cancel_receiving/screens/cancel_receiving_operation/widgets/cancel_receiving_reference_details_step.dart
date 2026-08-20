@@ -1,6 +1,6 @@
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/cancel_operation_details_section.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/operation/cancel_operation_widgets.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/shipment_reference_details_step.dart';
 
 class CancelReceivingReferenceDetailsStep extends StatelessWidget {
@@ -60,7 +60,7 @@ class CancelReceivingReferenceDetailsStep extends StatelessWidget {
         showLocationSection: true,
         showDocumentSection: true,
         notesController: commentsController,
-        extraContent: CancelOperationExtras(
+        extraContent: CancelOperationDetailsSection(
           isReceiving: true,
           cancelReasonController: cancelReasonController,
           originalReferenceController: originalReferenceController,

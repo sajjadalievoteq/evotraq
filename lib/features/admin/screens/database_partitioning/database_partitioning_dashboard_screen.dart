@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/models/partition_models.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/services/admin/database_partitioning_service.dart';
@@ -15,9 +13,8 @@ import 'package:traqtrace_app/features/admin/screens/database_partitioning/widge
 import 'package:traqtrace_app/features/admin/screens/database_partitioning/widgets/partition_details_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/database_partitioning/widgets/partition_archive_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/database_partitioning/widgets/partition_maintenance_tab.dart';
-import 'package:traqtrace_app/features/admin/screens/database_partitioning/widgets/help_widgets/partition_help_section.dart';
 
-part 'database_partitioning_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/database_partitioning/database_partitioning_actions.dart';
 
 class _OverviewData {
   final PartitionStatistics statistics;
@@ -31,13 +28,13 @@ class DatabasePartitioningDashboard extends StatefulWidget {
 
   @override
   State<DatabasePartitioningDashboard> createState() =>
-      _DatabasePartitioningDashboardState();
+      DatabasePartitioningDashboardState();
 }
 
-class _DatabasePartitioningDashboardState
+class DatabasePartitioningDashboardState
     extends State<DatabasePartitioningDashboard>
     with TickerProviderStateMixin {
-  late final DatabasePartitioningService _partitioningService;
+  late final DatabasePartitioningService partitioningService;
   late TabController _tabController;
 
   final Set<int> _loadedTabs = {};
@@ -46,7 +43,7 @@ class _DatabasePartitioningDashboardState
 
   LoadState<List<PartitionMetadata>> _metadataState = const LoadState.loading();
 
-  final List<String> _validTables = [
+  final List<String> validTables = [
     'epcis_events',
     'object_events',
     'aggregation_events',
@@ -64,7 +61,7 @@ class _DatabasePartitioningDashboardState
       }
     });
 
-    _partitioningService = getIt<DatabasePartitioningService>();
+    partitioningService = getIt<DatabasePartitioningService>();
 
     _ensureTabLoaded(_tabController.index);
   }
@@ -100,7 +97,7 @@ class _DatabasePartitioningDashboardState
     });
 
     try {
-      final overview = await _partitioningService.getDashboardOverview();
+      final overview = await partitioningService.getDashboardOverview();
       final statsJson = overview['statistics'];
       final healthJson = overview['health'];
 
@@ -139,7 +136,7 @@ class _DatabasePartitioningDashboardState
     });
 
     try {
-      final metadata = await _partitioningService.getPartitionMetadata();
+      final metadata = await partitioningService.getPartitionMetadata();
 
       if (!mounted) return;
       setState(() {
@@ -155,7 +152,7 @@ class _DatabasePartitioningDashboardState
     }
   }
 
-  Future<void> _refreshLoadedTabs() async {
+  Future<void> refreshLoadedTabs() async {
     final futures = <Future<void>>[];
 
     if (_loadedTabs.contains(0) || _loadedTabs.contains(1)) {
@@ -187,12 +184,12 @@ class _DatabasePartitioningDashboardState
         actions: [
           IconButton(
             icon: TraqIcon(AppAssets.iconInfo),
-            onPressed: _showHelpDialog,
+            onPressed: showHelpDialog,
             tooltip: 'Help & Information',
           ),
           IconButton(
             icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _refreshLoadedTabs,
+            onPressed: refreshLoadedTabs,
             tooltip: 'Refresh Data',
           ),
         ],
@@ -223,7 +220,7 @@ class _DatabasePartitioningDashboardState
           KeepAliveTabView(child: const PartitionArchiveTab()),
           KeepAliveTabView(
             child: PartitionMaintenanceTab(
-              onPerformMaintenance: _performMaintenance,
+              onPerformMaintenance: performMaintenance,
             ),
           ),
         ],

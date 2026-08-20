@@ -1,4 +1,6 @@
-part of 'tatmeen_credentials_form.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 
 class TatmeenSecretField extends StatelessWidget {
   const TatmeenSecretField({

@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
 
-part 'tatmeen_stat_card.dart';
-part 'tatmeen_stats_skeleton.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_stat_card.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_stats_skeleton.dart';
 
 class TatmeenStatsRow extends StatelessWidget {
   const TatmeenStatsRow({
@@ -75,11 +73,4 @@ class TatmeenStatsRow extends StatelessWidget {
       ],
     );
   }
-}
-
-double _tatmeenKpiCardWidth(BuildContext context) {
-  final width = MediaQuery.sizeOf(context).width;
-  if (width >= 1200) return (width - 520) / 4;
-  if (width >= 760) return (width - 460) / 2;
-  return double.infinity;
 }

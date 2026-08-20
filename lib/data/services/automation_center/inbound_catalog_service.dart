@@ -5,7 +5,8 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/automation_center/inbound_catalog.dart';
 
 class InboundCatalogService {
-  InboundCatalogService({required DioService dioService}) : _dioService = dioService;
+  InboundCatalogService({required DioService dioService})
+    : _dioService = dioService;
 
   final DioService _dioService;
 
@@ -16,12 +17,16 @@ class InboundCatalogService {
     final response = await _dioService.get(_catalogPath);
     final data = response.data;
     if (data is! Map) {
-      throw const FormatException('Inbound catalog response was not a JSON object');
+      throw const FormatException(
+        'Inbound catalog response was not a JSON object',
+      );
     }
     return InboundCatalog.fromJson(Map<String, dynamic>.from(data));
   }
 
-  Future<Uint8List> downloadPostmanCollection({required String categoryId}) async {
+  Future<Uint8List> downloadPostmanCollection({
+    required String categoryId,
+  }) async {
     final response = await _dioService.get(
       _postmanPath,
       queryParameters: {'category': categoryId},

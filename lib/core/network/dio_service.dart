@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
-
-part 'dio_service_logging.dart';
+import 'package:traqtrace_app/core/network/dio_service_logging.dart';
 
 class DioService {
   late Dio _dio;
@@ -209,7 +207,7 @@ class DioService {
             }
           }
 
-          _logRequest(options);
+          DioServiceLogger.logRequest(options);
           if (kDebugMode && options.uri.path.contains('/users/profile')) {
             _authDebugLog(options, null);
           }
@@ -217,7 +215,7 @@ class DioService {
           return handler.next(options);
         },
         onResponse: (response, handler) async {
-          _logResponse(response);
+          DioServiceLogger.logResponse(response);
           final code = response.statusCode;
           if (code == 401 || code == 403) {
             await handleAuthFailureStatus(
@@ -230,7 +228,7 @@ class DioService {
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
-          _logError(e);
+          DioServiceLogger.logError(e);
           final code = e.response?.statusCode;
           if (code == 401 || code == 403) {
             await handleAuthFailureStatus(

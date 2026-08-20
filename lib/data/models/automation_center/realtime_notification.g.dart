@@ -1,24 +1,25 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'realtime_notification.dart';
+import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-RealtimeNotification _$RealtimeNotificationFromJson(
-  Map<String, dynamic> json,
-) => RealtimeNotification(
-  id: json['id'] as String,
-  subscriptionId: json['subscriptionId'] as String,
-  eventType: json['eventType'] as String,
-  eventId: json['eventId'] as String,
-  eventData: json['eventData'] as Map<String, dynamic>,
-  timestamp: DateTime.parse(json['timestamp'] as String),
-  source: json['source'] as String,
-);
+RealtimeNotification realtimeNotificationFromJson(Map<String, dynamic> json) =>
+    RealtimeNotification(
+      id: json['id'] as String,
+      subscriptionId: json['subscriptionId'] as String,
+      eventType: json['eventType'] as String,
+      eventId: json['eventId'] as String,
+      eventData: json['eventData'] as Map<String, dynamic>,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      source: json['source'] as String,
+    );
 
-Map<String, dynamic> _$RealtimeNotificationToJson(
+Map<String, dynamic> realtimeNotificationToJson(
   RealtimeNotification instance,
 ) => <String, dynamic>{
   'id': instance.id,
@@ -30,7 +31,7 @@ Map<String, dynamic> _$RealtimeNotificationToJson(
   'source': instance.source,
 };
 
-NotificationBatch _$NotificationBatchFromJson(Map<String, dynamic> json) =>
+NotificationBatch notificationBatchFromJson(Map<String, dynamic> json) =>
     NotificationBatch(
       id: json['id'] as String,
       subscriptionId: json['subscriptionId'] as String,
@@ -49,7 +50,7 @@ NotificationBatch _$NotificationBatchFromJson(Map<String, dynamic> json) =>
       errorMessage: json['errorMessage'] as String?,
     );
 
-Map<String, dynamic> _$NotificationBatchToJson(NotificationBatch instance) =>
+Map<String, dynamic> notificationBatchToJson(NotificationBatch instance) =>
     <String, dynamic>{
       'id': instance.id,
       'subscriptionId': instance.subscriptionId,

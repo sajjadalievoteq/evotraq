@@ -2,82 +2,77 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/services/admin/data_consistency_persistence_service.dart';
 import 'package:traqtrace_app/data/services/admin/data_consistency_service.dart';
 import 'package:traqtrace_app/data/services/admin/error_correction_service.dart';
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_anomaly_tab.dart';
-import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_detail_row.dart';
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_error_correction_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_integrity_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_validation_tab.dart';
-import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_violation_item.dart';
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/widgets/consistency_workflows_tab.dart';
 import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 
-part 'data_consistency_actions.dart';
-part 'integrity_violation_actions.dart';
-part 'correction_workflow_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/data_consistency_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/integrity_violation_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity/correction_workflow_actions.dart';
 
 class DataConsistencyIntegrityDashboard extends StatefulWidget {
   const DataConsistencyIntegrityDashboard({Key? key}) : super(key: key);
 
   @override
-  _DataConsistencyIntegrityDashboardState createState() =>
-      _DataConsistencyIntegrityDashboardState();
+  DataConsistencyIntegrityDashboardState createState() =>
+      DataConsistencyIntegrityDashboardState();
 }
 
-class _DataConsistencyIntegrityDashboardState
+class DataConsistencyIntegrityDashboardState
     extends State<DataConsistencyIntegrityDashboard>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  late DataConsistencyService _consistencyService;
-  late ErrorCorrectionService _correctionService;
-  late DataConsistencyPersistenceService _persistenceService;
+  late DataConsistencyService consistencyService;
+  late ErrorCorrectionService correctionService;
+  late DataConsistencyPersistenceService persistenceService;
 
-  List<dynamic> _correctableErrors = [];
-  List<dynamic> _integrityJobs = [];
-  List<Map<String, dynamic>> _correctionWorkflows = [];
+  List<dynamic> correctableErrors = [];
+  List<dynamic> integrityJobs = [];
+  List<Map<String, dynamic>> correctionWorkflows = [];
 
-  LoadState<Map<String, dynamic>> _consistencyReportState =
+  LoadState<Map<String, dynamic>> consistencyReportState =
       const LoadState.empty();
-  LoadState<List<dynamic>> _anomaliesState = const LoadState.empty();
-  LoadState<Map<String, dynamic>> _correctionStatisticsState =
+  LoadState<List<dynamic>> anomaliesState = const LoadState.empty();
+  LoadState<Map<String, dynamic>> correctionStatisticsState =
       const LoadState.loading();
-  LoadState<List<dynamic>> _jobsState = const LoadState.loading();
-  LoadState<List<Map<String, dynamic>>> _workflowDataState =
+  LoadState<List<dynamic>> jobsState = const LoadState.loading();
+  LoadState<List<Map<String, dynamic>>> workflowDataState =
       const LoadState.loading();
 
-  final Set<int> _loadedTabs = {};
+  final Set<int> loadedTabs = {};
 
-  bool _isGeneratingReport = false;
-  bool _isDetectingAnomalies = false;
-  bool _isIdentifyingErrors = false;
-  bool _isRefreshingAll = false;
+  bool isGeneratingReport = false;
+  bool isDetectingAnomalies = false;
+  bool isIdentifyingErrors = false;
+  bool isRefreshingAll = false;
 
-  DateTime _startDate = DateTime.now().subtract(const Duration(days: 7));
-  DateTime _endDate = DateTime.now();
-  List<String> _selectedEventTypes = [
+  DateTime startDate = DateTime.now().subtract(const Duration(days: 7));
+  DateTime endDate = DateTime.now();
+  List<String> selectedEventTypes = [
     'ObjectEvent',
     'AggregationEvent',
     'TransactionEvent',
     'TransformationEvent',
   ];
-  List<String> _selectedErrorTypes = [
+  List<String> selectedErrorTypes = [
     'MISSING_FIELD',
     'INVALID_FORMAT',
     'DUPLICATE_EVENT',
     'TIMING_INCONSISTENCY',
   ];
 
-  Timer? _refreshTimer;
-  final Map<String, Timer> _jobPollTimers = {};
-  final Map<String, Timer> _workflowPollTimers = {};
+  Timer? refreshTimer;
+  final Map<String, Timer> jobPollTimers = {};
+  final Map<String, Timer> workflowPollTimers = {};
 
   @override
   void initState() {
@@ -85,36 +80,36 @@ class _DataConsistencyIntegrityDashboardState
     _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
-        _ensureTabLoaded(_tabController.index);
+        ensureTabLoaded(_tabController.index);
       }
     });
-    _persistenceService = DataConsistencyPersistenceService();
-    _initializeServices();
+    persistenceService = DataConsistencyPersistenceService();
+    initializeServices();
 
-    _persistenceService.addListener(_onPersistenceUpdate);
+    persistenceService.addListener(onPersistenceUpdate);
 
-    _integrityJobs = _persistenceService.integrityJobs;
-    _correctionWorkflows = _persistenceService.correctionWorkflows;
-    _jobsState = _integrityJobs.isEmpty
+    integrityJobs = persistenceService.integrityJobs;
+    correctionWorkflows = persistenceService.correctionWorkflows;
+    jobsState = integrityJobs.isEmpty
         ? const LoadState.empty()
-        : LoadState.success(_integrityJobs);
-    _workflowDataState = _correctionWorkflows.isEmpty
+        : LoadState.success(integrityJobs);
+    workflowDataState = correctionWorkflows.isEmpty
         ? const LoadState.empty()
-        : LoadState.success(_correctionWorkflows);
+        : LoadState.success(correctionWorkflows);
 
-    _ensureTabLoaded(_tabController.index);
-    _startAutoRefresh();
+    ensureTabLoaded(_tabController.index);
+    startAutoRefresh();
   }
 
   @override
   void dispose() {
-    _persistenceService.removeListener(_onPersistenceUpdate);
+    persistenceService.removeListener(onPersistenceUpdate);
     _tabController.dispose();
-    _refreshTimer?.cancel();
-    for (final timer in _jobPollTimers.values) {
+    refreshTimer?.cancel();
+    for (final timer in jobPollTimers.values) {
       timer.cancel();
     }
-    for (final timer in _workflowPollTimers.values) {
+    for (final timer in workflowPollTimers.values) {
       timer.cancel();
     }
     super.dispose();
@@ -147,12 +142,12 @@ class _DataConsistencyIntegrityDashboardState
         actions: [
           IconButton(
             icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _isRefreshingAll ? null : _refreshLoadedTabs,
+            onPressed: isRefreshingAll ? null : refreshLoadedTabs,
             tooltip: 'Refresh Data',
           ),
           IconButton(
             icon: TraqIcon(AppAssets.iconSettings),
-            onPressed: _showFiltersDialog,
+            onPressed: showFiltersDialog,
             tooltip: 'Filters',
           ),
         ],
@@ -163,47 +158,47 @@ class _DataConsistencyIntegrityDashboardState
         children: [
           KeepAliveTabView(
             child: ConsistencyValidationTab(
-              reportState: _consistencyReportState,
-              isGeneratingReport: _isGeneratingReport,
-              onGenerateReport: _generateConsistencyReport,
-              onCorrectViolation: _correctConsistencyViolation,
-              onViewViolationDetails: _showViolationDetails,
+              reportState: consistencyReportState,
+              isGeneratingReport: isGeneratingReport,
+              onGenerateReport: generateConsistencyReport,
+              onCorrectViolation: correctConsistencyViolation,
+              onViewViolationDetails: showViolationDetails,
             ),
           ),
           KeepAliveTabView(
             child: ConsistencyAnomalyTab(
-              anomaliesState: _anomaliesState,
-              isDetectingAnomalies: _isDetectingAnomalies,
-              onDetectAnomalies: _detectAnomalies,
-              onCorrectAnomaly: _correctAnomaly,
-              onViewAnomalyDetails: _showAnomalyDetails,
+              anomaliesState: anomaliesState,
+              isDetectingAnomalies: isDetectingAnomalies,
+              onDetectAnomalies: detectAnomalies,
+              onCorrectAnomaly: correctAnomaly,
+              onViewAnomalyDetails: showAnomalyDetails,
             ),
           ),
           KeepAliveTabView(
             child: ConsistencyErrorCorrectionTab(
-              correctionStatisticsState: _correctionStatisticsState,
-              correctableErrors: _correctableErrors,
-              isIdentifyingErrors: _isIdentifyingErrors,
-              onLoadCorrectionStatistics: _loadCorrectionStatistics,
-              onIdentifyCorrectableErrors: _identifyCorrectableErrors,
-              onShowCorrectionDialog: _showCorrectionDialog,
+              correctionStatisticsState: correctionStatisticsState,
+              correctableErrors: correctableErrors,
+              isIdentifyingErrors: isIdentifyingErrors,
+              onLoadCorrectionStatistics: loadCorrectionStatistics,
+              onIdentifyCorrectableErrors: identifyCorrectableErrors,
+              onShowCorrectionDialog: showCorrectionDialog,
             ),
           ),
           KeepAliveTabView(
             child: ConsistencyIntegrityTab(
-              jobsState: _jobsState,
-              onRefreshJobs: _refreshJobsState,
-              onStartIntegrityJob: _startIntegrityJob,
-              onViewViolations: _showIntegrityViolations,
+              jobsState: jobsState,
+              onRefreshJobs: refreshJobsState,
+              onStartIntegrityJob: startIntegrityJob,
+              onViewViolations: showIntegrityViolations,
             ),
           ),
           KeepAliveTabView(
             child: ConsistencyWorkflowsTab(
-              workflowDataState: _workflowDataState,
-              correctionWorkflowsCount: _correctionWorkflows.length,
-              onRefreshWorkflowData: _refreshWorkflowData,
-              onLoadWorkflowData: _loadWorkflowData,
-              onShowWorkflowDetails: _showWorkflowDetails,
+              workflowDataState: workflowDataState,
+              correctionWorkflowsCount: correctionWorkflows.length,
+              onRefreshWorkflowData: refreshWorkflowData,
+              onLoadWorkflowData: loadWorkflowData,
+              onShowWorkflowDetails: showWorkflowDetails,
             ),
           ),
         ],

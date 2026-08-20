@@ -1,4 +1,6 @@
-part of 'tatmeen_notifications_settings.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class TatmeenNotificationSwitch extends StatelessWidget {
   const TatmeenNotificationSwitch({

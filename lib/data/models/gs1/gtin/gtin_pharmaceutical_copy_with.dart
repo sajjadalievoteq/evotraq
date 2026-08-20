@@ -1,4 +1,5 @@
-part of 'gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_types.dart';
 
 extension GtinPharmaceuticalCopyWith on GTINPharmaceuticalExtension {
   GTINPharmaceuticalExtension copyWith({

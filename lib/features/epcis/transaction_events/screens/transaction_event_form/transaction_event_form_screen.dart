@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
-import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/transaction_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_state.dart';
 
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
-import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/epcis/transaction_events/screens/transaction_event_form/widgets/transaction_biz_data_fields.dart';
 
-part 'transaction_event_form_actions.dart';
+import 'package:traqtrace_app/features/epcis/transaction_events/screens/transaction_event_form/transaction_event_form_actions.dart';
 
 class TransactionEventFormScreen extends StatefulWidget {
   final String? transactionEventId;
@@ -31,31 +25,31 @@ class TransactionEventFormScreen extends StatefulWidget {
     : super(key: key);
 
   @override
-  _TransactionEventFormScreenState createState() =>
-      _TransactionEventFormScreenState();
+  TransactionEventFormScreenState createState() =>
+      TransactionEventFormScreenState();
 }
 
-class _TransactionEventFormScreenState
+class TransactionEventFormScreenState
     extends State<TransactionEventFormScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
 
-  final _bizTransactionTypeController = TextEditingController();
-  final _bizTransactionIdController = TextEditingController();
-  final _epcsController = TextEditingController();
-  final _locationGLNController = TextEditingController();
+  final bizTransactionTypeController = TextEditingController();
+  final bizTransactionIdController = TextEditingController();
+  final epcsController = TextEditingController();
+  final locationGLNController = TextEditingController();
 
-  String? _businessStep;
-  String? _disposition;
-  String? _bizTransactionType;
+  String? businessStep;
+  String? disposition;
+  String? bizTransactionType;
 
   final List<MapEntry<TextEditingController, TextEditingController>>
-  _bizDataControllers = [];
-  String _selectedAction = 'ADD';
-  bool _isEdit = false;
-  DateTime _eventTime = DateTime.now().subtract(const Duration(seconds: 5));
-  String _eventTimeZoneOffset = '+00:00';
+  bizDataControllers = [];
+  String selectedAction = 'ADD';
+  bool isEdit = false;
+  DateTime eventTime = DateTime.now().subtract(const Duration(seconds: 5));
+  String eventTimeZoneOffset = '+00:00';
 
-  final List<String> _standardBizTransactionTypes = [
+  final List<String> standardBizTransactionTypes = [
     'urn:epcglobal:cbv:btt:po',
     'urn:epcglobal:cbv:btt:desadv',
     'urn:epcglobal:cbv:btt:inv',
@@ -71,31 +65,31 @@ class _TransactionEventFormScreenState
   @override
   void initState() {
     super.initState();
-    _isEdit = widget.transactionEventId != null;
+    isEdit = widget.transactionEventId != null;
 
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
 
-    _eventTimeZoneOffset =
+    eventTimeZoneOffset =
         '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
 
-    if (_isEdit) {
+    if (isEdit) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadTransactionEvent();
+        loadTransactionEvent();
       });
     } else {
-      _addBizDataField();
+      addBizDataField();
     }
     context.read<CbvVocabularyCubit>().loadVocabulary();
   }
 
   List<CbvVocabularyItem> _allowedDispositions(CbvVocabularyState state) {
     CbvVocabularyItem? selectedStep;
-    if (_businessStep != null) {
+    if (businessStep != null) {
       for (final item in state.bizSteps) {
-        if (item.urn == _businessStep) {
+        if (item.urn == businessStep) {
           selectedStep = item;
           break;
         }
@@ -116,12 +110,12 @@ class _TransactionEventFormScreenState
 
   @override
   void dispose() {
-    _bizTransactionTypeController.dispose();
-    _bizTransactionIdController.dispose();
-    _epcsController.dispose();
-    _locationGLNController.dispose();
+    bizTransactionTypeController.dispose();
+    bizTransactionIdController.dispose();
+    epcsController.dispose();
+    locationGLNController.dispose();
 
-    for (var entry in _bizDataControllers) {
+    for (var entry in bizDataControllers) {
       entry.key.dispose();
       entry.value.dispose();
     }
@@ -134,12 +128,12 @@ class _TransactionEventFormScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _isEdit ? 'Edit Transaction Event' : 'Create Transaction Event',
+          isEdit ? 'Edit Transaction Event' : 'Create Transaction Event',
         ),
         actions: [
           IconButton(
             icon: TraqIcon(AppAssets.iconInfo),
-            onPressed: () => _showHelpScreen(context),
+            onPressed: () => showHelpScreen(context),
             tooltip: 'Help',
           ),
         ],
@@ -147,14 +141,14 @@ class _TransactionEventFormScreenState
       body: BlocBuilder<TransactionEventsCubit, TransactionEventsState>(
         builder: (context, state) {
           final cbvState = context.watch<CbvVocabularyCubit>().state;
-          if (state.loading && _isEdit) {
+          if (state.loading && isEdit) {
             return const Center(child: AppLoadingIndicator());
           }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Form(
-              key: _formKey,
+              key: formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -163,7 +157,7 @@ class _TransactionEventFormScreenState
                       labelText: 'Action *',
                       border: OutlineInputBorder(),
                     ),
-                    value: _selectedAction,
+                    value: selectedAction,
                     items: ['ADD', 'OBSERVE', 'DELETE']
                         .map(
                           (action) => DropdownMenuItem(
@@ -174,7 +168,7 @@ class _TransactionEventFormScreenState
                         .toList(),
                     onChanged: (value) {
                       setState(() {
-                        _selectedAction = value!;
+                        selectedAction = value!;
                       });
                     },
                     validator: (value) {
@@ -190,8 +184,8 @@ class _TransactionEventFormScreenState
                       labelText: 'Business Transaction Type *',
                       border: OutlineInputBorder(),
                     ),
-                    value: _bizTransactionType,
-                    items: _standardBizTransactionTypes
+                    value: bizTransactionType,
+                    items: standardBizTransactionTypes
                         .map(
                           (type) => DropdownMenuItem(
                             value: type,
@@ -203,9 +197,9 @@ class _TransactionEventFormScreenState
                         .toList(),
                     onChanged: (value) {
                       setState(() {
-                        _bizTransactionType = value;
+                        bizTransactionType = value;
                         if (value != null) {
-                          _bizTransactionTypeController.text = value;
+                          bizTransactionTypeController.text = value;
                         }
                       });
                     },
@@ -218,7 +212,7 @@ class _TransactionEventFormScreenState
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
-                    controller: _bizTransactionIdController,
+                    controller: bizTransactionIdController,
                     decoration: const InputDecoration(
                       labelText: 'Business Transaction ID *',
                       border: OutlineInputBorder(),
@@ -239,7 +233,7 @@ class _TransactionEventFormScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             EpcEntryField(
-                              controller: _epcsController,
+                              controller: epcsController,
                               fieldName: 'epcs',
                               label: 'EPCs (comma separated) *',
                               required: true,
@@ -269,12 +263,12 @@ class _TransactionEventFormScreenState
                                 '112345',
                               );
                               setState(() {
-                                final existingEpcs = _epcsController.text
+                                final existingEpcs = epcsController.text
                                     .trim();
                                 if (existingEpcs.isEmpty) {
-                                  _epcsController.text = sgtin;
+                                  epcsController.text = sgtin;
                                 } else {
-                                  _epcsController.text =
+                                  epcsController.text =
                                       '$existingEpcs, $sgtin';
                                 }
                               });
@@ -290,12 +284,12 @@ class _TransactionEventFormScreenState
                                 5,
                               );
                               setState(() {
-                                final existingEpcs = _epcsController.text
+                                final existingEpcs = epcsController.text
                                     .trim();
                                 if (existingEpcs.isEmpty) {
-                                  _epcsController.text = batch.join(', ');
+                                  epcsController.text = batch.join(', ');
                                 } else {
-                                  _epcsController.text =
+                                  epcsController.text =
                                       '$existingEpcs, ${batch.join(', ')}';
                                 }
                               });
@@ -312,7 +306,7 @@ class _TransactionEventFormScreenState
                     children: [
                       Expanded(
                         child: GlnEntryField(
-                          controller: _locationGLNController,
+                          controller: locationGLNController,
                           label: 'Location GLN *',
                           validator: (value) =>
                               EpcisGlnValidators.validateLocationGln(value),
@@ -326,7 +320,7 @@ class _TransactionEventFormScreenState
                             '00001',
                           );
                           setState(() {
-                            _locationGLNController.text = gln;
+                            locationGLNController.text = gln;
                           });
                         },
                         child: const Text('Generate GLN'),
@@ -360,7 +354,7 @@ class _TransactionEventFormScreenState
                       labelText: 'Business Step *',
                       border: OutlineInputBorder(),
                     ),
-                    value: _businessStep,
+                    value: businessStep,
                     items: cbvState.bizSteps
                         .map(
                           (step) => DropdownMenuItem(
@@ -371,14 +365,14 @@ class _TransactionEventFormScreenState
                         .toList(),
                     onChanged: (value) {
                       setState(() {
-                        _businessStep = value;
+                        businessStep = value;
                         if (value != null) {
                           final allowed = _allowedDispositions(cbvState);
                           final selectedStillValid = allowed.any(
-                            (item) => item.urn == _disposition,
+                            (item) => item.urn == disposition,
                           );
                           if (!selectedStillValid) {
-                            _disposition = null;
+                            disposition = null;
                           }
                         }
                       });
@@ -396,7 +390,7 @@ class _TransactionEventFormScreenState
                       labelText: 'Disposition *',
                       border: OutlineInputBorder(),
                     ),
-                    value: _disposition,
+                    value: disposition,
                     items: _allowedDispositions(cbvState)
                         .map(
                           (disp) => DropdownMenuItem(
@@ -407,7 +401,7 @@ class _TransactionEventFormScreenState
                         .toList(),
                     onChanged: (value) {
                       setState(() {
-                        _disposition = value;
+                        disposition = value;
                       });
                     },
                     validator: (value) {
@@ -422,24 +416,24 @@ class _TransactionEventFormScreenState
                   ListTile(
                     title: const Text('Event Time'),
                     subtitle: Text(
-                      DateFormat('yyyy-MM-dd HH:mm:ss').format(_eventTime),
+                      DateFormat('yyyy-MM-dd HH:mm:ss').format(eventTime),
                     ),
                     trailing: TraqIcon(AppAssets.iconClock),
                     onTap: () async {
                       final date = await showDatePicker(
                         context: context,
-                        initialDate: _eventTime,
+                        initialDate: eventTime,
                         firstDate: DateTime(2000),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
                       );
                       if (date != null) {
                         final time = await showTimePicker(
                           context: context,
-                          initialTime: TimeOfDay.fromDateTime(_eventTime),
+                          initialTime: TimeOfDay.fromDateTime(eventTime),
                         );
                         if (time != null) {
                           setState(() {
-                            _eventTime = DateTime(
+                            eventTime = DateTime(
                               date.year,
                               date.month,
                               date.day,
@@ -460,12 +454,12 @@ class _TransactionEventFormScreenState
                   const SizedBox(height: 8),
 
                   TransactionBizDataFields(
-                    controllers: _bizDataControllers,
-                    onRemove: _removeBizDataField,
+                    controllers: bizDataControllers,
+                    onRemove: removeBizDataField,
                   ),
 
                   TextButton.icon(
-                    onPressed: _addBizDataField,
+                    onPressed: addBizDataField,
                     icon: TraqIcon(AppAssets.iconPlus),
                     label: const Text('Add Business Data Field'),
                   ),
@@ -474,11 +468,11 @@ class _TransactionEventFormScreenState
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: state.loading ? null : _saveTransactionEvent,
+                      onPressed: state.loading ? null : saveTransactionEvent,
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          _isEdit
+                          isEdit
                               ? 'Update Transaction Event'
                               : 'Create Transaction Event',
                           style: const TextStyle(fontSize: 16),

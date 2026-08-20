@@ -1,10 +1,8 @@
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_batch_models.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
@@ -275,6 +273,6 @@ class OperationListCard extends StatelessWidget {
 
   static String? formatTimestamp(DateTime? value) {
     if (value == null) return null;
-    return DateFormat('MMM dd, yyyy HH:mm').format(value);
+    return DateFormat('MMM dd, yyyy HH:mm').format(value.toLocal());
   }
 }

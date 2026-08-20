@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/services/auth/auth_service.dart';
+import 'package:traqtrace_app/data/services/auth/auth_service_account_actions.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
 import '../../../data/models/profile/profile_models.dart';
 import 'profile_state.dart';
@@ -27,11 +28,13 @@ class ProfileCubit extends Cubit<ProfileState> {
         emailNotifications: user.emailNotifications,
         appNotifications: user.appNotifications,
       );
-      emit(state.copyWith(
-        status: ProfileStatus.success,
-        user: user,
-        preferences: prefs,
-      ));
+      emit(
+        state.copyWith(
+          status: ProfileStatus.success,
+          user: user,
+          preferences: prefs,
+        ),
+      );
 
       await loadProfilePicture();
       await loadSessions();
@@ -75,10 +78,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       return true;
     } catch (e) {
       emit(
-        state.copyWith(
-          isRevokingSession: false,
-          sessionsError: e.toString(),
-        ),
+        state.copyWith(isRevokingSession: false, sessionsError: e.toString()),
       );
       return false;
     }

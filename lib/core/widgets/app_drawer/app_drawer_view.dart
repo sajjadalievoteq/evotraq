@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer/app_drawer_account_header.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer/app_drawer_logout_tile.dart';
@@ -11,26 +12,20 @@ import 'package:traqtrace_app/core/widgets/app_drawer/app_drawer_navigation_icon
 import 'package:traqtrace_app/core/widgets/app_drawer/app_drawer_operations_nav.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer/app_drawer_animated_content.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer/utils/app_drawer_metrics.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_expansion_tile.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_brand_icon.dart';
-
 typedef AppDrawerNavigate =
     void Function(String route, {bool isDashboard, Object? extra});
-
 class AppDrawerView extends StatelessWidget {
   const AppDrawerView({
     super.key,
     required this.scrollController,
     required this.onNavigate,
   });
-
   final ScrollController scrollController;
   final AppDrawerNavigate onNavigate;
-
   bool canOperation(AuthState auth, String step) => auth.canPerform(step);
-
   bool hasAnyOperationNav(AuthState auth) =>
       canOperation(auth, OperationSteps.commission) ||
       canOperation(auth, OperationSteps.updateStatus) ||
@@ -42,7 +37,6 @@ class AppDrawerView extends StatelessWidget {
       canOperation(auth, OperationSteps.receive) ||
       canOperation(auth, OperationSteps.cancelReceive) ||
       canOperation(auth, OperationSteps.returnReceive);
-
   @override
   Widget build(BuildContext context) {
     final layout = context.layout;
@@ -471,7 +465,6 @@ class AppDrawerView extends StatelessWidget {
                             NavIcons.cbvVocabulary,
                           ),
                           title: const Text('CBV Vocabulary'),
-
                           onTap: () =>
                               onNavigate(Constants.adminCbvVocabularyRoute),
                         ),

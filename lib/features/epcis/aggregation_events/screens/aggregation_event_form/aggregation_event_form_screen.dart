@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart'
     as epcis_models;
@@ -15,6 +14,7 @@ import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_servic
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
+import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_actions.dart';
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_quantity_row_controllers.dart';
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/utils/aggregation_pharma_readiness_checker.dart';
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/utils/aggregation_reference_data_checker.dart';
@@ -30,7 +30,7 @@ import 'package:traqtrace_app/core/extensions/validation_feedback_extension.dart
 
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
-part 'aggregation_event_form_fields.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/aggregation_event_form_fields.dart';
 
 class AggregationEventFormScreen extends StatefulWidget {
   const AggregationEventFormScreen({
@@ -44,10 +44,10 @@ class AggregationEventFormScreen extends StatefulWidget {
 
   @override
   State<AggregationEventFormScreen> createState() =>
-      _AggregationEventFormScreenState();
+      AggregationEventFormScreenState();
 }
 
-class _AggregationEventFormScreenState
+class AggregationEventFormScreenState
     extends State<AggregationEventFormScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -56,7 +56,7 @@ class _AggregationEventFormScreenState
 
   String _selectedAction = 'ADD';
   final _parentEPCController = TextEditingController();
-  final List<TextEditingController> _childEpcControllers = [];
+  final List<TextEditingController> childEpcControllers = [];
   String? _businessStep;
   String? _disposition;
   GLN? _locationGLN;
@@ -65,19 +65,19 @@ class _AggregationEventFormScreenState
   AggregationPharmaReadinessChecker? _pharmaReadinessChecker;
 
   final List<MapEntry<TextEditingController, TextEditingController>>
-  _sourceListControllers = [];
+  sourceListControllers = [];
   final List<MapEntry<TextEditingController, TextEditingController>>
-  _destinationListControllers = [];
+  destinationListControllers = [];
   final List<MapEntry<TextEditingController, TextEditingController>>
-  _bizDataControllers = [];
-  final List<AggregationEventFormQuantityRowControllers> _quantityRows = [
+  bizDataControllers = [];
+  final List<AggregationEventFormQuantityRowControllers> quantityRows = [
     AggregationEventFormQuantityRowControllers(),
   ];
   bool _useQuantityList = false;
-  DateTime _eventTime = DateTime.now();
-  String _eventTimeZoneOffset = '+00:00';
-  Timer? _timer;
-  bool _isManualTime = false;
+  DateTime eventTime = DateTime.now();
+  String eventTimeZoneOffset = '+00:00';
+  Timer? timer;
+  bool isManualTime = false;
 
   @override
   void initState() {
@@ -87,20 +87,20 @@ class _AggregationEventFormScreenState
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
-    _eventTimeZoneOffset =
+    eventTimeZoneOffset =
         '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
 
-    _childEpcControllers.add(TextEditingController());
-    _addBizDataField();
+    childEpcControllers.add(TextEditingController());
+    addBizDataField();
 
     _startClock();
   }
 
   void _startClock() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted && !_isManualTime) {
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted && !isManualTime) {
         setState(() {
-          _eventTime = DateTime.now();
+          eventTime = DateTime.now();
         });
       }
     });
@@ -125,23 +125,23 @@ class _AggregationEventFormScreenState
 
   @override
   void dispose() {
-    _timer?.cancel();
+    timer?.cancel();
     _parentEPCController.dispose();
-    for (final c in _childEpcControllers) {
+    for (final c in childEpcControllers) {
       c.dispose();
     }
-    for (final row in _quantityRows) {
+    for (final row in quantityRows) {
       row.dispose();
     }
-    for (final entry in _bizDataControllers) {
+    for (final entry in bizDataControllers) {
       entry.key.dispose();
       entry.value.dispose();
     }
-    for (final entry in _sourceListControllers) {
+    for (final entry in sourceListControllers) {
       entry.key.dispose();
       entry.value.dispose();
     }
-    for (final entry in _destinationListControllers) {
+    for (final entry in destinationListControllers) {
       entry.key.dispose();
       entry.value.dispose();
     }
@@ -175,7 +175,7 @@ class _AggregationEventFormScreenState
 
       if (_useQuantityList) {
         childQuantityList = [];
-        for (final row in _quantityRows) {
+        for (final row in quantityRows) {
           final epcClass = row.epcClass.text.trim();
           final qtyText = row.quantity.text.trim();
           if (epcClass.isEmpty && qtyText.isEmpty) {
@@ -195,7 +195,7 @@ class _AggregationEventFormScreenState
           return;
         }
       } else {
-        childEPCs = _childEpcControllers
+        childEPCs = childEpcControllers
             .map((c) => c.text.trim())
             .where((e) => e.isNotEmpty)
             .map((epc) => EPCFormatter.formatToEPCUri(epc) ?? epc)
@@ -208,7 +208,7 @@ class _AggregationEventFormScreenState
       }
 
       final bizData = <String, String>{};
-      for (final entry in _bizDataControllers) {
+      for (final entry in bizDataControllers) {
         final key = entry.key.text.trim();
         final value = entry.value.text.trim();
         if (key.isNotEmpty && value.isNotEmpty) {
@@ -216,8 +216,8 @@ class _AggregationEventFormScreenState
         }
       }
 
-      final sourceList = _getSourceList();
-      final destinationList = _getDestinationList();
+      final sourceList = getSourceList();
+      final destinationList = getDestinationList();
       final businessStep = _businessStep ?? '';
       final disposition = _disposition ?? '';
       final locationGLN = _locationGLN!.glnCode;
@@ -257,9 +257,9 @@ class _AggregationEventFormScreenState
 
       final eventToValidate = AggregationEvent(
         eventId: 'event_${DateTime.now().millisecondsSinceEpoch}',
-        eventTime: _eventTime,
+        eventTime: eventTime,
         recordTime: DateTime.now(),
-        eventTimeZone: _eventTimeZoneOffset,
+        eventTimeZone: eventTimeZoneOffset,
         epcisVersion: epcis_models.EPCISVersion.v2_0,
         action: _selectedAction,
         businessStep: businessStep,
@@ -375,8 +375,8 @@ class _AggregationEventFormScreenState
       onDismissErrorMessage: () => setState(() => _errorMessage = null),
       selectedAction: _selectedAction,
       onActionChanged: (value) => setState(() => _selectedAction = value!),
-      eventTime: _eventTime,
-      onSelectEventTime: _selectEventTime,
+      eventTime: eventTime,
+      onSelectEventTime: selectEventTime,
       businessStep: _businessStep,
       disposition: _disposition,
       onBizStepChanged: (v) => setState(() => _businessStep = v),
@@ -387,28 +387,28 @@ class _AggregationEventFormScreenState
       onParentEpcChanged: (epc) => _parentEPCController.text = epc,
       useQuantityList: _useQuantityList,
       onUseQuantityListChanged: (v) => setState(() => _useQuantityList = v),
-      childEpcControllers: _childEpcControllers,
-      onAddChildEpc: _addChildEpc,
-      onRemoveChildEpc: _removeChildEpc,
-      onScanAndAddChildEpc: _scanAndAddChildEpc,
-      quantityRows: _quantityRows,
-      onAddQuantityRow: _addQuantityRow,
-      onRemoveQuantityRow: _removeQuantityRow,
+      childEpcControllers: childEpcControllers,
+      onAddChildEpc: addChildEpc,
+      onRemoveChildEpc: removeChildEpc,
+      onScanAndAddChildEpc: scanAndAddChildEpc,
+      quantityRows: quantityRows,
+      onAddQuantityRow: addQuantityRow,
+      onRemoveQuantityRow: removeQuantityRow,
       locationGLN: _locationGLN,
       locationGlnError: _locationGlnError,
       onLocationChanged: (gln) => setState(() {
         _locationGLN = gln;
         _locationGlnError = null;
       }),
-      sourceListControllers: _sourceListControllers,
-      onAddSourceEntry: _addSourceEntry,
-      onRemoveSourceEntry: _removeSourceEntry,
-      destinationListControllers: _destinationListControllers,
-      onAddDestinationEntry: _addDestinationEntry,
-      onRemoveDestinationEntry: _removeDestinationEntry,
-      bizDataControllers: _bizDataControllers,
-      onAddBizDataField: _addBizDataField,
-      onRemoveBizDataField: _removeBizDataField,
+      sourceListControllers: sourceListControllers,
+      onAddSourceEntry: addSourceEntry,
+      onRemoveSourceEntry: removeSourceEntry,
+      destinationListControllers: destinationListControllers,
+      onAddDestinationEntry: addDestinationEntry,
+      onRemoveDestinationEntry: removeDestinationEntry,
+      bizDataControllers: bizDataControllers,
+      onAddBizDataField: addBizDataField,
+      onRemoveBizDataField: removeBizDataField,
       onSave: _saveAggregationEvent,
       isLoading: _isLoading,
     );

@@ -1,6 +1,7 @@
-part of 'gtin_field_validators.dart';
+import 'gtin_format.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_core_validators.dart';
 
-abstract final class _GtinIndicatorLocationValidators {
+abstract final class GtinIndicatorLocationValidators {
   static const Set<String> _aiIndicatorCodes = {
     'REQUESTED_BY_LAW',
     'NOT_REQUESTED_BUT_ALLOCATED',
@@ -95,7 +96,7 @@ abstract final class _GtinIndicatorLocationValidators {
   static String? validateParentGtin(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    return _GtinCoreValidators.validateGtinCodeOptional(v);
+    return GtinCoreValidators.validateGtinCodeOptional(v);
   }
 
   static String? validateQuantityPerParent(String? value) {

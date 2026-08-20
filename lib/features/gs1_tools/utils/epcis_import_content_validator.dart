@@ -1,14 +1,11 @@
-import 'dart:convert';
-import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validator.dart';
+import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_date_validator.dart';
 
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
-import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_template.dart';
 
 import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validation_result.dart';
-export 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validation_result.dart';
 
 /// Three-gate validator: format → schema/structure → content.
 /// Rejects on the first failing gate (later gates are not run).
@@ -21,7 +18,7 @@ class EpcisImportContentValidator {
     required Set<String> allowedBizSteps,
     required Set<String> allowedDispositions,
   }) {
-    EpcisImportValidator.validateIsoInstant(
+    validateEpcisIsoInstant(
       event['eventTime'] as String?,
       '$path.eventTime',
       issues,

@@ -1,4 +1,10 @@
-part of 'tatmeen_records_table.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_widgets.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
 class TatmeenRecordsTableSkeleton extends StatelessWidget {
   const TatmeenRecordsTableSkeleton({super.key});

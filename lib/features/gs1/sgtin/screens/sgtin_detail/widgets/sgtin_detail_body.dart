@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';

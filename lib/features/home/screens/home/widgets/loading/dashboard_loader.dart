@@ -1,7 +1,7 @@
+import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/loading/widgets/dashboard_key_metrics_section_skeleton.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/loading/widgets/dashboard_operations_header_skeleton.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/loading/widgets/dashboard_quick_actions_and_compliance_skeleton.dart';

@@ -3,9 +3,6 @@ import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_aw
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
@@ -13,23 +10,16 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
-import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_detail_form_body.dart';
-import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_detail_form_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/gln_detail_screen_fields.dart';
-import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/utils/gln_location_type_mapper.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 
-part 'gln_detail_actions.dart';
+import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/gln_detail_actions.dart';
 
 class GLNDetailScreen extends StatefulWidget {
   final String? glnId;
@@ -52,60 +42,60 @@ class GLNDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<GLNDetailScreen> createState() => _GLNDetailScreenState();
+  State<GLNDetailScreen> createState() => GLNDetailScreenState();
 }
 
-class _GLNDetailScreenState extends State<GLNDetailScreen>
+class GLNDetailScreenState extends State<GLNDetailScreen>
     with GlnDetailScreenFields {
-  final _formKey = GlobalKey<FormState>();
-  final _pharmaExtensionKey =
+  final formKey = GlobalKey<FormState>();
+  final pharmaExtensionKey =
       GlobalKey<GLNPharmaceuticalExtensionWidgetState>();
-  late final ValidationCubit _validationCubit;
+  late final ValidationCubit validationCubit;
 
-  String _operatingStatus = 'ACTIVE';
-  String _industryClassification = 'HEALTHCARE';
-  String _glnSource = 'SELF_ALLOCATED';
-  String _mobility = 'FIXED';
-  String _digitalAddressType = 'URL';
-  String _locationTypeLabel = 'Other';
-  List<String> _glnTypes = ['FIXED_PHYSICAL'];
-  String? _glnTypesErrorText;
+  String operatingStatus = 'ACTIVE';
+  String industryClassification = 'HEALTHCARE';
+  String glnSource = 'SELF_ALLOCATED';
+  String mobility = 'FIXED';
+  String digitalAddressType = 'URL';
+  String locationTypeLabel = 'Other';
+  List<String> glnTypes = ['FIXED_PHYSICAL'];
+  String? glnTypesErrorText;
 
-  String? _hydratedTag;
+  String? hydratedTag;
 
-  DateTime? _licenseValidFrom;
-  DateTime? _licenseExpiry;
-  DateTime? _effectiveFrom;
-  DateTime? _effectiveTo;
-  DateTime? _nonReuseUntil;
+  DateTime? licenseValidFrom;
+  DateTime? licenseExpiry;
+  DateTime? effectiveFrom;
+  DateTime? effectiveTo;
+  DateTime? nonReuseUntil;
 
-  bool _hasSubmittedForm = false;
-  GeospatialCoordinates? _coordinates;
-  bool _forceMountAllSections = false;
+  bool hasSubmittedForm = false;
+  GeospatialCoordinates? coordinates;
+  bool forceMountAllSections = false;
 
-  GLNCubit? _glnCubit;
+  GLNCubit? glnCubit;
   bool _glnInitialLoadStarted = false;
 
-  bool _formFieldsHydrated = true;
+  bool formFieldsHydrated = true;
 
   void _setFieldError(String fieldName, String? error) {
-    if (_validationCubit.getFieldError(fieldName) == error) {
+    if (validationCubit.getFieldError(fieldName) == error) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _validationCubit.setFieldError(fieldName, error);
+      validationCubit.setFieldError(fieldName, error);
     });
   }
 
   @override
   void initState() {
     super.initState();
-    _validationCubit = ValidationCubit();
-    _formFieldsHydrated = widget.glnId == null && !widget.awaitingListSelection;
+    validationCubit = ValidationCubit();
+    formFieldsHydrated = widget.glnId == null && !widget.awaitingListSelection;
 
     if (!widget.embedded) {
-      _glnCubit = GLNCubit(glnService: getIt<GLNService>());
+      glnCubit = GLNCubit(glnService: getIt<GLNService>());
     }
   }
 
@@ -113,14 +103,14 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (widget.embedded) {
-      _glnCubit = context.read<GLNCubit>();
+      glnCubit = context.read<GLNCubit>();
     }
     if (!_glnInitialLoadStarted) {
       _glnInitialLoadStarted = true;
       if (widget.awaitingListSelection) {
         return;
       }
-      final cubit = _glnCubit;
+      final cubit = glnCubit;
       if (cubit == null) {
         return;
       }
@@ -130,7 +120,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          _maybeHydrateFromGln(null);
+          maybeHydrateFromGln(null);
         });
       }
     }
@@ -140,22 +130,22 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
   void dispose() {
     disposeGlnDetailFields();
     if (widget.embedded) {
-      _glnCubit?.clearSelection();
+      glnCubit?.clearSelection();
     } else {
-      _glnCubit?.close();
+      glnCubit?.close();
     }
-    _validationCubit.close();
+    validationCubit.close();
     super.dispose();
   }
 
-  String? _nonEmptyOrNull(String s) {
+  String? nonEmptyOrNull(String s) {
     final t = s.trim();
     return t.isEmpty ? null : t;
   }
 
   bool _fieldSkeletonsActive(GLNState state) {
     if (state.status == GLNStatus.error) return false;
-    return !_formFieldsHydrated;
+    return !formFieldsHydrated;
   }
 
   @override
@@ -166,7 +156,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
           builder: (context, state) => GlnAwaitingSelectionPane(state: state),
         );
       }
-      final cubit = _glnCubit;
+      final cubit = glnCubit;
       if (cubit == null) {
         return Scaffold(
           body: GlnAwaitingSelectionPane(state: const GLNState()),
@@ -192,12 +182,12 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           if (state.status == GLNStatus.error) {
-            setState(() => _formFieldsHydrated = true);
+            setState(() => formFieldsHydrated = true);
             context.showError(state.error ?? GlnUiConstants.errorGeneric);
             return;
           }
-          if (state.status == GLNStatus.success && _hasSubmittedForm) {
-            setState(() => _hasSubmittedForm = false);
+          if (state.status == GLNStatus.success && hasSubmittedForm) {
+            setState(() => hasSubmittedForm = false);
 
             context.showSuccess(GlnUiConstants.successGlnSaved);
 
@@ -216,7 +206,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
           if (state.status == GLNStatus.success &&
               state.selectedGLN != null &&
               widget.glnId != null) {
-            _maybeHydrateFromGln(state.selectedGLN);
+            maybeHydrateFromGln(state.selectedGLN);
           }
         });
       },
@@ -228,10 +218,10 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
             !canEditMasterData || widget.glnId != null || sk;
 
         return GlnDetailFormBody(
-          formKey: _formKey,
-          onRefresh: _refresh,
+          formKey: formKey,
+          onRefresh: refresh,
           showSkeleton: sk,
-          forceMountAllSections: _forceMountAllSections,
+          forceMountAllSections: forceMountAllSections,
           gln: gln,
           idStructureReadOnly: idStructureReadOnly,
           canEditMasterData: canEditMasterData,
@@ -239,7 +229,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
           allowMasterDataActions: allowMasterDataActions,
           embedded: widget.embedded,
           onSubmit: () {
-            _submitForm();
+            submitForm();
           },
           setFieldError: _setFieldError,
           glnCodeController: glnCodeController,
@@ -272,61 +262,61 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
           locationRolesController: locationRolesController,
           licenseNumberController: licenseNumberController,
           licenseTypeController: licenseTypeController,
-          operatingStatus: _operatingStatus,
-          industryClassification: _industryClassification,
-          glnSource: _glnSource,
-          mobility: _mobility,
-          digitalAddressType: _digitalAddressType,
-          locationTypeLabel: _locationTypeLabel,
-          glnTypes: _glnTypes,
-          glnTypesErrorText: _glnTypesErrorText,
-          licenseValidFrom: _licenseValidFrom,
-          licenseExpiry: _licenseExpiry,
-          effectiveFrom: _effectiveFrom,
-          effectiveTo: _effectiveTo,
-          nonReuseUntil: _nonReuseUntil,
-          displayCoordinates: _coordinates,
-          pharmaExtensionKey: _pharmaExtensionKey,
+          operatingStatus: operatingStatus,
+          industryClassification: industryClassification,
+          glnSource: glnSource,
+          mobility: mobility,
+          digitalAddressType: digitalAddressType,
+          locationTypeLabel: locationTypeLabel,
+          glnTypes: glnTypes,
+          glnTypesErrorText: glnTypesErrorText,
+          licenseValidFrom: licenseValidFrom,
+          licenseExpiry: licenseExpiry,
+          effectiveFrom: effectiveFrom,
+          effectiveTo: effectiveTo,
+          nonReuseUntil: nonReuseUntil,
+          displayCoordinates: coordinates,
+          pharmaExtensionKey: pharmaExtensionKey,
           onOperatingStatusChanged: (v) {
-            if (v != null) setState(() => _operatingStatus = v);
+            if (v != null) setState(() => operatingStatus = v);
           },
-          onPickEffectiveFrom: () => _pickDate(
-            (d) => setState(() => _effectiveFrom = d),
-            _effectiveFrom,
+          onPickEffectiveFrom: () => pickDate(
+            (d) => setState(() => effectiveFrom = d),
+            effectiveFrom,
           ),
           onPickEffectiveTo: () =>
-              _pickDate((d) => setState(() => _effectiveTo = d), _effectiveTo),
+              pickDate((d) => setState(() => effectiveTo = d), effectiveTo),
           onGlnTypesChanged: (next) {
             setState(() {
-              _glnTypes = next;
-              _glnTypesErrorText = null;
+              glnTypes = next;
+              glnTypesErrorText = null;
             });
           },
           onIndustryClassificationChanged: (v) {
-            if (v != null) setState(() => _industryClassification = v);
+            if (v != null) setState(() => industryClassification = v);
           },
           onGlnSourceChanged: (v) {
-            if (v != null) setState(() => _glnSource = v);
+            if (v != null) setState(() => glnSource = v);
           },
           onMobilityChanged: (v) {
-            if (v != null) setState(() => _mobility = v);
+            if (v != null) setState(() => mobility = v);
           },
           onDigitalAddressTypeChanged: (v) {
-            if (v != null) setState(() => _digitalAddressType = v);
+            if (v != null) setState(() => digitalAddressType = v);
           },
           onLocationTypeChanged: (v) {
-            if (v != null) setState(() => _locationTypeLabel = v);
+            if (v != null) setState(() => locationTypeLabel = v);
           },
-          onPickLicenseValidFrom: () => _pickDate(
-            (d) => setState(() => _licenseValidFrom = d),
-            _licenseValidFrom,
+          onPickLicenseValidFrom: () => pickDate(
+            (d) => setState(() => licenseValidFrom = d),
+            licenseValidFrom,
           ),
-          onPickLicenseExpiry: () => _pickDate(
-            (d) => setState(() => _licenseExpiry = d),
-            _licenseExpiry,
+          onPickLicenseExpiry: () => pickDate(
+            (d) => setState(() => licenseExpiry = d),
+            licenseExpiry,
           ),
           onCoordinatesChanged: (c) {
-            setState(() => _coordinates = c);
+            setState(() => coordinates = c);
           },
         );
       },
@@ -341,20 +331,20 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
           : GlnUiConstants.detailTitleView,
       showSaveAction: allowMasterDataActions,
       onSave: () {
-        _submitForm();
+        submitForm();
       },
       body: body,
     );
 
     Widget result = scaffold;
     if (!widget.embedded) {
-      final cubit = _glnCubit;
+      final cubit = glnCubit;
       if (cubit != null) {
         result = BlocProvider<GLNCubit>.value(value: cubit, child: scaffold);
       }
     }
     return BlocProvider<ValidationCubit>.value(
-      value: _validationCubit,
+      value: validationCubit,
       child: result,
     );
   }

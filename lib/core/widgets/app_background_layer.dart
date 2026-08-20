@@ -1,5 +1,5 @@
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
 
 class AppBackgroundLayer extends StatelessWidget {
   const AppBackgroundLayer({super.key});

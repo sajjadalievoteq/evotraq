@@ -1,19 +1,24 @@
-part of 'sscc_detail_screen.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
+import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/sscc_detail_edit_actions.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/sscc_detail_screen.dart';
 
-extension SSCCDetailActions on _SSCCDetailScreenState {
-  void _startInitialLoad() {
+extension SSCCDetailActions on SSCCDetailScreenState {
+  void startInitialLoad() {
     final code = widget.routeSsccCode;
     if (code == null || code.isEmpty) {
-      setState(() => _formFieldsHydrated = true);
+      setState(() => formFieldsHydrated = true);
       return;
     }
     _reloadFromServer();
   }
 
-  String? get _requestedSsccKey => widget.routeSsccCode;
+  String? get requestedSsccKey => widget.routeSsccCode;
 
-  bool _matchesRequestedSscc(SSCC sscc) {
-    final key = _requestedSsccKey;
+  bool matchesRequestedSscc(SSCC sscc) {
+    final key = requestedSsccKey;
     if (key == null || key.isEmpty) return false;
     if (RegExp(r'^\d{18}$').hasMatch(key)) {
       return sscc.ssccCode == key;
@@ -21,7 +26,7 @@ extension SSCCDetailActions on _SSCCDetailScreenState {
     return sscc.id?.toString() == key;
   }
 
-  bool _ssccRecordDiffers(SSCC current, SSCC incoming) {
+  bool ssccRecordDiffers(SSCC current, SSCC incoming) {
     return current.status != incoming.status ||
         current.packingDate != incoming.packingDate ||
         current.commissionedAt != incoming.commissionedAt ||
@@ -29,7 +34,7 @@ extension SSCCDetailActions on _SSCCDetailScreenState {
         current.updatedAt != incoming.updatedAt;
   }
 
-  SSCC? _ssccFromList(SSCCState state, String code) {
+  SSCC? ssccFromList(SSCCState state, String code) {
     for (final sscc in state.ssccs) {
       if (sscc.ssccCode == code) return sscc;
     }
@@ -37,59 +42,59 @@ extension SSCCDetailActions on _SSCCDetailScreenState {
   }
 
   void _reloadFromServer() {
-    if (_serverRefreshInFlight) return;
+    if (serverRefreshInFlight) return;
     final code = widget.routeSsccCode;
     if (code == null || code.isEmpty) return;
 
-    _serverRefreshInFlight = true;
-    _aggregationLinksRequestedCode = null;
-    _aggregationLinksFuture = null;
+    serverRefreshInFlight = true;
+    aggregationLinksRequestedCode = null;
+    aggregationLinksFuture = null;
     setState(() {
-      _loadedSsccKey = null;
-      _formFieldsHydrated = false;
+      loadedSsccKey = null;
+      formFieldsHydrated = false;
     });
     if (RegExp(r'^\d{18}$').hasMatch(code)) {
-      _cubit.fetchSSCCByCode(code);
+      cubit.fetchSSCCByCode(code);
 
-      _loadAggregationLinks(code);
+      loadAggregationLinks(code);
     } else {
-      _cubit.fetchSSCCById(code);
+      cubit.fetchSSCCById(code);
     }
   }
 
-  void _syncDetailWithListIfStale(SSCCState state) {
+  void syncDetailWithListIfStale(SSCCState state) {
     if (widget.isCreating || widget.awaitingListSelection) return;
     final code = widget.routeSsccCode;
-    if (code == null || code.isEmpty || _sscc == null) return;
+    if (code == null || code.isEmpty || sscc == null) return;
 
-    final listItem = _ssccFromList(state, code);
-    if (listItem == null || !_ssccRecordDiffers(_sscc!, listItem)) return;
+    final listItem = ssccFromList(state, code);
+    if (listItem == null || !ssccRecordDiffers(sscc!, listItem)) return;
 
     final syncKey =
         '${listItem.updatedAt.toIso8601String()}:${listItem.status.name}';
-    if (syncKey == _lastListSyncKey) return;
-    _lastListSyncKey = syncKey;
+    if (syncKey == lastListSyncKey) return;
+    lastListSyncKey = syncKey;
     _reloadFromServer();
   }
 
-  bool _shouldIgnoreCubitError(SSCCState state) {
+  bool shouldIgnoreCubitError(SSCCState state) {
     if (state.isListLoading) return true;
     return false;
   }
 
-  Future<void> _ensureGlnPickerCatalog() async {
-    if (_glnCatalogLoadStarted) return;
-    _glnCatalogLoadStarted = true;
+  Future<void> ensureGlnPickerCatalog() async {
+    if (glnCatalogLoadStarted) return;
+    glnCatalogLoadStarted = true;
     try {
       final catalog = await getIt<GlnPickerCatalog>().ensureLoaded();
       if (!mounted) return;
-      setState(() => _glnPickerCatalog = catalog);
-      _applyGlnCatalogToFields();
+      setState(() => glnPickerCatalog = catalog);
+      applyGlnCatalogToFields();
     } catch (_) {}
   }
 
-  Future<void> _refresh() async {
+  Future<void> refresh() async {
     if (widget.isCreating || widget.awaitingListSelection) return;
-    _startInitialLoad();
+    startInitialLoad();
   }
 }

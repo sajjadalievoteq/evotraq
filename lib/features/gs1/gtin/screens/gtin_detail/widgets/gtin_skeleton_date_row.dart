@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/widgets/skeleton_box.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_constants.dart';
 
 class GtinSkeletonDateRow extends StatelessWidget {

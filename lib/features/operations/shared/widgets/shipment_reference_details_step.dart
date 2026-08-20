@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -9,7 +10,6 @@ import 'package:traqtrace_app/data/models/operations/shared/pharma_return_reason
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_auto_reference_notice.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_event_time_tile.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_gln_selector.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_detail_buttons.dart';
 
 class ShipmentReferenceDetailsStep extends StatelessWidget {
   const ShipmentReferenceDetailsStep({

@@ -1,6 +1,7 @@
+import 'package:traqtrace_app/core/animation/traq_entrance_slide.dart';
+import 'package:traqtrace_app/core/animation/traq_staggered_entrance_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
-import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 
 /// One entrance controller for the branding panel (not one per section).
 class AuthBrandingEntrance extends StatelessWidget {

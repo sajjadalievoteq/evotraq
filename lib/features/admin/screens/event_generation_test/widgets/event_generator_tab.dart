@@ -1,7 +1,7 @@
+import 'package:traqtrace_app/data/services/admin/event_generation_test_models.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/data/services/admin/event_generation_test_service.dart';
 import 'package:traqtrace_app/features/admin/screens/event_generation_test/widgets/event_bulk_result_card.dart';
 
 class EventGeneratorTab extends StatelessWidget {

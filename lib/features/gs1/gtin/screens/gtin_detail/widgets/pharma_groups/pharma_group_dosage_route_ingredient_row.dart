@@ -1,5 +1,5 @@
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_types.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 
 class DosageRouteIngredientRow {
   DosageRouteIngredientRow({ActiveIngredient? initial, this.onChanged}) {

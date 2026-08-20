@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/core/widgets/skeleton_box.dart';
 
 class AggregationDetailSkeletonFieldRow extends StatelessWidget {
-  const AggregationDetailSkeletonFieldRow({
+  const AggregationDetailSkeletonFieldRow({super.key,
     required this.base,
     required this.maxWidth,
     this.withChip = false,

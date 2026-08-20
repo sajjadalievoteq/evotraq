@@ -1,7 +1,10 @@
-part of 'dio_service.dart';
+import 'dart:convert';
 
-extension DioServiceLogging on DioService {
-  String _formatBody(dynamic data) {
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+
+abstract final class DioServiceLogger {
+  static String _formatBody(dynamic data) {
     if (data == null) return '(none)';
     if (data is FormData) {
       return 'FormData('
@@ -25,9 +28,9 @@ extension DioServiceLogging on DioService {
     }
   }
 
-  String _requestUrl(RequestOptions options) => options.uri.toString();
+  static String _requestUrl(RequestOptions options) => options.uri.toString();
 
-  Map<String, dynamic> _redactedHeaders(Map<String, dynamic> headers) {
+  static Map<String, dynamic> _redactedHeaders(Map<String, dynamic> headers) {
     return headers.map((key, value) {
       if (key.toLowerCase() == 'authorization') {
         return MapEntry(key, '***');
@@ -36,7 +39,7 @@ extension DioServiceLogging on DioService {
     });
   }
 
-  void _logRequest(RequestOptions options) {
+  static void logRequest(RequestOptions options) {
     if (!kDebugMode) return;
 
     final buffer = StringBuffer()
@@ -59,7 +62,7 @@ extension DioServiceLogging on DioService {
     debugPrint(buffer.toString());
   }
 
-  void _logResponse(Response<dynamic> response) {
+  static void logResponse(Response<dynamic> response) {
     if (!kDebugMode) return;
 
     final buffer = StringBuffer()
@@ -76,7 +79,7 @@ extension DioServiceLogging on DioService {
     debugPrint(buffer.toString());
   }
 
-  void _logError(DioException error) {
+  static void logError(DioException error) {
     if (!kDebugMode) return;
 
     final options = error.requestOptions;

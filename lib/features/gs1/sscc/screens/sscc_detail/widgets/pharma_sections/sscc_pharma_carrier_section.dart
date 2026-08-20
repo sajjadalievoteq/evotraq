@@ -1,7 +1,7 @@
+import 'package:traqtrace_app/features/gs1/widgets/gs1_date_picker_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharma_group_card.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 
 class SsccPharmaCarrierSection extends StatelessWidget {
   const SsccPharmaCarrierSection({

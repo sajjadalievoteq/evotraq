@@ -88,7 +88,8 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                   ),
                   HelpItem(
                     title: 'Operations',
-                    description: '''Filter by which supply-chain operation produced the event:
+                    description:
+                        '''Filter by which supply-chain operation produced the event:
 • Shipping / Return Shipping / Cancel Shipping
 • Receiving / Return Receiving / Cancel Receiving
 • Accepting: Items being accepted into inventory
@@ -146,8 +147,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                         'Start with broad filters and refine based on notification volume',
                   ),
                   HelpTip(
-                    tip:
-                        'Test your API endpoint before creating subscriptions',
+                    tip: 'Test your API endpoint before creating subscriptions',
                   ),
                   HelpTip(
                     tip:
@@ -158,8 +158,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                         'Monitor API delivery rates in subscription statistics',
                   ),
                   HelpTip(
-                    tip:
-                        'Set up proper error handling in your API endpoint',
+                    tip: 'Set up proper error handling in your API endpoint',
                   ),
                 ],
               ),

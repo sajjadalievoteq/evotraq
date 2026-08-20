@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/automation_center/utils/subscription_filt
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_empty_state.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_error_view.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_loading_skeleton.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_skeleton_shape.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_master_list.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_detail_pane.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/embedded_full_details_pane.dart';

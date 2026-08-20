@@ -48,20 +48,16 @@ class CatalogRequestExample extends Equatable {
 
   @override
   List<Object?> get props => [
-        pathParameters,
-        queryParameters,
-        headers,
-        body,
-        notes,
-      ];
+    pathParameters,
+    queryParameters,
+    headers,
+    body,
+    notes,
+  ];
 }
 
 class CatalogResponseExample extends Equatable {
-  const CatalogResponseExample({
-    this.status,
-    this.description,
-    this.body,
-  });
+  const CatalogResponseExample({this.status, this.description, this.body});
 
   final int? status;
   final String? description;
@@ -133,16 +129,16 @@ class InboundCatalogEndpoint extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        method,
-        path,
-        order,
-        authMode,
-        example,
-        expectedResult,
-      ];
+    id,
+    title,
+    description,
+    method,
+    path,
+    order,
+    authMode,
+    example,
+    expectedResult,
+  ];
 }
 
 class InboundCatalogCategory extends Equatable {
@@ -168,7 +164,9 @@ class InboundCatalogCategory extends Equatable {
       description: json['description'] as String? ?? '',
       order: json['order'] as int? ?? 0,
       endpoints: endpointsJson
-          .map((e) => InboundCatalogEndpoint.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => InboundCatalogEndpoint.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
     );
   }
@@ -206,7 +204,9 @@ class InboundCatalog extends Equatable {
       schemaVersion: schemaVersion,
       generatedAt: json['generatedAt'] as String?,
       categories: categoriesJson
-          .map((e) => InboundCatalogCategory.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => InboundCatalogCategory.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
     );
   }

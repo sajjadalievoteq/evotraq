@@ -1,14 +1,10 @@
 import 'dart:convert';
 import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_content_validator.dart';
+import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_date_validator.dart';
 
-import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
-import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
-import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
-import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_template.dart';
 
 import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validation_result.dart';
-export 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validation_result.dart';
 
 /// Three-gate validator: format → schema/structure → content.
 /// Rejects on the first failing gate (later gates are not run).
@@ -219,7 +215,7 @@ abstract final class EpcisImportValidator {
       return EpcisImportValidationResult(issues: contentIssues);
     }
 
-    validateIsoInstant(
+    validateEpcisIsoInstant(
       doc['creationDate'] as String,
       r'$.creationDate',
       contentIssues,
@@ -327,34 +323,6 @@ abstract final class EpcisImportValidator {
           ),
         );
       }
-    }
-  }
-
-  static void validateIsoInstant(
-    String? value,
-    String path,
-    List<EpcisImportIssue> issues,
-  ) {
-    if (value == null || value.trim().isEmpty) {
-      issues.add(
-        EpcisImportIssue(
-          gate: EpcisImportGate.content,
-          path: path,
-          reason: 'ISO-8601 date-time is required',
-        ),
-      );
-      return;
-    }
-    try {
-      DateTime.parse(value);
-    } on FormatException {
-      issues.add(
-        EpcisImportIssue(
-          gate: EpcisImportGate.content,
-          path: path,
-          reason: 'Invalid ISO-8601 date-time: $value',
-        ),
-      );
     }
   }
 

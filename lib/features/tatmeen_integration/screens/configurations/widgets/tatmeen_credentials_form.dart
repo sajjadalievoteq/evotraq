@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
-import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_integration_settings.dart';
 
-part 'tatmeen_credentials_skeleton.dart';
-part 'tatmeen_credential_field_skeleton.dart';
-part 'tatmeen_credentials_read_only_summary.dart';
-part 'tatmeen_secret_field.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_credentials_skeleton.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_credentials_read_only_summary.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/configurations/widgets/tatmeen_secret_field.dart';
 
 typedef TatmeenCredentialsSaveCallback =
     Future<bool> Function(UpdateTatmeenIntegrationSettingsRequest request);
@@ -59,6 +57,17 @@ class _TatmeenCredentialsFormState extends State<TatmeenCredentialsForm> {
     _apiKeyController = TextEditingController();
     _initialUsername = widget.settings?.username;
     _syncSecretEditingFlags();
+    for (final controller in [
+      _usernameController,
+      _passwordController,
+      _apiKeyController,
+    ]) {
+      controller.addListener(_onFieldChanged);
+    }
+  }
+
+  void _onFieldChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -85,6 +94,17 @@ class _TatmeenCredentialsFormState extends State<TatmeenCredentialsForm> {
   bool get _passwordConfigured => widget.settings?.passwordConfigured ?? false;
 
   bool get _apiKeyConfigured => widget.settings?.apiKeyConfigured ?? false;
+
+  bool get _canSave {
+    if (widget.busy) return false;
+    if (_usernameController.text.trim().isEmpty) return false;
+    final passwordReady =
+        _passwordConfigured && !_editingPassword ||
+        _passwordController.text.isNotEmpty;
+    final apiKeyReady =
+        _apiKeyConfigured && !_editingApiKey || _apiKeyController.text.isNotEmpty;
+    return passwordReady && apiKeyReady;
+  }
 
   void _syncSecretEditingFlags() {
     _editingPassword = !_passwordConfigured;
@@ -198,7 +218,7 @@ class _TatmeenCredentialsFormState extends State<TatmeenCredentialsForm> {
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton(
-              onPressed: widget.busy ? null : _submit,
+              onPressed: _canSave ? _submit : null,
               child: widget.busy
                   ? const SizedBox(
                       width: 18,

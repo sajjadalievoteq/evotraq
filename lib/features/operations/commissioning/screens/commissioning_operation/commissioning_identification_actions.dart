@@ -1,9 +1,30 @@
-part of 'commissioning_operation_view.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/utils/barcode_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
+import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
+import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
+import 'package:traqtrace_app/features/operations/commissioning/models/commissioning_epc_item.dart';
+import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/commissioning_operation_view.dart';
+import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_epc_disambiguation_dialog.dart';
+import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_epc_resolver.dart';
+import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_serial_pool_checker.dart';
+import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_serial_pool_status.dart';
 
 extension CommissioningIdentificationActions
-    on _CommissioningOperationViewState {
-  String? _resolvedGtinCode() {
-    final fromParsed = _primaryParsed?.gtin;
+    on CommissioningOperationViewState {
+  String? resolvedGtinCode() {
+    final fromParsed = primaryParsed?.gtin;
     if (fromParsed != null && fromParsed.trim().isNotEmpty) {
       final trimmed = fromParsed.trim();
       if (GtinFormat.isValidGtin(trimmed)) {
@@ -11,7 +32,7 @@ extension CommissioningIdentificationActions
       }
       return trimmed;
     }
-    final epc = _primaryParsed?.epc;
+    final epc = primaryParsed?.epc;
     if (epc != null) {
       final fromEpc = Gs1Converter.epcToGTIN(epc);
       if (fromEpc != null &&
@@ -23,43 +44,43 @@ extension CommissioningIdentificationActions
     return null;
   }
 
-  void _onBatchLotTextChanged() {
+  void onBatchLotTextChanged() {
     if (!mounted) return;
     setState(() {});
   }
 
-  Future<void> _loadLocations() async {
+  Future<void> loadLocations() async {
     try {
       final catalog = getIt<GlnPickerCatalog>();
       final glns = await catalog.ensureLoaded();
       if (!mounted) return;
       setState(
-        () => _availableLocations = glns.where((g) => g.active).toList(),
+        () => availableLocations = glns.where((g) => g.active).toList(),
       );
     } catch (e) {
       debugPrint('Error loading GLNs for commissioning picker: $e');
     }
   }
 
-  Future<void> _onScanItemAdded(EPCParseResult result) async {
-    if (_commissionItems.isEmpty) {
+  Future<void> onScanItemAdded(EPCParseResult result) async {
+    if (commissionItems.isEmpty) {
       await _processResolvedEpc(result, isPrimary: true);
       return;
     }
-    if (_identifiedType != null && result.type != _identifiedType) {
+    if (identifiedType != null && result.type != identifiedType) {
       context.showError(
-        'Expected ${_identifiedType!.name.toUpperCase()} — got ${result.typeLabel}',
+        'Expected ${identifiedType!.name.toUpperCase()} — got ${result.typeLabel}',
       );
       return;
     }
-    if (_commissionItems.any((i) => i.epc == result.epc)) {
+    if (commissionItems.any((i) => i.epc == result.epc)) {
       context.showError('EPC already queued for commissioning');
       return;
     }
     await _processResolvedEpc(result, isPrimary: false);
   }
 
-  void _applyApiRejectionResults(ApiException exception) {
+  void applyApiRejectionResults(ApiException exception) {
     final body = exception.responseBody;
     if (body == null || body.isEmpty) return;
     try {
@@ -73,10 +94,10 @@ extension CommissioningIdentificationActions
       if (results.isEmpty) return;
 
       setState(() {
-        _commissionItems.replaceRange(
+        commissionItems.replaceRange(
           0,
-          _commissionItems.length,
-          _commissionItems.map((item) {
+          commissionItems.length,
+          commissionItems.map((item) {
             final match = results.where((r) {
               if (r.canonicalIdentifier != null &&
                   r.canonicalIdentifier == item.epc) {
@@ -106,7 +127,7 @@ extension CommissioningIdentificationActions
       return;
     }
 
-    if (!isPrimary && _primaryParsed != null && parsed.type == EPCType.sgtin) {
+    if (!isPrimary && primaryParsed != null && parsed.type == EPCType.sgtin) {
       final mismatch = _gtinMismatchMessageFor(parsed);
       if (mismatch != null) {
         context.showError(mismatch);
@@ -133,10 +154,10 @@ extension CommissioningIdentificationActions
     if (isPrimary) {
       await _applyPrimaryIdentification(item);
     } else {
-      setState(() => _commissionItems.add(item));
+      setState(() => commissionItems.add(item));
       _applyGuessabilityWarning(parsed);
-      if (_guessabilityWarning != null) {
-        context.showWarning(_guessabilityWarning!);
+      if (guessabilityWarning != null) {
+        context.showWarning(guessabilityWarning!);
       }
     }
   }
@@ -144,10 +165,10 @@ extension CommissioningIdentificationActions
   Future<void> _applyPrimaryIdentification(CommissioningEpcItem item) async {
     final parsed = item.parsed;
     setState(() {
-      _guessabilityWarning = null;
-      _identifiedType = parsed.type;
-      _primaryParsed = parsed;
-      _commissionItems
+      guessabilityWarning = null;
+      identifiedType = parsed.type;
+      primaryParsed = parsed;
+      commissionItems
         ..clear()
         ..add(item);
     });
@@ -162,63 +183,63 @@ extension CommissioningIdentificationActions
       }
       final details = extractBarcodeDetails(parsed.raw);
       if (details.batchLot != null && details.batchLot!.isNotEmpty) {
-        _batchLotController.text = details.batchLot!;
+        batchLotController.text = details.batchLot!;
       }
-      if (details.expiry != null && !_expiryManuallySet) {
-        _expiryDate = details.expiry;
+      if (details.expiry != null && !expiryManuallySet) {
+        expiryDate = details.expiry;
       }
-      if (details.productionDate != null && !_productionDateManuallySet) {
-        _productionDate = details.productionDate;
+      if (details.productionDate != null && !productionDateManuallySet) {
+        productionDate = details.productionDate;
       }
     }
 
     if (parsed.type == EPCType.sscc) {
-      _isPharmaGtin = false;
+      isPharmaGtin = false;
     }
 
     if (!mounted) return;
     setState(() {});
     _applyGuessabilityWarning(parsed);
-    if (_guessabilityWarning != null) {
-      context.showWarning(_guessabilityWarning!);
+    if (guessabilityWarning != null) {
+      context.showWarning(guessabilityWarning!);
     }
   }
 
   Future<void> _onPharmaGtinIdentified(String gtinCode) async {
     final normalized = GtinFormat.normalizeGtinTo14(gtinCode);
-    if (_pharmaGtinIdentifiedFor == normalized) return;
-    _pharmaGtinIdentifiedFor = normalized;
+    if (pharmaGtinIdentifiedFor == normalized) return;
+    pharmaGtinIdentifiedFor = normalized;
 
     final cubit = context.read<CommissioningOperationCubit>();
     final isPharma = await cubit.onPharmaGtinIdentified(gtinCode);
     if (!mounted) return;
-    setState(() => _isPharmaGtin = isPharma);
+    setState(() => isPharmaGtin = isPharma);
   }
 
   Future<void> _loadGtinForCode(String gtinCode) async {
     final normalized = GtinFormat.normalizeGtinTo14(gtinCode);
-    if (_selectedGTIN?.gtinCode == normalized) return;
-    if (_gtinLoadInFlightFor == normalized) return;
+    if (selectedGTIN?.gtinCode == normalized) return;
+    if (gtinLoadInFlightFor == normalized) return;
 
-    _gtinLoadInFlightFor = normalized;
+    gtinLoadInFlightFor = normalized;
     try {
-      final gtin = await _gtinService.getGTIN(normalized);
-      if (!mounted || _gtinLoadInFlightFor != normalized) return;
+      final gtin = await gtinService.getGTIN(normalized);
+      if (!mounted || gtinLoadInFlightFor != normalized) return;
       setState(() {
-        _selectedGTIN = gtin;
-        _gtinLoadInFlightFor = null;
+        selectedGTIN = gtin;
+        gtinLoadInFlightFor = null;
       });
     } catch (_) {
-      if (!mounted || _gtinLoadInFlightFor != normalized) return;
-      setState(() => _gtinLoadInFlightFor = null);
+      if (!mounted || gtinLoadInFlightFor != normalized) return;
+      setState(() => gtinLoadInFlightFor = null);
     }
   }
 
   CommissioningPoolCheckResult? _cachedPoolCheck(EPCParseResult parsed) {
-    final cached = _poolCheckCache[parsed.epc];
+    final cached = poolCheckCache[parsed.epc];
     if (cached != null) return cached;
 
-    for (final item in _commissionItems) {
+    for (final item in commissionItems) {
       if (item.epc != parsed.epc) continue;
       if (item.poolStatus == CommissioningSerialPoolStatus.checking) {
         return null;
@@ -239,18 +260,18 @@ extension CommissioningIdentificationActions
     final cached = _cachedPoolCheck(parsed);
     if (cached != null) return cached;
 
-    final result = await _poolChecker.check(parsed);
-    _poolCheckCache[parsed.epc] = result;
+    final result = await poolChecker.check(parsed);
+    poolCheckCache[parsed.epc] = result;
     return result;
   }
 
-  Map<String, String> get _itemProductNames {
-    final gtin = _selectedGTIN;
+  Map<String, String> get itemProductNames {
+    final gtin = selectedGTIN;
     final name = gtin?.tradeItemDescription?.trim().isNotEmpty == true
         ? gtin!.tradeItemDescription
         : gtin?.productName;
     if (name == null || name.trim().isEmpty) return const {};
-    return {for (final item in _commissionItems) item.epc: name};
+    return {for (final item in commissionItems) item.epc: name};
   }
 
   String? _validateCheckDigits(EPCParseResult parsed) {
@@ -264,7 +285,7 @@ extension CommissioningIdentificationActions
   }
 
   String? _gtinMismatchMessageFor(EPCParseResult parsed) {
-    final primaryGtin = _primaryParsed?.gtin;
+    final primaryGtin = primaryParsed?.gtin;
     final scannedGtin = parsed.gtin;
     if (primaryGtin == null || scannedGtin == null) return null;
     String norm(String v) => v.replaceAll(RegExp(r'\D'), '').padLeft(14, '0');
@@ -276,28 +297,28 @@ extension CommissioningIdentificationActions
   }
 
   void _applyGuessabilityWarning(EPCParseResult parsed) {
-    if (!_isPharmaSgtin || parsed.serial == null) return;
+    if (!isPharmaSgtin || parsed.serial == null) return;
     final serial = parsed.serial!;
     if (RegExp(r'^[A-Z]{3}\d{8,}$').hasMatch(serial)) {
-      _guessabilityWarning =
+      guessabilityWarning =
           'Serial $serial looks like an internal reference, not an FMD-compliant unpredictable serial.';
       return;
     }
     final details = extractBarcodeDetails(parsed.raw);
     if (details.type == Gs1BarcodeType.unknown) {
-      _guessabilityWarning =
+      guessabilityWarning =
           'Not a GS1 product barcode. Pharmaceutical serials must be unpredictable '
           '(FMD/DSCSA). Scan the pack label or enter a pool-allocated serial.';
     }
   }
 
-  Future<EPCParseResult?> _epcFallbackResolve(String input) async {
-    final outcome = await _epcResolver.resolve(input);
+  Future<EPCParseResult?> epcFallbackResolve(String input) async {
+    final outcome = await epcResolver.resolve(input);
     if (!mounted) return null;
     return switch (outcome) {
       CommissioningEpcResolved(:final parsed, :final poolCheck) => () {
         if (poolCheck != null) {
-          _poolCheckCache[parsed.epc] = poolCheck;
+          poolCheckCache[parsed.epc] = poolCheck;
         }
         return parsed;
       }(),
@@ -308,7 +329,7 @@ extension CommissioningIdentificationActions
           matches: matches,
         ).then((m) {
           if (m?.poolCheck != null) {
-            _poolCheckCache[m!.parsed.epc] = m.poolCheck!;
+            poolCheckCache[m!.parsed.epc] = m.poolCheck!;
           }
           return m?.parsed;
         }),

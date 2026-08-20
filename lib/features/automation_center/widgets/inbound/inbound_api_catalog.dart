@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/web/web_download_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/web_download_web.dart'
     if (dart.library.io) 'package:traqtrace_app/core/web/web_download_io.dart'
     as web_download;
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/automation_center/inbound_catalog.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/inbound_catalog_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/inbound_catalog_state.dart';
@@ -81,7 +82,8 @@ class _InboundApiCatalogState extends State<InboundApiCatalog> {
       builder: (context, state) {
         // Keep existing catalog visible during refresh; skeleton only when
         // there is nothing to show yet.
-        final showSkeleton = state.catalog == null &&
+        final showSkeleton =
+            state.catalog == null &&
             (state.status == InboundCatalogStatus.loading ||
                 state.status == InboundCatalogStatus.initial);
         if (showSkeleton) {
@@ -119,7 +121,9 @@ class _InboundApiCatalogState extends State<InboundApiCatalog> {
               'Select a collection to view B2B-Service-accessible endpoints, copy authenticated '
               'requests, or download the whole group as a Postman collection pre-filled '
               'with sample test data.',
-              style: context.text.body.copyWith(color: context.colors.textMuted),
+              style: context.text.body.copyWith(
+                color: context.colors.textMuted,
+              ),
             ),
             const SizedBox(height: TraqSpacing.md),
             GridView.builder(

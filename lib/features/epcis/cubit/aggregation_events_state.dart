@@ -1,17 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/data/models/operations/packing/packing_request_model.dart';
-import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_request_model.dart';
-import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
-import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
-import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/aggregation_events/utils/aggregation_event_list_utils.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
-import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
 enum AggregationEventsStatus { initial, loading, success, error }
 

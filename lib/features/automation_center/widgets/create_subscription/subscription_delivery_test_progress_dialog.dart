@@ -26,9 +26,7 @@ class SubscriptionDeliveryTestProgressDialog extends StatelessWidget {
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
           const SizedBox(width: 16),
-          Expanded(
-            child: Text('Checking the $_destinationLabel destination…'),
-          ),
+          Expanded(child: Text('Checking the $_destinationLabel destination…')),
         ],
       ),
     );

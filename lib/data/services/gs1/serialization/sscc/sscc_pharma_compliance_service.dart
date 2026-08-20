@@ -16,14 +16,15 @@ abstract final class _Paths {
   static String tatmeen(String id) => '${base(id)}/tatmeen';
   static String emvo(String id) => '${base(id)}/emvo';
   static String controlledChain(String id) => '${base(id)}/controlled-chain';
-  static String coldChainExcursion(String id) => '${base(id)}/cold-chain/excursion';
+  static String coldChainExcursion(String id) =>
+      '${base(id)}/cold-chain/excursion';
   static String tatmeenAck(String submissionId) =>
       '/identifiers/ssccs/pharma/tatmeen/$submissionId/acknowledge';
 }
 
 class SsccPharmaComplianceService {
   SsccPharmaComplianceService({required DioService dioService})
-      : _dio = dioService;
+    : _dio = dioService;
 
   final DioService _dio;
 
@@ -36,9 +37,9 @@ class SsccPharmaComplianceService {
   }
 
   Map<String, String> _headers(String token) => {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      };
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
 
   List<T> _decodeList<T>(
     dynamic data,

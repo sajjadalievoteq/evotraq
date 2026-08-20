@@ -1,120 +1,109 @@
-import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
-
-import 'gtin_format.dart';
-
-part 'gtin_core_validators.dart';
-part 'gtin_product_validators.dart';
-part 'gtin_indicator_location_validators.dart';
-part 'gtin_regulatory_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_core_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_product_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_indicator_location_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_regulatory_validators.dart';
 
 abstract final class GtinFieldValidators {
-  static final validateGtinCode = _GtinCoreValidators.validateGtinCode;
+  static final validateGtinCode = GtinCoreValidators.validateGtinCode;
   static final validateGtinCodeOptional =
-      _GtinCoreValidators.validateGtinCodeOptional;
-  static final isGtinCodeValid = _GtinCoreValidators.isGtinCodeValid;
+      GtinCoreValidators.validateGtinCodeOptional;
+  static final isGtinCodeValid = GtinCoreValidators.isGtinCodeValid;
   static final canonicalGtin14FromInput =
-      _GtinCoreValidators.canonicalGtin14FromInput;
-  static final validGtinChipsData = _GtinCoreValidators.validGtinChipsData;
-  static final validateProductName = _GtinCoreValidators.validateProductName;
-  static final validateManufacturer = _GtinCoreValidators.validateManufacturer;
+      GtinCoreValidators.canonicalGtin14FromInput;
+  static final validGtinChipsData = GtinCoreValidators.validGtinChipsData;
+  static final validateProductName = GtinCoreValidators.validateProductName;
+  static final validateManufacturer = GtinCoreValidators.validateManufacturer;
   static final validatePackSizeOptionalInt =
-      _GtinCoreValidators.validatePackSizeOptionalInt;
-  static final productNameRequired = _GtinCoreValidators.productNameRequired;
-  static final manufacturerRequired = _GtinCoreValidators.manufacturerRequired;
-  static final packSizeOptionalInt = _GtinCoreValidators.packSizeOptionalInt;
-  static final validateBrandName = _GtinProductValidators.validateBrandName;
+      GtinCoreValidators.validatePackSizeOptionalInt;
+  static final productNameRequired = GtinCoreValidators.productNameRequired;
+  static final manufacturerRequired = GtinCoreValidators.manufacturerRequired;
+  static final packSizeOptionalInt = GtinCoreValidators.packSizeOptionalInt;
+  static final validateBrandName = GtinProductValidators.validateBrandName;
   static final validateFunctionalName =
-      _GtinProductValidators.validateFunctionalName;
+      GtinProductValidators.validateFunctionalName;
   static final validateTradeItemDescription =
-      _GtinProductValidators.validateTradeItemDescription;
+      GtinProductValidators.validateTradeItemDescription;
   static final validateGpcBrickCode =
-      _GtinProductValidators.validateGpcBrickCode;
+      GtinProductValidators.validateGpcBrickCode;
   static final validateIso3166Numeric3 =
-      _GtinProductValidators.validateIso3166Numeric3;
+      GtinProductValidators.validateIso3166Numeric3;
   static final validateTargetMarketCountry =
-      _GtinProductValidators.validateTargetMarketCountry;
+      GtinProductValidators.validateTargetMarketCountry;
   static final validateCountryOfOrigin =
-      _GtinProductValidators.validateCountryOfOrigin;
+      GtinProductValidators.validateCountryOfOrigin;
   static final validateNetContentValueRequired =
-      _GtinProductValidators.validateNetContentValueRequired;
+      GtinProductValidators.validateNetContentValueRequired;
   static final validateUomCode3Required =
-      _GtinProductValidators.validateUomCode3Required;
+      GtinProductValidators.validateUomCode3Required;
   static final validateNetContentUomRequired =
-      _GtinProductValidators.validateNetContentUomRequired;
+      GtinProductValidators.validateNetContentUomRequired;
   static final validateOptionalDecimalNonNegative =
-      _GtinProductValidators.validateOptionalDecimalNonNegative;
+      GtinProductValidators.validateOptionalDecimalNonNegative;
   static final validateOptionalDecimalPositive =
-      _GtinProductValidators.validateOptionalDecimalPositive;
+      GtinProductValidators.validateOptionalDecimalPositive;
   static final validateGrossWeightValue =
-      _GtinProductValidators.validateGrossWeightValue;
+      GtinProductValidators.validateGrossWeightValue;
   static final validateGrossWeightUom =
-      _GtinProductValidators.validateGrossWeightUom;
-  static final validateHeightValue = _GtinProductValidators.validateHeightValue;
-  static final validateWidthValue = _GtinProductValidators.validateWidthValue;
-  static final validateDepthValue = _GtinProductValidators.validateDepthValue;
-  static final validateDimUom = _GtinProductValidators.validateDimUom;
+      GtinProductValidators.validateGrossWeightUom;
+  static final validateHeightValue = GtinProductValidators.validateHeightValue;
+  static final validateWidthValue = GtinProductValidators.validateWidthValue;
+  static final validateDepthValue = GtinProductValidators.validateDepthValue;
+  static final validateDimUom = GtinProductValidators.validateDimUom;
   static final validateQuantityOfChildren =
-      _GtinProductValidators.validateQuantityOfChildren;
+      GtinProductValidators.validateQuantityOfChildren;
   static final validateTotalQtyNextLower =
-      _GtinProductValidators.validateTotalQtyNextLower;
+      GtinProductValidators.validateTotalQtyNextLower;
   static final validateQuantityOfChildrenConditional =
-      _GtinProductValidators.validateQuantityOfChildrenConditional;
+      GtinProductValidators.validateQuantityOfChildrenConditional;
   static final validateTotalQtyNextLowerConditional =
-      _GtinProductValidators.validateTotalQtyNextLowerConditional;
+      GtinProductValidators.validateTotalQtyNextLowerConditional;
   static final validateNextLowerLevelGtinConditional =
-      _GtinProductValidators.validateNextLowerLevelGtinConditional;
+      GtinProductValidators.validateNextLowerLevelGtinConditional;
   static final validateNextLowerLevelQuantityConditional =
-      _GtinProductValidators.validateNextLowerLevelQuantityConditional;
+      GtinProductValidators.validateNextLowerLevelQuantityConditional;
   static final validateHasBatchNumberIndicator =
-      _GtinIndicatorLocationValidators.validateHasBatchNumberIndicator;
+      GtinIndicatorLocationValidators.validateHasBatchNumberIndicator;
   static final validateHasSerialNumberIndicator =
-      _GtinIndicatorLocationValidators.validateHasSerialNumberIndicator;
+      GtinIndicatorLocationValidators.validateHasSerialNumberIndicator;
   static final validateTradeItemRoleFlags =
-      _GtinIndicatorLocationValidators.validateTradeItemRoleFlags;
+      GtinIndicatorLocationValidators.validateTradeItemRoleFlags;
   static final validatePackagingType =
-      _GtinIndicatorLocationValidators.validatePackagingType;
+      GtinIndicatorLocationValidators.validatePackagingType;
   static final validateUnitOfMeasureTradeItem =
-      _GtinIndicatorLocationValidators.validateUnitOfMeasureTradeItem;
+      GtinIndicatorLocationValidators.validateUnitOfMeasureTradeItem;
   static final validateParentGtin =
-      _GtinIndicatorLocationValidators.validateParentGtin;
+      GtinIndicatorLocationValidators.validateParentGtin;
   static final validateQuantityPerParent =
-      _GtinIndicatorLocationValidators.validateQuantityPerParent;
-  static final validateGln13 = _GtinIndicatorLocationValidators.validateGln13;
+      GtinIndicatorLocationValidators.validateQuantityPerParent;
+  static final validateGln13 = GtinIndicatorLocationValidators.validateGln13;
   static final validateInformationProviderGln =
-      _GtinIndicatorLocationValidators.validateInformationProviderGln;
+      GtinIndicatorLocationValidators.validateInformationProviderGln;
   static final validateManufacturerGln =
-      _GtinIndicatorLocationValidators.validateManufacturerGln;
+      GtinIndicatorLocationValidators.validateManufacturerGln;
   static final validateInformationProviderName =
-      _GtinIndicatorLocationValidators.validateInformationProviderName;
+      GtinIndicatorLocationValidators.validateInformationProviderName;
   static final validateCreatedBy =
-      _GtinIndicatorLocationValidators.validateCreatedBy;
+      GtinIndicatorLocationValidators.validateCreatedBy;
   static final validateUpdatedBy =
-      _GtinIndicatorLocationValidators.validateUpdatedBy;
+      GtinIndicatorLocationValidators.validateUpdatedBy;
   static final validateTradeItemStatus =
-      _GtinIndicatorLocationValidators.validateTradeItemStatus;
+      GtinIndicatorLocationValidators.validateTradeItemStatus;
   static final validateProductStatus =
-      _GtinIndicatorLocationValidators.validateProductStatus;
+      GtinIndicatorLocationValidators.validateProductStatus;
   static final validateMarketingAuthorizationNumber =
-      _GtinRegulatoryValidators.validateMarketingAuthorizationNumber;
+      GtinRegulatoryValidators.validateMarketingAuthorizationNumber;
   static final validateGs1CompanyPrefixLengthHelper =
-      _GtinRegulatoryValidators.validateGs1CompanyPrefixLengthHelper;
+      GtinRegulatoryValidators.validateGs1CompanyPrefixLengthHelper;
   static final validateGs1CompanyPrefix =
-      _GtinRegulatoryValidators.validateGs1CompanyPrefix;
+      GtinRegulatoryValidators.validateGs1CompanyPrefix;
   static final validateItemReference =
-      _GtinRegulatoryValidators.validateItemReference;
+      GtinRegulatoryValidators.validateItemReference;
   static final validateAuthorizationValidityFromDate =
-      _GtinRegulatoryValidators.validateAuthorizationValidityFromDate;
+      GtinRegulatoryValidators.validateAuthorizationValidityFromDate;
   static final validateAuthorizationValidityToDate =
-      _GtinRegulatoryValidators.validateAuthorizationValidityToDate;
+      GtinRegulatoryValidators.validateAuthorizationValidityToDate;
   static final mapUnitDescriptorToBackendPackagingLevel =
-      _GtinRegulatoryValidators.mapUnitDescriptorToBackendPackagingLevel;
+      GtinRegulatoryValidators.mapUnitDescriptorToBackendPackagingLevel;
   static final validateUnitDescriptor =
-      _GtinRegulatoryValidators.validateUnitDescriptor;
+      GtinRegulatoryValidators.validateUnitDescriptor;
 }
-
-typedef GtinCodeChipsData = ({
-  String structureLabel,
-  String indicatorDigit,
-  String canonical14,
-  String checkDigit,
-});

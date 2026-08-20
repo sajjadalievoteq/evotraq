@@ -7,9 +7,8 @@ class TransformationEventService {
   final DioService _dioService;
 
   late final String _baseUrl;
-  TransformationEventService({
-    required DioService dioService,
-  }) : _dioService = dioService {
+  TransformationEventService({required DioService dioService})
+    : _dioService = dioService {
     _baseUrl = '${_dioService.baseUrl}/transformation-events';
   }
 

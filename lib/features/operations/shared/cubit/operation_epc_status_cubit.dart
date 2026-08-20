@@ -10,8 +10,8 @@ class OperationEpcStatusState {
 
 class OperationEpcStatusCubit extends Cubit<OperationEpcStatusState> {
   OperationEpcStatusCubit({required OperationEpcStatusService service})
-      : _service = service,
-        super(const OperationEpcStatusState());
+    : _service = service,
+      super(const OperationEpcStatusState());
 
   final OperationEpcStatusService _service;
   final Map<String, Future<EpcStatusResponse?>> _cache = {};

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/dialogs/job_queue_job_detail_row.dart';
 
 class JobQueueJobDetailsDialog extends StatelessWidget {

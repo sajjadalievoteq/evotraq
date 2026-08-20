@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/features/operations/shared/operation_epc_type.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
@@ -7,6 +8,7 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/object_event_service_operations.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
@@ -21,10 +23,10 @@ class PharmaReturnContextBuilder {
     GLNService? glnService,
     SGTINService? sgtinService,
     GTINService? gtinService,
-  })  : _objectEventService = objectEventService ?? getIt<ObjectEventService>(),
-        _glnService = glnService ?? getIt<GLNService>(),
-        _sgtinService = sgtinService ?? getIt<SGTINService>(),
-        _gtinService = gtinService ?? getIt<GTINService>();
+  }) : _objectEventService = objectEventService ?? getIt<ObjectEventService>(),
+       _glnService = glnService ?? getIt<GLNService>(),
+       _sgtinService = sgtinService ?? getIt<SGTINService>(),
+       _gtinService = gtinService ?? getIt<GTINService>();
 
   final ObjectEventService _objectEventService;
   final GLNService _glnService;
@@ -39,7 +41,9 @@ class PharmaReturnContextBuilder {
   static const _bizDataSourceEventId = 'source_event_id';
   static const _bizDataReturnReason = 'return_reason';
 
-  Future<PharmaReturnContext?> fromReceiving(ReceivingResponse operation) async {
+  Future<PharmaReturnContext?> fromReceiving(
+    ReceivingResponse operation,
+  ) async {
     final epcs = operation.epcList ?? const [];
     final eventId = operation.eventIds?.isNotEmpty == true
         ? operation.eventIds!.first
@@ -150,7 +154,6 @@ class PharmaReturnContextBuilder {
     }
   }
 
-
   Future<bool> _hasAcceptingInStockEvent(String receivingEventId) async {
     try {
       final events = await _objectEventService.findObjectEventsByILMD(
@@ -199,7 +202,9 @@ class PharmaReturnContextBuilder {
     );
   }
 
-  Future<bool> hasAcceptingEventForReceiving(ReceivingResponse operation) async {
+  Future<bool> hasAcceptingEventForReceiving(
+    ReceivingResponse operation,
+  ) async {
     final eventId = operation.eventIds?.isNotEmpty == true
         ? operation.eventIds!.first
         : null;
@@ -272,10 +277,7 @@ class PharmaReturnContextBuilder {
   /// Merge ILMD + bizData so return metadata is found regardless of where the
   /// backend stored it (return shipping uses bizData snake_case today).
   static Map<String, dynamic> _eventAttributes(ObjectEvent event) {
-    return <String, dynamic>{
-      ...?event.ilmd,
-      ...?event.bizData,
-    };
+    return <String, dynamic>{...?event.ilmd, ...?event.bizData};
   }
 
   static String? _firstNonEmpty(Map<String, dynamic> attrs, List<String> keys) {

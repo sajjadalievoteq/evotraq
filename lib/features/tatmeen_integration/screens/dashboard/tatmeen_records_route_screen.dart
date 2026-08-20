@@ -1,7 +1,7 @@
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/tatmeen_records_screen.dart';
 

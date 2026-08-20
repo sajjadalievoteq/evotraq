@@ -1,4 +1,8 @@
-part of 'tatmeen_status_breakdown.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_status_breakdown_skeleton_chart.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_status_breakdown_skeleton_legend.dart';
 
 class TatmeenStatusBreakdownSkeleton extends StatelessWidget {
   const TatmeenStatusBreakdownSkeleton({super.key});
@@ -9,55 +13,22 @@ class TatmeenStatusBreakdownSkeleton extends StatelessWidget {
     return AppShimmer(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxWidth < 360;
-          final chart = AppSkeletonBox(
-            width: 200,
-            height: 200,
-            radius: 100,
-            color: muted,
-          );
-          final legend = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: List.generate(
-              3,
-              (_) => Padding(
-                padding: const EdgeInsets.only(bottom: TraqSpacing.sm),
-                child: Row(
-                  children: [
-                    AppSkeletonBox(
-                      width: 10,
-                      height: 10,
-                      radius: 5,
-                      color: muted,
-                    ),
-                    const SizedBox(width: TraqSpacing.xs),
-                    Expanded(
-                      child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: 0.55,
-                        child: AppSkeletonBox(height: 12, color: muted),
-                      ),
-                    ),
-                    AppSkeletonBox(width: 40, height: 12, color: muted),
-                  ],
-                ),
-              ),
-            ),
-          );
-          if (compact) {
+          if (constraints.maxWidth < 360) {
             return Column(
               children: [
-                chart,
+                TatmeenStatusBreakdownSkeletonChart(color: muted),
                 const SizedBox(height: TraqSpacing.md),
-                legend,
+                TatmeenStatusBreakdownSkeletonLegend(color: muted),
               ],
             );
           }
           return Row(
             children: [
-              chart,
+              TatmeenStatusBreakdownSkeletonChart(color: muted),
               const SizedBox(width: TraqSpacing.md),
-              Expanded(child: legend),
+              Expanded(
+                child: TatmeenStatusBreakdownSkeletonLegend(color: muted),
+              ),
             ],
           );
         },

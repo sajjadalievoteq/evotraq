@@ -1,17 +1,20 @@
-part of 'traq_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_colors.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_typography.dart';
 
 abstract final class TraqThemeCards {
   static CardThemeData card(TraqColors c) => CardThemeData(
-        color: c.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 1,
-        margin: EdgeInsets.zero,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: c.border),
-          borderRadius: const BorderRadius.all(TraqRadius.md),
-        ),
-      );
+    color: c.surface,
+    surfaceTintColor: Colors.transparent,
+    elevation: 1,
+    margin: EdgeInsets.zero,
+    clipBehavior: Clip.antiAlias,
+    shape: RoundedRectangleBorder(
+      side: BorderSide(color: c.border),
+      borderRadius: const BorderRadius.all(TraqRadius.md),
+    ),
+  );
 
   static DialogThemeData dialog(TraqColors c, ShapeBorder shape) =>
       DialogThemeData(
@@ -24,21 +27,24 @@ abstract final class TraqThemeCards {
     TraqColors c,
     Brightness b,
     ShapeBorder shape,
-  ) =>
-      BottomSheetThemeData(
-        backgroundColor: c.surface,
-        surfaceTintColor: Colors.transparent,
-        modalBackgroundColor: c.surface,
-        modalBarrierColor:
-            Colors.black.withOpacity(b == Brightness.dark ? 0.55 : 0.35),
-        shape: shape,
-      );
+  ) => BottomSheetThemeData(
+    backgroundColor: c.surface,
+    surfaceTintColor: Colors.transparent,
+    modalBackgroundColor: c.surface,
+    modalBarrierColor: Colors.black.withOpacity(
+      b == Brightness.dark ? 0.55 : 0.35,
+    ),
+    shape: shape,
+  );
 
-  static SnackBarThemeData snackBar(TraqColors c, TraqText text, ShapeBorder shape) =>
-      SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: c.inverseSurface,
-        contentTextStyle: text.bodySm.copyWith(color: c.textOnInverse),
-        shape: shape,
-      );
+  static SnackBarThemeData snackBar(
+    TraqColors c,
+    TraqText text,
+    ShapeBorder shape,
+  ) => SnackBarThemeData(
+    behavior: SnackBarBehavior.floating,
+    backgroundColor: c.inverseSurface,
+    contentTextStyle: text.bodySm.copyWith(color: c.textOnInverse),
+    shape: shape,
+  );
 }

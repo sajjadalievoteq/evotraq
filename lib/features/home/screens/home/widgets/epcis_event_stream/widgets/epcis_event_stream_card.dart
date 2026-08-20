@@ -1,16 +1,12 @@
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/home/utils/home_navigation.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/cubit/home_state.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/epcis_event_stream/widgets/dashboard_recent_event_tile.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class EpcisEventStreamCard extends StatelessWidget {
   const EpcisEventStreamCard({super.key});

@@ -1,37 +1,38 @@
-part of 'traq_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_colors.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_typography.dart';
 
 abstract final class TraqThemeButtons {
   static FilledButtonThemeData filled(
     TraqColors c,
     TraqText text,
     Color onPrimaryInk,
-  ) =>
-      FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: c.primary,
-          foregroundColor: onPrimaryInk,
-          textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600, height: 1.0),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          shape: const RoundedRectangleBorder(borderRadius: TraqRadius.button),
-          minimumSize: const Size(0, TraqSpacing.buttonH),
-        ),
-      );
+  ) => FilledButtonThemeData(
+    style: FilledButton.styleFrom(
+      backgroundColor: c.primary,
+      foregroundColor: onPrimaryInk,
+      textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600, height: 1.0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      shape: const RoundedRectangleBorder(borderRadius: TraqRadius.button),
+      minimumSize: const Size(0, TraqSpacing.buttonH),
+    ),
+  );
 
   static ElevatedButtonThemeData elevated(
     TraqColors c,
     TraqText text,
     Color onPrimaryInk,
-  ) =>
-      ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: c.primary,
-          foregroundColor: onPrimaryInk,
-          textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600, height: 1.0),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          shape: const RoundedRectangleBorder(borderRadius: TraqRadius.button),
-          minimumSize: const Size(0, TraqSpacing.buttonH),
-        ),
-      );
+  ) => ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: c.primary,
+      foregroundColor: onPrimaryInk,
+      textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600, height: 1.0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      shape: const RoundedRectangleBorder(borderRadius: TraqRadius.button),
+      minimumSize: const Size(0, TraqSpacing.buttonH),
+    ),
+  );
 
   static OutlinedButtonThemeData outlined(TraqColors c, TraqText text) =>
       OutlinedButtonThemeData(
@@ -39,7 +40,10 @@ abstract final class TraqThemeButtons {
           backgroundColor: c.surfaceMuted,
           foregroundColor: c.textPrimary,
           side: BorderSide(color: c.borderVariant),
-          textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w500, height: 1.0),
+          textStyle: text.bodySm.copyWith(
+            fontWeight: FontWeight.w500,
+            height: 1.0,
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           shape: const RoundedRectangleBorder(borderRadius: TraqRadius.button),
           minimumSize: const Size(0, TraqSpacing.buttonH),
@@ -75,7 +79,9 @@ abstract final class TraqThemeButtons {
           shape: const WidgetStatePropertyAll(
             RoundedRectangleBorder(borderRadius: TraqRadius.button),
           ),
-          minimumSize: const WidgetStatePropertyAll(Size(0, TraqSpacing.buttonH)),
+          minimumSize: const WidgetStatePropertyAll(
+            Size(0, TraqSpacing.buttonH),
+          ),
           padding: const WidgetStatePropertyAll(
             EdgeInsets.symmetric(horizontal: 14, vertical: 0),
           ),

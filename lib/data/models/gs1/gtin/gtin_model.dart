@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 
-part 'gtin_mutation_serialization.dart';
 
 class GTIN extends Equatable {
   final int? id;
@@ -427,7 +426,7 @@ class GTIN extends Equatable {
   static const String statusSuspended = 'SUSPENDED';
   static const String statusDiscontinued = 'DISCONTINUED';
 
-  String _formatDateWithTimezone(DateTime dateTime) {
+  String formatDateWithTimezone(DateTime dateTime) {
     final String iso8601String = dateTime.toIso8601String();
 
     if (iso8601String.endsWith('Z') || iso8601String.contains('+')) {

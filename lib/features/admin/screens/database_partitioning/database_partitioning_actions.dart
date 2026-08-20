@@ -1,7 +1,14 @@
-part of 'database_partitioning_dashboard_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/admin/screens/database_partitioning/database_partitioning_dashboard_screen.dart';
+import 'package:traqtrace_app/features/admin/screens/database_partitioning/widgets/help_widgets/partition_help_section.dart';
 
-extension DatabasePartitioningActions on _DatabasePartitioningDashboardState {
-  Future<void> _performMaintenance(String action) async {
+extension DatabasePartitioningActions on DatabasePartitioningDashboardState {
+  Future<void> performMaintenance(String action) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -19,23 +26,23 @@ extension DatabasePartitioningActions on _DatabasePartitioningDashboardState {
     try {
       switch (action) {
         case 'CREATE_FUTURE':
-          await _partitioningService.automatePartitionCreation();
+          await partitioningService.automatePartitionCreation();
           break;
         case 'UPDATE_STATS':
-          for (final table in _validTables) {
-            await _partitioningService.updatePartitionStatistics(
+          for (final table in validTables) {
+            await partitioningService.updatePartitionStatistics(
               tableName: table,
             );
           }
           break;
         case 'ARCHIVE_OLD':
           final cutoffDate = DateTime.now().subtract(const Duration(days: 365));
-          await _partitioningService.archiveOldPartitions(
+          await partitioningService.archiveOldPartitions(
             cutoffDate: cutoffDate,
           );
           break;
         case 'HEALTH_CHECK':
-          final healthData = await _partitioningService
+          final healthData = await partitioningService
               .getPartitionHealthStatus();
           Navigator.of(context).pop();
           _showHealthCheckResults(healthData);
@@ -46,7 +53,7 @@ extension DatabasePartitioningActions on _DatabasePartitioningDashboardState {
 
       context.showSuccess('Maintenance operation completed successfully');
 
-      _refreshLoadedTabs();
+      refreshLoadedTabs();
     } catch (e) {
       Navigator.of(context).pop();
 
@@ -308,7 +315,7 @@ extension DatabasePartitioningActions on _DatabasePartitioningDashboardState {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _refreshLoadedTabs();
+              refreshLoadedTabs();
             },
             child: const Text('Refresh Dashboard'),
           ),
@@ -321,7 +328,7 @@ extension DatabasePartitioningActions on _DatabasePartitioningDashboardState {
     );
   }
 
-  void _showHelpDialog() {
+  void showHelpDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

@@ -1,3 +1,7 @@
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_review_field.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_review_info_row.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_review_optional_fields.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_review_step_header.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -7,7 +11,6 @@ import 'package:traqtrace_app/features/operations/update_status/screens/update_s
 import 'package:traqtrace_app/features/operations/shared/utils/operation_epc_type_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_review_rows.dart';
 
 class UpdateStatusReviewStep extends StatelessWidget {
   const UpdateStatusReviewStep({

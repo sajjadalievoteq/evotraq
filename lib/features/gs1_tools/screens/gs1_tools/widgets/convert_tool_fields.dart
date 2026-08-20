@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
-import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
-import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
-import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
-import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_state.dart';
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/mode_selector.dart';
-import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
-import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_slice.dart';
 
 /// Consolidated conversion workbench: URN ⇄ Digital Link, EPC ⇄ GS1

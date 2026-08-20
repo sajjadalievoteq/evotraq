@@ -1,11 +1,15 @@
-part of 'object_event_service.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/data/models/epcis/object_event.dart';
+import 'package:traqtrace_app/data/services/epcis/object_event_api_constants.dart';
+import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
 
 extension ObjectEventServiceOperations on ObjectEventService {
   Future<Map<String, dynamic>> validateObjectEvent(ObjectEvent event) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
     try {
-      final response = await _dioService.post(
-        '$_baseUrl/${ObjectEventApiConstants.segmentValidate}',
+      final response = await dioService.post(
+        '$baseUrl/${ObjectEventApiConstants.segmentValidate}',
         headers: headers,
         data: json.encode(event.toJson()),
         responseType: ResponseType.plain,
@@ -27,9 +31,9 @@ extension ObjectEventServiceOperations on ObjectEventService {
   Future<List<ObjectEvent>> createObjectEventsBatch(
     List<ObjectEvent> events,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.post(
-      '$_baseUrl/${ObjectEventApiConstants.segmentBatch}',
+    final headers = await getHeaders();
+    final response = await dioService.post(
+      '$baseUrl/${ObjectEventApiConstants.segmentBatch}',
       headers: headers,
       data: json.encode(events.map((e) => e.toJson()).toList()),
       responseType: ResponseType.plain,
@@ -46,9 +50,9 @@ extension ObjectEventServiceOperations on ObjectEventService {
   }
 
   Future<ObjectEvent> updateObjectEvent(String id, ObjectEvent event) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.put(
-      '$_baseUrl/$id',
+    final headers = await getHeaders();
+    final response = await dioService.put(
+      '$baseUrl/$id',
       headers: headers,
       data: json.encode(event.toJson()),
       responseType: ResponseType.plain,
@@ -63,9 +67,9 @@ extension ObjectEventServiceOperations on ObjectEventService {
   }
 
   Future<void> deleteObjectEvent(String id) async {
-    final headers = await _getHeaders();
-    final response = await _dioService.delete(
-      '$_baseUrl/$id',
+    final headers = await getHeaders();
+    final response = await dioService.delete(
+      '$baseUrl/$id',
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -77,28 +81,28 @@ extension ObjectEventServiceOperations on ObjectEventService {
   }
 
   Future<List<ObjectEvent>> findObjectEventsByAction(String action) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentAction}/$action',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentAction}/$action',
     );
   }
 
   Future<List<ObjectEvent>> findObjectEventsByEPC(String epc) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentEpc}',
       queryParameters: {ObjectEventApiConstants.queryEpc: epc},
     );
   }
 
   Future<List<ObjectEvent>> findObjectEventsByEPCs(List<String> epcs) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpcs}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentEpcs}',
       queryParameters: {ObjectEventApiConstants.queryEpcs: epcs.join(',')},
     );
   }
 
   Future<List<ObjectEvent>> findObjectEventsByEPCClass(String epcClass) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpcClass}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentEpcClass}',
       queryParameters: {ObjectEventApiConstants.queryEpcClass: epcClass},
     );
   }
@@ -107,8 +111,8 @@ extension ObjectEventServiceOperations on ObjectEventService {
     String property,
     String value,
   ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentIlmd}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentIlmd}',
       queryParameters: {
         ObjectEventApiConstants.queryProperty: property,
         ObjectEventApiConstants.queryValue: value,
@@ -121,8 +125,8 @@ extension ObjectEventServiceOperations on ObjectEventService {
     double minQuantity,
     double maxQuantity,
   ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentQuantity}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentQuantity}',
       queryParameters: {
         ObjectEventApiConstants.queryEpcClass: epcClass,
         ObjectEventApiConstants.queryMin: minQuantity.toString(),
@@ -134,24 +138,24 @@ extension ObjectEventServiceOperations on ObjectEventService {
   Future<List<ObjectEvent>> findObjectEventsByBusinessStep(
     String businessStep,
   ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep',
     );
   }
 
   Future<List<ObjectEvent>> findObjectEventsByDisposition(
     String disposition,
   ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentDisposition}/$disposition',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentDisposition}/$disposition',
     );
   }
 
   Future<List<ObjectEvent>> findObjectEventsByLocation(
     String locationGLN,
   ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentLocation}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentLocation}',
       queryParameters: {ObjectEventApiConstants.queryLocationGln: locationGLN},
     );
   }
@@ -160,8 +164,8 @@ extension ObjectEventServiceOperations on ObjectEventService {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentTimeRange}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentTimeRange}',
       queryParameters: {
         ObjectEventApiConstants.queryStartTime: startTime
             .toUtc()
@@ -176,8 +180,8 @@ extension ObjectEventServiceOperations on ObjectEventService {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentLocation}/${ObjectEventApiConstants.segmentTimeRange}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentLocation}/${ObjectEventApiConstants.segmentTimeRange}',
       queryParameters: {
         ObjectEventApiConstants.queryLocationGln: locationGLN,
         ObjectEventApiConstants.queryStartTime: startTime
@@ -192,7 +196,7 @@ extension ObjectEventServiceOperations on ObjectEventService {
     DateTime? startTime,
     DateTime? endTime,
   }) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final queryParams = <String, String>{};
     if (startTime != null) {
@@ -205,9 +209,9 @@ extension ObjectEventServiceOperations on ObjectEventService {
     }
 
     final uri = Uri.parse(
-      '$_baseUrl/${ObjectEventApiConstants.segmentStatistics}',
+      '$baseUrl/${ObjectEventApiConstants.segmentStatistics}',
     ).replace(queryParameters: queryParams);
-    final response = await _dioService.get(
+    final response = await dioService.get(
       uri.toString(),
       headers: headers,
       responseType: ResponseType.plain,

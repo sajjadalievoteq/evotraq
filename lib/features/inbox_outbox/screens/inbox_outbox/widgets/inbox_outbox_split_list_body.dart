@@ -16,7 +16,7 @@ import 'package:traqtrace_app/features/inbox_outbox/cubit/inbox_outbox_cubit.dar
 import 'package:traqtrace_app/features/inbox_outbox/screens/inbox_outbox/widgets/inbox_outbox_results.dart';
 import 'package:traqtrace_app/features/inbox_outbox/screens/inbox_outbox/widgets/inbox_outbox_toolbar.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
-import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operations_state.dart';
 
 class InboxOutboxSplitListBody extends StatefulWidget {
   const InboxOutboxSplitListBody({

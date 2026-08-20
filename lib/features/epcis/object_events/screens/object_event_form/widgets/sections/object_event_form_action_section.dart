@@ -1,8 +1,8 @@
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_read_only_text.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_validation_context.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_field_decoration.dart';
-import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_read_only_field.dart';
 import 'package:traqtrace_app/features/epcis/object_events/widgets/object_event_form_section_card.dart';
 
 class ObjectEventFormActionSection extends StatelessWidget {

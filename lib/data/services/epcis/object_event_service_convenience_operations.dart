@@ -1,4 +1,10 @@
-part of 'object_event_service.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/page_response_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
+import 'package:traqtrace_app/data/models/epcis/object_event.dart';
+import 'package:traqtrace_app/data/services/epcis/object_event_api_constants.dart';
+import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
 
 extension ObjectEventServiceConvenienceOperations on ObjectEventService {
   Future<ObjectEvent> createAddEvent(
@@ -9,7 +15,7 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
     Map<String, dynamic> ilmd,
     Map<String, String> bizData,
   ) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final eventData = {
       ObjectEventApiConstants.jsonKeyAction: ObjectEventApiConstants.actionAdd,
@@ -25,8 +31,8 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
           _localTimezoneOffset(),
     };
 
-    final response = await _dioService.post(
-      '$_baseUrl/${ObjectEventApiConstants.segmentAdd}',
+    final response = await dioService.post(
+      '$baseUrl/${ObjectEventApiConstants.segmentAdd}',
       headers: headers,
       data: json.encode(eventData),
       responseType: ResponseType.plain,
@@ -47,7 +53,7 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
     String disposition,
     Map<String, String> bizData,
   ) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final eventData = {
       ObjectEventApiConstants.jsonKeyAction:
@@ -63,8 +69,8 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
           _localTimezoneOffset(),
     };
 
-    final response = await _dioService.post(
-      '$_baseUrl/${ObjectEventApiConstants.segmentObserve}',
+    final response = await dioService.post(
+      '$baseUrl/${ObjectEventApiConstants.segmentObserve}',
       headers: headers,
       data: json.encode(eventData),
       responseType: ResponseType.plain,
@@ -85,7 +91,7 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
     String disposition,
     Map<String, String> bizData,
   ) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final eventData = {
       ObjectEventApiConstants.jsonKeyAction:
@@ -101,8 +107,8 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
           _localTimezoneOffset(),
     };
 
-    final response = await _dioService.post(
-      '$_baseUrl/${ObjectEventApiConstants.segmentDelete}',
+    final response = await dioService.post(
+      '$baseUrl/${ObjectEventApiConstants.segmentDelete}',
       headers: headers,
       data: json.encode(eventData),
       responseType: ResponseType.plain,
@@ -119,7 +125,7 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
   Future<List<ObjectEvent>> findObjectEventsWithSensorData(
     Map<String, dynamic> sensorCriteria,
   ) async {
-    final all = await _fetchAllObjectEvents(_baseUrl);
+    final all = await fetchAllObjectEvents(baseUrl);
     return all
         .where(
           (event) =>
@@ -165,8 +171,8 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
     String businessStep,
     String epc,
   ) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep/${ObjectEventApiConstants.segmentEpc}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep/${ObjectEventApiConstants.segmentEpc}',
       queryParameters: {ObjectEventApiConstants.queryEpc: epc},
     );
   }
@@ -183,7 +189,7 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
     int size = 20,
     String direction = 'DESC',
   }) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
     final params = <String, String>{
       ObjectEventApiConstants.queryPage: page.toString(),
       ObjectEventApiConstants.querySize: size.toString(),
@@ -215,8 +221,8 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
           .toIso8601String();
     }
 
-    final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentSearch}',
+    final response = await dioService.get(
+      '$baseUrl/${ObjectEventApiConstants.segmentSearch}',
       queryParameters: params,
       headers: headers,
       responseType: ResponseType.plain,
@@ -235,8 +241,8 @@ extension ObjectEventServiceConvenienceOperations on ObjectEventService {
   }
 
   Future<List<ObjectEvent>> getEpcHistory(String epc) async {
-    return _fetchAllObjectEvents(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}/${ObjectEventApiConstants.segmentHistory}',
+    return fetchAllObjectEvents(
+      '$baseUrl/${ObjectEventApiConstants.segmentEpc}/${ObjectEventApiConstants.segmentHistory}',
       queryParameters: {ObjectEventApiConstants.queryEpc: epc},
     );
   }

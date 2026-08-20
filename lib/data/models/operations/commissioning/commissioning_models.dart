@@ -1,4 +1,3 @@
-export 'commissioning_batch_models.dart';
 import 'commissioning_canonical_identifier.dart';
 
 class CommissioningRequest {
@@ -242,10 +241,10 @@ class CommissioningResponse {
       failedCount: json['failedCount'],
       status: _parseStatus(json['status']),
       processedAt: json['processedAt'] != null
-          ? DateTime.parse(json['processedAt'])
+          ? DateTime.parse(json['processedAt']).toLocal()
           : null,
       eventTime: json['eventTime'] != null
-          ? DateTime.parse(json['eventTime'])
+          ? DateTime.parse(json['eventTime']).toLocal()
           : null,
       gtinCode: json['gtinCode'],
       batchLotNumber: json['batchLotNumber'],

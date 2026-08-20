@@ -1,6 +1,6 @@
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_batch_models.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
@@ -29,14 +29,16 @@ class CommissioningDetailReferenceCard extends StatelessWidget {
         if (batch.createdAt != null)
           OperationDetailInfoRow(
             label: 'Created At',
-            value: DateFormat('MMM dd, yyyy HH:mm:ss').format(batch.createdAt!),
+            value: DateFormat(
+              'MMM dd, yyyy HH:mm:ss',
+            ).format(batch.createdAt!.toLocal()),
           ),
         if (batch.completedAt != null)
           OperationDetailInfoRow(
             label: 'Completed At',
             value: DateFormat(
               'MMM dd, yyyy HH:mm:ss',
-            ).format(batch.completedAt!),
+            ).format(batch.completedAt!.toLocal()),
           ),
         if (batch.createdBy != null)
           OperationDetailInfoRow(label: 'Created By', value: batch.createdBy!),

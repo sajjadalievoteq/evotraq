@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_template.dart';
 import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validator.dart';
+import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validation_result.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
@@ -22,7 +22,7 @@ import 'package:traqtrace_app/features/admin/cbv_vocabulary/screens/cbv_vocabula
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
 class CbvVocabularyManagementView extends StatefulWidget {
-  const CbvVocabularyManagementView();
+  const CbvVocabularyManagementView({super.key});
 
   @override
   State<CbvVocabularyManagementView> createState() =>

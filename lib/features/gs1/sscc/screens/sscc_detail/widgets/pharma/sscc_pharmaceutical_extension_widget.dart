@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma_sections/sscc_pharma_carrier_section.dart';
@@ -16,7 +14,7 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/phar
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma_sections/sscc_pharma_special_handling_section.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_section_loading_skeleton.dart';
 
-part 'sscc_pharmaceutical_extension_actions.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_actions.dart';
 
 class SSCCPharmaceuticalExtensionWidget extends StatefulWidget {
   final int? ssccId;
@@ -41,8 +39,8 @@ class SSCCPharmaceuticalExtensionWidget extends StatefulWidget {
 
 class SSCCPharmaceuticalExtensionWidgetState
     extends State<SSCCPharmaceuticalExtensionWidget> {
-  SSCCPharmaceuticalExtension? _extension;
-  bool _isLoading = true;
+  SSCCPharmaceuticalExtension? extension;
+  bool isLoading = true;
 
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, String> _seedTexts = {};
@@ -52,37 +50,37 @@ class SSCCPharmaceuticalExtensionWidgetState
     () => TextEditingController(text: _seedTexts[key] ?? ''),
   );
 
-  String _text(String key) => _controllers[key]?.text ?? _seedTexts[key] ?? '';
+  String text(String key) => _controllers[key]?.text ?? _seedTexts[key] ?? '';
 
-  void _setSeedOrController(String key, String value) {
+  void setSeedOrController(String key, String value) {
     _seedTexts[key] = value;
     _controllers[key]?.text = value;
   }
 
-  bool _coldChainRequired = false;
+  bool coldChainRequired = false;
   TextEditingController get _minTemperatureCelsiusController =>
       _c('minTemperatureCelsius');
   TextEditingController get _maxTemperatureCelsiusController =>
       _c('maxTemperatureCelsius');
-  bool _temperatureMonitoringRequired = false;
+  bool temperatureMonitoringRequired = false;
   TextEditingController get _temperatureMonitoringDeviceIdController =>
       _c('temperatureMonitoringDeviceId');
   TextEditingController get _temperatureExcursionLimitMinutesController =>
       _c('temperatureExcursionLimitMinutes');
 
-  bool _gdpCompliant = true;
+  bool gdpCompliant = true;
   TextEditingController get _gdpCertificateNumberController =>
       _c('gdpCertificateNumber');
-  DateTime? _gdpCertificateExpiry;
+  DateTime? gdpCertificateExpiry;
   TextEditingController get _gdpIssuingAuthorityController =>
       _c('gdpIssuingAuthority');
 
-  bool _whoPqsRequired = false;
+  bool whoPqsRequired = false;
   TextEditingController get _whoPqsEquipmentCodeController =>
       _c('whoPqsEquipmentCode');
 
-  bool _containsControlledSubstance = false;
-  String? _deaSchedule;
+  bool containsControlledSubstance = false;
+  String? deaSchedule;
   TextEditingController get _deaOrderFormNumberController =>
       _c('deaOrderFormNumber');
   TextEditingController get _incbAuthorizationNumberController =>
@@ -90,33 +88,33 @@ class SSCCPharmaceuticalExtensionWidgetState
   TextEditingController get _narcoticTransitPermitController =>
       _c('narcoticTransitPermit');
 
-  String? _hazmatClass;
+  String? hazmatClass;
   TextEditingController get _hazmatUnNumberController => _c('hazmatUnNumber');
-  String? _hazmatPackingGroup;
+  String? hazmatPackingGroup;
   TextEditingController get _hazmatSpecialProvisionsController =>
       _c('hazmatSpecialProvisions');
 
-  bool _humidityControlled = false;
+  bool humidityControlled = false;
   TextEditingController get _minHumidityPercentController =>
       _c('minHumidityPercent');
   TextEditingController get _maxHumidityPercentController =>
       _c('maxHumidityPercent');
-  bool _lightSensitive = false;
-  bool _orientationSensitive = false;
-  bool _shockSensitive = false;
+  bool lightSensitive = false;
+  bool orientationSensitive = false;
+  bool shockSensitive = false;
 
-  bool _chainOfCustodyRequired = false;
-  bool _requiresSignatureOnReceipt = false;
-  bool _requiresPharmacistVerification = false;
+  bool chainOfCustodyRequired = false;
+  bool requiresSignatureOnReceipt = false;
+  bool requiresPharmacistVerification = false;
 
   TextEditingController get _carrierGdpQualificationNumberController =>
       _c('carrierGdpQualificationNumber');
-  DateTime? _carrierGdpQualificationExpiry;
+  DateTime? carrierGdpQualificationExpiry;
   TextEditingController get _vehicleQualificationNumberController =>
       _c('vehicleQualificationNumber');
-  DateTime? _vehicleLastQualificationDate;
+  DateTime? vehicleLastQualificationDate;
 
-  bool _clinicalTrialShipment = false;
+  bool clinicalTrialShipment = false;
   TextEditingController get _clinicalTrialProtocolNumberController =>
       _c('clinicalTrialProtocolNumber');
   TextEditingController get _irbApprovalNumberController =>
@@ -124,14 +122,14 @@ class SSCCPharmaceuticalExtensionWidgetState
 
   TextEditingController get _specialHandlingInstructionsController =>
       _c('specialHandlingInstructions');
-  bool _fragile = false;
-  bool _doNotStack = false;
-  bool _thisSideUp = false;
+  bool fragile = false;
+  bool doNotStack = false;
+  bool thisSideUp = false;
 
   @override
   void initState() {
     super.initState();
-    _loadExtension();
+    loadExtension();
   }
 
   @override
@@ -139,7 +137,7 @@ class SSCCPharmaceuticalExtensionWidgetState
     super.didUpdateWidget(oldWidget);
     if (widget.ssccId != oldWidget.ssccId ||
         widget.ssccCode != oldWidget.ssccCode) {
-      _loadExtension();
+      loadExtension();
     }
   }
 
@@ -167,7 +165,7 @@ class SSCCPharmaceuticalExtensionWidgetState
       return const SizedBox.shrink();
     }
 
-    if (_isLoading) {
+    if (isLoading) {
       return const SsccSectionLoadingSkeleton(fieldCount: 3);
     }
 
@@ -190,14 +188,14 @@ class SSCCPharmaceuticalExtensionWidgetState
         SsccPharmaColdChainSection(
           outlineColor: outline,
           isEditing: widget.isEditing,
-          coldChainRequired: _coldChainRequired,
+          coldChainRequired: coldChainRequired,
           onColdChainRequiredChanged: (value) =>
-              setState(() => _coldChainRequired = value),
+              setState(() => coldChainRequired = value),
           minTemperatureCelsiusController: _minTemperatureCelsiusController,
           maxTemperatureCelsiusController: _maxTemperatureCelsiusController,
-          temperatureMonitoringRequired: _temperatureMonitoringRequired,
+          temperatureMonitoringRequired: temperatureMonitoringRequired,
           onTemperatureMonitoringRequiredChanged: (value) =>
-              setState(() => _temperatureMonitoringRequired = value),
+              setState(() => temperatureMonitoringRequired = value),
           temperatureMonitoringDeviceIdController:
               _temperatureMonitoringDeviceIdController,
           temperatureExcursionLimitMinutesController:
@@ -206,32 +204,32 @@ class SSCCPharmaceuticalExtensionWidgetState
         SsccPharmaGdpSection(
           outlineColor: outline,
           isEditing: widget.isEditing,
-          gdpCompliant: _gdpCompliant,
+          gdpCompliant: gdpCompliant,
           onGdpCompliantChanged: (value) =>
-              setState(() => _gdpCompliant = value),
+              setState(() => gdpCompliant = value),
           gdpCertificateNumberController: _gdpCertificateNumberController,
-          gdpCertificateExpiry: _gdpCertificateExpiry,
+          gdpCertificateExpiry: gdpCertificateExpiry,
           onGdpCertificateExpiryTap: widget.isEditing
-              ? () => _selectDate(
+              ? () => selectDate(
                   context,
-                  _gdpCertificateExpiry,
-                  (date) => setState(() => _gdpCertificateExpiry = date),
+                  gdpCertificateExpiry,
+                  (date) => setState(() => gdpCertificateExpiry = date),
                 )
               : null,
           gdpIssuingAuthorityController: _gdpIssuingAuthorityController,
-          whoPqsRequired: _whoPqsRequired,
+          whoPqsRequired: whoPqsRequired,
           onWhoPqsRequiredChanged: (value) =>
-              setState(() => _whoPqsRequired = value),
+              setState(() => whoPqsRequired = value),
           whoPqsEquipmentCodeController: _whoPqsEquipmentCodeController,
         ),
         SsccPharmaControlledSubstancesSection(
           outlineColor: outline,
           isEditing: widget.isEditing,
-          containsControlledSubstance: _containsControlledSubstance,
+          containsControlledSubstance: containsControlledSubstance,
           onContainsControlledSubstanceChanged: (value) =>
-              setState(() => _containsControlledSubstance = value),
-          deaSchedule: _deaSchedule,
-          onDeaScheduleChanged: (value) => setState(() => _deaSchedule = value),
+              setState(() => containsControlledSubstance = value),
+          deaSchedule: deaSchedule,
+          onDeaScheduleChanged: (value) => setState(() => deaSchedule = value),
           deaOrderFormNumberController: _deaOrderFormNumberController,
           incbAuthorizationNumberController: _incbAuthorizationNumberController,
           narcoticTransitPermitController: _narcoticTransitPermitController,
@@ -239,77 +237,77 @@ class SSCCPharmaceuticalExtensionWidgetState
         SsccPharmaHazmatSection(
           outlineColor: outline,
           isEditing: widget.isEditing,
-          hazmatClass: _hazmatClass,
-          onHazmatClassChanged: (value) => setState(() => _hazmatClass = value),
+          hazmatClass: hazmatClass,
+          onHazmatClassChanged: (value) => setState(() => hazmatClass = value),
           hazmatUnNumberController: _hazmatUnNumberController,
-          hazmatPackingGroup: _hazmatPackingGroup,
+          hazmatPackingGroup: hazmatPackingGroup,
           onHazmatPackingGroupChanged: (value) =>
-              setState(() => _hazmatPackingGroup = value),
+              setState(() => hazmatPackingGroup = value),
           hazmatSpecialProvisionsController: _hazmatSpecialProvisionsController,
         ),
         SsccPharmaEnvironmentalSection(
           outlineColor: outline,
           isEditing: widget.isEditing,
-          humidityControlled: _humidityControlled,
+          humidityControlled: humidityControlled,
           onHumidityControlledChanged: (value) =>
-              setState(() => _humidityControlled = value),
+              setState(() => humidityControlled = value),
           minHumidityPercentController: _minHumidityPercentController,
           maxHumidityPercentController: _maxHumidityPercentController,
-          lightSensitive: _lightSensitive,
+          lightSensitive: lightSensitive,
           onLightSensitiveChanged: (value) =>
-              setState(() => _lightSensitive = value),
-          orientationSensitive: _orientationSensitive,
+              setState(() => lightSensitive = value),
+          orientationSensitive: orientationSensitive,
           onOrientationSensitiveChanged: (value) =>
-              setState(() => _orientationSensitive = value),
-          shockSensitive: _shockSensitive,
+              setState(() => orientationSensitive = value),
+          shockSensitive: shockSensitive,
           onShockSensitiveChanged: (value) =>
-              setState(() => _shockSensitive = value),
+              setState(() => shockSensitive = value),
         ),
         SsccPharmaChainOfCustodySection(
           outlineColor: outline,
           isEditing: widget.isEditing,
-          chainOfCustodyRequired: _chainOfCustodyRequired,
+          chainOfCustodyRequired: chainOfCustodyRequired,
           onChainOfCustodyRequiredChanged: (value) =>
-              setState(() => _chainOfCustodyRequired = value),
-          requiresSignatureOnReceipt: _requiresSignatureOnReceipt,
+              setState(() => chainOfCustodyRequired = value),
+          requiresSignatureOnReceipt: requiresSignatureOnReceipt,
           onRequiresSignatureOnReceiptChanged: (value) =>
-              setState(() => _requiresSignatureOnReceipt = value),
-          requiresPharmacistVerification: _requiresPharmacistVerification,
+              setState(() => requiresSignatureOnReceipt = value),
+          requiresPharmacistVerification: requiresPharmacistVerification,
           onRequiresPharmacistVerificationChanged: (value) =>
-              setState(() => _requiresPharmacistVerification = value),
+              setState(() => requiresPharmacistVerification = value),
         ),
         SsccPharmaCarrierSection(
           outlineColor: outline,
           isEditing: widget.isEditing,
           carrierGdpQualificationNumberController:
               _carrierGdpQualificationNumberController,
-          carrierGdpQualificationExpiry: _carrierGdpQualificationExpiry,
+          carrierGdpQualificationExpiry: carrierGdpQualificationExpiry,
           onCarrierGdpQualificationExpiryTap: widget.isEditing
-              ? () => _selectDate(
+              ? () => selectDate(
                   context,
-                  _carrierGdpQualificationExpiry,
+                  carrierGdpQualificationExpiry,
                   (date) =>
-                      setState(() => _carrierGdpQualificationExpiry = date),
+                      setState(() => carrierGdpQualificationExpiry = date),
                 )
               : null,
           vehicleQualificationNumberController:
               _vehicleQualificationNumberController,
-          vehicleLastQualificationDate: _vehicleLastQualificationDate,
+          vehicleLastQualificationDate: vehicleLastQualificationDate,
           onVehicleLastQualificationDateTap: widget.isEditing
-              ? () => _selectDate(
+              ? () => selectDate(
                   context,
-                  _vehicleLastQualificationDate,
+                  vehicleLastQualificationDate,
                   (date) =>
-                      setState(() => _vehicleLastQualificationDate = date),
+                      setState(() => vehicleLastQualificationDate = date),
                 )
               : null,
         ),
         SsccPharmaClinicalTrialSection(
           outlineColor: outline,
           isEditing: widget.isEditing,
-          clinicalTrialShipment: _clinicalTrialShipment,
+          clinicalTrialShipment: clinicalTrialShipment,
           onClinicalTrialShipmentChanged: (value) =>
-              setState(() => _clinicalTrialShipment = value),
+              setState(() => clinicalTrialShipment = value),
           clinicalTrialProtocolNumberController:
               _clinicalTrialProtocolNumberController,
           irbApprovalNumberController: _irbApprovalNumberController,
@@ -317,12 +315,12 @@ class SSCCPharmaceuticalExtensionWidgetState
         SsccPharmaSpecialHandlingSection(
           outlineColor: outline,
           isEditing: widget.isEditing,
-          fragile: _fragile,
-          onFragileChanged: (value) => setState(() => _fragile = value),
-          doNotStack: _doNotStack,
-          onDoNotStackChanged: (value) => setState(() => _doNotStack = value),
-          thisSideUp: _thisSideUp,
-          onThisSideUpChanged: (value) => setState(() => _thisSideUp = value),
+          fragile: fragile,
+          onFragileChanged: (value) => setState(() => fragile = value),
+          doNotStack: doNotStack,
+          onDoNotStackChanged: (value) => setState(() => doNotStack = value),
+          thisSideUp: thisSideUp,
+          onThisSideUpChanged: (value) => setState(() => thisSideUp = value),
           specialHandlingInstructionsController:
               _specialHandlingInstructionsController,
         ),

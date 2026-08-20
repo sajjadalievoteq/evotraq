@@ -1,11 +1,11 @@
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_panel.dart';
-import 'package:traqtrace_app/features/auth/widgets/branding_widget.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_branding_section.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class AuthMobileFormLayout extends StatelessWidget {
   const AuthMobileFormLayout({

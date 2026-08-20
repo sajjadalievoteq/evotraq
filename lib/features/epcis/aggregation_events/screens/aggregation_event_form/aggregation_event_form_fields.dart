@@ -1,95 +1,99 @@
-part of 'aggregation_event_form_screen.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/aggregation_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_quantity_row_controllers.dart';
 
-extension AggregationEventFormFields on _AggregationEventFormScreenState {
-  void _addChildEpc([String value = '']) {
+extension AggregationEventFormFields on AggregationEventFormScreenState {
+  void addChildEpc([String value = '']) {
     setState(
-      () => _childEpcControllers.add(TextEditingController(text: value)),
+      () => childEpcControllers.add(TextEditingController(text: value)),
     );
   }
 
-  void _removeChildEpc(int index) {
+  void removeChildEpc(int index) {
     setState(() {
-      _childEpcControllers.removeAt(index).dispose();
+      childEpcControllers.removeAt(index).dispose();
     });
   }
 
-  Future<void> _scanAndAddChildEpc() async {
+  Future<void> scanAndAddChildEpc() async {
     final value = await Gs1FieldBarcodeScan.scan(
       context,
       Gs1FieldScanKind.sgtin,
     );
     if (value != null && value.isNotEmpty && mounted) {
-      _addChildEpc(value);
+      addChildEpc(value);
     }
   }
 
-  void _addQuantityRow() {
+  void addQuantityRow() {
     setState(
-      () => _quantityRows.add(AggregationEventFormQuantityRowControllers()),
+      () => quantityRows.add(AggregationEventFormQuantityRowControllers()),
     );
   }
 
-  void _removeQuantityRow(
+  void removeQuantityRow(
     int index,
     AggregationEventFormQuantityRowControllers row,
   ) {
     setState(() {
       row.dispose();
-      _quantityRows.removeAt(index);
+      quantityRows.removeAt(index);
     });
   }
 
-  void _addBizDataField() {
+  void addBizDataField() {
     setState(() {
-      _bizDataControllers.add(
+      bizDataControllers.add(
         MapEntry(TextEditingController(), TextEditingController()),
       );
     });
   }
 
-  void _removeBizDataField(int index) {
+  void removeBizDataField(int index) {
     setState(() {
-      final entry = _bizDataControllers.removeAt(index);
+      final entry = bizDataControllers.removeAt(index);
       entry.key.dispose();
       entry.value.dispose();
     });
   }
 
-  void _addSourceEntry() {
+  void addSourceEntry() {
     setState(() {
-      _sourceListControllers.add(
+      sourceListControllers.add(
         MapEntry(TextEditingController(), TextEditingController()),
       );
     });
   }
 
-  void _removeSourceEntry(int index) {
+  void removeSourceEntry(int index) {
     setState(() {
-      final entry = _sourceListControllers.removeAt(index);
+      final entry = sourceListControllers.removeAt(index);
       entry.key.dispose();
       entry.value.dispose();
     });
   }
 
-  void _addDestinationEntry() {
+  void addDestinationEntry() {
     setState(() {
-      _destinationListControllers.add(
+      destinationListControllers.add(
         MapEntry(TextEditingController(), TextEditingController()),
       );
     });
   }
 
-  void _removeDestinationEntry(int index) {
+  void removeDestinationEntry(int index) {
     setState(() {
-      final entry = _destinationListControllers.removeAt(index);
+      final entry = destinationListControllers.removeAt(index);
       entry.key.dispose();
       entry.value.dispose();
     });
   }
 
-  List<Map<String, dynamic>> _getSourceList() {
+  List<Map<String, dynamic>> getSourceList() {
     final sourceList = <Map<String, dynamic>>[];
-    for (final entry in _sourceListControllers) {
+    for (final entry in sourceListControllers) {
       final type = entry.key.text.trim();
       final value = entry.value.text.trim();
       if (type.isNotEmpty && value.isNotEmpty) {
@@ -99,9 +103,9 @@ extension AggregationEventFormFields on _AggregationEventFormScreenState {
     return sourceList;
   }
 
-  List<Map<String, dynamic>> _getDestinationList() {
+  List<Map<String, dynamic>> getDestinationList() {
     final destinationList = <Map<String, dynamic>>[];
-    for (final entry in _destinationListControllers) {
+    for (final entry in destinationListControllers) {
       final type = entry.key.text.trim();
       final value = entry.value.text.trim();
       if (type.isNotEmpty && value.isNotEmpty) {
@@ -111,10 +115,10 @@ extension AggregationEventFormFields on _AggregationEventFormScreenState {
     return destinationList;
   }
 
-  Future<void> _selectEventTime() async {
+  Future<void> selectEventTime() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _eventTime,
+      initialDate: eventTime,
       firstDate: DateTime(2000),
       lastDate: DateTime.now().add(const Duration(days: 1)),
     );
@@ -122,14 +126,14 @@ extension AggregationEventFormFields on _AggregationEventFormScreenState {
     if (picked != null && mounted) {
       final timePicked = await showTimePicker(
         context: context,
-        initialTime: TimeOfDay.fromDateTime(_eventTime),
+        initialTime: TimeOfDay.fromDateTime(eventTime),
       );
 
       if (timePicked != null) {
         setState(() {
-          _isManualTime = true;
-          _timer?.cancel();
-          _eventTime = DateTime(
+          isManualTime = true;
+          timer?.cancel();
+          eventTime = DateTime(
             picked.year,
             picked.month,
             picked.day,

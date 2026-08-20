@@ -1,9 +1,9 @@
+import 'package:traqtrace_app/data/services/admin/event_generation_test_data_models.dart';
+import 'package:traqtrace_app/data/services/admin/event_generation_test_models.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 import 'package:traqtrace_app/data/services/admin/event_generation_test_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -11,51 +11,50 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/screens/event_generation_test/widgets/event_data_management_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/event_generation_test/widgets/event_generator_tab.dart';
 import 'package:traqtrace_app/features/admin/screens/event_generation_test/widgets/event_simulation_tab.dart';
-import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 
-part 'event_generation_actions.dart';
-part 'event_data_cleanup_actions.dart';
-part 'event_master_data_cleanup_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/event_generation_test/event_generation_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/event_generation_test/event_data_cleanup_actions.dart';
+import 'package:traqtrace_app/features/admin/screens/event_generation_test/event_master_data_cleanup_actions.dart';
 
 class EventGenerationTestScreen extends StatefulWidget {
   const EventGenerationTestScreen({Key? key}) : super(key: key);
 
   @override
   State<EventGenerationTestScreen> createState() =>
-      _EventGenerationTestScreenState();
+      EventGenerationTestScreenState();
 }
 
-class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
+class EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     with TickerProviderStateMixin {
-  EventGenerationTestService? _testService;
-  bool _isLoading = false;
-  String? _errorMessage;
+  EventGenerationTestService? testService;
+  bool isLoading = false;
+  String? errorMessage;
   late TabController _tabController;
 
-  String _selectedEventType = 'OBJECT';
-  final Map<String, dynamic> _eventParams = {};
+  String selectedEventType = 'OBJECT';
+  final Map<String, dynamic> eventParams = {};
   bool _isBulkGeneration = false;
-  int _bulkCount = 100;
-  BulkGenerationResult? _lastBulkResult;
+  int bulkCount = 100;
+  BulkGenerationResult? lastBulkResult;
 
-  SimulationSession? _activeSimulation;
-  SimulationStatus? _simulationStatus;
-  final Map<String, dynamic> _simulationParams = {};
+  SimulationSession? activeSimulation;
+  SimulationStatus? simulationStatus;
+  final Map<String, dynamic> simulationParams = {};
 
-  TestDataStatistics? _dataStatistics;
-  TestEnvironment? _activeEnvironment;
+  TestDataStatistics? dataStatistics;
+  TestEnvironment? activeEnvironment;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _initializeDefaults();
+    initializeDefaults();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _testService ??= getIt<EventGenerationTestService>();
+    testService ??= getIt<EventGenerationTestService>();
   }
 
   @override
@@ -87,72 +86,72 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
       ),
       body: Column(
         children: [
-          if (_errorMessage != null)
+          if (errorMessage != null)
             Container(
               width: double.infinity,
               color: context.colors.error,
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                _errorMessage!,
+                errorMessage!,
                 style: const TextStyle(color: Colors.white),
               ),
             ),
-          if (_isLoading) const LinearProgressIndicator(),
+          if (isLoading) const LinearProgressIndicator(),
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
                 EventGeneratorTab(
-                  selectedEventType: _selectedEventType,
+                  selectedEventType: selectedEventType,
                   isBulkGeneration: _isBulkGeneration,
-                  bulkCount: _bulkCount,
-                  isLoading: _isLoading,
-                  lastBulkResult: _lastBulkResult,
+                  bulkCount: bulkCount,
+                  isLoading: isLoading,
+                  lastBulkResult: lastBulkResult,
                   onEventTypeChanged: (value) =>
-                      setState(() => _selectedEventType = value),
+                      setState(() => selectedEventType = value),
                   onBulkGenerationChanged: (value) =>
                       setState(() => _isBulkGeneration = value),
-                  onBulkCountChanged: (value) => _bulkCount = value,
+                  onBulkCountChanged: (value) => bulkCount = value,
                   onGenerate: _isBulkGeneration
-                      ? _generateBulkEvents
-                      : _generateSingleEvent,
+                      ? generateBulkEvents
+                      : generateSingleEvent,
                 ),
                 EventSimulationTab(
-                  activeSimulation: _activeSimulation,
-                  simulationStatus: _simulationStatus,
-                  simulationParams: _simulationParams,
-                  isLoading: _isLoading,
-                  statusColor: _getSimulationStatusColor(context),
-                  statusText: _getSimulationStatusText(),
+                  activeSimulation: activeSimulation,
+                  simulationStatus: simulationStatus,
+                  simulationParams: simulationParams,
+                  isLoading: isLoading,
+                  statusColor: getSimulationStatusColor(context),
+                  statusText: getSimulationStatusText(),
                   onDurationChanged: (value) =>
-                      _simulationParams['duration'] = value,
+                      simulationParams['duration'] = value,
                   onEventIntervalChanged: (value) =>
-                      _simulationParams['eventInterval'] = value,
+                      simulationParams['eventInterval'] = value,
                   onIncludeAnomaliesChanged: (value) => setState(
-                    () => _simulationParams['includeAnomalies'] = value,
+                    () => simulationParams['includeAnomalies'] = value,
                   ),
                   onAnomalyRateChanged: (value) =>
-                      _simulationParams['anomalyRate'] = value,
-                  onStart: _startSupplyChainSimulation,
-                  onStop: _stopSupplyChainSimulation,
-                  onRefresh: _pollSimulationStatus,
-                  onClear: _clearSimulation,
+                      simulationParams['anomalyRate'] = value,
+                  onStart: startSupplyChainSimulation,
+                  onStop: stopSupplyChainSimulation,
+                  onRefresh: pollSimulationStatus,
+                  onClear: clearSimulation,
                 ),
                 EventDataManagementTab(
-                  statistics: _dataStatistics,
-                  activeEnvironment: _activeEnvironment,
-                  isLoading: _isLoading,
-                  onRefresh: _loadDataManagementData,
-                  onCleanTestData: _cleanTestData,
-                  onCleanObjectEvents: _cleanObjectEvents,
-                  onCleanGlnData: _cleanGLNTestData,
-                  onCleanGtinData: _cleanGTINTestData,
-                  onCleanSgtinData: _cleanSGTINTestData,
-                  onCleanSsccTestData: _cleanSSCCTestData,
-                  onCleanAllSsccData: _cleanAllSSCCData,
-                  onCleanAggregationEvents: _cleanAggregationEvents,
-                  onCleanTransactionEvents: _cleanTransactionEvents,
-                  onCleanTransformationEvents: _cleanTransformationEvents,
+                  statistics: dataStatistics,
+                  activeEnvironment: activeEnvironment,
+                  isLoading: isLoading,
+                  onRefresh: loadDataManagementData,
+                  onCleanTestData: cleanTestData,
+                  onCleanObjectEvents: cleanObjectEvents,
+                  onCleanGlnData: cleanGLNTestData,
+                  onCleanGtinData: cleanGTINTestData,
+                  onCleanSgtinData: cleanSGTINTestData,
+                  onCleanSsccTestData: cleanSSCCTestData,
+                  onCleanAllSsccData: cleanAllSSCCData,
+                  onCleanAggregationEvents: cleanAggregationEvents,
+                  onCleanTransactionEvents: cleanTransactionEvents,
+                  onCleanTransformationEvents: cleanTransformationEvents,
                 ),
               ],
             ),

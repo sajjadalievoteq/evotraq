@@ -1,5 +1,5 @@
+import 'package:traqtrace_app/core/animation/traq_status_switcher.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 import 'package:traqtrace_app/core/utils/email_provider_launch_utils.dart';
 import 'package:traqtrace_app/core/web/auth_navigation_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/auth_navigation_web.dart';

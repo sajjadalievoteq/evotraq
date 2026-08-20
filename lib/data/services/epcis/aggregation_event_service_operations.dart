@@ -1,4 +1,7 @@
-part of 'aggregation_event_service.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
+import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
 
 extension AggregationEventServiceOperations on AggregationEventService {
   /// @Deprecated Prefer [PackingOperationService.createPackingOperation]
@@ -14,7 +17,7 @@ extension AggregationEventServiceOperations on AggregationEventService {
     List<Map<String, dynamic>>? sourceList,
     List<Map<String, dynamic>>? destinationList,
   }) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
@@ -56,8 +59,8 @@ extension AggregationEventServiceOperations on AggregationEventService {
 
     final body = json.encode(requestData);
 
-    final response = await _dioService.post(
-      _baseUrl,
+    final response = await dioService.post(
+      baseUrl,
       headers: headers,
       data: body,
       responseType: ResponseType.plain,
@@ -67,7 +70,7 @@ extension AggregationEventServiceOperations on AggregationEventService {
     if (response.statusCode == 201 || response.statusCode == 200) {
       return AggregationEvent.fromJson(json.decode(response.data));
     } else {
-      throw Exception(_getDetailedErrorMessage(response));
+      throw Exception(getDetailedErrorMessage(response));
     }
   }
 
@@ -84,7 +87,7 @@ extension AggregationEventServiceOperations on AggregationEventService {
     List<Map<String, dynamic>>? sourceList,
     List<Map<String, dynamic>>? destinationList,
   }) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
 
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
@@ -126,8 +129,8 @@ extension AggregationEventServiceOperations on AggregationEventService {
 
     final body = json.encode(requestData);
 
-    final response = await _dioService.post(
-      _baseUrl,
+    final response = await dioService.post(
+      baseUrl,
       headers: headers,
       data: body,
       responseType: ResponseType.plain,
@@ -137,11 +140,11 @@ extension AggregationEventServiceOperations on AggregationEventService {
     if (response.statusCode == 201 || response.statusCode == 200) {
       return AggregationEvent.fromJson(json.decode(response.data));
     } else {
-      throw Exception(_getDetailedErrorMessage(response));
+      throw Exception(getDetailedErrorMessage(response));
     }
   }
 
-  String _getDetailedErrorMessage(Response response) {
+  String getDetailedErrorMessage(Response response) {
     try {
       final Map<String, dynamic> errorData = json.decode(response.data);
       final String message = errorData['message'] ?? 'Unknown error';
@@ -206,15 +209,15 @@ extension AggregationEventServiceOperations on AggregationEventService {
   /// (`GET /events/aggregation/children`). Prefer this over traversal
   /// `contained-items` for product/ops UIs.
   Future<List<String>> findContainerContents(String parentEPC) async {
-    final headers = await _getHeaders();
+    final headers = await getHeaders();
     const pageSize = 200;
     final all = <String>[];
     var page = 0;
 
     try {
       while (true) {
-        final response = await _dioService.get(
-          '$_baseUrl/children',
+        final response = await dioService.get(
+          '$baseUrl/children',
           queryParameters: {
             'parentEPC': parentEPC,
             'page': page.toString(),
@@ -226,7 +229,7 @@ extension AggregationEventServiceOperations on AggregationEventService {
         );
 
         if (response.statusCode != 200) {
-          throw Exception(_getDetailedErrorMessage(response));
+          throw Exception(getDetailedErrorMessage(response));
         }
 
         final data = json.decode(response.data) as Map<String, dynamic>;
@@ -256,9 +259,9 @@ extension AggregationEventServiceOperations on AggregationEventService {
       return true;
     } catch (_) {
       try {
-        final headers = await _getHeaders();
-        final containerResponse = await _dioService.get(
-          '$_baseUrl/container',
+        final headers = await getHeaders();
+        final containerResponse = await dioService.get(
+          '$baseUrl/container',
           queryParameters: {'childEPC': epc},
           headers: headers,
           responseType: ResponseType.plain,

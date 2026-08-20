@@ -1,4 +1,7 @@
-part of 'tatmeen_credentials_form.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_integration_settings.dart';
 
 class TatmeenCredentialsReadOnlySummary extends StatelessWidget {
   const TatmeenCredentialsReadOnlySummary({super.key, required this.settings});

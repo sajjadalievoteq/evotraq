@@ -203,10 +203,9 @@ class ValidationCubit extends Cubit<ValidationState> {
     emit(state.copyWith(fieldErrors: mappedErrors));
   }
 
-  ValidationCubit({
-    ValidationService? validationService,
-  }) : _validationService = validationService ?? getIt<ValidationService>(),
-       super(ValidationState.initial());
+  ValidationCubit({ValidationService? validationService})
+    : _validationService = validationService ?? getIt<ValidationService>(),
+      super(ValidationState.initial());
 
   Future<bool> validateObjectEvent(ObjectEvent event) async {
     return _validateEvent(

@@ -1,4 +1,9 @@
-part of 'journey_cubit.dart';
+import 'package:equatable/equatable.dart';
+import 'package:traqtrace_app/data/models/home/recent_event.dart';
+import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
+import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
+import 'package:traqtrace_app/data/models/product_journey/product_search_result.dart';
+import 'package:traqtrace_app/features/product_journey/utils/journey_event_filter.dart';
 
 const _unset = Object();
 

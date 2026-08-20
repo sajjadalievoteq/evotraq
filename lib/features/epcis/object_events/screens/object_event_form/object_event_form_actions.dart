@@ -1,23 +1,33 @@
-part of 'object_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_save_models.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
+import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
+import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
+import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/object_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_constants.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_mandatory_fields.dart';
+import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/utils/object_event_form_save_handler.dart';
 
-extension ObjectEventFormActions on _ObjectEventFormScreenState {
-  String? _getFieldError(String fieldName) {
+extension ObjectEventFormActions on ObjectEventFormScreenState {
+  String? getFieldError(String fieldName) {
     return context.read<ValidationCubit>().getFieldError(fieldName);
   }
 
-  bool _hasFieldBeenValidated(String fieldName) {
+  bool hasFieldBeenValidated(String fieldName) {
     return context.read<ValidationCubit>().hasBeenValidated(fieldName);
   }
 
-  void _setFieldError(String fieldName, String? error) {
+  void setFieldError(String fieldName, String? error) {
     context.read<ValidationCubit>().setFieldError(fieldName, error);
   }
 
-  void _markFieldAsValid(String fieldName) {
+  void markFieldAsValid(String fieldName) {
     context.read<ValidationCubit>().markFieldAsValid(fieldName);
   }
 
-  void _validateField(
+  void validateField(
     String fieldName,
     String value,
     String? Function(String) validator,
@@ -25,20 +35,20 @@ extension ObjectEventFormActions on _ObjectEventFormScreenState {
     context.read<ValidationCubit>().validateField(fieldName, value, validator);
   }
 
-  bool _isMandatory(String fieldName) =>
+  bool isMandatory(String fieldName) =>
       ObjectEventFormMandatoryFields.isFieldMandatory(
         fieldName: fieldName,
-        action: _action,
-        businessStep: _businessStep,
-        epcListEmpty: _epcList.isEmpty,
-        quantityListEmpty: _quantityList.isEmpty,
-        epcList: _epcList,
+        action: action,
+        businessStep: businessStep,
+        epcListEmpty: epcList.isEmpty,
+        quantityListEmpty: quantityList.isEmpty,
+        epcList: epcList,
       );
 
   String? get _effectiveItemDisposition =>
-      widget.currentItemDisposition ?? _queryItemDisposition;
+      widget.currentItemDisposition ?? queryItemDisposition;
 
-  List<String> _allowedActionsForItemState() {
+  List<String> allowedActionsForItemState() {
     final d = _effectiveItemDisposition;
     if (d == null) return objectEventActions;
 
@@ -66,62 +76,62 @@ extension ObjectEventFormActions on _ObjectEventFormScreenState {
     return objectEventActions;
   }
 
-  void _applyDispositionContextActions() {
-    final allowed = _allowedActionsForItemState();
+  void applyDispositionContextActions() {
+    final allowed = allowedActionsForItemState();
     if (_effectiveItemDisposition == null || allowed.isEmpty) return;
-    if (allowed.length == 1 || !allowed.contains(_action)) {
-      setState(() => _action = allowed.first);
+    if (allowed.length == 1 || !allowed.contains(action)) {
+      setState(() => action = allowed.first);
     }
   }
 
-  bool _shouldShowIlmdSection() {
-    if (_action != 'ADD') return false;
-    if (!CbvVocabularyFormatter.isBizStepCommissioning(_businessStep)) {
+  bool shouldShowIlmdSection() {
+    if (action != 'ADD') return false;
+    if (!CbvVocabularyFormatter.isBizStepCommissioning(businessStep)) {
       return false;
     }
-    return _epcList.any(Gs1CanonicalIdentifier.isSgtin);
+    return epcList.any(Gs1CanonicalIdentifier.isSgtin);
   }
 
-  void _syncIlmdState() {
-    if (!_shouldShowIlmdSection()) {
-      _ilmd.clear();
+  void syncIlmdState() {
+    if (!shouldShowIlmdSection()) {
+      ilmd.clear();
     }
   }
 
-  void _formatCbvFieldsForVersion(EPCISVersion version) {
+  void formatCbvFieldsForVersion(EPCISVersion version) {
     final versionString = version == EPCISVersion.v2_0 ? '2.0' : '1.3';
-    if (_businessStep != null) {
-      _businessStep = CbvVocabularyFormatter.formatBizStep(
+    if (businessStep != null) {
+      businessStep = CbvVocabularyFormatter.formatBizStep(
         versionString,
-        _businessStep!,
+        businessStep!,
       );
     }
-    if (_disposition != null) {
-      _disposition = CbvVocabularyFormatter.formatDisposition(
+    if (disposition != null) {
+      disposition = CbvVocabularyFormatter.formatDisposition(
         versionString,
-        _disposition!,
+        disposition!,
       );
     }
   }
 
-  void _onActionChanged(String? newAction) {
+  void onActionChanged(String? newAction) {
     setState(() {
-      _action = newAction;
-      _syncIlmdState();
+      action = newAction;
+      syncIlmdState();
     });
   }
 
-  void _onBusinessStepChanged(String? value) {
+  void onBusinessStepChanged(String? value) {
     setState(() {
-      _businessStep = value;
-      _syncIlmdState();
+      businessStep = value;
+      syncIlmdState();
     });
   }
 
-  Future<void> _selectEventTime() async {
+  Future<void> selectEventTime() async {
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: _eventTime,
+      initialDate: eventTime,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
@@ -129,12 +139,12 @@ extension ObjectEventFormActions on _ObjectEventFormScreenState {
 
     final pickedTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_eventTime),
+      initialTime: TimeOfDay.fromDateTime(eventTime),
     );
     if (pickedTime == null) return;
 
     setState(() {
-      _eventTime = DateTime(
+      eventTime = DateTime(
         pickedDate.year,
         pickedDate.month,
         pickedDate.day,
@@ -144,35 +154,35 @@ extension ObjectEventFormActions on _ObjectEventFormScreenState {
     });
   }
 
-  Future<void> _saveEvent() async {
+  Future<void> saveEvent() async {
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _validationErrors = [];
+      isLoading = true;
+      errorMessage = null;
+      validationErrors = [];
     });
 
     final result = await ObjectEventFormSaveHandler.save(
       context: context,
-      formKey: _formKey,
+      formKey: formKey,
       data: ObjectEventFormSaveData(
-        eventTime: _eventTime,
-        eventTimeZone: _eventTimeZone,
-        action: _action,
-        businessStep: _businessStep,
-        disposition: _disposition,
-        readPointGLN: _readPoint?.glnCode,
-        businessLocationGLN: _businessLocation?.glnCode,
-        epcList: _epcList,
-        epcClassList: _epcClassList,
-        quantityList: _quantityList,
-        bizData: _bizData,
-        sourceList: _sourceList,
-        destinationList: _destinationList,
-        persistentDisposition: _persistentDisposition,
-        sensorElementList: _sensorElementList,
-        certificationInfoList: _certificationInfoList,
-        epcisVersion: _epcisVersion,
-        ilmd: Map<String, Object>.from(_ilmd),
+        eventTime: eventTime,
+        eventTimeZone: eventTimeZone,
+        action: action,
+        businessStep: businessStep,
+        disposition: disposition,
+        readPointGLN: readPoint?.glnCode,
+        businessLocationGLN: businessLocation?.glnCode,
+        epcList: epcList,
+        epcClassList: epcClassList,
+        quantityList: quantityList,
+        bizData: bizData,
+        sourceList: sourceList,
+        destinationList: destinationList,
+        persistentDisposition: persistentDisposition,
+        sensorElementList: sensorElementList,
+        certificationInfoList: certificationInfoList,
+        epcisVersion: epcisVersion,
+        ilmd: Map<String, Object>.from(ilmd),
       ),
       existingEvent: widget.event,
       embedded: widget.embedded,
@@ -181,9 +191,9 @@ extension ObjectEventFormActions on _ObjectEventFormScreenState {
 
     if (!mounted) return;
     setState(() {
-      _isLoading = false;
-      _errorMessage = result.errorMessage;
-      _validationErrors = result.validationErrors;
+      isLoading = false;
+      errorMessage = result.errorMessage;
+      validationErrors = result.validationErrors;
     });
   }
 }

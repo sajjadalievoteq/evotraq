@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/widgets/object_event_form_required_indicator.dart';
+import 'package:flutter/material.dart';
 
 class ObjectEventFormSectionCard extends StatelessWidget {
   final String? title;

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class OperationStepCircle extends StatelessWidget {
-  const OperationStepCircle({
+  const OperationStepCircle({super.key,
     required this.step,
     required this.label,
     required this.iconAsset,

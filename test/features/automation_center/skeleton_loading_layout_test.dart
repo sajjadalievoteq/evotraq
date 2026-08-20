@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/inbound/inbound_catalog_loading_skeleton.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_loading_skeleton.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_skeleton_shape.dart';
 
 void main() {
   Widget wrap(Widget child) {
@@ -34,9 +35,7 @@ void main() {
     expect(find.byType(Row), findsWidgets);
     // Stacked Column with fixed list height is not used on wide layouts.
     expect(
-      find.byWidgetPredicate(
-        (w) => w is SizedBox && w.height == 220,
-      ),
+      find.byWidgetPredicate((w) => w is SizedBox && w.height == 220),
       findsNothing,
     );
   });
@@ -59,35 +58,32 @@ void main() {
     );
 
     expect(
-      find.byWidgetPredicate(
-        (w) => w is SizedBox && w.height == 220,
-      ),
+      find.byWidgetPredicate((w) => w is SizedBox && w.height == 220),
       findsOneWidget,
     );
   });
 
-  testWidgets(
-    'managementMasterDetail layouts in unbounded height when wide',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 800));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets('managementMasterDetail layouts in unbounded height when wide', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(
-        wrap(
-          ListView(
-            children: const [
-              SubscriptionLoadingSkeleton(
-                shrinkWrap: true,
-                shape: SubscriptionSkeletonShape.managementMasterDetail,
-              ),
-            ],
-          ),
+    await tester.pumpWidget(
+      wrap(
+        ListView(
+          children: const [
+            SubscriptionLoadingSkeleton(
+              shrinkWrap: true,
+              shape: SubscriptionSkeletonShape.managementMasterDetail,
+            ),
+          ],
         ),
-      );
+      ),
+    );
 
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'managementMasterDetail layouts in unbounded height when stacked',

@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/features/operations/shared/operation_epc_type.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';

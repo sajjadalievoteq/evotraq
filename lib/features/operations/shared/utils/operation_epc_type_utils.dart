@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
-import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
+import 'package:traqtrace_app/features/operations/shared/operation_epc_type.dart';
 
 abstract final class OperationEpcTypeUtils {
   static String labelFromValue(String value) {
-    return label(OperationEpcScanValidator.resolveEpcType(value));
+    return label(resolveOperationEpcType(value));
   }
 
   static String label(OperationScanItemType type) {
@@ -18,7 +18,7 @@ abstract final class OperationEpcTypeUtils {
   }
 
   static Color colorFromValue(BuildContext context, String value) {
-    return color(context, OperationEpcScanValidator.resolveEpcType(value));
+    return color(context, resolveOperationEpcType(value));
   }
 
   static Color color(BuildContext context, OperationScanItemType type) {

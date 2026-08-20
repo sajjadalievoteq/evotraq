@@ -1,9 +1,9 @@
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/operations_header/widgets/home_operations_header_actions.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/operations_header/widgets/home_operations_search_field.dart';
-import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class OperationsHeader extends StatelessWidget {
   const OperationsHeader({super.key, required this.layout});

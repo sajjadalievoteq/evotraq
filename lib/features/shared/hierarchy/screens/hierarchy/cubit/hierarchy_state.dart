@@ -1,4 +1,5 @@
-part of 'hierarchy_cubit.dart';
+import 'package:traqtrace_app/data/models/hierarchy/hierarchy_summary.dart';
+import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 
 sealed class HierarchyState {
   const HierarchyState();

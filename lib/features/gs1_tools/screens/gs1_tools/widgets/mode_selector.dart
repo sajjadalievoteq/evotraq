@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 
 /// Compact mode picker shared by the consolidated GS1 Tools panels.
 ///

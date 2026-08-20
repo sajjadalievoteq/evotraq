@@ -1,5 +1,5 @@
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_batch_models.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
-import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 
 class CommissioningDetailData {
   const CommissioningDetailData({

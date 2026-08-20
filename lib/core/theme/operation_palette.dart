@@ -1,7 +1,8 @@
+import 'package:traqtrace_app/features/operations/shared/operation_epc_type.dart';
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_batch_models.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
-import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_type.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
@@ -179,25 +180,25 @@ class OperationPalette {
       color.withValues(alpha: opacity);
 
   Color forOperationType(OperationType type) => switch (type) {
-        OperationType.commissioning => opCommissioning,
-        OperationType.packing => opPacking,
-        OperationType.unpacking => opUnpacking,
-        OperationType.shipping => opShipping,
-        OperationType.receiving => opReceiving,
-        OperationType.returnShipping => opReturnShipping,
-        OperationType.returnReceiving => opReturnReceiving,
-        OperationType.cancelShipping => opCancelShipping,
-        OperationType.cancelReceiving => opCancelReceiving,
-        OperationType.updateStatus => opUpdateStatus,
-      };
+    OperationType.commissioning => opCommissioning,
+    OperationType.packing => opPacking,
+    OperationType.unpacking => opUnpacking,
+    OperationType.shipping => opShipping,
+    OperationType.receiving => opReceiving,
+    OperationType.returnShipping => opReturnShipping,
+    OperationType.returnReceiving => opReturnReceiving,
+    OperationType.cancelShipping => opCancelShipping,
+    OperationType.cancelReceiving => opCancelReceiving,
+    OperationType.updateStatus => opUpdateStatus,
+  };
 
   Color forOperationStatus(OperationStatus status) => switch (status) {
-        OperationStatus.success => statusSuccess,
-        OperationStatus.partialSuccess => statusPartialSuccess,
-        OperationStatus.failed => statusFailed,
-        OperationStatus.validationError => statusValidationError,
-        OperationStatus.accepted => statusAccepted,
-      };
+    OperationStatus.success => statusSuccess,
+    OperationStatus.partialSuccess => statusPartialSuccess,
+    OperationStatus.failed => statusFailed,
+    OperationStatus.validationError => statusValidationError,
+    OperationStatus.accepted => statusAccepted,
+  };
 
   Color forCommissioningBatchStatus(CommissioningBatchStatus status) =>
       switch (status) {
@@ -209,38 +210,38 @@ class OperationPalette {
       };
 
   Color forItemStatus(ItemStatus status) => switch (status) {
-        ItemStatus.RESERVED => itemReserved,
-        ItemStatus.ALLOCATED => itemAllocated,
-        ItemStatus.COMMISSIONED => itemCommissioned,
-        ItemStatus.ACTIVE => itemActive,
-        ItemStatus.IN_TRANSIT => itemInTransit,
-        ItemStatus.RECEIVED => itemReceived,
-        ItemStatus.DISPENSED => itemDispensed,
-        ItemStatus.RETURNED => itemReturned,
-        ItemStatus.DESTROYED => itemDestroyed,
-        ItemStatus.RECALLED => itemRecalled,
-        ItemStatus.STOLEN => itemStolen,
-        ItemStatus.EXPIRED => itemExpired,
-        ItemStatus.EXCEPTION => itemException,
-      };
+    ItemStatus.RESERVED => itemReserved,
+    ItemStatus.ALLOCATED => itemAllocated,
+    ItemStatus.COMMISSIONED => itemCommissioned,
+    ItemStatus.ACTIVE => itemActive,
+    ItemStatus.IN_TRANSIT => itemInTransit,
+    ItemStatus.RECEIVED => itemReceived,
+    ItemStatus.DISPENSED => itemDispensed,
+    ItemStatus.RETURNED => itemReturned,
+    ItemStatus.DESTROYED => itemDestroyed,
+    ItemStatus.RECALLED => itemRecalled,
+    ItemStatus.STOLEN => itemStolen,
+    ItemStatus.EXPIRED => itemExpired,
+    ItemStatus.EXCEPTION => itemException,
+  };
 
   Color forLogisticUnitStatus(LogisticUnitStatus status) => switch (status) {
-        LogisticUnitStatus.DRAFT => ssccDraft,
-        LogisticUnitStatus.ALLOCATED => ssccAllocated,
-        LogisticUnitStatus.ACTIVE => ssccActive,
-        LogisticUnitStatus.IN_TRANSIT => ssccInTransit,
-        LogisticUnitStatus.RECEIVED => ssccReceived,
-        LogisticUnitStatus.DECOMMISSIONED => ssccDecommissioned,
-        LogisticUnitStatus.VOIDED => ssccVoided,
-      };
+    LogisticUnitStatus.DRAFT => ssccDraft,
+    LogisticUnitStatus.ALLOCATED => ssccAllocated,
+    LogisticUnitStatus.ACTIVE => ssccActive,
+    LogisticUnitStatus.IN_TRANSIT => ssccInTransit,
+    LogisticUnitStatus.RECEIVED => ssccReceived,
+    LogisticUnitStatus.DECOMMISSIONED => ssccDecommissioned,
+    LogisticUnitStatus.VOIDED => ssccVoided,
+  };
 
   Color forEpcType(OperationScanItemType type) => switch (type) {
-        OperationScanItemType.sgtin => epcSgtin,
-        OperationScanItemType.sscc => epcSscc,
-        OperationScanItemType.gtin => epcGtin,
-        OperationScanItemType.invalid => epcInvalid,
-        OperationScanItemType.unknown => epcInvalid,
-      };
+    OperationScanItemType.sgtin => epcSgtin,
+    OperationScanItemType.sscc => epcSscc,
+    OperationScanItemType.gtin => epcGtin,
+    OperationScanItemType.invalid => epcInvalid,
+    OperationScanItemType.unknown => epcInvalid,
+  };
 
   /// Light palette — slightly muted for white/light surfaces.
   static const light = OperationPalette(

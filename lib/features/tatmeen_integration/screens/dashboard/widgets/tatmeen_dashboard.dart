@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_widgets.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
@@ -13,10 +15,9 @@ import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_das
 import 'package:traqtrace_app/features/tatmeen_integration/hooks/use_tatmeen_navigation.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_error_summary.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_dashboard_charts.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_recent_activity.dart';
 import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_stats_row.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_status_breakdown.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_sync_chart.dart';
 
 class TatmeenDashboard extends StatefulWidget {
   const TatmeenDashboard({super.key, this.controller});
@@ -136,49 +137,12 @@ class _TatmeenDashboardState extends State<TatmeenDashboard> {
                       },
               ),
               const SizedBox(height: TraqSpacing.md),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final stacked = constraints.maxWidth < 980;
-                  final syncCard = SizedBox(
-                    height: 320,
-                    child: TraqCard(
-                      child: TatmeenSyncChart(
-                        data: loading ? const [] : _dashboard.chartData,
-                        isLoading: loading,
-                        error: loading ? null : _dashboard.error,
-                        onRetry: _dashboard.refetch,
-                      ),
-                    ),
-                  );
-                  final breakdownCard = SizedBox(
-                    height: 320,
-                    child: TraqCard(
-                      child: TatmeenStatusBreakdownChart(
-                        breakdown: loading ? null : _dashboard.breakdown,
-                        isLoading: loading,
-                        error: loading ? null : _dashboard.error,
-                        onRetry: _dashboard.refetch,
-                      ),
-                    ),
-                  );
-                  if (stacked) {
-                    return Column(
-                      children: [
-                        syncCard,
-                        const SizedBox(height: TraqSpacing.md),
-                        breakdownCard,
-                      ],
-                    );
-                  }
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: syncCard),
-                      const SizedBox(width: TraqSpacing.md),
-                      Expanded(child: breakdownCard),
-                    ],
-                  );
-                },
+              TatmeenDashboardCharts(
+                chartData: loading ? const [] : _dashboard.chartData,
+                breakdown: loading ? null : _dashboard.breakdown,
+                isLoading: loading,
+                error: loading ? null : _dashboard.error,
+                onRetry: _dashboard.refetch,
               ),
               const SizedBox(height: TraqSpacing.md),
               TraqCard(

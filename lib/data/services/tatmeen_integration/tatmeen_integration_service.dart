@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_integration_settings.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/data/tatmeen_records_mock_data.dart';
 
 class TatmeenIntegrationService {
   TatmeenIntegrationService({required DioService dioService})
@@ -15,6 +14,7 @@ class TatmeenIntegrationService {
   static const _settingsPath = '/tatmeen-integration/settings';
   static const _testConnectionPath = '/tatmeen-integration/test-connection';
   static const _recordsPath = '/tatmeen-integration/records';
+  static const _commissioningPath = '/tatmeen-integration/commissioning';
 
   Future<TatmeenIntegrationSettings> fetchSettings() async {
     try {
@@ -57,6 +57,231 @@ class TatmeenIntegrationService {
     }
   }
 
+  Future<TatmeenDashboardStats> getTatmeenDashboardStats() async {
+    try {
+      final response = await _dioService.get('/tatmeen-integration/dashboard/stats');
+      return TatmeenDashboardStats.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    } on DioException catch (e) {
+      throw ApiExceptionMapper.fromDio(
+        e,
+        fallbackMessage: 'Failed to load dashboard stats.',
+      );
+    }
+  }
+
+  Future<List<TatmeenChartPoint>> getTatmeenChartData({int days = 30}) async {
+    try {
+      final response = await _dioService.get(
+        '/tatmeen-integration/dashboard/chart',
+        queryParameters: {'days': days},
+      );
+      final raw = response.data;
+      if (raw is! List) return const [];
+      return [
+        for (final item in raw)
+          if (item is Map)
+            TatmeenChartPoint.fromJson(Map<String, dynamic>.from(item)),
+      ];
+    } on DioException catch (e) {
+      throw ApiExceptionMapper.fromDio(
+        e,
+        fallbackMessage: 'Failed to load dashboard chart data.',
+      );
+    }
+  }
+
+  Future<TatmeenStatusBreakdown> getTatmeenStatusBreakdown() async {
+    try {
+      final response = await _dioService.get(
+        '/tatmeen-integration/dashboard/breakdown',
+      );
+      return TatmeenStatusBreakdown.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    } on DioException catch (e) {
+      throw ApiExceptionMapper.fromDio(
+        e,
+        fallbackMessage: 'Failed to load status breakdown.',
+      );
+    }
+  }
+
+  Future<List<TatmeenSyncEvent>> getTatmeenRecentActivity({int limit = 10}) async {
+    try {
+      final response = await _dioService.get(
+        '/tatmeen-integration/dashboard/recent-activity',
+        queryParameters: {'limit': limit},
+      );
+      final raw = response.data;
+      if (raw is! List) return const [];
+      return [
+        for (final item in raw)
+          if (item is Map)
+            TatmeenSyncEvent.fromJson(Map<String, dynamic>.from(item)),
+      ];
+    } on DioException catch (e) {
+      throw ApiExceptionMapper.fromDio(
+        e,
+        fallbackMessage: 'Failed to load recent activity.',
+      );
+    }
+  }
+
+  Future<List<TatmeenErrorSummaryItem>> getTatmeenErrorSummary() async {
+    try {
+      final response = await _dioService.get(
+        '/tatmeen-integration/dashboard/error-summary',
+      );
+      final raw = response.data;
+      if (raw is! List) return const [];
+      return [
+        for (final item in raw)
+          if (item is Map)
+            TatmeenErrorSummaryItem.fromJson(Map<String, dynamic>.from(item)),
+      ];
+    } on DioException catch (e) {
+      throw ApiExceptionMapper.fromDio(
+        e,
+        fallbackMessage: 'Failed to load error summary.',
+      );
+    }
+  }
+
+  Future<TatmeenSyncRecordsPage> getSyncRecords(
+    TatmeenRecordsQuery query,
+  ) async {
+    try {
+      final response = await _dioService.get(
+        _recordsPath,
+        queryParameters: {
+          if (query.status != TatmeenRecordsStatusFilter.all)
+            'status': query.status.name,
+          if (query.fromDate != null)
+            'fromDate': _dateParam(query.fromDate!),
+          if (query.toDate != null) 'toDate': _dateParam(query.toDate!),
+          if (query.search != null && query.search!.trim().isNotEmpty)
+            'search': query.search!.trim(),
+          'page': query.page,
+          'pageSize': query.pageSize,
+        },
+      );
+      if (response.data is! Map) {
+        throw const FormatException('Tatmeen records response was not a JSON object');
+      }
+      return TatmeenSyncRecordsPage.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    } on DioException catch (e) {
+      throw ApiExceptionMapper.fromDio(
+        e,
+        fallbackMessage: 'Failed to load sync records.',
+      );
+    }
+  }
+
+  Future<TatmeenRetryOutcome> retrySyncRecord(String operationId) async {
+    try {
+      final response = await _dioService.post(
+        '/tatmeen-integration/failed-queue/$operationId/retry',
+      );
+      return _parseRetryOutcome(response.data);
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      final status = e.response?.statusCode;
+      if (data is Map && (status == 400 || status == 502)) {
+        return _parseRetryOutcome(data);
+      }
+      throw ApiExceptionMapper.fromDio(
+        e,
+        fallbackMessage: 'Failed to retry sync record.',
+      );
+    }
+  }
+
+  TatmeenRetryOutcome _parseRetryOutcome(dynamic data) {
+    if (data is! Map) return const TatmeenRetryOutcome.success();
+    final result = data['result']?.toString();
+    final error = data['error']?.toString();
+    final raw = data['message']?.toString();
+
+    if (result == 'success') return const TatmeenRetryOutcome.success();
+
+    if (error == 'integration_disabled') {
+      return TatmeenRetryOutcome.failure(
+        'Tatmeen integration is currently disabled. '
+        'Go to Settings → Tatmeen to enable it before retrying.',
+      );
+    }
+    if (error == 'credentials_missing') {
+      return TatmeenRetryOutcome.failure(
+        'Tatmeen credentials are not configured. '
+        'Add your API credentials in Settings → Tatmeen first.',
+      );
+    }
+    return TatmeenRetryOutcome.failure(_friendlyBackendMessage(raw));
+  }
+
+  String _friendlyBackendMessage(String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return 'Retry failed. Please try again later.';
+    }
+    final lower = raw.toLowerCase();
+    if (lower.contains('timed out') || lower.contains('timeout')) {
+      return 'Tatmeen is not responding. '
+          'The service may be temporarily unavailable — try again later.';
+    }
+    if (lower.contains('connection refused') ||
+        lower.contains('econnrefused') ||
+        (lower.contains('connect') && lower.contains('fail'))) {
+      return 'Could not reach Tatmeen. '
+          'Check that the service is running and your network connection is stable.';
+    }
+    if (lower.contains('unauthorized') ||
+        lower.contains('unauthenticated') ||
+        lower.contains('401')) {
+      return 'Tatmeen authentication failed. '
+          'Your credentials may have expired — check Settings → Tatmeen.';
+    }
+    if (lower.contains('bad_payload') ||
+        lower.contains('invalid') ||
+        lower.contains('400')) {
+      return 'Tatmeen rejected the request data. '
+          'Please contact support if this keeps happening.';
+    }
+    if (lower.contains('500') || lower.contains('server error')) {
+      return 'Tatmeen server error. Please try again in a moment.';
+    }
+    final trimmed = raw.trim();
+    return trimmed.length > 120
+        ? 'Retry failed: ${trimmed.substring(0, 120)}…'
+        : 'Retry failed: $trimmed';
+  }
+
+  Future<void> dismissSyncRecord(String id) async {
+    try {
+      await _dioService.patch('/tatmeen-integration/failed-queue/$id/dismiss');
+    } on DioException catch (e) {
+      throw ApiExceptionMapper.fromDio(
+        e,
+        fallbackMessage: 'Failed to dismiss sync record.',
+      );
+    }
+  }
+
+  Future<String> triggerCommissioning(Map<String, dynamic> payload) async {
+    try {
+      final response = await _dioService.post(_commissioningPath, data: payload);
+      return (response.data as Map)['syncLogId'] as String;
+    } on DioException catch (e) {
+      throw ApiExceptionMapper.fromDio(
+        e,
+        fallbackMessage: 'Failed to trigger commissioning sync.',
+      );
+    }
+  }
+
   TatmeenIntegrationSettings _decodeSettings(dynamic data) {
     if (data is! Map) {
       throw const FormatException(
@@ -81,155 +306,6 @@ class TatmeenIntegrationService {
     return TatmeenConnectionTestResult.fromJson(
       Map<String, dynamic>.from(data),
     );
-  }
-
-  Future<TatmeenDashboardStats> getTatmeenDashboardStats() async {
-    final now = DateTime.now().toLocal();
-    return TatmeenDashboardStats(
-      totalSynced: 12840,
-      successfulThisMonth: 11204,
-      failedThisMonth: 87,
-      pendingInQueue: 23,
-      successfulTrendPct: 7.4,
-      failedTrendPct: -3.1,
-      pendingTrendPct: 1.8,
-      lastSyncedAt: now.subtract(const Duration(minutes: 2)),
-    );
-  }
-
-  Future<List<TatmeenChartPoint>> getTatmeenChartData({int days = 30}) async {
-    final now = DateTime.now().toLocal();
-    return List.generate(days, (index) {
-      final day = now.subtract(Duration(days: days - 1 - index));
-      final successful = 290 + ((index * 7) % 90) + (index % 4) * 14;
-      final failed = 2 + (index % 5) + (index % 3 == 0 ? 2 : 0);
-      return TatmeenChartPoint(
-        date: DateTime(day.year, day.month, day.day),
-        successful: successful,
-        failed: failed,
-      );
-    });
-  }
-
-  Future<TatmeenStatusBreakdown> getTatmeenStatusBreakdown() async {
-    return const TatmeenStatusBreakdown(
-      successful: 11204,
-      failed: 87,
-      pending: 23,
-    );
-  }
-
-  Future<List<TatmeenSyncEvent>> getTatmeenRecentActivity({int limit = 10}) async {
-    final now = DateTime.now().toLocal();
-    final seed = <TatmeenSyncEvent>[
-      TatmeenSyncEvent(
-        timestamp: now.subtract(const Duration(minutes: 3)),
-        recordType: 'Serialized Pack',
-        recordId: 'SGTIN-6291041500012.99887766',
-        status: TatmeenSyncStatus.successful,
-        message: 'Synchronized successfully',
-      ),
-      TatmeenSyncEvent(
-        timestamp: now.subtract(const Duration(minutes: 11)),
-        recordType: 'Aggregation',
-        recordId: 'AGG-782991',
-        status: TatmeenSyncStatus.pending,
-        message: 'Queued for Tatmeen acknowledgment',
-      ),
-      TatmeenSyncEvent(
-        timestamp: now.subtract(const Duration(minutes: 18)),
-        recordType: 'Shipment',
-        recordId: 'SHIP-440128',
-        status: TatmeenSyncStatus.failed,
-        message: 'Remote endpoint timeout after 15s',
-      ),
-      TatmeenSyncEvent(
-        timestamp: now.subtract(const Duration(minutes: 26)),
-        recordType: 'Decommission',
-        recordId: 'SGTIN-6291041500012.88776611',
-        status: TatmeenSyncStatus.successful,
-        message: 'Lifecycle status accepted',
-      ),
-      TatmeenSyncEvent(
-        timestamp: now.subtract(const Duration(minutes: 34)),
-        recordType: 'Return Receiving',
-        recordId: 'RET-77109',
-        status: TatmeenSyncStatus.successful,
-        message: 'Synchronized successfully',
-      ),
-    ];
-
-    return List.generate(limit, (index) => seed[index % seed.length]);
-  }
-
-  Future<List<TatmeenErrorSummaryItem>> getTatmeenErrorSummary() async {
-    return const [
-      TatmeenErrorSummaryItem(
-        message: 'Remote endpoint timeout after 15s',
-        count: 27,
-      ),
-      TatmeenErrorSummaryItem(
-        message: 'Authentication token expired while sending batch',
-        count: 16,
-      ),
-      TatmeenErrorSummaryItem(
-        message: 'Payload rejected: missing mandatory serial metadata',
-        count: 13,
-      ),
-      TatmeenErrorSummaryItem(
-        message: 'Duplicate transaction reference detected by Tatmeen',
-        count: 8,
-      ),
-      TatmeenErrorSummaryItem(
-        message: 'Transport unavailable: TLS handshake failure',
-        count: 5,
-      ),
-    ];
-  }
-
-  Future<TatmeenSyncRecordsPage> getSyncRecords(
-    TatmeenRecordsQuery query,
-  ) async {
-    try {
-      final response = await _dioService.get(
-        _recordsPath,
-        queryParameters: {
-          if (query.status != TatmeenRecordsStatusFilter.all)
-            'status': query.status.name,
-          if (query.fromDate != null)
-            'fromDate': _dateParam(query.fromDate!),
-          if (query.toDate != null) 'toDate': _dateParam(query.toDate!),
-          if (query.search != null && query.search!.trim().isNotEmpty)
-            'search': query.search!.trim(),
-          'page': query.page,
-          'pageSize': query.pageSize,
-        },
-      );
-      if (response.data is! Map) {
-        return TatmeenRecordsMockData.page(query);
-      }
-      return TatmeenSyncRecordsPage.fromJson(
-        Map<String, dynamic>.from(response.data as Map),
-      );
-    } on DioException {
-      return TatmeenRecordsMockData.page(query);
-    }
-  }
-
-  Future<void> retrySyncRecord(String id) async {
-    try {
-      await _dioService.post('/tatmeen-integration/failed-queue/$id/retry');
-    } on DioException {
-      return;
-    }
-  }
-
-  Future<void> dismissSyncRecord(String id) async {
-    try {
-      await _dioService.patch('/tatmeen-integration/failed-queue/$id/dismiss');
-    } on DioException {
-      return;
-    }
   }
 
   String _dateParam(DateTime date) {

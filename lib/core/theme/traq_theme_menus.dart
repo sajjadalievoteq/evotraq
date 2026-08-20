@@ -1,4 +1,6 @@
-part of 'traq_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_colors.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 
 abstract final class TraqThemeMenus {
   static PopupMenuThemeData popupMenu(TraqColors c, ShapeBorder shape) =>
@@ -8,7 +10,8 @@ abstract final class TraqThemeMenus {
         shape: shape,
       );
 
-  static MenuThemeData menu(TraqColors c, OutlinedBorder shape) => MenuThemeData(
+  static MenuThemeData menu(TraqColors c, OutlinedBorder shape) =>
+      MenuThemeData(
         style: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(c.surface),
           surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
@@ -25,14 +28,8 @@ abstract final class TraqThemeMenus {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          labelStyle: TextStyle(
-              fontSize: 10,
-                  fontWeight: FontWeight.w400
-          ),
-          hintStyle: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w400
-          ),
+          labelStyle: TextStyle(fontSize: 10, fontWeight: FontWeight.w400),
+          hintStyle: TextStyle(fontSize: 10, fontWeight: FontWeight.w400),
           fillColor: c.background,
           border: OutlineInputBorder(
             borderRadius: TraqRadius.input,

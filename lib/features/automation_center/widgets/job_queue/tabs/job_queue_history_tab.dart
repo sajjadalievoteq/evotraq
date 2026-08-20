@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/cards/job_queue_history_job_card.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/filters/job_queue_job_type_filter.dart';
-import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/ops_cards.dart';
+import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/job_queue_job_type_chart.dart';
 
 class JobQueueHistoryTab extends StatelessWidget {
   final List<Map<String, dynamic>> jobHistory;

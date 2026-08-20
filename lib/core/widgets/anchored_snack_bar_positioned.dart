@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-
+import 'package:traqtrace_app/core/widgets/anchored_snack_bar_layout.dart';
 
 class AnchoredSnackBarPositioned extends StatefulWidget {
-  const AnchoredSnackBarPositioned({
+  const AnchoredSnackBarPositioned({super.key,
     required this.anchorRect,
     required this.child,
   });
@@ -20,7 +18,7 @@ class AnchoredSnackBarPositioned extends StatefulWidget {
 class AnchoredSnackBarPositionedState
     extends State<AnchoredSnackBarPositioned> {
   final GlobalKey _measureKey = GlobalKey();
-  double _measuredHeight = CustomSnackBarPresenter.estimatedSnackBarHeight;
+  double _measuredHeight = AnchoredSnackBarLayout.estimatedHeight;
 
   @override
   void initState() {
@@ -43,7 +41,7 @@ class AnchoredSnackBarPositionedState
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final layout = CustomSnackBarPresenter.layoutForAnchor(
+    final layout = AnchoredSnackBarLayout.calculate(
       anchorRect: widget.anchorRect,
       screenSize: mediaQuery.size,
       viewPadding: mediaQuery.padding,

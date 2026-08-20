@@ -1,23 +1,21 @@
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/auth/login_request.dart';
 import 'package:traqtrace_app/data/models/auth/register_request.dart';
 import 'package:traqtrace_app/data/models/auth/auth_response.dart';
 import 'package:traqtrace_app/data/models/auth/user.dart';
-import 'package:traqtrace_app/data/models/auth/user_session.dart';
 
-part 'auth_service_account_actions.dart';
 
 class AuthService {
-  final DioService _dioService;
+  final DioService dioService;
 
-  AuthService({required DioService dioService}) : _dioService = dioService;
+  AuthService({required this.dioService});
 
   /// Current Bearer token from Dio's cache/storage (same source used by API calls).
-  Future<String?> getAuthToken() => _dioService.getAuthToken();
+  Future<String?> getAuthToken() => dioService.getAuthToken();
 
   String? _extractMessageFromDecodedBody(dynamic decoded) {
     if (decoded is Map<String, dynamic>) {
@@ -59,7 +57,7 @@ class AuthService {
     return null;
   }
 
-  String? _parseErrorMessage(dynamic data) {
+  String? parseErrorMessage(dynamic data) {
     try {
       if (data is String) {
         final decoded = jsonDecode(data);
@@ -149,7 +147,7 @@ class AuthService {
     return message;
   }
 
-  String? _stringifyResponseData(dynamic data) {
+  String? stringifyResponseData(dynamic data) {
     if (data == null) return null;
     if (data is String) return data;
     try {
@@ -184,10 +182,10 @@ class AuthService {
 
   Future<AuthResponse> login(LoginRequest request) async {
     try {
-      await _dioService.removeAuthToken();
+      await dioService.removeAuthToken();
 
-      final response = await _dioService.post(
-        '${_dioService.baseUrl}${Constants.authLoginEndpoint}',
+      final response = await dioService.post(
+        '${dioService.baseUrl}${Constants.authLoginEndpoint}',
         data: jsonEncode(request.toJson()),
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -199,28 +197,28 @@ class AuthService {
             ? jsonDecode(response.data)
             : response.data;
         final authResponse = AuthResponse.fromJson(data);
-        await _dioService.saveAuthToken(authResponse.token);
+        await dioService.saveAuthToken(authResponse.token);
         return authResponse;
       }
 
       throw ApiException(
         statusCode: response.statusCode,
         message: _userFriendlyAuthMessage(
-          _parseErrorMessage(response.data),
+          parseErrorMessage(response.data),
           statusCode: response.statusCode,
           fallback: 'Login failed',
         ),
-        responseBody: _stringifyResponseData(response.data),
+        responseBody: stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message: _userFriendlyAuthMessage(
-          _parseErrorMessage(e.response?.data),
+          parseErrorMessage(e.response?.data),
           statusCode: e.response?.statusCode,
           fallback: 'Login failed',
         ),
-        responseBody: _stringifyResponseData(e.response?.data),
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }
@@ -228,10 +226,10 @@ class AuthService {
 
   Future<void> register(RegisterRequest request) async {
     try {
-      await _dioService.removeAuthToken();
+      await dioService.removeAuthToken();
 
-      final response = await _dioService.post(
-        '${_dioService.baseUrl}${Constants.authRegisterEndpoint}',
+      final response = await dioService.post(
+        '${dioService.baseUrl}${Constants.authRegisterEndpoint}',
         data: jsonEncode(request.toJson()),
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -242,22 +240,22 @@ class AuthService {
         throw ApiException(
           statusCode: response.statusCode,
           message: _userFriendlyAuthMessage(
-            _parseErrorMessage(response.data),
+            parseErrorMessage(response.data),
             statusCode: response.statusCode,
             fallback: 'Registration failed',
           ),
-          responseBody: _stringifyResponseData(response.data),
+          responseBody: stringifyResponseData(response.data),
         );
       }
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message: _userFriendlyAuthMessage(
-          _parseErrorMessage(e.response?.data),
+          parseErrorMessage(e.response?.data),
           statusCode: e.response?.statusCode,
           fallback: 'Registration failed',
         ),
-        responseBody: _stringifyResponseData(e.response?.data),
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }
@@ -265,8 +263,8 @@ class AuthService {
 
   Future<String> resendVerificationEmail(String email) async {
     try {
-      final response = await _dioService.post(
-        '${_dioService.baseUrl}${Constants.authResendVerificationEmailEndpoint}',
+      final response = await dioService.post(
+        '${dioService.baseUrl}${Constants.authResendVerificationEmailEndpoint}',
         data: jsonEncode({'email': email.trim()}),
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -274,28 +272,28 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        return _parseErrorMessage(response.data) ??
+        return parseErrorMessage(response.data) ??
             'If an unverified account exists for that email, a new verification email has been sent.';
       }
 
       throw ApiException(
         statusCode: response.statusCode,
         message: _userFriendlyAuthMessage(
-          _parseErrorMessage(response.data),
+          parseErrorMessage(response.data),
           statusCode: response.statusCode,
           fallback: 'Failed to resend verification email',
         ),
-        responseBody: _stringifyResponseData(response.data),
+        responseBody: stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message: _userFriendlyAuthMessage(
-          _parseErrorMessage(e.response?.data),
+          parseErrorMessage(e.response?.data),
           statusCode: e.response?.statusCode,
           fallback: 'Failed to resend verification email',
         ),
-        responseBody: _stringifyResponseData(e.response?.data),
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }
@@ -305,8 +303,8 @@ class AuthService {
     final trimmedUsername = username.trim();
 
     try {
-      final response = await _dioService.get(
-        '${_dioService.baseUrl}${Constants.authCheckUsernameEndpoint}',
+      final response = await dioService.get(
+        '${dioService.baseUrl}${Constants.authCheckUsernameEndpoint}',
         queryParameters: {'username': trimmedUsername},
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -323,31 +321,31 @@ class AuthService {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ??
+            parseErrorMessage(response.data) ??
             'Failed to verify username availability',
-        responseBody: _stringifyResponseData(response.data),
+        responseBody: stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message:
-            _parseErrorMessage(e.response?.data) ??
+            parseErrorMessage(e.response?.data) ??
             'Failed to verify username availability',
-        responseBody: _stringifyResponseData(e.response?.data),
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }
   }
 
   Future<User> getCurrentUser() async {
-    final token = await _dioService.getAuthToken();
+    final token = await dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     try {
-      final response = await _dioService.get(
-        '${_dioService.baseUrl}${Constants.usersProfileEndpoint}',
+      final response = await dioService.get(
+        '${dioService.baseUrl}${Constants.usersProfileEndpoint}',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -364,25 +362,24 @@ class AuthService {
       }
 
       if (response.statusCode == 401) {
-        await _dioService.removeAuthToken();
+        await dioService.removeAuthToken();
       }
 
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ?? 'Failed to get user details',
-        responseBody: _stringifyResponseData(response.data),
+            parseErrorMessage(response.data) ?? 'Failed to get user details',
+        responseBody: stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        await _dioService.removeAuthToken();
+        await dioService.removeAuthToken();
       }
       throw ApiException(
         statusCode: e.response?.statusCode,
         message:
-            _parseErrorMessage(e.response?.data) ??
-            'Failed to get user details',
-        responseBody: _stringifyResponseData(e.response?.data),
+            parseErrorMessage(e.response?.data) ?? 'Failed to get user details',
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }
@@ -390,8 +387,8 @@ class AuthService {
 
   Future<AuthResponse> refreshToken() async {
     try {
-      final response = await _dioService.post(
-        '${_dioService.baseUrl}${Constants.authRefreshEndpoint}',
+      final response = await dioService.post(
+        '${dioService.baseUrl}${Constants.authRefreshEndpoint}',
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -401,23 +398,25 @@ class AuthService {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
-        final authResponse = AuthResponse.fromJson(data as Map<String, dynamic>);
-        await _dioService.saveAuthToken(authResponse.token);
+        final authResponse = AuthResponse.fromJson(
+          data as Map<String, dynamic>,
+        );
+        await dioService.saveAuthToken(authResponse.token);
         return authResponse;
       }
 
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            _parseErrorMessage(response.data) ?? 'Failed to refresh session',
-        responseBody: _stringifyResponseData(response.data),
+            parseErrorMessage(response.data) ?? 'Failed to refresh session',
+        responseBody: stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message:
-            _parseErrorMessage(e.response?.data) ?? 'Failed to refresh session',
-        responseBody: _stringifyResponseData(e.response?.data),
+            parseErrorMessage(e.response?.data) ?? 'Failed to refresh session',
+        responseBody: stringifyResponseData(e.response?.data),
         originalException: e,
       );
     }
@@ -425,8 +424,8 @@ class AuthService {
 
   Future<void> pingActivity() async {
     try {
-      await _dioService.post(
-        '${_dioService.baseUrl}${Constants.authActivityEndpoint}',
+      await dioService.post(
+        '${dioService.baseUrl}${Constants.authActivityEndpoint}',
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -439,8 +438,8 @@ class AuthService {
 
   Future<void> logout() async {
     try {
-      await _dioService.post(
-        '${_dioService.baseUrl}${Constants.authLogoutEndpoint}',
+      await dioService.post(
+        '${dioService.baseUrl}${Constants.authLogoutEndpoint}',
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -448,7 +447,7 @@ class AuthService {
     } catch (_) {
       // Local logout must always succeed even if the backend is unreachable.
     } finally {
-      await _dioService.removeAuthToken();
+      await dioService.removeAuthToken();
     }
   }
 }

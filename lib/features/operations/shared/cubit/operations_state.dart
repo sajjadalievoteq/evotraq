@@ -1,4 +1,4 @@
-part of 'operations_cubit.dart';
+import 'package:equatable/equatable.dart';
 
 const _unset = Object();
 
@@ -41,35 +41,36 @@ class OperationsState<T> extends Equatable {
     int? totalPages,
     Object? errorMessage = _unset,
     Object? detailError = _unset,
-  }) =>
-      OperationsState<T>(
-        items: items ?? this.items,
-        selectedDetail: selectedDetail ?? this.selectedDetail,
-        isLoading: isLoading ?? this.isLoading,
-        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-        isDetailLoading: isDetailLoading ?? this.isDetailLoading,
-        hasMore: hasMore ?? this.hasMore,
-        currentPage: currentPage ?? this.currentPage,
-        total: total ?? this.total,
-        totalPages: totalPages ?? this.totalPages,
-        errorMessage:
-            identical(errorMessage, _unset) ? this.errorMessage : errorMessage as String?,
-        detailError:
-            identical(detailError, _unset) ? this.detailError : detailError as String?,
-      );
+  }) => OperationsState<T>(
+    items: items ?? this.items,
+    selectedDetail: selectedDetail ?? this.selectedDetail,
+    isLoading: isLoading ?? this.isLoading,
+    isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    isDetailLoading: isDetailLoading ?? this.isDetailLoading,
+    hasMore: hasMore ?? this.hasMore,
+    currentPage: currentPage ?? this.currentPage,
+    total: total ?? this.total,
+    totalPages: totalPages ?? this.totalPages,
+    errorMessage: identical(errorMessage, _unset)
+        ? this.errorMessage
+        : errorMessage as String?,
+    detailError: identical(detailError, _unset)
+        ? this.detailError
+        : detailError as String?,
+  );
 
   @override
   List<Object?> get props => [
-        items,
-        selectedDetail,
-        isLoading,
-        isLoadingMore,
-        isDetailLoading,
-        hasMore,
-        currentPage,
-        total,
-        totalPages,
-        errorMessage,
-        detailError,
-      ];
+    items,
+    selectedDetail,
+    isLoading,
+    isLoadingMore,
+    isDetailLoading,
+    hasMore,
+    currentPage,
+    total,
+    totalPages,
+    errorMessage,
+    detailError,
+  ];
 }

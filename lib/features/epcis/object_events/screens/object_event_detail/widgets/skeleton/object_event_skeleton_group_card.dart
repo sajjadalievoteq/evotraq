@@ -1,6 +1,5 @@
-﻿import 'package:flutter/material.dart';
-
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_skeleton_outline_field.dart';
+import 'package:flutter/material.dart';
 
 
 class ObjectEventSkeletonGroupCard extends StatelessWidget {
@@ -21,7 +20,8 @@ class ObjectEventSkeletonGroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = baseColor ??
+    final c =
+        baseColor ??
         (Theme.of(context).brightness == Brightness.dark
             ? Colors.grey.shade800
             : Colors.grey.shade300);

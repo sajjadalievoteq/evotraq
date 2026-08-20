@@ -4,10 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class JobDownloadResult {
-  const JobDownloadResult({
-    required this.bytes,
-    required this.filename,
-  });
+  const JobDownloadResult({required this.bytes, required this.filename});
 
   final Uint8List bytes;
   final String filename;
@@ -128,10 +125,7 @@ class JobQueueService {
   }) async {
     await _dioService.post(
       '/jobs/submit',
-      queryParameters: {
-        'jobType': jobType,
-        'priority': priority,
-      },
+      queryParameters: {'jobType': jobType, 'priority': priority},
       data: payload,
     );
   }
@@ -149,11 +143,13 @@ class JobQueueService {
 
     String filename = 'export_data.csv';
     final cdHdr = response.headers['content-disposition'];
-    final contentDisposition =
-        cdHdr != null && cdHdr.isNotEmpty ? cdHdr.first : null;
+    final contentDisposition = cdHdr != null && cdHdr.isNotEmpty
+        ? cdHdr.first
+        : null;
     if (contentDisposition != null) {
-      final match =
-          RegExp(r'filename="([^"]+)"').firstMatch(contentDisposition);
+      final match = RegExp(
+        r'filename="([^"]+)"',
+      ).firstMatch(contentDisposition);
       if (match != null) {
         filename = match.group(1)!;
       }

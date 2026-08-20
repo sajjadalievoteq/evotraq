@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/features/operations/shared/operation_epc_type.dart';
 import 'dart:async';
 
 import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';

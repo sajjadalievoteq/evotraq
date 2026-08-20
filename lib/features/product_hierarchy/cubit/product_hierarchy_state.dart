@@ -115,16 +115,15 @@ class ProductHierarchyState extends Equatable {
           : (detailsError ?? this.detailsError),
       treeVersion: treeVersion ?? this.treeVersion,
       focusEpc: clearFocusEpc ? null : (focusEpc ?? this.focusEpc),
-      searchedEpc:
-          clearSearchedEpc ? null : (searchedEpc ?? this.searchedEpc),
+      searchedEpc: clearSearchedEpc ? null : (searchedEpc ?? this.searchedEpc),
       scrollToEpc: clearScrollToEpc ? null : (scrollToEpc ?? this.scrollToEpc),
-      flashFocusEpc:
-          clearFlashFocusEpc ? null : (flashFocusEpc ?? this.flashFocusEpc),
+      flashFocusEpc: clearFlashFocusEpc
+          ? null
+          : (flashFocusEpc ?? this.flashFocusEpc),
       parentHasParent: parentHasParent ?? this.parentHasParent,
       climbToast: clearClimbToast ? null : (climbToast ?? this.climbToast),
       recentParents: recentParents ?? this.recentParents,
-      recentParentsLoading:
-          recentParentsLoading ?? this.recentParentsLoading,
+      recentParentsLoading: recentParentsLoading ?? this.recentParentsLoading,
     );
   }
 

@@ -1,6 +1,6 @@
+import 'package:traqtrace_app/features/gs1/widgets/gs1_date_picker_field.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class SsccDatesCard extends StatelessWidget {

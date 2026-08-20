@@ -1,4 +1,14 @@
-part of 'tatmeen_records_table.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_widgets.dart';
+import 'package:traqtrace_app/core/utils/display_date_utils.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
+import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/records/tatmeen_operation_details_dialog.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/records/tatmeen_record_confirm_dialogs.dart';
+import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/widgets/tatmeen_sync_status_badge.dart';
 
 class TatmeenRecordTile extends StatelessWidget {
   const TatmeenRecordTile({
@@ -10,7 +20,7 @@ class TatmeenRecordTile extends StatelessWidget {
 
   final TatmeenSyncRecord record;
   final bool busy;
-  final Future<void> Function() onRetry;
+  final Future<TatmeenRetryOutcome> Function() onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +78,14 @@ class TatmeenRecordTile extends StatelessWidget {
                           : () async {
                               final confirmed =
                                   await showTatmeenRetryRecordDialog(context);
-                              if (confirmed) await onRetry();
+                              if (!confirmed) return;
+                              final outcome = await onRetry();
+                              if (!context.mounted) return;
+                              if (outcome.succeeded) {
+                                context.showSuccess(outcome.message);
+                              } else {
+                                context.showError(outcome.message);
+                              }
                             },
                       child: busy
                           ? const SizedBox(

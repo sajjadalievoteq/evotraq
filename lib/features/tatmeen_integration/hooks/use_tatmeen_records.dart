@@ -70,7 +70,39 @@ class UseTatmeenRecords extends ChangeNotifier {
     return _fetch();
   }
 
-  Future<void> retryRecord(String id) => _mutate(id, _service.retrySyncRecord);
+  Future<TatmeenRetryOutcome> retryRecord(String operationId) async {
+    if (_inFlightIds.contains(operationId)) {
+      return TatmeenRetryOutcome.failure('Already retrying this record.');
+    }
+    _inFlightIds.add(operationId);
+    notifyListeners();
+    try {
+      final outcome = await _service.retrySyncRecord(operationId);
+      await _fetch(silent: true);
+      return outcome;
+    } on ApiException catch (e) {
+      return TatmeenRetryOutcome.failure(_friendlyApiError(e));
+    } catch (_) {
+      return TatmeenRetryOutcome.failure(
+        'An unexpected error occurred. Please try again.',
+      );
+    } finally {
+      _inFlightIds.remove(operationId);
+      notifyListeners();
+    }
+  }
+
+  static String _friendlyApiError(ApiException e) {
+    return switch (e.statusCode) {
+      null => 'Network error. Check your internet connection and try again.',
+      401 => 'Your session has expired. Please log in again.',
+      403 => 'You don\'t have permission to retry this record.',
+      404 =>
+        'This record was not found — it may have already been processed or removed.',
+      500 => 'Server error. Please try again in a moment.',
+      _ => e.getUserFriendlyMessage(),
+    };
+  }
 
   Future<void> dismissRecord(String id) =>
       _mutate(id, _service.dismissSyncRecord);

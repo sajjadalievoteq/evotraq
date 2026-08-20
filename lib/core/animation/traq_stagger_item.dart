@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
-import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 import 'package:traqtrace_app/core/animation/traq_entrance_slide.dart';
 
 class TraqStaggerItem extends StatelessWidget {
-  const TraqStaggerItem({
+  const TraqStaggerItem({super.key,
     required this.fade,
     required this.motion,
     required this.scale,

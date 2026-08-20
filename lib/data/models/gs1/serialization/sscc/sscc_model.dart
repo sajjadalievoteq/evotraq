@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-part 'sscc_copy_with.dart';
 
 class SSCC {
   final String? id;

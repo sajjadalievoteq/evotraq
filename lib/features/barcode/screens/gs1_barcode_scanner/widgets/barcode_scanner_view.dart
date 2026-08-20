@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/services/scanner_detection_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';

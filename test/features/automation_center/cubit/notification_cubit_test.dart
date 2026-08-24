@@ -135,16 +135,23 @@ void main() {
     );
   });
 
-  test('loadFailedBatches keeps only exhausted batches', () async {
+  test('loadFailedBatches uses aggregate exhausted endpoint', () async {
     when(
       () => api.getSubscriptions(),
     ).thenAnswer((_) async => [subscription()]);
-    when(() => api.getBatchHistory('sub-1')).thenAnswer(
-      (_) async => [
-        batch(id: 'exhausted', status: 'FAILED', deliveryAttempts: 3),
-        batch(id: 'retrying', status: 'FAILED', deliveryAttempts: 1),
-        batch(id: 'sent', status: 'SENT', deliveryAttempts: 3),
-      ],
+    when(
+      () => api.getExhaustedBatches(
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+      ),
+    ).thenAnswer(
+      (_) async => (
+        items: [
+          batch(id: 'exhausted', status: 'FAILED', deliveryAttempts: 3),
+        ],
+        hasMore: false,
+        page: 0,
+      ),
     );
 
     final cubit = NotificationCubit(apiService: api, webSocketService: socket);
@@ -153,6 +160,8 @@ void main() {
     expect(cubit.state.failedBatches, hasLength(1));
     expect(cubit.state.failedBatches.single.id, 'exhausted');
     expect(cubit.state.failedBatchesLoading, isFalse);
+    expect(cubit.state.failedBatchesHasMore, isFalse);
+    verifyNever(() => api.getBatchHistory(any()));
     await cubit.close();
   });
 
@@ -160,7 +169,14 @@ void main() {
     when(
       () => api.getSubscriptions(),
     ).thenAnswer((_) async => [subscription()]);
-    when(() => api.getBatchHistory('sub-1')).thenAnswer((_) async => []);
+    when(
+      () => api.getExhaustedBatches(
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+      ),
+    ).thenAnswer(
+      (_) async => (items: <NotificationBatch>[], hasMore: false, page: 0),
+    );
     when(
       () => api.getDeliveryActivity(
         page: any(named: 'page'),
@@ -174,7 +190,12 @@ void main() {
     await cubit.retryBatch('batch-1');
 
     verify(() => api.retryBatch('batch-1')).called(1);
-    verify(() => api.getBatchHistory('sub-1')).called(1);
+    verify(
+      () => api.getExhaustedBatches(
+        page: any(named: 'page'),
+        size: any(named: 'size'),
+      ),
+    ).called(1);
     verify(
       () => api.getDeliveryActivity(
         page: any(named: 'page'),

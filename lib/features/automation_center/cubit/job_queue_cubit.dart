@@ -58,6 +58,39 @@ class JobQueueCubit extends Cubit<JobQueueState> {
   void _onSnapshotPushed(Map<String, dynamic> payload) {
     if (isClosed) return;
     try {
+      final isFull = payload['full'] != false;
+      if (!isFull) {
+        final existing = state.snapshot;
+        if (existing == null) return;
+        final summary = _asMap(payload['summary']);
+        final health = _asMap(payload['queueHealth']);
+        final snapshot = _buildSnapshot(
+          dashboardData: summary.isEmpty
+              ? {
+                  'queuedJobs': existing.queuedJobs,
+                  'activeJobs': existing.activeJobs,
+                  'completedJobs': existing.completedJobs,
+                  'failedJobs': existing.failedJobs,
+                  'processingPaused': existing.processingPaused,
+                  'priorityDistribution': existing.priorityDistribution,
+                  'jobTypeDistribution': existing.jobTypeDistribution,
+                }
+              : summary,
+          workerPoolStats: existing.workerPoolStats,
+          queueHealth: health.isEmpty
+              ? {
+                  'healthy': existing.healthy,
+                  'issues': existing.issues,
+                }
+              : health,
+          activeJobs: existing.activeJobsList,
+          queuedJobs: existing.queuedJobsList,
+          jobHistory: existing.recentHistory,
+        );
+        emit(state.copyWith(status: JobQueueStatus.success, snapshot: snapshot));
+        return;
+      }
+
       final snapshot = _buildSnapshot(
         dashboardData: _asMap(payload['summary']),
         workerPoolStats: _asMap(payload['workerPoolStats']),

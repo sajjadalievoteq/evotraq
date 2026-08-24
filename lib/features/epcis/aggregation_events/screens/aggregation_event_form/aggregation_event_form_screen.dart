@@ -239,7 +239,8 @@ class AggregationEventFormScreenState
         }
       }
 
-      if (_pharmaReadinessChecker != null && _selectedAction == 'ADD') {
+      if (_pharmaReadinessChecker != null &&
+          (_selectedAction == 'ADD' || _selectedAction == 'DELETE')) {
         final pharmaIssues = await _pharmaReadinessChecker!.findIssues(
           eventLocationGln: locationGLN,
           action: _selectedAction,
@@ -249,7 +250,13 @@ class AggregationEventFormScreenState
         if (pharmaIssues.isNotEmpty) {
           setState(() => _isLoading = false);
           if (mounted) {
-            await AggregationPharmaIssuesDialog.show(context, pharmaIssues);
+            await AggregationPharmaIssuesDialog.show(
+              context,
+              pharmaIssues,
+              blockedTitle: _selectedAction == 'DELETE'
+                  ? 'Unpacking Blocked — GS1 Compliance Issues'
+                  : 'Packing Blocked — GS1 Compliance Issues',
+            );
           }
           return;
         }

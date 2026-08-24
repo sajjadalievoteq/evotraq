@@ -1,6 +1,7 @@
 
 abstract final class GlnMasterDataApiConsts {
   static const String prefix = '/master-data/glns';
+  static const String pickerSummaries = '$prefix/picker-summaries';
   static const String search = '$prefix/search';
   static const String searchAdvanced = '$prefix/search/advanced';
   static const String expiredLicenses = '$prefix/expired-licenses';

@@ -453,6 +453,54 @@ class NotificationApiService {
     }
   }
 
+  /// Cross-subscription exhausted failed batches (newest first).
+  Future<({List<domain.NotificationBatch> items, bool hasMore, int page})>
+  getExhaustedBatches({int page = 0, int size = 20}) async {
+    try {
+      final headers = await _getAuthHeaders();
+      final clamped = PageResponseUtils.clampSize(size);
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/notifications/batches/exhausted?page=$page&size=$clamped',
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.data);
+        final raw = PageResponseUtils.normalizeBody(
+          decoded,
+          fallbackSize: clamped,
+        );
+        final history = <domain.NotificationBatch>[];
+        for (final item in PageResponseUtils.contentList(raw)) {
+          if (item is! Map) continue;
+          try {
+            history.add(
+              domain.NotificationBatch.fromJson(
+                Map<String, dynamic>.from(item),
+              ),
+            );
+          } catch (_) {
+            // Skip malformed rows rather than failing the whole panel.
+          }
+        }
+        return (
+          items: history,
+          hasMore: !PageResponseUtils.isLast(raw),
+          page: PageResponseUtils.pageNumber(raw),
+        );
+      }
+      throw ApiException(
+        message: 'Failed to fetch exhausted batches',
+        statusCode: response.statusCode,
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(message: 'Failed to fetch exhausted batches: $e');
+    }
+  }
+
   /// Triggers a manual retry for an exhausted batch.
   Future<void> retryBatch(String batchId) async {
     try {

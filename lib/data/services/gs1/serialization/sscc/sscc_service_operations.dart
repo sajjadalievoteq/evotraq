@@ -92,34 +92,6 @@ extension SsccServiceOperations on SSCCService {
     }
   }
 
-  Future<List<SsccAggregationLink>> getAggregationLinksByCode(
-    String ssccCode,
-  ) async {
-    final response = await dioService.get(
-      '${dioService.baseUrl}${SsccServiceConstants.pathAggregationByCode}',
-      queryParameters: {SsccServiceConstants.qSsccCode: ssccCode},
-      headers: SSCCService.headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == SsccServiceConstants.statusOk) {
-      final List<dynamic> data = json.decode(response.data);
-      return data
-          .map(
-            (item) =>
-                SsccAggregationLink.fromJson(item as Map<String, dynamic>),
-          )
-          .toList();
-    }
-
-    throw ApiException(
-      statusCode: response.statusCode,
-      message: 'Failed to load aggregation links: ${response.statusMessage}',
-      responseBody: response.data is String ? response.data as String : null,
-    );
-  }
-
   Future<SsccAggregationLink> addAggregationLink(
     String ssccId, {
     required String childEpc,

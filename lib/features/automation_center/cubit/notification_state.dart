@@ -51,6 +51,9 @@ class NotificationState extends Equatable {
   /// Exhausted batches awaiting manual retry (FAILED with deliveryAttempts >= 3).
   final List<NotificationBatch> failedBatches;
   final bool failedBatchesLoading;
+  final bool failedBatchesLoadingMore;
+  final bool failedBatchesHasMore;
+  final int failedBatchesPage;
   final String? failedBatchesError;
 
   final NotificationStats? lastLoadedStats;
@@ -78,6 +81,9 @@ class NotificationState extends Equatable {
     this.deliveryActivityError,
     this.failedBatches = const [],
     this.failedBatchesLoading = false,
+    this.failedBatchesLoadingMore = false,
+    this.failedBatchesHasMore = false,
+    this.failedBatchesPage = 0,
     this.failedBatchesError,
     this.lastLoadedStats,
     this.lastLoadedStatsSubscriptionId,
@@ -105,6 +111,9 @@ class NotificationState extends Equatable {
     String? deliveryActivityError,
     List<NotificationBatch>? failedBatches,
     bool? failedBatchesLoading,
+    bool? failedBatchesLoadingMore,
+    bool? failedBatchesHasMore,
+    int? failedBatchesPage,
     String? failedBatchesError,
     NotificationStats? lastLoadedStats,
     String? lastLoadedStatsSubscriptionId,
@@ -139,6 +148,10 @@ class NotificationState extends Equatable {
       deliveryActivityError: deliveryActivityError,
       failedBatches: failedBatches ?? this.failedBatches,
       failedBatchesLoading: failedBatchesLoading ?? this.failedBatchesLoading,
+      failedBatchesLoadingMore:
+          failedBatchesLoadingMore ?? this.failedBatchesLoadingMore,
+      failedBatchesHasMore: failedBatchesHasMore ?? this.failedBatchesHasMore,
+      failedBatchesPage: failedBatchesPage ?? this.failedBatchesPage,
       failedBatchesError: failedBatchesError,
       lastLoadedStats: lastLoadedStats ?? this.lastLoadedStats,
       lastLoadedStatsSubscriptionId:
@@ -170,6 +183,9 @@ class NotificationState extends Equatable {
     deliveryActivityError,
     failedBatches,
     failedBatchesLoading,
+    failedBatchesLoadingMore,
+    failedBatchesHasMore,
+    failedBatchesPage,
     failedBatchesError,
     lastLoadedStats,
     lastLoadedStatsSubscriptionId,

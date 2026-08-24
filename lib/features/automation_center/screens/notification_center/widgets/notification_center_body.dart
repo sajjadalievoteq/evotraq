@@ -28,6 +28,29 @@ class NotificationCenterBody extends StatelessWidget {
   final VoidCallback onClearFilters;
   final VoidCallback onPrimaryAction;
 
+  /// Shared near-end handler for the outer workbench [CustomScrollView].
+  static bool handleOuterScroll(
+    BuildContext context,
+    ScrollNotification notification,
+    NotificationState state,
+  ) {
+    if (notification.metrics.axis != Axis.vertical) return false;
+    if (notification.metrics.extentAfter >= 400) return false;
+
+    final cubit = context.read<NotificationCubit>();
+    if (state.deliveryActivityHasMore &&
+        !state.deliveryActivityLoadingMore &&
+        !state.deliveryActivityLoading) {
+      cubit.loadMoreDeliveryActivity();
+    }
+    if (state.failedBatchesHasMore &&
+        !state.failedBatchesLoadingMore &&
+        !state.failedBatchesLoading) {
+      cubit.loadMoreFailedBatches();
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final loading =
@@ -75,7 +98,9 @@ class NotificationCenterBody extends StatelessWidget {
     if (filtered.isEmpty && state.failedBatches.isEmpty) {
       return EmptyDeliveryFeed(
         hasAnyEvents:
-            state.deliveryActivity.isNotEmpty || state.deliveryActivityHasMore,
+            state.deliveryActivity.isNotEmpty ||
+            state.deliveryActivityHasMore ||
+            state.failedBatchesHasMore,
         hasCounters: hasCounters,
         selectedFilter: selectedFilter,
         onClearFilters: onClearFilters,
@@ -111,7 +136,9 @@ class NotificationCenterBody extends StatelessWidget {
     if (timeline.isEmpty) {
       return EmptyDeliveryFeed(
         hasAnyEvents:
-            state.deliveryActivity.isNotEmpty || state.deliveryActivityHasMore,
+            state.deliveryActivity.isNotEmpty ||
+            state.deliveryActivityHasMore ||
+            state.failedBatchesHasMore,
         hasCounters: hasCounters,
         selectedFilter: selectedFilter,
         onClearFilters: onClearFilters,
@@ -120,56 +147,53 @@ class NotificationCenterBody extends StatelessWidget {
     }
 
     final showLoadMoreFooter =
-        state.deliveryActivityHasMore || state.deliveryActivityLoadingMore;
-    final itemCount = timeline.length + (showLoadMoreFooter ? 1 : 0);
+        state.deliveryActivityHasMore ||
+        state.deliveryActivityLoadingMore ||
+        state.failedBatchesHasMore ||
+        state.failedBatchesLoadingMore;
 
-    final list = ListView.builder(
-      shrinkWrap: shrinkWrap,
-      physics: shrinkWrap
-          ? const NeverScrollableScrollPhysics()
-          : const AlwaysScrollableScrollPhysics(),
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
-        if (index >= timeline.length) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: TraqSpacing.md),
-            child: Center(
-              child: state.deliveryActivityLoadingMore
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          );
-        }
-        return Padding(
+    final children = <Widget>[
+      for (var index = 0; index < timeline.length; index++)
+        Padding(
           padding: EdgeInsets.only(
             bottom: index == timeline.length - 1 && !showLoadMoreFooter
                 ? 0
                 : TraqSpacing.sm,
           ),
           child: timeline[index].child,
-        );
-      },
-    );
+        ),
+      if (showLoadMoreFooter)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: TraqSpacing.md),
+          child: Center(
+            child: (state.deliveryActivityLoadingMore ||
+                    state.failedBatchesLoadingMore)
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ),
+    ];
 
+    // Embedded workbench path: no nested scroll — outer CustomScrollView owns
+    // scrolling and load-more via [handleOuterScroll].
     if (shrinkWrap) {
-      return list;
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      );
     }
 
     return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification.metrics.extentAfter < 400 &&
-            state.deliveryActivityHasMore &&
-            !state.deliveryActivityLoadingMore &&
-            !state.deliveryActivityLoading) {
-          context.read<NotificationCubit>().loadMoreDeliveryActivity();
-        }
-        return false;
-      },
-      child: list,
+      onNotification: (notification) =>
+          handleOuterScroll(context, notification, state),
+      child: ListView(
+        children: children,
+      ),
     );
   }
 }

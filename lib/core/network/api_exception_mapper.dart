@@ -57,14 +57,22 @@ abstract final class ApiExceptionMapper {
     return data.toString();
   }
 
+  static const int _logBodyPreviewChars = 2048;
+
   static void _log(ApiException exception, {StackTrace? stackTrace}) {
+    if (!kDebugMode) return;
     debugPrint(
       '[ApiExceptionMapper] ApiException '
       'status=${exception.statusCode} code=${exception.code} '
       'message=${exception.message}',
     );
-    if (exception.responseBody != null && exception.responseBody!.isNotEmpty) {
-      debugPrint('[ApiExceptionMapper] responseBody: ${exception.responseBody}');
+    final body = exception.responseBody;
+    if (body != null && body.isNotEmpty) {
+      final preview = body.length <= _logBodyPreviewChars
+          ? body
+          : '${body.substring(0, _logBodyPreviewChars)}… '
+              '[truncated ${body.length - _logBodyPreviewChars} chars]';
+      debugPrint('[ApiExceptionMapper] responseBody: $preview');
     }
     if (stackTrace != null) {
       debugPrint('[ApiExceptionMapper] $stackTrace');

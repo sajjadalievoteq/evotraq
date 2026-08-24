@@ -381,6 +381,9 @@ class NotificationCubit extends Cubit<NotificationState> {
 
   Future<void> loadFailedBatches() => _activityController.loadFailedBatches();
 
+  Future<void> loadMoreFailedBatches() =>
+      _activityController.loadMoreFailedBatches();
+
   Future<void> retryBatch(String batchId) =>
       _activityController.retryBatch(batchId);
 

@@ -16,6 +16,7 @@ import 'package:traqtrace_app/features/automation_center/screens/automation_cent
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_inbound_panel.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_center_tab_content.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/notification_center_screen.dart';
+import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/notification_center_body.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/subscription_management_screen.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/automation_workbench_panel.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_panel.dart';
@@ -134,6 +135,17 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
             )
           : AutomationWorkbenchPanel(
               title: 'Outbound',
+              onScrollNotification: selected ==
+                      AutomationCenterSections.notificationActivity
+                  ? (notification) {
+                      final cubit = context.read<NotificationCubit>();
+                      return NotificationCenterBody.handleOuterScroll(
+                        context,
+                        notification,
+                        cubit.state,
+                      );
+                    }
+                  : null,
               actions: switch (selected) {
                 AutomationCenterSections.alertSubscriptions => [
                   IconButton(

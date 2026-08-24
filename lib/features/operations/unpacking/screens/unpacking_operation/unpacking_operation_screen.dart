@@ -273,7 +273,11 @@ class UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
 
       if (pharmaIssues.isNotEmpty && mounted) {
         setState(() => _isLoading = false);
-        await AggregationPharmaIssuesDialog.show(context, pharmaIssues);
+        await AggregationPharmaIssuesDialog.show(
+          context,
+          pharmaIssues,
+          blockedTitle: 'Unpacking Blocked — GS1 Compliance Issues',
+        );
         return;
       }
 

@@ -1,22 +1,40 @@
 import 'package:flutter/foundation.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 
-
-
+/// Shared session catalog for GLN pickers.
+///
+/// Prefers the lightweight `/picker-summaries` projection; falls back to the
+/// full paginated GLN list when that endpoint is unavailable.
 class GlnPickerCatalog {
   GlnPickerCatalog({required GLNService glnService}) : _glnService = glnService;
 
   final GLNService _glnService;
+
+  /// Soft advisory bound for diagnostics; catalog is not truncated so every
+  /// picker option remains available.
+  @visibleForTesting
+  static const int maxCachedEntriesAdvisory = 10000;
+
   List<GLN>? _cache;
+  List<GLN>? _activeCache;
   Future<List<GLN>>? _inFlight;
+  bool _usedSummaryEndpoint = false;
 
   List<GLN> get items => List.unmodifiable(_cache ?? const <GLN>[]);
 
   bool get isLoaded => _cache != null;
 
-  List<GLN> get activeItems =>
-      items.where((gln) => gln.active).toList(growable: false);
+  @visibleForTesting
+  bool get usedSummaryEndpoint => _usedSummaryEndpoint;
+
+  List<GLN> get activeItems {
+    if (_activeCache != null) return _activeCache!;
+    final filtered = items.where((gln) => gln.active).toList(growable: false);
+    _activeCache = filtered;
+    return filtered;
+  }
 
   Future<List<GLN>> ensureLoaded({bool forceRefresh = false}) async {
     if (!forceRefresh && _cache != null) {
@@ -34,9 +52,45 @@ class GlnPickerCatalog {
   }
 
   Future<List<GLN>> _fetch() async {
-    final glns = await _glnService.fetchAllGLNs();
-    _cache = List<GLN>.from(glns);
+    List<GLN> glns;
+    var usedSummary = false;
+    try {
+      glns = await _glnService.fetchPickerSummaries();
+      usedSummary = true;
+    } on ApiException catch (e) {
+      if (_isUnavailableSummaryEndpoint(e)) {
+        debugPrint(
+          '[GlnPickerCatalog] picker-summaries unavailable '
+          '(${e.statusCode}); falling back to full GLN list',
+        );
+        glns = await _glnService.fetchAllGLNs();
+      } else {
+        rethrow;
+      }
+    } catch (e) {
+      debugPrint(
+        '[GlnPickerCatalog] picker-summaries failed ($e); '
+        'falling back to full GLN list',
+      );
+      glns = await _glnService.fetchAllGLNs();
+    }
+
+    if (glns.length > maxCachedEntriesAdvisory) {
+      debugPrint(
+        '[GlnPickerCatalog] large catalog size=${glns.length} '
+        '(advisory bound $maxCachedEntriesAdvisory)',
+      );
+    }
+
+    _cache = List<GLN>.unmodifiable(glns);
+    _activeCache = null;
+    _usedSummaryEndpoint = usedSummary;
     return items;
+  }
+
+  bool _isUnavailableSummaryEndpoint(ApiException e) {
+    final code = e.statusCode;
+    return code == 404 || code == 405 || code == 501;
   }
 
   Future<void> preload() async {
@@ -51,7 +105,9 @@ class GlnPickerCatalog {
 
   void invalidate() {
     _cache = null;
+    _activeCache = null;
     _inFlight = null;
+    _usedSummaryEndpoint = false;
   }
 
   void clear() => invalidate();

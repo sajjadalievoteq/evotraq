@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:traqtrace_app/core/network/token_manager.dart';
@@ -402,10 +403,34 @@ class WebSocketService {
 
     _reconnectTimer = Timer(Duration(milliseconds: delayMs), () {
       if (!_isConnected && !_intentionalDisconnect) {
-        print('Attempting to reconnect... (attempt $_reconnectAttempts)');
+        _logReconnectAttempt(_reconnectAttempts);
         connect();
       }
     });
+  }
+
+  DateTime? _lastReconnectLogAt;
+  int _suppressedReconnectLogs = 0;
+
+  void _logReconnectAttempt(int attempt) {
+    if (!kDebugMode) return;
+    final now = DateTime.now();
+    final last = _lastReconnectLogAt;
+    if (last != null && now.difference(last) < const Duration(seconds: 15)) {
+      _suppressedReconnectLogs++;
+      return;
+    }
+    final suppressed = _suppressedReconnectLogs;
+    _suppressedReconnectLogs = 0;
+    _lastReconnectLogAt = now;
+    if (suppressed > 0) {
+      debugPrint(
+        'Attempting to reconnect... (attempt $attempt; '
+        'suppressed $suppressed identical logs)',
+      );
+    } else {
+      debugPrint('Attempting to reconnect... (attempt $attempt)');
+    }
   }
 
   void subscribeToNotifications(String subscriptionId) {

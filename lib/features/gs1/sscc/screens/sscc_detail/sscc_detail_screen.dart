@@ -83,7 +83,7 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
   SsccInputMode ssccInputMode = SsccInputMode.generate;
 
   UnitType unitType = UnitType.PALLET;
-  LogisticUnitStatus status = LogisticUnitStatus.DRAFT;
+  LogisticUnitStatus status = LogisticUnitStatus.ALLOCATED;
   ContentHomogeneity contentHomogeneity = ContentHomogeneity.UNKNOWN;
   List<String> serverTransitions = const [];
   List<SsccAggregationLink> aggregationLinks = const [];
@@ -112,7 +112,7 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
         widget.routeSsccCode == null ||
         widget.routeSsccCode!.isEmpty;
     initSsccDetailFields();
-    status = LogisticUnitStatus.DRAFT;
+    status = LogisticUnitStatus.ALLOCATED;
 
     if (!widget.embedded) {
       ssccCubit = SSCCCubit(ssccService: getIt<SSCCService>());

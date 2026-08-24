@@ -207,6 +207,8 @@ class DioService {
             }
           }
 
+          options.extra['dio_log_started_ms'] =
+              DateTime.now().millisecondsSinceEpoch;
           DioServiceLogger.logRequest(options);
           if (kDebugMode && options.uri.path.contains('/users/profile')) {
             _authDebugLog(options, null);

@@ -1,4 +1,3 @@
-
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
     as status_rules;
@@ -16,7 +15,9 @@ bool canManuallyEditSsccStatus(
   LogisticUnitStatus status, {
   bool isCreating = false,
 }) {
-  if (isCreating) return true;
+  // Create always persists ALLOCATED (or explicit draft via dedicated draft flows).
+  // Users must not pick ACTIVE / IN_TRANSIT / etc. on create.
+  if (isCreating) return false;
   return status == LogisticUnitStatus.DRAFT;
 }
 

@@ -5,8 +5,12 @@ import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 
-/// Shared Automation Center panel chrome: one outer scroll for title,
-/// instructions, and intrinsic-height body (no nested expand/scroll).
+/// Shared Automation Center panel chrome: one outer [CustomScrollView] for
+/// title, instructions, and body (no nested expand/scroll).
+///
+/// Prefer [bodySlivers] for large lists so rows stay lazily built. When only
+/// [child] is provided it is wrapped in a [SliverToBoxAdapter] (Tatmeen and
+/// compact panels).
 ///
 /// Text selection comes from the route-level [SelectionArea]. Nested
 /// [SelectionArea] widgets throw `_selectable == null`.
@@ -14,22 +18,30 @@ class AutomationWorkbenchPanel extends StatelessWidget {
   const AutomationWorkbenchPanel({
     super.key,
     required this.title,
-    required this.child,
+    this.child,
+    this.bodySlivers,
     this.instructions,
     this.actions = const [],
-    this.fillBody = false,
-  });
+    this.onScrollNotification,
+  }) : assert(
+          child != null || bodySlivers != null,
+          'Provide child and/or bodySlivers',
+        );
 
   final String title;
-  final Widget child;
+
+  /// Box content painted inside the card (non-virtualized).
+  final Widget? child;
+
+  /// Slivers contributed inside the card chrome (virtualized lists).
+  final List<Widget>? bodySlivers;
+
   final WorkbenchInstructions? instructions;
   final List<Widget> actions;
 
-  /// When true, the body card fills the remaining panel height. The header and
-  /// body participate in one coordinated right-pane scroll, so scrolling a
-  /// long body also scrolls the panel chrome instead of trapping the pointer
-  /// inside the card.
-  final bool fillBody;
+  /// Optional scroll hook for load-more (must be an ancestor listener use-case;
+  /// this also forwards notifications from the panel's [CustomScrollView]).
+  final bool Function(ScrollNotification notification)? onScrollNotification;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +77,6 @@ class AutomationWorkbenchPanel extends StatelessWidget {
       else
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
-
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(child: titleText),
@@ -82,41 +93,54 @@ class AutomationWorkbenchPanel extends StatelessWidget {
       ],
     ];
 
-    final card = Card(
-      elevation: 0,
+    final cardDecoration = ShapeDecoration(
+      color: colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(2),
         side: BorderSide(color: colors.border),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(padding: TraqSpacing.surfacePad, child: child),
     );
 
-    if (fillBody) {
-      return NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          SliverPadding(
-            padding: EdgeInsets.fromLTRB(
-              context.gutter,
-              context.gutter,
-              context.gutter,
-              0,
+    final innerSlivers = <Widget>[
+      ?SliverToBoxAdapter(child: child),
+      ...?bodySlivers,
+    ];
+
+    final scrollView = CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(pad, pad, pad, 0),
+          sliver: SliverList.list(children: header),
+        ),
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(pad, 0, pad, pad),
+          sliver: DecoratedSliver(
+            decoration: cardDecoration,
+            sliver: SliverPadding(
+              padding: TraqSpacing.surfacePad,
+              sliver: MultiSliver(children: innerSlivers),
             ),
-            sliver: SliverList.list(children: header),
-          ),
-        ],
-        body: Padding(
-          padding: EdgeInsets.fromLTRB(context.gutter, 0, context.gutter, 0),
-          child: Column(
-            children: [
-              Expanded(child: card),
-              SizedBox(height: context.gutter),
-            ],
           ),
         ),
-      );
-    }
+      ],
+    );
 
-    return ListView(padding: EdgeInsets.all(pad), children: [...header, card]);
+    if (onScrollNotification == null) return scrollView;
+    return NotificationListener<ScrollNotification>(
+      onNotification: onScrollNotification,
+      child: scrollView,
+    );
+  }
+}
+
+/// Groups heterogeneous slivers without requiring a package dependency.
+class MultiSliver extends StatelessWidget {
+  const MultiSliver({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverMainAxisGroup(slivers: children);
   }
 }

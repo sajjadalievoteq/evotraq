@@ -20,7 +20,7 @@ class TraqIcon extends StatelessWidget {
         DefaultTextStyle.of(context).style.color ??
         Theme.of(context).colorScheme.onSurface;
     return Padding(
-      padding: const EdgeInsets.all(5.0),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: SvgPicture.asset(
         asset,
         width: size,

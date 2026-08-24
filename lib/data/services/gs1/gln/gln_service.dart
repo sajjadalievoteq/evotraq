@@ -82,6 +82,62 @@ class GLNService {
     return all;
   }
 
+  /// Lightweight picker catalog. Falls through to caller on 404/unavailable.
+  Future<List<GLN>> fetchPickerSummaries() async {
+    final all = <GLN>[];
+    var page = 0;
+    while (true) {
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}${GlnMasterDataApiConsts.pickerSummaries}',
+        queryParameters: {
+          'page': page.toString(),
+          'size': PageResponseUtils.maxPageSize.toString(),
+          'sortBy': 'glnCode',
+          'direction': 'ASC',
+        },
+        headers: _headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 404 || response.statusCode == 405) {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: 'Picker summaries endpoint unavailable',
+          responseBody:
+              response.data is String ? response.data as String? : null,
+        );
+      }
+      if (response.statusCode != 200) {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: GlnApiMessages.failedToLoadGlns(response.statusMessage),
+          responseBody:
+              response.data is String ? response.data as String? : null,
+        );
+      }
+
+      final raw = PageResponseUtils.normalizeBody(json.decode(response.data));
+      final content = raw[GlnApiHttpConsts.jsonKeyContent];
+      if (content is! List) {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: GlnApiMessages.unexpectedListFormat,
+        );
+      }
+      for (final item in content) {
+        if (item is Map<String, dynamic>) {
+          all.add(GLN.fromJson(item));
+        } else if (item is Map) {
+          all.add(GLN.fromJson(Map<String, dynamic>.from(item)));
+        }
+      }
+      if (PageResponseUtils.isLast(raw)) break;
+      page++;
+    }
+    return all;
+  }
+
   Future<GLN> getGLNById(String id) async {
     final url = '${_dioService.baseUrl}${GlnMasterDataApiConsts.byCodePath(id)}';
 

@@ -37,7 +37,7 @@ class TatmeenStatCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  TraqIcon(iconAsset, size: 18, color: color),
+                  TraqIcon(iconAsset, size: 18, color: color,),
                   const SizedBox(width: TraqSpacing.xs),
                   Expanded(
                     child: Text(

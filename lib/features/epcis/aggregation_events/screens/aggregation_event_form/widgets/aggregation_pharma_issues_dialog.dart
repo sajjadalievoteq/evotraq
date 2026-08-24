@@ -7,21 +7,27 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
     super.key,
     required this.issues,
     this.allowProceed = false,
+    this.blockedTitle = 'Packing Blocked — GS1 Compliance Issues',
   });
 
   final List<String> issues;
   final bool allowProceed;
 
+  /// Shown when [allowProceed] is false (hard block).
+  final String blockedTitle;
+
   static Future<bool?> show(
     BuildContext context,
     List<String> issues, {
     bool allowProceed = false,
+    String blockedTitle = 'Packing Blocked — GS1 Compliance Issues',
   }) {
     return showDialog<bool>(
       context: context,
       builder: (_) => AggregationPharmaIssuesDialog(
         issues: issues,
         allowProceed: allowProceed,
+        blockedTitle: blockedTitle,
       ),
     );
   }
@@ -31,11 +37,7 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
     final theme = Theme.of(context);
     return AlertDialog(
       icon: TraqIcon(AppAssets.iconBlock, color: theme.colorScheme.error),
-      title: Text(
-        allowProceed
-            ? 'GS1 Compliance Issues'
-            : 'Packing Blocked — GS1 Compliance Issues',
-      ),
+      title: Text(allowProceed ? 'GS1 Compliance Issues' : blockedTitle),
       content: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

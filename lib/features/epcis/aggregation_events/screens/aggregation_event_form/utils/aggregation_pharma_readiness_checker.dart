@@ -38,20 +38,47 @@ class AggregationPharmaReadinessChecker {
     ItemStatus.ALLOCATED,
   };
 
+  static const _terminalSscc = {
+    LogisticUnitStatus.DECOMMISSIONED,
+    LogisticUnitStatus.VOIDED,
+  };
+
+  static const _terminalSgtin = {ItemStatus.DESTROYED, ItemStatus.STOLEN};
+
   Future<List<String>> findIssues({
     required String eventLocationGln,
     required String action,
     String? parentEpcUri,
     List<String> childEpcUris = const [],
   }) async {
-    if (action != 'ADD' && action != 'DELETE') return [];
+    if (action == 'ADD') {
+      return _findPackingIssues(
+        eventLocationGln: eventLocationGln,
+        parentEpcUri: parentEpcUri,
+        childEpcUris: childEpcUris,
+      );
+    }
+    if (action == 'DELETE') {
+      return _findUnpackingIssues(
+        eventLocationGln: eventLocationGln,
+        parentEpcUri: parentEpcUri,
+        childEpcUris: childEpcUris,
+      );
+    }
+    return [];
+  }
 
+  Future<List<String>> _findPackingIssues({
+    required String eventLocationGln,
+    String? parentEpcUri,
+    List<String> childEpcUris = const [],
+  }) async {
     final packingGln = AggregationEventFormValidators.parseGlnToCode(
       eventLocationGln.trim(),
     );
     final issues = <String>[];
 
-    await _checkOperatingGln(packingGln, issues);
+    await _checkOperatingGln(packingGln, issues, packing: true);
 
     SSCC? parentSscc;
     SGTIN? parentSgtin;
@@ -61,7 +88,7 @@ class AggregationPharmaReadinessChecker {
       if (type == 'sscc') {
         parentSscc = await _loadSscc(parentUri);
         if (parentSscc != null) {
-          _checkSsccParent(parentSscc, packingGln, issues);
+          _checkSsccParentForPacking(parentSscc, packingGln, issues);
         } else {
           issues.add(
             'The parent container ($parentUri) was not found in the system. '
@@ -71,7 +98,7 @@ class AggregationPharmaReadinessChecker {
       } else if (type == 'sgtin') {
         parentSgtin = await _loadSgtin(parentUri);
         if (parentSgtin != null) {
-          _checkSgtinParent(parentSgtin, packingGln, issues);
+          _checkSgtinParentForPacking(parentSgtin, packingGln, issues);
         } else {
           final serial = Gs1Converter.epcToSerial(parentUri);
           issues.add(
@@ -101,7 +128,7 @@ class AggregationPharmaReadinessChecker {
       final child = await _loadSgtin(childUri);
       if (child == null) continue;
 
-      _checkSgtinChild(
+      _checkSgtinChildForPacking(
         child,
         childUri,
         packingGln,
@@ -114,27 +141,169 @@ class AggregationPharmaReadinessChecker {
     return issues;
   }
 
+  Future<List<String>> _findUnpackingIssues({
+    required String eventLocationGln,
+    String? parentEpcUri,
+    List<String> childEpcUris = const [],
+  }) async {
+    final unpackingGln = AggregationEventFormValidators.parseGlnToCode(
+      eventLocationGln.trim(),
+    );
+    final issues = <String>[];
+
+    await _checkOperatingGln(unpackingGln, issues, packing: false);
+
+    final parentUri = _resolveEpcUri(parentEpcUri);
+    if (parentUri == null) {
+      issues.add(
+        'A parent container is required for unpacking. '
+        'Scan or enter the SSCC or case serial you are unpacking from.',
+      );
+      return issues;
+    }
+
+    SSCC? parentSscc;
+    SGTIN? parentSgtin;
+    final type = Gs1Converter.epcType(parentUri);
+    if (type == 'sscc') {
+      parentSscc = await _loadSscc(parentUri);
+      if (parentSscc == null) {
+        issues.add(
+          'The parent container ($parentUri) was not found in the system. '
+          'Confirm the SSCC is registered before unpacking from it.',
+        );
+        return issues;
+      }
+      if (_terminalSscc.contains(parentSscc.status)) {
+        issues.add(
+          'The container (SSCC: ${parentSscc.ssccCode}) cannot be unpacked because its status is "${parentSscc.status.name}". '
+          'Voided or decommissioned containers cannot be unpacked.',
+        );
+        return issues;
+      }
+    } else if (type == 'sgtin') {
+      parentSgtin = await _loadSgtin(parentUri);
+      if (parentSgtin == null) {
+        final serial = Gs1Converter.epcToSerial(parentUri);
+        issues.add(
+          'The parent item${serial != null ? ' (Serial: $serial)' : ''} was not found in the system. '
+          'Confirm the serial is commissioned before unpacking from it.',
+        );
+        return issues;
+      }
+      if (_terminalSgtin.contains(parentSgtin.status)) {
+        issues.add(
+          'The parent item (Serial: ${parentSgtin.serialNumber}) cannot be unpacked because its status is "${parentSgtin.status.name}".',
+        );
+        return issues;
+      }
+    }
+
+    Set<String>? activeChildEpcs;
+    if (parentSscc != null) {
+      try {
+        final links = await _ssccService.getAggregationLinksByCode(
+          parentSscc.ssccCode,
+        );
+        activeChildEpcs = {
+          for (final link in links)
+            if (link.disaggregatedAt == null && link.active)
+              ..._childIdentityKeys(link.childEpc),
+        };
+      } catch (_) {
+        issues.add(
+          'Could not verify active aggregation for the parent container. '
+          'Confirm the selected children are packed under this container before unpacking.',
+        );
+        return issues;
+      }
+    } else if (parentSgtin != null) {
+      activeChildEpcs = {
+        for (final child in parentSgtin.childEpcs) ..._childIdentityKeys(child),
+      };
+    }
+
+    for (final rawChild in childEpcUris) {
+      final childUri = _resolveEpcUri(rawChild);
+      if (childUri == null) continue;
+      final childType = Gs1Converter.epcType(childUri);
+
+      if (childType == 'sgtin') {
+        final child = await _loadSgtin(childUri);
+        if (child == null) {
+          issues.add(
+            'Item $childUri was not found in the system. '
+            'Confirm the product serial exists before unpacking it.',
+          );
+          continue;
+        }
+        if (_terminalSgtin.contains(child.status)) {
+          issues.add(
+            'Item $childUri cannot be unpacked because its status is "${child.status.name}".',
+          );
+          continue;
+        }
+        if (activeChildEpcs != null &&
+            !_isContainedInActiveSet(childUri, activeChildEpcs)) {
+          issues.add(
+            'Item $childUri is not currently aggregated under the selected parent. '
+            'Only items that are actively packed in this container can be unpacked.',
+          );
+        }
+        continue;
+      }
+
+      if (childType == 'sscc') {
+        final childSscc = await _loadSscc(childUri);
+        if (childSscc == null) {
+          issues.add('Child container $childUri was not found in the system.');
+          continue;
+        }
+        if (_terminalSscc.contains(childSscc.status)) {
+          issues.add(
+            'Child container (SSCC: ${childSscc.ssccCode}) cannot be unpacked because its status is "${childSscc.status.name}".',
+          );
+          continue;
+        }
+        if (activeChildEpcs != null &&
+            !_isContainedInActiveSet(childUri, activeChildEpcs)) {
+          issues.add(
+            'Child container $childUri is not currently aggregated under the selected parent.',
+          );
+        }
+      }
+    }
+
+    return issues;
+  }
+
   Future<void> _checkOperatingGln(
-    String packingGln,
-    List<String> issues,
-  ) async {
+    String glnCode,
+    List<String> issues, {
+    required bool packing,
+  }) async {
+    final role = packing ? 'packing location' : 'unpacking location';
     try {
-      final gln = await _glnService.getGLNByCode(packingGln);
+      final gln = await _glnService.getGLNByCode(glnCode);
       if (!gln.active) {
         issues.add(
-          'The packing location (GLN: $packingGln) is not active. '
+          'The $role (GLN: $glnCode) is not active. '
           'Ask your administrator to activate this location in master data before proceeding.',
         );
       }
     } catch (_) {
       issues.add(
-        'The packing location (GLN: $packingGln) is not registered in the system. '
+        'The $role (GLN: $glnCode) is not registered in the system. '
         'Ask your administrator to add this location to master data.',
       );
     }
   }
 
-  void _checkSsccParent(SSCC parent, String packingGln, List<String> issues) {
+  void _checkSsccParentForPacking(
+    SSCC parent,
+    String packingGln,
+    List<String> issues,
+  ) {
     if (parent.commissionedAt == null &&
         parent.status == LogisticUnitStatus.DRAFT) {
       issues.add(
@@ -165,7 +334,11 @@ class AggregationPharmaReadinessChecker {
     }
   }
 
-  void _checkSgtinParent(SGTIN parent, String packingGln, List<String> issues) {
+  void _checkSgtinParentForPacking(
+    SGTIN parent,
+    String packingGln,
+    List<String> issues,
+  ) {
     if (parent.commissionedAt == null ||
         _uncommissionedSgtin.contains(parent.status)) {
       issues.add(
@@ -194,7 +367,7 @@ class AggregationPharmaReadinessChecker {
     }
   }
 
-  void _checkSgtinChild(
+  void _checkSgtinChildForPacking(
     SGTIN child,
     String childEpc,
     String packingGln,
@@ -243,6 +416,22 @@ class AggregationPharmaReadinessChecker {
         'The item and container must be at the same location.',
       );
     }
+  }
+
+  Set<String> _childIdentityKeys(String epc) {
+    final resolved = _resolveEpcUri(epc) ?? epc.trim();
+    final keys = <String>{resolved, epc.trim()};
+    final serial = Gs1Converter.epcToSerial(resolved);
+    final gtin = Gs1Converter.epcToGTIN(resolved);
+    if (serial != null) keys.add(serial);
+    if (gtin != null && serial != null) keys.add('$gtin|$serial');
+    final sscc = Gs1CanonicalIdentifier.extractSscc18(resolved);
+    if (sscc != null) keys.add(sscc);
+    return keys;
+  }
+
+  bool _isContainedInActiveSet(String childUri, Set<String> activeChildEpcs) {
+    return _childIdentityKeys(childUri).any(activeChildEpcs.contains);
   }
 
   Future<SSCC?> _loadSscc(String epcUri) async {

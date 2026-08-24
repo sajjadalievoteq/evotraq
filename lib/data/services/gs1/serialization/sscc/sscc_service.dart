@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/page_response_utils.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
@@ -491,5 +492,33 @@ class SSCCService {
         responseBody: response.data is String ? response.data as String : null,
       );
     }
+  }
+
+  Future<List<SsccAggregationLink>> getAggregationLinksByCode(
+    String ssccCode,
+  ) async {
+    final response = await dioService.get(
+      '${dioService.baseUrl}${SsccServiceConstants.pathAggregationByCode}',
+      queryParameters: {SsccServiceConstants.qSsccCode: ssccCode},
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == SsccServiceConstants.statusOk) {
+      final List<dynamic> data = json.decode(response.data);
+      return data
+          .map(
+            (item) =>
+                SsccAggregationLink.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
+    }
+
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Failed to load aggregation links: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String : null,
+    );
   }
 }

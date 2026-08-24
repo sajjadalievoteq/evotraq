@@ -129,7 +129,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       groupCardTitle: 'Add Items to Pack',
       pageHeaderTitle: 'Scan Items to Pack',
       pageHeaderSubtitle:
-      'Scan the items to be packed into container: ${_parentContainerId ?? 'Unknown'}',
+          'Scan the items to be packed into container: ${_parentContainerId ?? 'Unknown'}',
       scannedListTitle: 'Scanned Items (${_scannedEPCs.length})',
       scannedQueuedLabel: 'to pack',
       hierarchyScreenTitle: 'Packing Hierarchy',
@@ -189,9 +189,10 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
     switch (_currentStep) {
       case 0:
-        final referenceError = PackingOperationStepValidator.validateReferenceStep(
-          packingLocationGln: _packingLocationGLN,
-        );
+        final referenceError =
+            PackingOperationStepValidator.validateReferenceStep(
+              packingLocationGln: _packingLocationGLN,
+            );
         if (referenceError != null) {
           if (referenceError.contains('GLN')) {
             setState(() => _packingLocationGLNError = referenceError);
@@ -201,15 +202,18 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
           return false;
         }
         final containerError =
-        PackingOperationStepValidator.validateContainerStep(_parentContainerId);
+            PackingOperationStepValidator.validateContainerStep(
+              _parentContainerId,
+            );
         if (containerError != null) {
           context.showError(containerError);
           return false;
         }
         return true;
       case 1:
-        final itemsError =
-        PackingOperationStepValidator.validateItemsStep(_scannedEPCs);
+        final itemsError = PackingOperationStepValidator.validateItemsStep(
+          _scannedEPCs,
+        );
         if (itemsError != null) {
           context.showError(itemsError);
           return false;
@@ -227,11 +231,11 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
     try {
       final packingService = getIt<PackingOperationService>();
-      final conversionResult =
-      Gs1Converter.barcodeBatchToEpc(_scannedEPCs);
+      final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEPCs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-      final failedConversions =
-      List<String>.from(conversionResult['failed'] ?? []);
+      final failedConversions = List<String>.from(
+        conversionResult['failed'] ?? [],
+      );
 
       if (failedConversions.isNotEmpty) {
         context.showError(
@@ -248,8 +252,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       }
 
       final containerEpc =
-          Gs1Converter.barcodeToEpc(_parentContainerId!) ??
-              _parentContainerId!;
+          Gs1Converter.barcodeToEpc(_parentContainerId!) ?? _parentContainerId!;
 
       _pharmaReadinessChecker ??= AggregationPharmaReadinessChecker(
         glnService: getIt<GLNService>(),
@@ -266,7 +269,11 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
       if (pharmaIssues.isNotEmpty && mounted) {
         setState(() => _isLoading = false);
-        await AggregationPharmaIssuesDialog.show(context, pharmaIssues);
+        await AggregationPharmaIssuesDialog.show(
+          context,
+          pharmaIssues,
+          blockedTitle: 'Packing Blocked — GS1 Compliance Issues',
+        );
         return;
       }
 
@@ -275,7 +282,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         childEpcs: epcUris,
         packingLocationGLN: _packingLocationGLN!.glnCode,
         operationLocation: OperationGlnDisplay.fromGln(_packingLocationGLN),
-        
+
         readPointGLN: _packingLocationGLN!.glnCode,
         closeContainer: _closeContainer,
         workOrderNumber: _workOrderController.text.trim().isNotEmpty
@@ -290,19 +297,18 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         eventTime: _eventTime,
       );
 
-      final response =
-      await packingService.createPackingOperation(packingRequest);
+      final response = await packingService.createPackingOperation(
+        packingRequest,
+      );
 
       if (response.isSuccessOrPartial) {
         if (response.status == OperationStatus.partialSuccess) {
           context.showSuccess(
             'Packing submitted with warnings — some items were not processed. '
-                'Open the operation record to see which items need attention.',
+            'Open the operation record to see which items need attention.',
           );
         } else {
-          context.showSuccess(
-            'Packing operation completed successfully.',
-          );
+          context.showSuccess('Packing operation completed successfully.');
         }
         if (mounted) {
           popOrGo(context, Constants.opPackingRoute);
@@ -353,14 +359,14 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     final outcome = result.outcome;
     if (!outcome.success) {
       context.showError(
-        outcome.errorMessage ??
-            PackingStepValidationMessages.itemAddFallback,
+        outcome.errorMessage ?? PackingStepValidationMessages.itemAddFallback,
       );
       return false;
     }
 
-    final epcError =
-        AggregationEventFormValidators.validateChildEpcEntry(outcome.rawBarcode);
+    final epcError = AggregationEventFormValidators.validateChildEpcEntry(
+      outcome.rawBarcode,
+    );
     if (epcError != null) {
       context.showError(PackingStepValidationMessages.invalidItemEpc);
       return false;
@@ -389,9 +395,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       return;
     }
 
-    setState(
-      () => _parentContainerId = parentContainerIdFromParsed(result),
-    );
+    setState(() => _parentContainerId = parentContainerIdFromParsed(result));
   }
 
   @override
@@ -414,7 +418,10 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
                 showLocationSection: false,
                 showProductionSection: false,
               ),
-              itemsStep: _itemScanStep(embeddedInPanel: true, fillHeight: false),
+              itemsStep: _itemScanStep(
+                embeddedInPanel: true,
+                fillHeight: false,
+              ),
             ),
             reviewStep: _reviewStep(embeddedInPanel: true),
             onSubmit: _submitPackingOperation,
@@ -434,11 +441,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
           onSubmit: _submitPackingOperation,
           appBarTitle: 'Packing Operation',
           submitLabel: 'Create Packing Operation',
-          stepPages: [
-            _referenceDetailsStep(),
-            _itemScanStep(),
-            _reviewStep(),
-          ],
+          stepPages: [_referenceDetailsStep(), _itemScanStep(), _reviewStep()],
         );
       },
     );

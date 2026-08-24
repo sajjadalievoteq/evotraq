@@ -249,36 +249,47 @@ class _InboundApiCatalogState extends State<InboundApiCatalog> {
                   ),
                 ],
               ),
+              SizedBox(height: TraqSpacing.md,),
               ...selected.endpoints.map(
-                (endpoint) => ExpansionTile(
-                  tilePadding: EdgeInsets.zero,
-                  title: Text(
-                    '${endpoint.method}  ${buildCatalogExampleUrl(endpoint)}',
-                  ),
-                  subtitle: Text(endpoint.description),
-                  childrenPadding: const EdgeInsets.fromLTRB(
-                    TraqSpacing.md,
-                    0,
-                    TraqSpacing.md,
-                    TraqSpacing.md,
-                  ),
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: SelectableText(
-                        'Request\n${formatCatalogRequestExample(endpoint)}\n\n'
-                        'Response\n${endpoint.expectedResult.displayText}',
-                      ),
+                (endpoint) => Padding(
+                  padding:  EdgeInsets.only(bottom: TraqSpacing.md),
+                  child: ExpansionTile(
+
+                          shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          ),
+                    collapsedShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () => _copy(context, endpoint),
-                        icon: const Icon(Icons.copy),
-                        label: const Text('Copy as curl'),
-                      ),
+                    collapsedBackgroundColor: context.colors.primary.withValues(alpha: 0.1),
+                    title: Text(
+                      '${endpoint.method}  ${buildCatalogExampleUrl(endpoint)}',
                     ),
-                  ],
+                    subtitle: Text(endpoint.description),
+                    childrenPadding: const EdgeInsets.fromLTRB(
+                      TraqSpacing.md,
+                      0,
+                      TraqSpacing.md,
+                      TraqSpacing.md,
+                    ),
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: SelectableText(
+                          'Request\n${formatCatalogRequestExample(endpoint)}\n\n'
+                          'Response\n${endpoint.expectedResult.displayText}',
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => _copy(context, endpoint),
+                          icon: const Icon(Icons.copy),
+                          label: const Text('Copy as curl'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

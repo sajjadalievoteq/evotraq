@@ -65,6 +65,8 @@ class AutomationWorkbenchPanel extends StatelessWidget {
       else
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
+
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(child: titleText),
             if (actions.isNotEmpty) ...[

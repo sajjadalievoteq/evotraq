@@ -15,6 +15,7 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
   final workerPool = dashboardData['workerPool'] as Map<String, dynamic>? ?? {};
   final priorityRaw = dashboardData['priorityDistribution'] as Map? ?? {};
   final typeRaw = dashboardData['jobTypeDistribution'] as Map? ?? {};
+  final subscriptionRuns = dashboardData['subscriptionRuns'] as Map? ?? {};
 
   final priority = <String, int>{
     for (final e in priorityRaw.entries)
@@ -48,14 +49,18 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
     utilization = utilRaw.toDouble() > 1 ? utilRaw / 100.0 : utilRaw.toDouble();
   }
 
-  final failed = jobHistory
+  final failedFromHistory = jobHistory
       .where((j) => '${j['status']}'.toUpperCase() == 'FAILED')
       .length;
   final completedFromHistory = jobHistory
       .where((j) => '${j['status']}'.toUpperCase() == 'COMPLETED')
       .length;
   final completed =
-      (dashboardData['completedJobs'] as num?)?.toInt() ?? completedFromHistory;
+      (subscriptionRuns['completed'] as num?)?.toInt() ??
+      (dashboardData['completedJobs'] as num?)?.toInt() ??
+      completedFromHistory;
+  final failed =
+      (subscriptionRuns['failed'] as num?)?.toInt() ?? failedFromHistory;
 
   final issues =
       (queueHealth['issues'] as List?)?.map((e) => '$e').toList() ??
@@ -68,9 +73,13 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
         queueHealth['processingPaused'] as bool? ??
         false,
     queuedJobs:
-        (dashboardData['queuedJobs'] as num?)?.toInt() ?? queuedJobs.length,
+        (subscriptionRuns['queued'] as num?)?.toInt() ??
+        (dashboardData['queuedJobs'] as num?)?.toInt() ??
+        queuedJobs.length,
     activeJobs:
-        (dashboardData['activeJobs'] as num?)?.toInt() ?? activeJobs.length,
+        (subscriptionRuns['active'] as num?)?.toInt() ??
+        (dashboardData['activeJobs'] as num?)?.toInt() ??
+        activeJobs.length,
     completedJobs: completed,
     failedJobs: failed,
     workerActive: workerActive,

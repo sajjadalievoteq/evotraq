@@ -18,20 +18,34 @@ class SubscriptionMasterList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A shrink-wrapped ListView is a viewport and cannot report intrinsic dimensions. The
+    // embedded desktop master/detail layout uses IntrinsicHeight so both panes remain equal
+    // height; use ordinary box children in that mode while preserving the exact row spacing.
+    if (shrinkWrap) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var index = 0; index < subscriptions.length; index++) ...[
+            if (index > 0) const SizedBox(height: TraqSpacing.sm),
+            _buildRow(subscriptions[index]),
+          ],
+        ],
+      );
+    }
+
     return ListView.separated(
-      shrinkWrap: shrinkWrap,
-      physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
       padding: EdgeInsets.zero,
       itemCount: subscriptions.length,
       separatorBuilder: (_, _) => const SizedBox(height: TraqSpacing.sm),
-      itemBuilder: (context, index) {
-        final sub = subscriptions[index];
-        return SubscriptionMasterRow(
-          subscription: sub,
-          selected: sub.id == selectedId,
-          onTap: () => onSelected(sub),
-        );
-      },
+      itemBuilder: (context, index) => _buildRow(subscriptions[index]),
+    );
+  }
+
+  Widget _buildRow(NotificationSubscription subscription) {
+    return SubscriptionMasterRow(
+      subscription: subscription,
+      selected: subscription.id == selectedId,
+      onTap: () => onSelected(subscription),
     );
   }
 }

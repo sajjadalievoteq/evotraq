@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/widgets/skeleton_box.dart';
 
@@ -11,7 +12,6 @@ class UserApprovalsHeaderSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final r = TraqRadius.md.x.toDouble();
-
     return Card(
       elevation: 1,
       child: Padding(

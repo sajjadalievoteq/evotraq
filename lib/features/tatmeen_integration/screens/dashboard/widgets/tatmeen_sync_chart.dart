@@ -25,8 +25,6 @@ class TatmeenSyncChart extends StatelessWidget {
   final String? error;
   final VoidCallback onRetry;
 
-  static const _yInterval = 100.0;
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const TatmeenChartSkeleton();
@@ -46,13 +44,12 @@ class TatmeenSyncChart extends StatelessWidget {
       );
     }
 
-    var peak = 0.0;
+    var totalItems = 0;
     final bars = <BarChartGroupData>[];
     for (var i = 0; i < data.length; i++) {
       final successful = data[i].successful.toDouble();
       final failed = data[i].failed.toDouble();
-      if (successful > peak) peak = successful;
-      if (failed > peak) peak = failed;
+      totalItems += data[i].successful + data[i].failed;
       bars.add(
         BarChartGroupData(
           x: i,
@@ -69,10 +66,8 @@ class TatmeenSyncChart extends StatelessWidget {
       );
     }
 
-    final maxY = ((peak / _yInterval).ceil() * _yInterval).clamp(
-      _yInterval,
-      double.infinity,
-    );
+    final maxY = totalItems.clamp(1, 0x7fffffff).toDouble();
+    final yInterval = maxY <= 5 ? 1.0 : (maxY / 4).ceilToDouble();
     const dateTickCount = 6;
     final lastIndex = data.length - 1;
     final dateLabelIndexes = <int>{
@@ -108,7 +103,7 @@ class TatmeenSyncChart extends StatelessWidget {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  horizontalInterval: _yInterval,
+                  horizontalInterval: yInterval,
                 ),
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(
@@ -116,11 +111,12 @@ class TatmeenSyncChart extends StatelessWidget {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 32,
-                      interval: _yInterval,
+                      interval: yInterval,
                       minIncluded: true,
-                      maxIncluded: false,
+                      maxIncluded: true,
                       getTitlesWidget: (value, meta) {
-                        if ((value % _yInterval).abs() > 0.01) {
+                        final isMaximum = (value - maxY).abs() < 0.01;
+                        if (!isMaximum && (value % yInterval).abs() > 0.01) {
                           return const SizedBox.shrink();
                         }
                         return Text(

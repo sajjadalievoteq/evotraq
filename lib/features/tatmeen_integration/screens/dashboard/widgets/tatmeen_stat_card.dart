@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_widgets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/features/tatmeen_integration/screens/dashboard/utils/tatmeen_dashboard_layout.dart';
 
 class TatmeenStatCard extends StatelessWidget {
   const TatmeenStatCard({
@@ -13,6 +12,7 @@ class TatmeenStatCard extends StatelessWidget {
     required this.value,
     required this.iconAsset,
     required this.color,
+    required this.width,
     this.trend,
     this.onTap,
   });
@@ -21,13 +21,14 @@ class TatmeenStatCard extends StatelessWidget {
   final String value;
   final String iconAsset;
   final Color color;
+  final double width;
   final double? trend;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: tatmeenKpiCardWidth(context),
+      width: width,
       child: InkWell(
         onTap: onTap,
         borderRadius: TraqRadius.card,
@@ -37,7 +38,7 @@ class TatmeenStatCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  TraqIcon(iconAsset, size: 18, color: color,),
+                  TraqIcon(iconAsset, size: 18, color: color),
                   const SizedBox(width: TraqSpacing.xs),
                   Expanded(
                     child: Text(

@@ -41,18 +41,15 @@ class UseTatmeenDashboard extends ChangeNotifier {
       notifyListeners();
     }
     try {
-      final results = await Future.wait([
-        _service.getTatmeenDashboardStats(),
-        _service.getTatmeenChartData(days: 30),
-        _service.getTatmeenStatusBreakdown(),
-        _service.getTatmeenRecentActivity(limit: 10),
-        _service.getTatmeenErrorSummary(),
-      ]);
-      stats = results[0] as TatmeenDashboardStats;
-      chartData = results[1] as List<TatmeenChartPoint>;
-      breakdown = results[2] as TatmeenStatusBreakdown;
-      recentActivity = results[3] as List<TatmeenSyncEvent>;
-      errorSummary = results[4] as List<TatmeenErrorSummaryItem>;
+      final dashboard = await _service.getTatmeenDashboard(
+        days: 30,
+        activityLimit: 10,
+      );
+      stats = dashboard.stats;
+      chartData = dashboard.chartData;
+      breakdown = dashboard.breakdown;
+      recentActivity = dashboard.recentActivity;
+      errorSummary = dashboard.errorSummary;
       error = null;
       _initialLoaded = true;
     } catch (e) {

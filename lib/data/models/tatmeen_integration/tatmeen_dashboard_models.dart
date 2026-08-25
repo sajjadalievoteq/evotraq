@@ -1,5 +1,58 @@
 import 'package:equatable/equatable.dart';
 
+class TatmeenDashboardData extends Equatable {
+  const TatmeenDashboardData({
+    required this.stats,
+    required this.chartData,
+    required this.breakdown,
+    required this.recentActivity,
+    required this.errorSummary,
+  });
+
+  final TatmeenDashboardStats stats;
+  final List<TatmeenChartPoint> chartData;
+  final TatmeenStatusBreakdown breakdown;
+  final List<TatmeenSyncEvent> recentActivity;
+  final List<TatmeenErrorSummaryItem> errorSummary;
+
+  factory TatmeenDashboardData.fromJson(Map<String, dynamic> json) {
+    return TatmeenDashboardData(
+      stats: TatmeenDashboardStats.fromJson(
+        Map<String, dynamic>.from(json['stats'] as Map),
+      ),
+      chartData: _list(json['chartData'], TatmeenChartPoint.fromJson),
+      breakdown: TatmeenStatusBreakdown.fromJson(
+        Map<String, dynamic>.from(json['breakdown'] as Map),
+      ),
+      recentActivity: _list(json['recentActivity'], TatmeenSyncEvent.fromJson),
+      errorSummary: _list(
+        json['errorSummary'],
+        TatmeenErrorSummaryItem.fromJson,
+      ),
+    );
+  }
+
+  static List<T> _list<T>(
+    Object? value,
+    T Function(Map<String, dynamic>) fromJson,
+  ) {
+    if (value is! List) return const [];
+    return [
+      for (final item in value)
+        if (item is Map) fromJson(Map<String, dynamic>.from(item)),
+    ];
+  }
+
+  @override
+  List<Object?> get props => [
+    stats,
+    chartData,
+    breakdown,
+    recentActivity,
+    errorSummary,
+  ];
+}
+
 class TatmeenDashboardStats extends Equatable {
   const TatmeenDashboardStats({
     required this.totalSynced,
@@ -30,9 +83,7 @@ class TatmeenDashboardStats extends Equatable {
       successfulTrendPct: _double(json['successfulTrendPct']),
       failedTrendPct: _double(json['failedTrendPct']),
       pendingTrendPct: _double(json['pendingTrendPct']),
-      lastSyncedAt: DateTime.parse(
-        json['lastSyncedAt'] as String,
-      ).toLocal(),
+      lastSyncedAt: DateTime.parse(json['lastSyncedAt'] as String).toLocal(),
     );
   }
 

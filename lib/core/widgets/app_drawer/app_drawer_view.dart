@@ -329,110 +329,110 @@ class AppDrawerView extends StatelessWidget {
                           ],
                         ),
 
-                        // TraqExpansionTile(
-                        //   leading: AppDrawerNavigationIcon(
-                        //     NavIcons.systemTools,
-                        //   ),
-                        //   title: const Text('System Tools'),
-                        //   children: [
-                        //     ListTile(
-                        //       leading: AppDrawerNavigationIcon(
-                        //         NavIcons.systemSettings,
-                        //       ),
-                        //       title: const Text('System Settings'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () =>
-                        //           onNavigate(Constants.adminSettingsRoute),
-                        //     ),
-                        //     ListTile(
-                        //       leading: AppDrawerNavigationIcon(
-                        //         NavIcons.cacheManagement,
-                        //       ),
-                        //       title: const Text('Cache Management'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () =>
-                        //           onNavigate(Constants.adminCacheRoute),
-                        //     ),
-                        //     ListTile(
-                        //       leading: AppDrawerNavigationIcon(
-                        //         NavIcons.performanceTests,
-                        //       ),
-                        //       title: const Text('Performance Tests'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () => onNavigate(
-                        //         Constants.adminPerformanceTestsRoute,
-                        //       ),
-                        //     ),
-                        //     ListTile(
-                        //       leading: AppDrawerNavigationIcon(
-                        //         NavIcons.performanceOptimization,
-                        //       ),
-                        //       title: const Text('Performance Optimization'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () => onNavigate(
-                        //         Constants.adminPerformanceOptimizationRoute,
-                        //       ),
-                        //     ),
-                        //     ListTile(
-                        //       leading: AppDrawerNavigationIcon(
-                        //         NavIcons.systemMonitoring,
-                        //       ),
-                        //       title: const Text('System Monitoring'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () =>
-                        //           onNavigate(Constants.adminMonitoringRoute),
-                        //     ),
-                        //     ListTile(
-                        //       leading: AppDrawerNavigationIcon(
-                        //         NavIcons.databasePartitioning,
-                        //       ),
-                        //       title: const Text('Database Partitioning'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () => onNavigate(
-                        //         Constants.adminDatabasePartitioningRoute,
-                        //       ),
-                        //     ),
-                        //     ListTile(
-                        //       leading: AppDrawerNavigationIcon(
-                        //         NavIcons.dataConsistencyIntegrity,
-                        //       ),
-                        //       title: const Text('Data Consistency & Integrity'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () => onNavigate(
-                        //         Constants.adminDataConsistencyIntegrityRoute,
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-                        //
-                        // TraqExpansionTile(
-                        //   leading: AppDrawerNavigationIcon(
-                        //     NavIcons.testDataGeneration,
-                        //   ),
-                        //   title: const Text('Test Data Generation'),
-                        //   children: [
-                        //     ListTile(
-                        //       leading: AppDrawerNavigationIcon(
-                        //         NavIcons.eventGenerationTests,
-                        //       ),
-                        //       title: const Text('Event Generation Tests'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () => onNavigate(
-                        //         Constants.adminEventGenerationTestRoute,
-                        //       ),
-                        //     ),
-                        //     ListTile(
-                        //       leading: AppDrawerNavigationIcon(
-                        //         NavIcons.industryTestData,
-                        //       ),
-                        //       title: const Text('Industry Test Data'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () => onNavigate(
-                        //         Constants.adminIndustryTestDataRoute,
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
+                        TraqExpansionTile(
+                          leading: AppDrawerNavigationIcon(
+                            NavIcons.systemTools,
+                          ),
+                          title: const Text('System Tools'),
+                          children: [
+                            ListTile(
+                              leading: AppDrawerNavigationIcon(
+                                NavIcons.systemSettings,
+                              ),
+                              title: const Text('System Settings'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () =>
+                                  onNavigate(Constants.adminSettingsRoute),
+                            ),
+                            ListTile(
+                              leading: AppDrawerNavigationIcon(
+                                NavIcons.cacheManagement,
+                              ),
+                              title: const Text('Cache Management'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () =>
+                                  onNavigate(Constants.adminCacheRoute),
+                            ),
+                            ListTile(
+                              leading: AppDrawerNavigationIcon(
+                                NavIcons.performanceTests,
+                              ),
+                              title: const Text('Performance Tests'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => onNavigate(
+                                Constants.adminPerformanceTestsRoute,
+                              ),
+                            ),
+                            ListTile(
+                              leading: AppDrawerNavigationIcon(
+                                NavIcons.performanceOptimization,
+                              ),
+                              title: const Text('Performance Optimization'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => onNavigate(
+                                Constants.adminPerformanceOptimizationRoute,
+                              ),
+                            ),
+                            ListTile(
+                              leading: AppDrawerNavigationIcon(
+                                NavIcons.systemMonitoring,
+                              ),
+                              title: const Text('System Monitoring'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () =>
+                                  onNavigate(Constants.adminMonitoringRoute),
+                            ),
+                            ListTile(
+                              leading: AppDrawerNavigationIcon(
+                                NavIcons.databasePartitioning,
+                              ),
+                              title: const Text('Database Partitioning'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => onNavigate(
+                                Constants.adminDatabasePartitioningRoute,
+                              ),
+                            ),
+                            ListTile(
+                              leading: AppDrawerNavigationIcon(
+                                NavIcons.dataConsistencyIntegrity,
+                              ),
+                              title: const Text('Data Consistency & Integrity'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => onNavigate(
+                                Constants.adminDataConsistencyIntegrityRoute,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        TraqExpansionTile(
+                          leading: AppDrawerNavigationIcon(
+                            NavIcons.testDataGeneration,
+                          ),
+                          title: const Text('Test Data Generation'),
+                          children: [
+                            ListTile(
+                              leading: AppDrawerNavigationIcon(
+                                NavIcons.eventGenerationTests,
+                              ),
+                              title: const Text('Event Generation Tests'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => onNavigate(
+                                Constants.adminEventGenerationTestRoute,
+                              ),
+                            ),
+                            ListTile(
+                              leading: AppDrawerNavigationIcon(
+                                NavIcons.industryTestData,
+                              ),
+                              title: const Text('Industry Test Data'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => onNavigate(
+                                Constants.adminIndustryTestDataRoute,
+                              ),
+                            ),
+                          ],
+                        ),
                         ListTile(
                           leading: AppDrawerNavigationIcon(
                             NavIcons.batchProcessing,
@@ -456,18 +456,18 @@ class AppDrawerView extends StatelessWidget {
                             onTap: () =>
                                 onNavigate(Constants.tatmeenIntegrationRoute),
                           ),
-                        // ListTile(
-                        //   trailing: const AppDrawerNavigationIcon(
-                        //     NavIcons.chevronRight,
-                        //     size: 14,
-                        //   ),
-                        //   leading: AppDrawerNavigationIcon(
-                        //     NavIcons.cbvVocabulary,
-                        //   ),
-                        //   title: const Text('CBV Vocabulary'),
-                        //   onTap: () =>
-                        //       onNavigate(Constants.adminCbvVocabularyRoute),
-                        // ),
+                        ListTile(
+                          trailing: const AppDrawerNavigationIcon(
+                            NavIcons.chevronRight,
+                            size: 14,
+                          ),
+                          leading: AppDrawerNavigationIcon(
+                            NavIcons.cbvVocabulary,
+                          ),
+                          title: const Text('CBV Vocabulary'),
+                          onTap: () =>
+                              onNavigate(Constants.adminCbvVocabularyRoute),
+                        ),
                       ],
 
                       const Divider(),

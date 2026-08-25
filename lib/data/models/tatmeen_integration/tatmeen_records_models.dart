@@ -6,10 +6,7 @@ enum TatmeenRecordsStatusFilter { all, successful, failed, pending }
 enum TatmeenRecordsSource { kpiCard, recentActivity }
 
 class RecordsFilter extends Equatable {
-  const RecordsFilter({
-    required this.status,
-    required this.source,
-  });
+  const RecordsFilter({required this.status, required this.source});
 
   const RecordsFilter.kpi(this.status) : source = TatmeenRecordsSource.kpiCard;
 
@@ -131,6 +128,23 @@ class TatmeenSyncRecord extends Equatable {
     return '${message.substring(0, 60)}…';
   }
 
+  TatmeenSyncRecord copyWith({TatmeenSyncStatus? status, String? message}) {
+    return TatmeenSyncRecord(
+      id: id,
+      operationId: operationId,
+      operationType: operationType,
+      status: status ?? this.status,
+      attemptNumber: attemptNumber,
+      maxRetries: maxRetries,
+      durationMs: durationMs,
+      message: message ?? this.message,
+      requestPayload: requestPayload,
+      responseBody: responseBody,
+      attemptHistory: attemptHistory,
+      createdAt: createdAt,
+    );
+  }
+
   factory TatmeenSyncRecord.fromJson(Map<String, dynamic> json) {
     return TatmeenSyncRecord(
       id: json['id'] as String,
@@ -244,8 +258,8 @@ class TatmeenRetryOutcome {
   final String message;
 
   const TatmeenRetryOutcome.success()
-      : succeeded = true,
-        message = 'Retry successful! The record has been synced to Tatmeen.';
+    : succeeded = true,
+      message = 'Retry queued. The record will be synced to Tatmeen shortly.';
 
   factory TatmeenRetryOutcome.failure(String message) =>
       TatmeenRetryOutcome._(succeeded: false, message: message);

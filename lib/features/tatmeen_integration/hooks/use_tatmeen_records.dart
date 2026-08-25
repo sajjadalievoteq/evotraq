@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
 import 'package:traqtrace_app/data/services/tatmeen_integration/tatmeen_integration_service.dart';
 
@@ -78,7 +79,9 @@ class UseTatmeenRecords extends ChangeNotifier {
     notifyListeners();
     try {
       final outcome = await _service.retrySyncRecord(operationId);
-      await _fetch(silent: true);
+      if (outcome.succeeded) {
+        _applyQueuedRetry(operationId);
+      }
       return outcome;
     } on ApiException catch (e) {
       return TatmeenRetryOutcome.failure(_friendlyApiError(e));
@@ -90,6 +93,40 @@ class UseTatmeenRecords extends ChangeNotifier {
       _inFlightIds.remove(operationId);
       notifyListeners();
     }
+  }
+
+  void _applyQueuedRetry(String operationId) {
+    final current = pageData;
+    if (current == null) return;
+
+    if (_status == TatmeenRecordsStatusFilter.failed) {
+      final items = current.items
+          .where((record) => record.operationId != operationId)
+          .toList(growable: false);
+      pageData = TatmeenSyncRecordsPage(
+        items: items,
+        total: current.total > 0 ? current.total - 1 : 0,
+        page: current.page,
+        pageSize: current.pageSize,
+      );
+      return;
+    }
+
+    pageData = TatmeenSyncRecordsPage(
+      items: current.items
+          .map(
+            (record) => record.operationId == operationId
+                ? record.copyWith(
+                    status: TatmeenSyncStatus.pending,
+                    message: 'Retry queued for processing',
+                  )
+                : record,
+          )
+          .toList(growable: false),
+      total: current.total,
+      page: current.page,
+      pageSize: current.pageSize,
+    );
   }
 
   static String _friendlyApiError(ApiException e) {

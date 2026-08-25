@@ -57,94 +57,22 @@ class TatmeenIntegrationService {
     }
   }
 
-  Future<TatmeenDashboardStats> getTatmeenDashboardStats() async {
+  Future<TatmeenDashboardData> getTatmeenDashboard({
+    int days = 30,
+    int activityLimit = 10,
+  }) async {
     try {
-      final response = await _dioService.get('/tatmeen-integration/dashboard/stats');
-      return TatmeenDashboardStats.fromJson(
+      final response = await _dioService.get(
+        '/tatmeen-integration/dashboard',
+        queryParameters: {'days': days, 'activityLimit': activityLimit},
+      );
+      return TatmeenDashboardData.fromJson(
         Map<String, dynamic>.from(response.data as Map),
       );
     } on DioException catch (e) {
       throw ApiExceptionMapper.fromDio(
         e,
-        fallbackMessage: 'Failed to load dashboard stats.',
-      );
-    }
-  }
-
-  Future<List<TatmeenChartPoint>> getTatmeenChartData({int days = 30}) async {
-    try {
-      final response = await _dioService.get(
-        '/tatmeen-integration/dashboard/chart',
-        queryParameters: {'days': days},
-      );
-      final raw = response.data;
-      if (raw is! List) return const [];
-      return [
-        for (final item in raw)
-          if (item is Map)
-            TatmeenChartPoint.fromJson(Map<String, dynamic>.from(item)),
-      ];
-    } on DioException catch (e) {
-      throw ApiExceptionMapper.fromDio(
-        e,
-        fallbackMessage: 'Failed to load dashboard chart data.',
-      );
-    }
-  }
-
-  Future<TatmeenStatusBreakdown> getTatmeenStatusBreakdown() async {
-    try {
-      final response = await _dioService.get(
-        '/tatmeen-integration/dashboard/breakdown',
-      );
-      return TatmeenStatusBreakdown.fromJson(
-        Map<String, dynamic>.from(response.data as Map),
-      );
-    } on DioException catch (e) {
-      throw ApiExceptionMapper.fromDio(
-        e,
-        fallbackMessage: 'Failed to load status breakdown.',
-      );
-    }
-  }
-
-  Future<List<TatmeenSyncEvent>> getTatmeenRecentActivity({int limit = 10}) async {
-    try {
-      final response = await _dioService.get(
-        '/tatmeen-integration/dashboard/recent-activity',
-        queryParameters: {'limit': limit},
-      );
-      final raw = response.data;
-      if (raw is! List) return const [];
-      return [
-        for (final item in raw)
-          if (item is Map)
-            TatmeenSyncEvent.fromJson(Map<String, dynamic>.from(item)),
-      ];
-    } on DioException catch (e) {
-      throw ApiExceptionMapper.fromDio(
-        e,
-        fallbackMessage: 'Failed to load recent activity.',
-      );
-    }
-  }
-
-  Future<List<TatmeenErrorSummaryItem>> getTatmeenErrorSummary() async {
-    try {
-      final response = await _dioService.get(
-        '/tatmeen-integration/dashboard/error-summary',
-      );
-      final raw = response.data;
-      if (raw is! List) return const [];
-      return [
-        for (final item in raw)
-          if (item is Map)
-            TatmeenErrorSummaryItem.fromJson(Map<String, dynamic>.from(item)),
-      ];
-    } on DioException catch (e) {
-      throw ApiExceptionMapper.fromDio(
-        e,
-        fallbackMessage: 'Failed to load error summary.',
+        fallbackMessage: 'Failed to load Tatmeen dashboard.',
       );
     }
   }
@@ -158,8 +86,7 @@ class TatmeenIntegrationService {
         queryParameters: {
           if (query.status != TatmeenRecordsStatusFilter.all)
             'status': query.status.name,
-          if (query.fromDate != null)
-            'fromDate': _dateParam(query.fromDate!),
+          if (query.fromDate != null) 'fromDate': _dateParam(query.fromDate!),
           if (query.toDate != null) 'toDate': _dateParam(query.toDate!),
           if (query.search != null && query.search!.trim().isNotEmpty)
             'search': query.search!.trim(),
@@ -168,7 +95,9 @@ class TatmeenIntegrationService {
         },
       );
       if (response.data is! Map) {
-        throw const FormatException('Tatmeen records response was not a JSON object');
+        throw const FormatException(
+          'Tatmeen records response was not a JSON object',
+        );
       }
       return TatmeenSyncRecordsPage.fromJson(
         Map<String, dynamic>.from(response.data as Map),
@@ -272,7 +201,10 @@ class TatmeenIntegrationService {
 
   Future<String> triggerCommissioning(Map<String, dynamic> payload) async {
     try {
-      final response = await _dioService.post(_commissioningPath, data: payload);
+      final response = await _dioService.post(
+        _commissioningPath,
+        data: payload,
+      );
       return (response.data as Map)['syncLogId'] as String;
     } on DioException catch (e) {
       throw ApiExceptionMapper.fromDio(

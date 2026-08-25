@@ -23,6 +23,7 @@ class AppDrawerAccountHeader extends StatelessWidget {
           builder: (context, settingsState) {
             final isDarkMode = themeState.isDarkMode;
             return UserAccountsDrawerHeader(
+              otherAccountsPicturesSize:Size.square(45.0),
               accountName: Row(
                 children: [
                   Text(
@@ -62,8 +63,9 @@ class AppDrawerAccountHeader extends StatelessWidget {
               ),
               otherAccountsPictures: [
                 IconButton(
-                  iconSize: 30,
+                  iconSize: 40,
                   icon: TraqIcon(
+                    size: 40,
                     isDarkMode ? NavIcons.themeSun : NavIcons.themeMoon,
                     color: context.colors.background,
                   ),

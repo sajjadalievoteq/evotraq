@@ -1,4 +1,5 @@
 import 'commissioning_canonical_identifier.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 
 enum CommissioningBatchStatus {
   pending,
@@ -21,6 +22,8 @@ class CommissioningBatch {
   final CommissioningBatchStatus status;
   final DateTime? expiryDate;
   final DateTime? productionDate;
+  final String? manufacturingOrigin;
+  final String? shipmentPermit;
   final String? operatorId;
   final String? createdBy;
   final DateTime? createdAt;
@@ -39,6 +42,8 @@ class CommissioningBatch {
     required this.status,
     this.expiryDate,
     this.productionDate,
+    this.manufacturingOrigin,
+    this.shipmentPermit,
     this.operatorId,
     this.createdBy,
     this.createdAt,
@@ -63,13 +68,15 @@ class CommissioningBatch {
       productionDate: json['productionDate'] != null
           ? DateTime.tryParse(json['productionDate'] as String)
           : null,
+      manufacturingOrigin: json['manufacturingOrigin'] as String?,
+      shipmentPermit: json['shipmentPermit'] as String?,
       operatorId: json['operatorId'] as String?,
       createdBy: json['createdBy'] as String?,
       createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'] as String)?.toLocal()
+          ? AppTime.tryParseApi(json['createdAt'])
           : null,
       completedAt: json['completedAt'] != null
-          ? DateTime.tryParse(json['completedAt'] as String)?.toLocal()
+          ? AppTime.tryParseApi(json['completedAt'])
           : null,
     );
   }

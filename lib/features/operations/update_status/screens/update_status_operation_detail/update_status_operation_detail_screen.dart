@@ -7,8 +7,7 @@ import 'package:traqtrace_app/features/operations/shared/screens/generic_operati
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation_detail/widgets/update_status_detail_content.dart';
 
-final _updateStatusDetailConfig =
-    OperationDetailScreenConfig<UpdateStatusResponse>(
+final _updateStatusDetailConfig = OperationDetailScreenConfig<UpdateStatusResponse>(
   createCubit: (fallbackErrorMessage) {
     final service = getIt<UpdateStatusOperationService>();
     return OperationDetailCubit<UpdateStatusResponse>(
@@ -16,24 +15,24 @@ final _updateStatusDetailConfig =
       fallbackErrorMessage: fallbackErrorMessage,
     );
   },
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      UpdateStatusDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    operation: operation,
-    onRetry: onRetry,
-  ),
+  contentBuilder:
+      (
+        context, {
+        required awaitingSelection,
+        required listLoading,
+        required isLoading,
+        required errorMessage,
+        required operation,
+        required onRetry,
+        onOperationUpdated,
+      }) => UpdateStatusDetailContent(
+        awaitingSelection: awaitingSelection,
+        listLoading: listLoading,
+        isLoading: isLoading,
+        errorMessage: errorMessage,
+        operation: operation,
+        onRetry: onRetry,
+      ),
   titleBuilder: (op) => op.decommissioningReference ?? 'Update Status Detail',
   listRoute: Constants.opUpdateStatusRoute,
   defaultTitle: 'Update Status Detail',

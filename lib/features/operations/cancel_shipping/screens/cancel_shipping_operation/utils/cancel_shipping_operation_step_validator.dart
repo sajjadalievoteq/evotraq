@@ -16,7 +16,8 @@ class CancelShippingOperationStepValidator {
           'Please select the original Ship-From location (required for GS1 cancel shipping).',
       destinationMissingMessage:
           'Please select the original Ship-To location (required for DSCSA audit trail).',
-      sameLocationMessage: 'Ship-From and Ship-To locations cannot be the same.',
+      sameLocationMessage:
+          'Ship-From and Ship-To locations cannot be the same.',
       sourceInvalidMessagePrefix: 'Ship-From GLN ',
       destinationInvalidMessagePrefix: 'Ship-To GLN ',
       sourceInvalidMessageSuffix: ' is not a valid GS1 GLN.',
@@ -32,7 +33,8 @@ class CancelShippingOperationStepValidator {
   static String? validateItemsStep(List<String> scannedEpcs) {
     return OperationStepValidationUtils.validateCancelItemsStep(
       scannedEpcs,
-      emptyMessage: 'Scan at least one SGTIN or SSCC from the original shipment.',
+      emptyMessage:
+          'Scan at least one SGTIN or SSCC from the original shipment.',
     );
   }
 }

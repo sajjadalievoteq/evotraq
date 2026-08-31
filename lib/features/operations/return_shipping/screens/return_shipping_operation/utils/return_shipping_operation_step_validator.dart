@@ -5,9 +5,7 @@ import 'package:traqtrace_app/features/operations/shared/utils/operation_step_va
 class ReturnShippingOperationStepValidator {
   ReturnShippingOperationStepValidator._();
 
-  static String? validateReferenceStep({
-    required GLN? sourceGln,
-  }) {
+  static String? validateReferenceStep({required GLN? sourceGln}) {
     if (sourceGln == null) {
       return 'Please select Return From Location (source GLN).';
     }
@@ -19,6 +17,8 @@ class ReturnShippingOperationStepValidator {
   }
 
   static String? validateItemsStep(List<String> scannedEpcs) {
-    return OperationStepValidationUtils.validateSerializedItemsStep(scannedEpcs);
+    return OperationStepValidationUtils.validateSerializedItemsStep(
+      scannedEpcs,
+    );
   }
 }

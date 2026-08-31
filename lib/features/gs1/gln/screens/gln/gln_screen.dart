@@ -6,6 +6,9 @@ import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/gln_list_screen.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
@@ -39,6 +42,7 @@ class _GLNScreenState extends State<GLNScreen> {
       child: SplitOrListIndexedStack(
         split: Gs1SplitViewScreen<GLNCubit, GLNState>(
           appBarTitle: GlnUiConstants.appBarManagement,
+          listRoute: Constants.gs1GlnsRoute,
           fabHeroTag: 'gln_split_view_add_fab',
           fabAddTooltip: 'Add New GLN',
           fabCloseTooltip: 'Close create form',
@@ -66,13 +70,13 @@ class _GLNScreenState extends State<GLNScreen> {
                     onEmbeddedCreate: onRequestCreate,
                     onSelectGln: onSelect,
                   ),
-          detailViewBuilder: (context, code) => GLNDetailScreen(
-            key: ValueKey(code),
+          detailViewBuilder: (context, code, {required editing}) => GLNDetailScreen(
+            key: ValueKey('$code-$editing'),
             glnId: code,
-            isEditing: false,
+            isEditing: editing,
             embedded: true,
           ),
-          detailCreateBuilder: (context, onSuccess) => GLNDetailScreen(
+          detailCreateBuilder: (context, onSuccess, {commissionAfterCreate = false}) => GLNDetailScreen(
             key: const ValueKey('__gln_embedded_new__'),
             isEditing: true,
             embedded: true,
@@ -86,7 +90,12 @@ class _GLNScreenState extends State<GLNScreen> {
             awaitingListSelection: true,
           ),
         ),
-        fallback: const GLNListScreen(),
+        fallback: MasterDetailMobileRedirect(
+          listRoute: Constants.gs1GlnsRoute,
+          detailRoute: (id) => GlnRouteConstants.pathForGlnCode(id),
+          editRoute: (id) => GlnRouteConstants.pathForGlnCodeEdit(id),
+          child: const GLNListScreen(),
+        ),
       ),
     );
   }

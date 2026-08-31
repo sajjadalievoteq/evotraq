@@ -1,8 +1,8 @@
-﻿import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
+import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 
 enum UpdateStatusDisposition {
   sample('non_sellable_other', 'Sample'),
-  lost('unknown', 'Lost'),
+  lost('lost', 'Lost'),
   stolen('stolen', 'Stolen'),
   damaged('damaged', 'Damaged'),
   dispensing('dispensed', 'Dispensing'),
@@ -16,14 +16,17 @@ enum UpdateStatusDisposition {
 
   static UpdateStatusDisposition? fromCode(String? code) {
     if (code == null) return null;
-    final normalised =
-        CbvVocabularyFormatter.shortName(code.trim()).toLowerCase();
+    final normalised = CbvVocabularyFormatter.shortName(
+      code.trim(),
+    ).toLowerCase();
+    if (normalised == 'unknown') {
+      return UpdateStatusDisposition.lost;
+    }
     for (final d in values) {
       if (d.code == normalised || d.name == normalised) return d;
     }
     return null;
   }
 
-  static String labelFor(String? code) =>
-      fromCode(code)?.label ?? code ?? '-';
+  static String labelFor(String? code) => fromCode(code)?.label ?? code ?? '-';
 }

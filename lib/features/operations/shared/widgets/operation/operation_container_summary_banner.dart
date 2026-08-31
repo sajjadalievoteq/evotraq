@@ -26,17 +26,16 @@ class OperationContainerSummaryBanner extends StatelessWidget {
                 children: [
                   Text(
                     'Container: ${parentContainerId ?? 'Not selected'}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(color: Colors.white),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleSmall?.copyWith(color: Colors.white),
                   ),
                   Text(
                     'Reference: Auto-generated on submit',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 12,
-                        ),
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),

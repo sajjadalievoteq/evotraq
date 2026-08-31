@@ -42,7 +42,8 @@ class OperationQuickFilterDialog extends StatefulWidget {
       _OperationQuickFilterDialogState();
 }
 
-class _OperationQuickFilterDialogState extends State<OperationQuickFilterDialog> {
+class _OperationQuickFilterDialogState
+    extends State<OperationQuickFilterDialog> {
   late String _status;
 
   @override
@@ -81,8 +82,8 @@ class _OperationQuickFilterDialogState extends State<OperationQuickFilterDialog>
             Text(
               widget.footerHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -90,8 +91,9 @@ class _OperationQuickFilterDialogState extends State<OperationQuickFilterDialog>
       actions: [
         CustomTextButtonWidget(
           title: OperationUiConstants.buttonClearFilters,
-          onTap: () => Navigator.of(context)
-              .pop(const OperationQuickFilterResult.cleared()),
+          onTap: () => Navigator.of(
+            context,
+          ).pop(const OperationQuickFilterResult.cleared()),
         ),
         CustomOutlinedButtonWidget(
           title: OperationUiConstants.buttonCancel,
@@ -100,7 +102,9 @@ class _OperationQuickFilterDialogState extends State<OperationQuickFilterDialog>
         FilledButton(
           onPressed: () => Navigator.of(context).pop(
             OperationQuickFilterResult.applied(
-              status: _status == OperationUiConstants.filterAll ? null : _status,
+              status: _status == OperationUiConstants.filterAll
+                  ? null
+                  : _status,
             ),
           ),
           child: const Text(OperationUiConstants.buttonApply),

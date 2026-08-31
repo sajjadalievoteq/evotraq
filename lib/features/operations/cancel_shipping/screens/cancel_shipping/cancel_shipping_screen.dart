@@ -11,21 +11,23 @@ class CancelShippingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
-        showFloatingActionButton:
-            context.canPerform(OperationSteps.cancelShip),
-        appBarTitle: 'Cancel Shipping',
-        fabHeroTag: 'cancel_shipping_fab',
-        fabAddTooltip: 'New Cancellation',
-        createHeaderText: 'New Cancel Shipping',
-        emptyNoMatchText: 'No Cancel Shipping match your search.',
-        fabNavigateRoute: Constants.opCancelShippingCreateRoute,
-        listBuilder: (context, {
+    showFloatingActionButton: context.canPerform(OperationSteps.cancelShip),
+    appBarTitle: 'Cancel Shipping',
+    listRoute: Constants.opCancelShippingRoute,
+    detailRoute: (id) => '${Constants.opCancelShippingRoute}/$id',
+    fabHeroTag: 'cancel_shipping_fab',
+    fabAddTooltip: 'New Cancellation',
+    createHeaderText: 'New Cancel Shipping',
+    emptyNoMatchText: 'No Cancel Shipping match your search.',
+    fabNavigateRoute: Constants.opCancelShippingCreateRoute,
+    listBuilder:
+        (
+          context, {
           required selectedId,
           required onSelect,
           required bindRefresh,
           required onRequestCreate,
-        }) =>
-            CancelShippingOperationListScreen(
+        }) => CancelShippingOperationListScreen(
           embedded: true,
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
@@ -34,17 +36,19 @@ class CancelShippingScreen extends StatelessWidget {
               ? onRequestCreate
               : null,
         ),
-        detailViewBuilder: (context, id) => CancelShippingOperationDetailScreen(
+    detailViewBuilder: (context, id, {required editing}) =>
+        CancelShippingOperationDetailScreen(
           key: ValueKey(id),
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context, {required listLoading}) => CancelShippingOperationDetailScreen(
+    detailAwaitBuilder: (context, {required listLoading}) =>
+        CancelShippingOperationDetailScreen(
           key: const ValueKey('__cancel_shipping_split_await__'),
           embedded: true,
           listLoading: listLoading,
           awaitingSelection: true,
         ),
-        fallbackList: const CancelShippingOperationListScreen(),
-      );
+    fallbackList: const CancelShippingOperationListScreen(),
+  );
 }

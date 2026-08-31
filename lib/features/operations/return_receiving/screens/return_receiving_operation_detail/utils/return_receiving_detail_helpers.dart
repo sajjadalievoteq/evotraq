@@ -14,4 +14,3 @@ class ReturnReceivingDetailHelpers {
         operation.gincNumber != null;
   }
 }
-

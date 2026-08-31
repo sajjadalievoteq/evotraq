@@ -27,24 +27,22 @@ class OperationEpcScanOutcome {
     required OperationScanItemType epcType,
     required String identifierToValidate,
     BarcodeDetails? details,
-  }) =>
-      OperationEpcScanOutcome._(
-        success: true,
-        rawBarcode: rawBarcode,
-        epcType: epcType,
-        identifierToValidate: identifierToValidate,
-        details: details,
-      );
+  }) => OperationEpcScanOutcome._(
+    success: true,
+    rawBarcode: rawBarcode,
+    epcType: epcType,
+    identifierToValidate: identifierToValidate,
+    details: details,
+  );
 
   factory OperationEpcScanOutcome.failure({
     required String rawBarcode,
     required String errorMessage,
-  }) =>
-      OperationEpcScanOutcome._(
-        success: false,
-        rawBarcode: rawBarcode,
-        errorMessage: errorMessage,
-      );
+  }) => OperationEpcScanOutcome._(
+    success: false,
+    rawBarcode: rawBarcode,
+    errorMessage: errorMessage,
+  );
 
   final bool success;
   final String rawBarcode;
@@ -87,7 +85,6 @@ class OperationEpcScanValidator {
       );
     }
 
-    
     if (Gs1CanonicalIdentifier.isSgtin(rawBarcode)) {
       final serial = _cleanIdentifier(
         Gs1CanonicalIdentifier.extractSerial(rawBarcode),
@@ -112,10 +109,7 @@ class OperationEpcScanValidator {
                 isValid: true,
                 gtin: gtin,
                 serial: serial,
-                allFields: {
-                  '01': gtin,
-                  '21': serial,
-                },
+                allFields: {'01': gtin, '21': serial},
               ),
       );
     }
@@ -139,11 +133,15 @@ class OperationEpcScanValidator {
     if (parsedBarcode['valid'] == true) {
       if (parsedBarcode['SSCC'] != null) {
         epcType = OperationScanItemType.sscc;
-        identifierToValidate = _cleanIdentifier(parsedBarcode['SSCC'] as String?);
+        identifierToValidate = _cleanIdentifier(
+          parsedBarcode['SSCC'] as String?,
+        );
       } else if (parsedBarcode['GTIN'] != null &&
           parsedBarcode['SERIAL'] != null) {
         epcType = OperationScanItemType.sgtin;
-        identifierToValidate = _cleanIdentifier(parsedBarcode['SERIAL'] as String?);
+        identifierToValidate = _cleanIdentifier(
+          parsedBarcode['SERIAL'] as String?,
+        );
       } else if (parsedBarcode['GTIN'] != null &&
           parsedBarcode['LOT'] != null) {
         return OperationEpcScanOutcome.failure(
@@ -153,7 +151,8 @@ class OperationEpcScanValidator {
       } else if (parsedBarcode['GTIN'] != null) {
         return OperationEpcScanOutcome.failure(
           rawBarcode: rawBarcode,
-          errorMessage: 'Barcode missing serial number: $rawBarcode\n\n'
+          errorMessage:
+              'Barcode missing serial number: $rawBarcode\n\n'
               'For operations, a complete SGTIN with serial number is required.',
         );
       }
@@ -170,7 +169,8 @@ class OperationEpcScanValidator {
         identifierToValidate.isEmpty) {
       return OperationEpcScanOutcome.failure(
         rawBarcode: rawBarcode,
-        errorMessage: 'Invalid barcode format: $rawBarcode\n\n'
+        errorMessage:
+            'Invalid barcode format: $rawBarcode\n\n'
             'Supported formats:\n'
             '- GS1 element string: (01)GTIN(21)SERIAL(17)EXPIRY(10)BATCH\n'
             '- GS1 Digital Link: https://id.gs1.org/01/…/21/…\n'
@@ -199,10 +199,7 @@ class OperationEpcScanValidator {
     required String operationLabel,
     bool allowGtin = false,
   }) async {
-    final prepared = _prepareScan(
-      rawBarcode,
-      alreadyScanned: alreadyScanned,
-    );
+    final prepared = _prepareScan(rawBarcode, alreadyScanned: alreadyScanned);
     if (prepared.outcome != null) return prepared.outcome!;
 
     final EPCValidationResult validationResult;
@@ -225,20 +222,15 @@ class OperationEpcScanValidator {
     );
   }
 
-  
-  
   Future<({OperationEpcScanOutcome outcome, T? status})>
-      validateAndAddWithStatus<T>(
+  validateAndAddWithStatus<T>(
     String rawBarcode, {
     required Iterable<String> alreadyScanned,
     required String operationLabel,
     required Future<T?> Function(String epc) loadStatus,
     bool allowGtin = false,
   }) async {
-    final prepared = _prepareScan(
-      rawBarcode,
-      alreadyScanned: alreadyScanned,
-    );
+    final prepared = _prepareScan(rawBarcode, alreadyScanned: alreadyScanned);
     if (prepared.outcome != null) {
       return (outcome: prepared.outcome!, status: null);
     }

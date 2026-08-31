@@ -15,24 +15,24 @@ final _packingDetailConfig = OperationDetailScreenConfig<PackingResponse>(
       fallbackErrorMessage: fallbackErrorMessage,
     );
   },
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      PackingDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    operation: operation,
-    onRetry: onRetry,
-  ),
+  contentBuilder:
+      (
+        context, {
+        required awaitingSelection,
+        required listLoading,
+        required isLoading,
+        required errorMessage,
+        required operation,
+        required onRetry,
+        onOperationUpdated,
+      }) => PackingDetailContent(
+        awaitingSelection: awaitingSelection,
+        listLoading: listLoading,
+        isLoading: isLoading,
+        errorMessage: errorMessage,
+        operation: operation,
+        onRetry: onRetry,
+      ),
   titleBuilder: (op) => op.packingReference ?? 'Packing Detail',
   listRoute: Constants.opPackingRoute,
   defaultTitle: 'Packing Detail',

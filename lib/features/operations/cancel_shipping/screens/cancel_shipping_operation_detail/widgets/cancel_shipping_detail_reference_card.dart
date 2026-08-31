@@ -6,10 +6,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_formatters.dart';
 
 class CancelShippingDetailReferenceCard extends StatelessWidget {
-  const CancelShippingDetailReferenceCard({
-    super.key,
-    required this.operation,
-  });
+  const CancelShippingDetailReferenceCard({super.key, required this.operation});
 
   final CancelShippingResponse operation;
 
@@ -41,7 +38,9 @@ class CancelShippingDetailReferenceCard extends StatelessWidget {
         if (operation.processedAt != null)
           OperationDetailInfoRow(
             label: 'Processed At',
-            value: OperationDetailFormatters.formatDateTime(operation.processedAt!),
+            value: OperationDetailFormatters.formatDateTime(
+              operation.processedAt!,
+            ),
           ),
       ],
     );

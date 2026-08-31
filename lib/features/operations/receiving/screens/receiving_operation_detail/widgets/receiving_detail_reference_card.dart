@@ -6,10 +6,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_formatters.dart';
 
 class ReceivingDetailReferenceCard extends StatelessWidget {
-  const ReceivingDetailReferenceCard({
-    super.key,
-    required this.operation,
-  });
+  const ReceivingDetailReferenceCard({super.key, required this.operation});
 
   final ReceivingResponse operation;
 
@@ -36,7 +33,9 @@ class ReceivingDetailReferenceCard extends StatelessWidget {
         if (operation.processedAt != null)
           OperationDetailInfoRow(
             label: 'Processed At',
-            value: OperationDetailFormatters.formatDateTime(operation.processedAt!),
+            value: OperationDetailFormatters.formatDateTime(
+              operation.processedAt!,
+            ),
           ),
       ],
     );

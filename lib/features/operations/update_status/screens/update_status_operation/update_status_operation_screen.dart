@@ -171,12 +171,13 @@ class _UpdateStatusOperationScreenState
 
     switch (_currentStep) {
       case 0:
-        final detailsError = UpdateStatusOperationStepValidator.validateDetailsStep(
-          locationGln: _locationGln,
-          disposition: _selectedDisposition,
-          selectedReason: _selectedReason,
-          freeTextReason: _reasonController.text.trim(),
-        );
+        final detailsError =
+            UpdateStatusOperationStepValidator.validateDetailsStep(
+              locationGln: _locationGln,
+              disposition: _selectedDisposition,
+              selectedReason: _selectedReason,
+              freeTextReason: _reasonController.text.trim(),
+            );
         if (detailsError != null) {
           if (detailsError.contains('GLN')) {
             setState(() => _locationGlnError = detailsError);
@@ -187,8 +188,9 @@ class _UpdateStatusOperationScreenState
         }
         return true;
       case 1:
-        final itemsError =
-            UpdateStatusOperationStepValidator.validateItemsStep(_scannedEpcs);
+        final itemsError = UpdateStatusOperationStepValidator.validateItemsStep(
+          _scannedEpcs,
+        );
         if (itemsError != null) {
           _showOperationError(itemsError);
           return false;
@@ -208,19 +210,21 @@ class _UpdateStatusOperationScreenState
       final service = getIt<UpdateStatusOperationService>();
       final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-      final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
+      final failedConversions = List<String>.from(
+        conversionResult['failed'] ?? [],
+      );
 
       if (failedConversions.isNotEmpty) {
         _showOperationError(
-          UpdateStatusSubmitErrorMessage.epcConversionFailures(failedConversions),
+          UpdateStatusSubmitErrorMessage.epcConversionFailures(
+            failedConversions,
+          ),
         );
         return;
       }
 
       if (epcUris.isEmpty) {
-        _showOperationError(
-          UpdateStatusSubmitErrorMessage.emptyEpcList(),
-        );
+        _showOperationError(UpdateStatusSubmitErrorMessage.emptyEpcList());
         return;
       }
 
@@ -240,7 +244,7 @@ class _UpdateStatusOperationScreenState
       final response = await service.createUpdateStatusOperation(request);
 
       if (response.isSuccessOrPartial) {
-          context.showSuccess(
+        context.showSuccess(
           response.status == OperationStatus.partialSuccess
               ? 'Update Status submitted with warnings. Open the record for details.'
               : 'Status updated successfully.',
@@ -249,9 +253,9 @@ class _UpdateStatusOperationScreenState
 
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
-            context
-                .read<OperationSplitCubit>()
-                .setCreatedId(response.navigableOperationId);
+            context.read<OperationSplitCubit>().setCreatedId(
+              response.navigableOperationId,
+            );
           }
           widget.onEmbeddedActionSuccess!();
         } else {
@@ -263,13 +267,9 @@ class _UpdateStatusOperationScreenState
         );
       }
     } on ApiException catch (e) {
-      _showOperationError(
-        UpdateStatusSubmitErrorMessage.fromApiException(e),
-      );
+      _showOperationError(UpdateStatusSubmitErrorMessage.fromApiException(e));
     } catch (e) {
-      _showOperationError(
-        UpdateStatusSubmitErrorMessage.unexpected(e),
-      );
+      _showOperationError(UpdateStatusSubmitErrorMessage.unexpected(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -347,11 +347,7 @@ class _UpdateStatusOperationScreenState
           onSubmit: _submitUpdateStatusOperation,
           appBarTitle: 'Update Status Operation',
           submitLabel: 'Create Update Status Operation',
-          stepPages: [
-            _referenceDetailsStep(),
-            _itemScanStep(),
-            _reviewStep(),
-          ],
+          stepPages: [_referenceDetailsStep(), _itemScanStep(), _reviewStep()],
         );
       },
     );

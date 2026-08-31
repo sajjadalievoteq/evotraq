@@ -73,6 +73,14 @@ abstract final class SsccUiConstants {
   static const splitCreateHeader = 'Create SSCC';
   static const tooltipClose = 'Close';
 
+  static const createModeDialogTitle = 'How do you want to create this SSCC?';
+  static const createModeDialogBody =
+      'Create only issues the SSCC as ALLOCATED so you can edit master data '
+      'and commission it later. Create & commission opens the create form and '
+      'commissions the SSCC when you submit.';
+  static const createModeCreateOnly = 'Create only';
+  static const createModeCreateAndCommission = 'Create & commission';
+
   static const dialogAdvancedFiltersTitle = 'Advanced Filters';
   static const buttonClose = 'Close';
   static const buttonCancel = 'Cancel';
@@ -109,7 +117,20 @@ abstract final class SsccUiConstants {
   static const detailEditTitle = 'Edit SSCC';
   static const detailViewTitle = 'SSCC Details';
   static const detailSaveButton = 'Save SSCC';
+  static const detailSavingButton = 'Saving SSCC…';
+  static const detailCreateAndCommissionButton = 'Create & Commission';
+  static const detailCreatingAndCommissioningButton = 'Creating & commissioning…';
+  static const detailSaveAndCommissionButton = 'Save & Commission';
+  static const detailSavingAndCommissioningButton = 'Saving & commissioning…';
+  static const buttonCommission = 'Commission';
+  static const commissionActionHint =
+      'Commission this allocated SSCC to activate it for logistics operations.';
   static const successSsccSaved = 'SSCC saved successfully';
+  static const successSsccCreatedAndCommissioned =
+      'SSCC created and commissioned successfully';
+  static const successSsccSavedAndCommissioned =
+      'SSCC saved and commissioned successfully';
+  static const successSsccCommissioned = 'SSCC commissioned successfully';
   static const errorGeneric = 'Something went wrong';
   static const errorFixForm = 'Please fix the errors in the form';
 

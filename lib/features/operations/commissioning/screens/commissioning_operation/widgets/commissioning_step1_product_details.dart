@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
@@ -11,11 +12,16 @@ import 'package:traqtrace_app/features/operations/shared/widgets/operation_gln_s
 class CommissioningStep1ProductDetails extends StatelessWidget {
   const CommissioningStep1ProductDetails({
     super.key,
+    required this.identifierType,
+    required this.identifierTypeError,
+    required this.onIdentifierTypeChanged,
     required this.commissioningLocationGLN,
     required this.locationError,
     required this.onLocationChanged,
     required this.referenceController,
     required this.countryOfOriginController,
+    required this.manufacturingOriginController,
+    required this.shipmentPermitController,
     required this.productionOrderController,
     required this.productionLineController,
     required this.regulatoryMarketController,
@@ -27,12 +33,17 @@ class CommissioningStep1ProductDetails extends StatelessWidget {
     this.showPageHeader = true,
   });
 
+  final EPCType? identifierType;
+  final String? identifierTypeError;
+  final ValueChanged<EPCType> onIdentifierTypeChanged;
   final GLN? commissioningLocationGLN;
   final String? locationError;
   final ValueChanged<GLN?> onLocationChanged;
   final List<GLN>? pickerCatalog;
   final TextEditingController referenceController;
   final TextEditingController countryOfOriginController;
+  final TextEditingController manufacturingOriginController;
+  final TextEditingController shipmentPermitController;
   final TextEditingController productionOrderController;
   final TextEditingController productionLineController;
   final TextEditingController regulatoryMarketController;
@@ -70,6 +81,60 @@ class CommissioningStep1ProductDetails extends StatelessWidget {
             const SizedBox(height: 24),
           ],
           Gs1GroupCard(
+            title: 'Identifier Type',
+            showRequiredStar: true,
+            outlineColor: outline,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SegmentedButton<EPCType>(
+                  segments: const [
+                    ButtonSegment<EPCType>(
+                      value: EPCType.sgtin,
+                      label: Text('SGTIN'),
+                      icon: Icon(Icons.qr_code_2),
+                    ),
+                    ButtonSegment<EPCType>(
+                      value: EPCType.sscc,
+                      label: Text('SSCC'),
+                      icon: Icon(Icons.inventory_2_outlined),
+                    ),
+                  ],
+                  selected: identifierType == null
+                      ? const <EPCType>{}
+                      : <EPCType>{identifierType!},
+                  emptySelectionAllowed: true,
+                  showSelectedIcon: true,
+                  onSelectionChanged: (selection) {
+                    if (selection.isNotEmpty) {
+                      onIdentifierTypeChanged(selection.first);
+                    }
+                  },
+                ),
+                if (identifierTypeError != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    identifierTypeError!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Text(
+                  identifierType == EPCType.sscc
+                      ? 'Create or commission logistic-unit SSCC identifiers.'
+                      : identifierType == EPCType.sgtin
+                      ? 'Create or commission serialized trade-item SGTIN identifiers.'
+                      : 'Choose the identifier being commissioned.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Gs1GroupCard(
             title: 'Operation Reference',
             outlineColor: outline,
             child: Column(
@@ -105,7 +170,10 @@ class CommissioningStep1ProductDetails extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           CommissioningAdditionalInfoCard(
+            identifierType: identifierType,
             countryOfOriginController: countryOfOriginController,
+            manufacturingOriginController: manufacturingOriginController,
+            shipmentPermitController: shipmentPermitController,
             productionOrderController: productionOrderController,
             productionLineController: productionLineController,
             regulatoryMarketController: regulatoryMarketController,

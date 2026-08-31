@@ -26,7 +26,10 @@ class OperationDetailInfoRowCopy extends StatelessWidget {
           InkWell(
             onTap: () {
               Clipboard.setData(ClipboardData(text: value));
-              context.showSuccess('Copied', duration: const Duration(seconds: 1));
+              context.showSuccess(
+                'Copied',
+                duration: const Duration(seconds: 1),
+              );
             },
             borderRadius: BorderRadius.circular(4),
             child: const Padding(

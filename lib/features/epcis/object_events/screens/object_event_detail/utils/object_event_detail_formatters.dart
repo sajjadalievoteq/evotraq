@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/object_events/utils/object_event_shared_ui_constants.dart';
 
@@ -9,7 +10,7 @@ class ObjectEventDetailFormatters {
 
   static String formatDate(DateTime? dt) => dt == null
       ? ObjectEventSharedUiConstants.emDash
-      : DateFormat(dateFormat).format(dt.toLocal());
+      : AppTime.formatUae(dt, DateFormat(dateFormat));
 
   static String epcisVersionLabel(EPCISVersion? version) {
     switch (version) {

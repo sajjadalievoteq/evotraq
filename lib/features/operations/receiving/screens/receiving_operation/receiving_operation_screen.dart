@@ -40,11 +40,11 @@ class ReceivingOperationScreen extends StatefulWidget {
 
   final VoidCallback? onEmbeddedActionSuccess;
 
-  
   final Map<String, dynamic>? initialPrefill;
 
   @override
-  State<ReceivingOperationScreen> createState() => _ReceivingOperationScreenState();
+  State<ReceivingOperationScreen> createState() =>
+      _ReceivingOperationScreenState();
 }
 
 class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
@@ -245,10 +245,11 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
 
     switch (_currentStep) {
       case 0:
-        final referenceError = ReceivingOperationStepValidator.validateReferenceStep(
-          sourceGln: _sourceGln,
-          receivingGln: _receivingGln,
-        );
+        final referenceError =
+            ReceivingOperationStepValidator.validateReferenceStep(
+              sourceGln: _sourceGln,
+              receivingGln: _receivingGln,
+            );
         if (referenceError != null) {
           if (referenceError.contains('Ship From')) {
             setState(() => _sourceGlnError = referenceError);
@@ -261,7 +262,9 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
         }
         return true;
       case 1:
-        final itemsError = ReceivingOperationStepValidator.validateItemsStep(_scannedEpcs);
+        final itemsError = ReceivingOperationStepValidator.validateItemsStep(
+          _scannedEpcs,
+        );
         if (itemsError != null) {
           context.showError(itemsError);
           return false;
@@ -281,7 +284,9 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
       final receivingService = getIt<ReceivingOperationService>();
       final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-      final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
+      final failedConversions = List<String>.from(
+        conversionResult['failed'] ?? [],
+      );
 
       if (failedConversions.isNotEmpty) {
         context.showError(
@@ -325,10 +330,9 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
         despatchAdviceNumber: _despatchAdviceController.text.trim().isNotEmpty
             ? _despatchAdviceController.text.trim()
             : null,
-        receivingAdviceNumber:
-            _receivingAdviceController.text.trim().isNotEmpty
-                ? _receivingAdviceController.text.trim()
-                : null,
+        receivingAdviceNumber: _receivingAdviceController.text.trim().isNotEmpty
+            ? _receivingAdviceController.text.trim()
+            : null,
         invoiceNumber: _invoiceController.text.trim().isNotEmpty
             ? _invoiceController.text.trim()
             : null,
@@ -347,8 +351,9 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
         eventTime: _eventTime,
       );
 
-      final response =
-          await receivingService.createReceivingOperation(receivingRequest);
+      final response = await receivingService.createReceivingOperation(
+        receivingRequest,
+      );
 
       if (response.isSuccessOrPartial) {
         if (mounted) {
@@ -356,8 +361,8 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             response.status == OperationStatus.partialSuccess
                 ? 'Receiving submitted with warnings. Open the record for details.'
                 : response.isAccepted
-                    ? 'Receiving completed and goods accepted.'
-                    : 'Receiving operation completed successfully.',
+                ? 'Receiving completed and goods accepted.'
+                : 'Receiving operation completed successfully.',
           );
         }
 
@@ -365,20 +370,22 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
 
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
-            context
-                .read<OperationSplitCubit>()
-                .setCreatedId(response.navigableOperationId);
+            context.read<OperationSplitCubit>().setCreatedId(
+              response.navigableOperationId,
+            );
           }
           widget.onEmbeddedActionSuccess!();
         } else {
           popOrGo(context, Constants.opReceivingRoute);
         }
       } else {
-        context.showError(OperationErrorTranslator.translateMessages(
-          response.messages,
-          fallback:
-              'The Receiving operation could not be completed. Check your inputs and try again.',
-        ));
+        context.showError(
+          OperationErrorTranslator.translateMessages(
+            response.messages,
+            fallback:
+                'The Receiving operation could not be completed. Check your inputs and try again.',
+          ),
+        );
       }
     } on ApiException catch (e) {
       context.showError(e.getUserFriendlyMessage());
@@ -396,11 +403,12 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   }
 
   Future<bool> _addEpc(String barcode, {bool showSuccessToast = false}) async {
-    final duplicate = OperationEpcScanValidator.checkDuplicate(barcode, _scannedEpcs);
+    final duplicate = OperationEpcScanValidator.checkDuplicate(
+      barcode,
+      _scannedEpcs,
+    );
     if (duplicate != null) {
-      context.showError(
-        'This EPC is already in the list.',
-      );
+      context.showError('This EPC is already in the list.');
       return false;
     }
 
@@ -411,7 +419,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     }
 
     setState(() => _scannedEpcs.add(barcode));
-    
+
     _loadSoftWarning(barcode);
     if (showSuccessToast) {
       context.showSuccess('Item added');
@@ -429,8 +437,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
       } else {
         setState(() => _itemWarnings.remove(epc));
       }
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   @override
@@ -463,11 +470,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           onSubmit: _submitReceivingOperation,
           appBarTitle: 'Receiving Operation',
           submitLabel: 'Create Receiving Operation',
-          stepPages: [
-            _referenceDetailsStep(),
-            _itemScanStep(),
-            _reviewStep(),
-          ],
+          stepPages: [_referenceDetailsStep(), _itemScanStep(), _reviewStep()],
         );
       },
     );

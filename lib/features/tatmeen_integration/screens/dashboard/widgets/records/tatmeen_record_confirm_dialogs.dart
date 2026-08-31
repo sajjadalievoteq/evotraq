@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 
-Future<bool> showTatmeenRetryRecordDialog(BuildContext context) async {
+Future<bool> showTatmeenRetryRecordDialog(
+  BuildContext context, {
+  required bool isPending,
+}) async {
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      title: const Text('Retry this sync?'),
-      content: const SizedBox(
+      title: Text(isPending ? 'Resubmit to Tatmeen?' : 'Retry this sync?'),
+      content: SizedBox(
         width: 420,
         child: Text(
-          'This record will be queued for another Tatmeen sync attempt.',
+          isPending
+              ? 'A fresh Tatmeen submission will be sent with a new message ID. '
+                  'Use this when the previous attempt never reached Tatmeen.'
+              : 'This record will be queued for another Tatmeen sync attempt.',
         ),
       ),
       actions: [
@@ -18,7 +24,7 @@ Future<bool> showTatmeenRetryRecordDialog(BuildContext context) async {
         ),
         FilledButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: const Text('Retry'),
+          child: Text(isPending ? 'Resubmit' : 'Retry'),
         ),
       ],
     ),
@@ -26,15 +32,21 @@ Future<bool> showTatmeenRetryRecordDialog(BuildContext context) async {
   return confirmed ?? false;
 }
 
-Future<bool> showTatmeenDismissRecordDialog(BuildContext context) async {
+Future<bool> showTatmeenDismissRecordDialog(
+  BuildContext context, {
+  required bool isPending,
+}) async {
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      title: const Text('Dismiss this failed item?'),
-      content: const SizedBox(
+      title: Text(isPending ? 'Dismiss this pending sync?' : 'Dismiss this failed item?'),
+      content: SizedBox(
         width: 420,
         child: Text(
-          'The failed item will be dismissed from the queue. This cannot be undone.',
+          isPending
+              ? 'This stops status polling for the stale submission. '
+                  'Use Resubmit afterward to send a fresh message to Tatmeen.'
+              : 'The failed item will be dismissed from the queue. This cannot be undone.',
         ),
       ),
       actions: [

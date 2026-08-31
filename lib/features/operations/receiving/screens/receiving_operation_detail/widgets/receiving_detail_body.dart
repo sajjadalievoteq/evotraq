@@ -15,10 +15,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
 
 class ReceivingDetailBody extends StatelessWidget {
-  const ReceivingDetailBody({
-    super.key,
-    required this.operation,
-  });
+  const ReceivingDetailBody({super.key, required this.operation});
 
   final ReceivingResponse operation;
 

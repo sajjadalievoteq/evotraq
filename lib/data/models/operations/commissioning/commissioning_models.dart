@@ -1,4 +1,5 @@
 import 'commissioning_canonical_identifier.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 
 class CommissioningRequest {
   String? commissioningReference;
@@ -24,6 +25,8 @@ class CommissioningRequest {
   String? regulatoryStatus;
 
   String? countryOfOrigin;
+  String manufacturingOrigin;
+  String? shipmentPermit;
 
   String? readPointGLN;
 
@@ -47,6 +50,8 @@ class CommissioningRequest {
     this.regulatoryMarket,
     this.regulatoryStatus,
     this.countryOfOrigin,
+    required this.manufacturingOrigin,
+    this.shipmentPermit,
     this.readPointGLN,
     this.identifierType,
     this.canonicalIdentifiers,
@@ -70,6 +75,8 @@ class CommissioningRequest {
       'regulatoryMarket': regulatoryMarket,
       'regulatoryStatus': regulatoryStatus,
       'countryOfOrigin': countryOfOrigin,
+      'manufacturingOrigin': manufacturingOrigin,
+      'shipmentPermit': shipmentPermit,
       'readPointGLN': readPointGLN,
     };
   }
@@ -97,6 +104,8 @@ class CommissioningRequest {
       regulatoryMarket: json['regulatoryMarket'],
       regulatoryStatus: json['regulatoryStatus'],
       countryOfOrigin: json['countryOfOrigin'],
+      manufacturingOrigin: json['manufacturingOrigin'] as String? ?? '',
+      shipmentPermit: json['shipmentPermit'],
       readPointGLN: json['readPointGLN'],
       identifierType: json['identifierType'] as String?,
       canonicalIdentifiers: json['canonicalIdentifiers'] != null
@@ -115,7 +124,15 @@ class SsccCommissioningRequest {
   String? readPointGLN;
   String? operatorId;
   String? notes;
+  String? batchLotNumber;
   String? countryOfOrigin;
+  String manufacturingOrigin;
+  String? shipmentPermit;
+  DateTime? productionDate;
+  DateTime? expiryDate;
+  DateTime? bestBeforeDate;
+  String? eventTime;
+  String? eventTimeZoneOffset;
 
   List<String>? childEpcUris;
 
@@ -126,7 +143,15 @@ class SsccCommissioningRequest {
     this.readPointGLN,
     this.operatorId,
     this.notes,
+    this.batchLotNumber,
     this.countryOfOrigin,
+    required this.manufacturingOrigin,
+    this.shipmentPermit,
+    this.productionDate,
+    this.expiryDate,
+    this.bestBeforeDate,
+    this.eventTime,
+    this.eventTimeZoneOffset,
     this.childEpcUris,
   });
 
@@ -139,8 +164,22 @@ class SsccCommissioningRequest {
       'readPointGLN': readPointGLN,
     if (operatorId != null && operatorId!.isNotEmpty) 'operatorId': operatorId,
     if (notes != null && notes!.isNotEmpty) 'notes': notes,
+    if (batchLotNumber != null && batchLotNumber!.isNotEmpty)
+      'batchLotNumber': batchLotNumber,
     if (countryOfOrigin != null && countryOfOrigin!.isNotEmpty)
       'countryOfOrigin': countryOfOrigin,
+    if (manufacturingOrigin.isNotEmpty)
+      'manufacturingOrigin': manufacturingOrigin,
+    if (shipmentPermit != null && shipmentPermit!.isNotEmpty)
+      'shipmentPermit': shipmentPermit,
+    if (productionDate != null)
+      'productionDate': productionDate!.toIso8601String().split('T').first,
+    if (expiryDate != null)
+      'expiryDate': expiryDate!.toIso8601String().split('T').first,
+    if (bestBeforeDate != null)
+      'bestBeforeDate': bestBeforeDate!.toIso8601String().split('T').first,
+    if (eventTime != null) 'eventTime': eventTime,
+    if (eventTimeZoneOffset != null) 'eventTimeZoneOffset': eventTimeZoneOffset,
     if (childEpcUris != null && childEpcUris!.isNotEmpty)
       'childEpcUris': childEpcUris,
   };
@@ -241,10 +280,10 @@ class CommissioningResponse {
       failedCount: json['failedCount'],
       status: _parseStatus(json['status']),
       processedAt: json['processedAt'] != null
-          ? DateTime.parse(json['processedAt']).toLocal()
+          ? AppTime.parseApi(json['processedAt'])
           : null,
       eventTime: json['eventTime'] != null
-          ? DateTime.parse(json['eventTime']).toLocal()
+          ? AppTime.parseApi(json['eventTime'])
           : null,
       gtinCode: json['gtinCode'],
       batchLotNumber: json['batchLotNumber'],

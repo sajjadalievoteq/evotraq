@@ -11,21 +11,23 @@ class UnpackingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
-        showFloatingActionButton:
-            context.canPerform(OperationSteps.unpack),
-        appBarTitle: 'Unpacking Operations',
-        fabHeroTag: 'unpacking_fab',
-        fabAddTooltip: 'New unpacking operation',
-        createHeaderText: 'New Unpacking Operation',
-        emptyNoMatchText: 'No unpacking operations match your search.',
-        fabNavigateRoute: Constants.opUnpackingCreateRoute,
-        listBuilder: (context, {
+    showFloatingActionButton: context.canPerform(OperationSteps.unpack),
+    appBarTitle: 'Unpacking Operations',
+    listRoute: Constants.opUnpackingRoute,
+    detailRoute: (id) => '${Constants.opUnpackingRoute}/$id',
+    fabHeroTag: 'unpacking_fab',
+    fabAddTooltip: 'New unpacking operation',
+    createHeaderText: 'New Unpacking Operation',
+    emptyNoMatchText: 'No unpacking operations match your search.',
+    fabNavigateRoute: Constants.opUnpackingCreateRoute,
+    listBuilder:
+        (
+          context, {
           required selectedId,
           required onSelect,
           required bindRefresh,
           required onRequestCreate,
-        }) =>
-            UnpackingOperationListScreen(
+        }) => UnpackingOperationListScreen(
           embedded: true,
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
@@ -34,18 +36,19 @@ class UnpackingScreen extends StatelessWidget {
               ? onRequestCreate
               : null,
         ),
-        detailViewBuilder: (context, id) => UnpackingOperationDetailScreen(
+    detailViewBuilder: (context, id, {required editing}) =>
+        UnpackingOperationDetailScreen(
           key: ValueKey(id),
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context, {required listLoading}) =>
-            UnpackingOperationDetailScreen(
+    detailAwaitBuilder: (context, {required listLoading}) =>
+        UnpackingOperationDetailScreen(
           key: const ValueKey('__unpacking_split_await__'),
           embedded: true,
           awaitingSelection: true,
           listLoading: listLoading,
         ),
-        fallbackList: const UnpackingOperationListScreen(),
-      );
+    fallbackList: const UnpackingOperationListScreen(),
+  );
 }

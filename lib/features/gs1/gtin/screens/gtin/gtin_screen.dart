@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
@@ -7,6 +8,7 @@ import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/gtin_detail_
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_list/gtin_list_screen.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 
 class GTINScreen extends StatefulWidget {
@@ -38,6 +40,7 @@ class _GTINScreenState extends State<GTINScreen> {
       child: SplitOrListIndexedStack(
         split: Gs1SplitViewScreen<GTINCubit, GTINState>(
           appBarTitle: GtinUiConstants.appBarManagement,
+          listRoute: Constants.gs1GtinsRoute,
           fabHeroTag: 'gtin_split_view_add_fab',
           fabAddTooltip: 'Add New GTIN',
           fabCloseTooltip: 'Close create form',
@@ -67,13 +70,13 @@ class _GTINScreenState extends State<GTINScreen> {
                     onSelectGtin: onSelect,
                     onEmbeddedCreate: onRequestCreate,
                   ),
-          detailViewBuilder: (context, code) => GTINDetailScreen(
-            key: ValueKey(code),
+          detailViewBuilder: (context, code, {required editing}) => GTINDetailScreen(
+            key: ValueKey('$code-$editing'),
             gtinCode: code,
-            isEditing: false,
+            isEditing: editing,
             embedded: true,
           ),
-          detailCreateBuilder: (context, onSuccess) => GTINDetailScreen(
+          detailCreateBuilder: (context, onSuccess, {commissionAfterCreate = false}) => GTINDetailScreen(
             key: const ValueKey('__gtin_embedded_new__'),
             isEditing: true,
             embedded: true,
@@ -89,7 +92,12 @@ class _GTINScreenState extends State<GTINScreen> {
             awaitingListSelection: true,
           ),
         ),
-        fallback: const GTINListScreen(),
+        fallback: MasterDetailMobileRedirect(
+          listRoute: Constants.gs1GtinsRoute,
+          detailRoute: (id) => '${Constants.gs1GtinsRoute}/$id',
+          editRoute: (id) => '${Constants.gs1GtinsRoute}/$id/edit',
+          child: const GTINListScreen(),
+        ),
       ),
     );
   }

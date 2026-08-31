@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class CancelShippingResponse {
@@ -49,22 +50,25 @@ class CancelShippingResponse {
         ? List<String>.from((json['eventIds'] as List).map((e) => e.toString()))
         : null;
 
-    final epcList = (json['epcList'] as List?)
-            ?.map((e) => e.toString())
-            .toList() ??
+    final epcList =
+        (json['epcList'] as List?)?.map((e) => e.toString()).toList() ??
         (json['childEpcList'] as List?)?.map((e) => e.toString()).toList();
 
     return CancelShippingResponse(
-      cancelShippingOperationId: _readNonEmptyString(json['cancelShippingOperationId']) ??
+      cancelShippingOperationId:
+          _readNonEmptyString(json['cancelShippingOperationId']) ??
           _readNonEmptyString(json['operationId']) ??
           _readNonEmptyString(json['id']) ??
           _readNonEmptyString(metadata?['cancel_shipping_operation_id']) ??
           _firstNonEmptyString(eventIds) ??
           _readNonEmptyString(metadata?['event_id']) ??
           _readNonEmptyString(metadata?['eventId']),
-      cancelShippingReference: _readNonEmptyString(json['cancelShippingReference']),
+      cancelShippingReference: _readNonEmptyString(
+        json['cancelShippingReference'],
+      ),
       eventIds: eventIds,
-      cancelledEpcsCount: (json['cancelledEpcsCount'] as num?)?.toInt() ??
+      cancelledEpcsCount:
+          (json['cancelledEpcsCount'] as num?)?.toInt() ??
           (json['processedEpcsCount'] as num?)?.toInt() ??
           epcList?.length,
       epcList: epcList,
@@ -72,16 +76,18 @@ class CancelShippingResponse {
           ? parseOperationStatus(json['status'].toString())
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.tryParse(json['processedAt'].toString())?.toLocal()
+          ? AppTime.tryParseApi(json['processedAt'])
           : null,
       sourceGLN: _readNonEmptyString(json['sourceGLN']),
       destinationGLN: _readNonEmptyString(json['destinationGLN']),
       sourceLocation: OperationGlnDisplay.fromJson(json['sourceLocation']),
-      destinationLocation:
-          OperationGlnDisplay.fromJson(json['destinationLocation']),
+      destinationLocation: OperationGlnDisplay.fromJson(
+        json['destinationLocation'],
+      ),
       cancelReason: _readNonEmptyString(json['cancelReason']),
-      originalShippingReference:
-          _readNonEmptyString(json['originalShippingReference']),
+      originalShippingReference: _readNonEmptyString(
+        json['originalShippingReference'],
+      ),
       comments: _readNonEmptyString(json['comments']),
       messages: (json['messages'] as List?)?.map((e) => e.toString()).toList(),
       processingTimeMs: (json['processingTimeMs'] as num?)?.toInt(),

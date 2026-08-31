@@ -7,10 +7,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
 
 class UpdateStatusDetailLocationCard extends StatelessWidget {
-  const UpdateStatusDetailLocationCard({
-    super.key,
-    required this.operation,
-  });
+  const UpdateStatusDetailLocationCard({super.key, required this.operation});
 
   final UpdateStatusResponse operation;
 
@@ -40,13 +37,12 @@ class UpdateStatusDetailLocationCard extends StatelessWidget {
         if (operation.disposition != null)
           OperationDetailInfoRow(
             label: 'Status',
-            value: TextUtils().capitalize(UpdateStatusDisposition.labelFor(operation.disposition)),
+            value: TextUtils().capitalize(
+              UpdateStatusDisposition.labelFor(operation.disposition),
+            ),
           ),
         if (operation.reason != null)
-          OperationDetailInfoRow(
-            label: 'Reason',
-            value: operation.reason!,
-          ),
+          OperationDetailInfoRow(label: 'Reason', value: operation.reason!),
       ],
     );
   }

@@ -45,7 +45,8 @@ class CancelReceivingOperationScreen extends StatefulWidget {
       _CancelReceivingOperationScreenState();
 }
 
-class _CancelReceivingOperationScreenState extends State<CancelReceivingOperationScreen> {
+class _CancelReceivingOperationScreenState
+    extends State<CancelReceivingOperationScreen> {
   static const _wizardSteps = [
     OperationStepConfig.details,
     OperationStepConfig.items,
@@ -192,11 +193,12 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
 
     switch (_currentStep) {
       case 0:
-        final referenceError = CancelReceivingOperationStepValidator.validateReferenceStep(
-          sourceGln: _sourceGln,
-          receivingGln: _receivingGln,
-          cancelReason: _cancelReasonController.text,
-        );
+        final referenceError =
+            CancelReceivingOperationStepValidator.validateReferenceStep(
+              sourceGln: _sourceGln,
+              receivingGln: _receivingGln,
+              cancelReason: _cancelReasonController.text,
+            );
         if (referenceError != null) {
           if (referenceError.contains('Sender')) {
             setState(() => _sourceGlnError = referenceError);
@@ -211,7 +213,9 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
         return true;
       case 1:
         final itemsError =
-            CancelReceivingOperationStepValidator.validateItemsStep(_scannedEpcs);
+            CancelReceivingOperationStepValidator.validateItemsStep(
+              _scannedEpcs,
+            );
         if (itemsError != null) {
           context.showError(itemsError);
           return false;
@@ -230,7 +234,9 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
     try {
       final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-      final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
+      final failedConversions = List<String>.from(
+        conversionResult['failed'] ?? [],
+      );
 
       if (failedConversions.isNotEmpty) {
         context.showError(
@@ -296,8 +302,8 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
         actingGln: actingGln,
         originalReceivingReference:
             _originalReferenceController.text.trim().isNotEmpty
-                ? _originalReferenceController.text.trim()
-                : null,
+            ? _originalReferenceController.text.trim()
+            : null,
         comments: _commentsController.text.trim().isNotEmpty
             ? _commentsController.text.trim()
             : null,
@@ -319,20 +325,22 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
 
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
-            context
-                .read<OperationSplitCubit>()
-                .setCreatedId(response.navigableOperationId);
+            context.read<OperationSplitCubit>().setCreatedId(
+              response.navigableOperationId,
+            );
           }
           widget.onEmbeddedActionSuccess!();
         } else {
           popOrGo(context, Constants.opCancelReceivingRoute);
         }
       } else {
-        context.showError(OperationErrorTranslator.translateMessages(
-          response.messages,
-          fallback:
-              'The cancel receiving operation could not be completed. Check your inputs and try again.',
-        ));
+        context.showError(
+          OperationErrorTranslator.translateMessages(
+            response.messages,
+            fallback:
+                'The cancel receiving operation could not be completed. Check your inputs and try again.',
+          ),
+        );
       }
     } on ApiException catch (e) {
       context.showError(e.getUserFriendlyMessage());
@@ -354,13 +362,16 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
       );
       return;
     }
-    final duplicate = OperationEpcScanValidator.checkDuplicate(epc, _scannedEpcs);
+    final duplicate = OperationEpcScanValidator.checkDuplicate(
+      epc,
+      _scannedEpcs,
+    );
     if (duplicate != null) {
       context.showError('This EPC is already in the list.');
       return;
     }
     setState(() => _scannedEpcs.add(epc));
-    
+
     _checkEpcStatus(epc);
   }
 
@@ -374,8 +385,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
       } else {
         setState(() => _itemWarnings.remove(epc));
       }
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   @override
@@ -408,11 +418,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
           onSubmit: _submitCancelReceivingOperation,
           appBarTitle: 'Cancel Receiving',
           submitLabel: 'Cancel Receiving',
-          stepPages: [
-            _referenceDetailsStep(),
-            _itemScanStep(),
-            _reviewStep(),
-          ],
+          stepPages: [_referenceDetailsStep(), _itemScanStep(), _reviewStep()],
         );
       },
     );

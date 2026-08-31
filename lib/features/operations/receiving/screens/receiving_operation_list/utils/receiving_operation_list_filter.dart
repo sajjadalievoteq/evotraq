@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
+import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 
@@ -29,9 +29,9 @@ class ReceivingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.receivingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.receivingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
@@ -39,9 +39,9 @@ class ReceivingOperationListFilter {
               false) ||
           (operation.trackingNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.receivingOperationId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.receivingOperationId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false);
     }).toList();
 
@@ -77,9 +77,9 @@ class ReceivingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.operationReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.operationReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||

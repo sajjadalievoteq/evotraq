@@ -51,8 +51,7 @@ class UnpackingItemScanStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outlineVariant;
     final isPartial = scope == UnpackingScope.partial;
-    final allowed = allowedTypes ??
-        const [EPCType.sgtin, EPCType.sscc];
+    final allowed = allowedTypes ?? const [EPCType.sgtin, EPCType.sscc];
 
     final scopeCard = Gs1GroupCard(
       title: 'Unpack scope',
@@ -142,10 +141,7 @@ class UnpackingItemScanStep extends StatelessWidget {
             scopeCard,
             const SizedBox(height: 16),
             contentsTable,
-            if (isPartial) ...[
-              const SizedBox(height: 16),
-              addItemsCard,
-            ],
+            if (isPartial) ...[const SizedBox(height: 16), addItemsCard],
           ],
         ),
       );
@@ -156,17 +152,12 @@ class UnpackingItemScanStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          OperationContainerSummaryBanner(
-            parentContainerId: parentContainerId,
-          ),
+          OperationContainerSummaryBanner(parentContainerId: parentContainerId),
           const SizedBox(height: 16),
           scopeCard,
           const SizedBox(height: 16),
           Expanded(child: contentsTable),
-          if (isPartial) ...[
-            const SizedBox(height: 16),
-            addItemsCard,
-          ],
+          if (isPartial) ...[const SizedBox(height: 16), addItemsCard],
         ],
       ),
     );

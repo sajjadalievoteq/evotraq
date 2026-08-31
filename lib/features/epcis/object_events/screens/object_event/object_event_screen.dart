@@ -8,6 +8,9 @@ import 'package:traqtrace_app/features/epcis/object_events/screens/object_events
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_form/object_event_form_screen.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_events_list/utils/object_event_list_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/object_events/utils/object_event_shared_ui_constants.dart';
+import 'package:traqtrace_app/features/epcis/object_events/utils/object_event_route_constants.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 
@@ -44,6 +47,7 @@ class _ObjectEventScreenState extends State<ObjectEventScreen> {
       child: SplitOrListIndexedStack(
         split: Gs1SplitViewScreen<ObjectEventsCubit, ObjectEventsState>(
           appBarTitle: ObjectEventSharedUiConstants.appBarManagement,
+          listRoute: Constants.epcisObjectEventsRoute,
           fabHeroTag: ObjectEventSharedUiConstants.fabHeroTag,
           fabAddTooltip: ObjectEventSharedUiConstants.fabAddTooltip,
           fabCloseTooltip: ObjectEventSharedUiConstants.fabCloseTooltip,
@@ -72,12 +76,12 @@ class _ObjectEventScreenState extends State<ObjectEventScreen> {
                 onBindRefresh: bindRefresh,
                 onEmbeddedCreate: onRequestCreate,
               ),
-          detailViewBuilder: (context, id) => ObjectEventDetailScreen(
+          detailViewBuilder: (context, id, {required editing}) => ObjectEventDetailScreen(
             key: ValueKey(id),
             eventId: id,
             embedded: true,
           ),
-          detailCreateBuilder: (context, onSuccess) => ObjectEventFormScreen(
+          detailCreateBuilder: (context, onSuccess, {commissionAfterCreate = false}) => ObjectEventFormScreen(
             key: const ValueKey('__obj_event_embedded_new__'),
             embedded: true,
             onEmbeddedActionSuccess: onSuccess,
@@ -88,7 +92,11 @@ class _ObjectEventScreenState extends State<ObjectEventScreen> {
             awaitingListSelection: true,
           ),
         ),
-        fallback: const ObjectEventsListScreen(),
+        fallback: MasterDetailMobileRedirect(
+          listRoute: Constants.epcisObjectEventsRoute,
+          detailRoute: (id) => ObjectEventRouteConstants.detailLocation(id),
+          child: const ObjectEventsListScreen(),
+        ),
       ),
     );
   }

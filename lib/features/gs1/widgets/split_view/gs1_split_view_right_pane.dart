@@ -15,8 +15,10 @@ class Gs1SplitViewRightPane<TCubit extends StateStreamable<TState>, TState>
     required this.isEmptyNoMatch,
     required this.idsFromState,
     required this.detailViewBuilder,
+    required this.detailEditing,
     required this.detailAwaitBuilder,
     required this.detailCreateBuilder,
+    this.embeddedCreateWithCommission = false,
     required this.isListLoading,
     required this.createHeaderText,
     required this.closeCreateTooltip,
@@ -30,11 +32,22 @@ class Gs1SplitViewRightPane<TCubit extends StateStreamable<TState>, TState>
   final bool isCreateMode;
   final bool Function(TState state) isEmptyNoMatch;
   final Iterable<String>? Function(TState state) idsFromState;
-  final Widget Function(BuildContext context, String id) detailViewBuilder;
+  final Widget Function(
+    BuildContext context,
+    String id, {
+    required bool editing,
+  })
+  detailViewBuilder;
+  final bool detailEditing;
   final Widget Function(BuildContext context, {required bool listLoading})
   detailAwaitBuilder;
-  final Widget Function(BuildContext context, VoidCallback onSuccess)?
+  final Widget Function(
+    BuildContext context,
+    VoidCallback onSuccess, {
+    bool commissionAfterCreate,
+  })?
   detailCreateBuilder;
+  final bool embeddedCreateWithCommission;
   final bool Function(TState state)? isListLoading;
   final String createHeaderText;
   final String closeCreateTooltip;
@@ -58,7 +71,11 @@ class Gs1SplitViewRightPane<TCubit extends StateStreamable<TState>, TState>
         if (effective == null) {
           return detailAwaitBuilder(context, listLoading: false);
         }
-        return detailViewBuilder(context, effective);
+        return detailViewBuilder(
+          context,
+          effective,
+          editing: detailEditing,
+        );
       },
     );
     if (!useEmbeddedCreate) return viewPane;
@@ -104,7 +121,13 @@ class Gs1SplitViewRightPane<TCubit extends StateStreamable<TState>, TState>
           ),
         ),
         const Divider(height: 1),
-        Expanded(child: detailCreateBuilder!(context, onEmbeddedCreateSuccess)),
+        Expanded(
+          child: detailCreateBuilder!(
+            context,
+            onEmbeddedCreateSuccess,
+            commissionAfterCreate: embeddedCreateWithCommission,
+          ),
+        ),
       ],
     );
     return IndexedStack(

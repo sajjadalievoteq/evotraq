@@ -131,6 +131,9 @@ extension CommissioningSubmissionActions on CommissioningOperationViewState {
   Form buildStep1({bool embeddedInPanel = false}) => Form(
     key: step1FormKey,
     child: CommissioningStep1ProductDetails(
+      identifierType: identifiedType,
+      identifierTypeError: identifierTypeError,
+      onIdentifierTypeChanged: selectIdentifierType,
       commissioningLocationGLN: commissioningLocationGLN,
       locationError: locationError,
       onLocationChanged: (gln) => setState(() {
@@ -140,6 +143,8 @@ extension CommissioningSubmissionActions on CommissioningOperationViewState {
       pickerCatalog: availableLocations.isEmpty ? null : availableLocations,
       referenceController: referenceController,
       countryOfOriginController: countryOfOriginController,
+      manufacturingOriginController: manufacturingOriginController,
+      shipmentPermitController: shipmentPermitController,
       productionOrderController: productionOrderController,
       productionLineController: productionLineController,
       regulatoryMarketController: regulatoryMarketController,
@@ -170,7 +175,8 @@ extension CommissioningSubmissionActions on CommissioningOperationViewState {
     bestBeforeDate: bestBeforeDate,
     onSelectDate: selectDate,
     onClearDate: clearDate,
-    requireExpiry: isPharmaSgtin,
+    requireExpiry: identifiedType == EPCType.sgtin,
+    batchLookupState: batchState,
     itemProductNames: itemProductNames,
   );
 
@@ -188,6 +194,8 @@ extension CommissioningSubmissionActions on CommissioningOperationViewState {
     bestBeforeDate: bestBeforeDate,
     items: commissionItems,
     countryOfOrigin: countryOfOriginController.text.trim(),
+    manufacturingOrigin: manufacturingOriginController.text.trim(),
+    shipmentPermit: shipmentPermitController.text.trim(),
     productionOrder: productionOrderController.text.trim(),
     productionLine: productionLineController.text.trim(),
     regulatoryMarket: regulatoryMarketController.text.trim(),

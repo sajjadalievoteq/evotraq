@@ -4,10 +4,7 @@ import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_util
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
 class UnpackingDetailUnpackedItemsCard extends StatelessWidget {
-  const UnpackingDetailUnpackedItemsCard({
-    super.key,
-    required this.operation,
-  });
+  const UnpackingDetailUnpackedItemsCard({super.key, required this.operation});
 
   final UnpackingResponse operation;
 

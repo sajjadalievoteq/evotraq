@@ -13,6 +13,7 @@ class Gs1MasterDataDetailScaffold extends StatelessWidget {
     this.showSaveAction = false,
     this.onSave,
     this.saveEnabled = true,
+    this.saveInProgress = false,
     this.saveActionTooltip = 'Save',
   });
 
@@ -22,6 +23,7 @@ class Gs1MasterDataDetailScaffold extends StatelessWidget {
   final bool showSaveAction;
   final VoidCallback? onSave;
   final bool saveEnabled;
+  final bool saveInProgress;
   final String saveActionTooltip;
 
   @override
@@ -42,11 +44,24 @@ class Gs1MasterDataDetailScaffold extends StatelessWidget {
               ),
         actions: [
           if (showSaveAction && onSave != null)
-            IconButton(
-              tooltip: saveActionTooltip,
-              icon: const TraqIcon(AppAssets.iconSave),
-              onPressed: saveEnabled ? onSave : null,
-            ),
+            saveInProgress
+                ? IconButton(
+                    onPressed: null,
+                    tooltip: saveActionTooltip,
+                    icon: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  )
+                : IconButton(
+                    tooltip: saveActionTooltip,
+                    icon: const TraqIcon(AppAssets.iconSave),
+                    onPressed: saveEnabled ? onSave : null,
+                  ),
         ],
       ),
       drawer: const AppDrawer(),

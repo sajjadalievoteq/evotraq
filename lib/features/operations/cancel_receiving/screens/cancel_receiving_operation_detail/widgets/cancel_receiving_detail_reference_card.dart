@@ -41,7 +41,9 @@ class CancelReceivingDetailReferenceCard extends StatelessWidget {
         if (operation.processedAt != null)
           OperationDetailInfoRow(
             label: 'Processed At',
-            value: OperationDetailFormatters.formatDateTime(operation.processedAt!),
+            value: OperationDetailFormatters.formatDateTime(
+              operation.processedAt!,
+            ),
           ),
       ],
     );

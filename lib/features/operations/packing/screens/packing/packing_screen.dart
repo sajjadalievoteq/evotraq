@@ -11,21 +11,23 @@ class PackingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
-        showFloatingActionButton:
-            context.canPerform(OperationSteps.pack),
-        appBarTitle: 'Packing Operations',
-        fabHeroTag: 'packing_fab',
-        fabAddTooltip: 'New packing operation',
-        createHeaderText: 'New Packing Operation',
-        emptyNoMatchText: 'No packing operations match your search.',
-        fabNavigateRoute: Constants.opPackingCreateRoute,
-        listBuilder: (context, {
+    showFloatingActionButton: context.canPerform(OperationSteps.pack),
+    appBarTitle: 'Packing Operations',
+    listRoute: Constants.opPackingRoute,
+    detailRoute: (id) => '${Constants.opPackingRoute}/$id',
+    fabHeroTag: 'packing_fab',
+    fabAddTooltip: 'New packing operation',
+    createHeaderText: 'New Packing Operation',
+    emptyNoMatchText: 'No packing operations match your search.',
+    fabNavigateRoute: Constants.opPackingCreateRoute,
+    listBuilder:
+        (
+          context, {
           required selectedId,
           required onSelect,
           required bindRefresh,
           required onRequestCreate,
-        }) =>
-            PackingOperationListScreen(
+        }) => PackingOperationListScreen(
           embedded: true,
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
@@ -34,18 +36,19 @@ class PackingScreen extends StatelessWidget {
               ? onRequestCreate
               : null,
         ),
-        detailViewBuilder: (context, id) => PackingOperationDetailScreen(
+    detailViewBuilder: (context, id, {required editing}) =>
+        PackingOperationDetailScreen(
           key: ValueKey(id),
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context, {required listLoading}) =>
-            PackingOperationDetailScreen(
+    detailAwaitBuilder: (context, {required listLoading}) =>
+        PackingOperationDetailScreen(
           key: const ValueKey('__packing_split_await__'),
           embedded: true,
           awaitingSelection: true,
           listLoading: listLoading,
         ),
-        fallbackList: const PackingOperationListScreen(),
-      );
+    fallbackList: const PackingOperationListScreen(),
+  );
 }

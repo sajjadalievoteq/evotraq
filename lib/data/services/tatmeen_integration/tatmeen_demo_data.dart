@@ -200,7 +200,7 @@ abstract final class TatmeenDemoData {
       _rec(
         id: '5',
         operationId: 'OP-2024-08-005',
-        operationType: 'decommission',
+        operationType: 'update_status',
         status: TatmeenSyncStatus.pending,
         attempt: 1,
         durationMs: 0,

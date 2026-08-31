@@ -100,6 +100,7 @@ class SgtinResultsList extends StatelessWidget {
             child: RefreshIndicator(
               onRefresh: onRefresh,
               child: ListView.separated(
+                key: const PageStorageKey<String>('sgtin-results-list'),
                 controller: scrollController,
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: ClampingScrollPhysics(),
@@ -118,6 +119,9 @@ class SgtinResultsList extends StatelessWidget {
                   if (index < sgtins.length) {
                     final sgtin = sgtins[index];
                     return ConstrainedSectionContent(
+                      key: ValueKey<String>(
+                        'sgtin-${sgtin.id ?? sgtin.serialNumber}',
+                      ),
                       child: RepaintBoundary(
                         child: SgtinListItemCard(
                           sgtin: sgtin,

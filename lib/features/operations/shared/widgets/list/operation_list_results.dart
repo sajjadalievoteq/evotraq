@@ -51,7 +51,12 @@ class OperationListResults<T> extends StatelessWidget {
     if (isLoading) {
       return AppShimmer(
         child: ListView.builder(
-          padding: EdgeInsets.fromLTRB(context.horizontalPadding.left,0,context.horizontalPadding.left,0),
+          padding: EdgeInsets.fromLTRB(
+            context.horizontalPadding.left,
+            0,
+            context.horizontalPadding.left,
+            0,
+          ),
           itemCount: 6,
           itemBuilder: (context, _) => const OperationListCardSkeleton(),
         ),
@@ -85,7 +90,9 @@ class OperationListResults<T> extends StatelessWidget {
             notification is! OverscrollNotification) {
           return false;
         }
-        if (notification.metrics.extentAfter < 400 && hasMore && !isLoadingMore) {
+        if (notification.metrics.extentAfter < 400 &&
+            hasMore &&
+            !isLoadingMore) {
           onLoadMore();
         }
         return false;
@@ -104,7 +111,8 @@ class OperationListResults<T> extends StatelessWidget {
             addAutomaticKeepAlives: false,
             addRepaintBoundaries: true,
             cacheExtent: 400,
-            itemCount: filteredOperations.length +
+            itemCount:
+                filteredOperations.length +
                 ((hasMore && isLoadingMore) ? 1 : 0) +
                 1,
             itemBuilder: (context, index) {
@@ -112,7 +120,8 @@ class OperationListResults<T> extends StatelessWidget {
                 return itemBuilder(context, filteredOperations[index]);
               }
               final loaderIndex = filteredOperations.length;
-              final spacerIndex = filteredOperations.length +
+              final spacerIndex =
+                  filteredOperations.length +
                   ((hasMore && isLoadingMore) ? 1 : 0);
               if (index == loaderIndex && hasMore && isLoadingMore) {
                 return const Gs1ListLoadMoreIndicator();

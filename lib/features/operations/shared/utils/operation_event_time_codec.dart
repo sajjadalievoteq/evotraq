@@ -1,6 +1,8 @@
+import 'package:traqtrace_app/core/utils/app_time.dart';
+
 abstract final class OperationEventTimeCodec {
   static String localTimezoneOffset([DateTime? reference]) {
-    final offset = (reference ?? DateTime.now()).timeZoneOffset;
+    final offset = AppTime.uaeOffset;
     final hours = offset.inHours.abs().toString().padLeft(2, '0');
     final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
     final sign = offset.isNegative ? '-' : '+';
@@ -8,7 +10,14 @@ abstract final class OperationEventTimeCodec {
   }
 
   static String encodeLocal(DateTime local) {
-    final offset = local.timeZoneOffset;
+    return _encodeWallClock(local, local.timeZoneOffset);
+  }
+
+  static String encodeUaeWallClock(DateTime uaeWallClock) {
+    return _encodeWallClock(uaeWallClock, AppTime.uaeOffset);
+  }
+
+  static String _encodeWallClock(DateTime local, Duration offset) {
     final sign = offset.isNegative ? '-' : '+';
     final hours = offset.inHours.abs().toString().padLeft(2, '0');
     final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
@@ -21,16 +30,16 @@ abstract final class OperationEventTimeCodec {
     return '$y-$mo-${d}T$h:$mi:$s$sign$hours:$minutes';
   }
 
-  /// Parses an API instant (UTC / offset) into the device's local wall clock.
+  /// Parses an API instant into the UAE wall clock used by operation forms.
   static DateTime? parseApiDateTime(Object? raw) {
-    if (raw == null) return null;
-    return DateTime.tryParse(raw.toString())?.toLocal();
+    final instant = AppTime.tryParseApi(raw);
+    return instant == null ? null : AppTime.toUae(instant);
   }
 
   static Map<String, String> fieldsForRequest(DateTime? eventTime) {
-    final local = eventTime ?? DateTime.now();
+    final local = eventTime ?? AppTime.nowUae();
     return {
-      'eventTime': encodeLocal(local),
+      'eventTime': encodeUaeWallClock(local),
       'eventTimeZoneOffset': localTimezoneOffset(local),
     };
   }

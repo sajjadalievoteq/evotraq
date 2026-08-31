@@ -25,7 +25,9 @@ class OperationDetailMessagesCard extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(m, style: const TextStyle(fontSize: 13))),
+                  Expanded(
+                    child: Text(m, style: const TextStyle(fontSize: 13)),
+                  ),
                 ],
               ),
             ),

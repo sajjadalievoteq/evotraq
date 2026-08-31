@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class UnpackingResponse {
@@ -54,7 +55,8 @@ class UnpackingResponse {
         : null;
 
     return UnpackingResponse(
-      unpackingOperationId: _readNonEmptyString(json['unpackingOperationId']) ??
+      unpackingOperationId:
+          _readNonEmptyString(json['unpackingOperationId']) ??
           _readNonEmptyString(json['operationId']) ??
           _readNonEmptyString(json['id']) ??
           _readNonEmptyString(metadata?['unpackingOperationId']) ??
@@ -73,10 +75,12 @@ class UnpackingResponse {
           ? parseOperationStatus(json['status'])
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.parse(json['processedAt']).toLocal()
+          ? AppTime.parseApi(json['processedAt'])
           : null,
       unpackingLocationGLN: json['unpackingLocationGLN'],
-      operationLocation: OperationGlnDisplay.fromJson(json['operationLocation']),
+      operationLocation: OperationGlnDisplay.fromJson(
+        json['operationLocation'],
+      ),
       workOrderNumber: json['workOrderNumber'],
       batchNumber: json['batchNumber'],
       productionOrder: json['productionOrder'],
@@ -119,7 +123,9 @@ class UnpackingResponse {
 
   bool get isSuccess => status == OperationStatus.success;
   bool get isSuccessOrPartial =>
-      status == OperationStatus.success || status == OperationStatus.partialSuccess;
+      status == OperationStatus.success ||
+      status == OperationStatus.partialSuccess;
   bool get hasErrors =>
-      status == OperationStatus.failed || status == OperationStatus.validationError;
+      status == OperationStatus.failed ||
+      status == OperationStatus.validationError;
 }

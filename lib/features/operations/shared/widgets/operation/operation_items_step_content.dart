@@ -14,10 +14,7 @@ class OperationItemsStepContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        detailsStep,
-        itemsStep,
-      ],
+      children: [detailsStep, itemsStep],
     );
   }
 }

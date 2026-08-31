@@ -15,24 +15,24 @@ final _unpackingDetailConfig = OperationDetailScreenConfig<UnpackingResponse>(
       fallbackErrorMessage: fallbackErrorMessage,
     );
   },
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      UnpackingDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    operation: operation,
-    onRetry: onRetry,
-  ),
+  contentBuilder:
+      (
+        context, {
+        required awaitingSelection,
+        required listLoading,
+        required isLoading,
+        required errorMessage,
+        required operation,
+        required onRetry,
+        onOperationUpdated,
+      }) => UnpackingDetailContent(
+        awaitingSelection: awaitingSelection,
+        listLoading: listLoading,
+        isLoading: isLoading,
+        errorMessage: errorMessage,
+        operation: operation,
+        onRetry: onRetry,
+      ),
   titleBuilder: (op) => op.unpackingReference ?? 'Unpacking Detail',
   listRoute: Constants.opUnpackingRoute,
   defaultTitle: 'Unpacking Detail',

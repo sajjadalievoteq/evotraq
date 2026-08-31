@@ -26,7 +26,8 @@ class OperationDetailSingleGlnLocationCard extends StatelessWidget {
     return OperationDetailGroupCard(
       title: cardTitle,
       children: [
-        if (gln != null) OperationDetailInfoRowCopy(label: glnLabel, value: gln!),
+        if (gln != null)
+          OperationDetailInfoRowCopy(label: glnLabel, value: gln!),
         if (facilityName?.isNotEmpty == true)
           OperationDetailInfoRow(label: 'Facility', value: facilityName!),
         if (city?.isNotEmpty == true)

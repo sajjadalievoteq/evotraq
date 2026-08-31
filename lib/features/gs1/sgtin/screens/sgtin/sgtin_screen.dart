@@ -6,8 +6,10 @@ import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/sgtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/sgtin_list_screen.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 
 class SGTINScreen extends StatefulWidget {
   const SGTINScreen({super.key});
@@ -38,6 +40,7 @@ class _SGTINScreenState extends State<SGTINScreen> {
       child: SplitOrListIndexedStack(
         split: Gs1SplitViewScreen<SGTINCubit, SGTINState>(
           appBarTitle: SgtinUiConstants.appBarManagement,
+          listRoute: Constants.gs1SgtinsRoute,
           fabHeroTag: 'sgtin_split_view_add_fab',
           fabAddTooltip: SgtinUiConstants.fabAddNew,
           fabCloseTooltip: SgtinUiConstants.fabCloseCreate,
@@ -65,21 +68,14 @@ class _SGTINScreenState extends State<SGTINScreen> {
                 onSelectSgtin: onSelect,
                 onEmbeddedCreate: onRequestCreate,
               ),
-          detailViewBuilder: (context, id) => SGTINDetailScreen(
-            key: ValueKey(id),
+          detailViewBuilder: (context, id, {required editing}) => SGTINDetailScreen(
+            key: ValueKey('$id-$editing'),
             sgtinId: id,
-            isEditing: false,
+            isEditing: editing,
             embedded: true,
           ),
-          detailCreateBuilder: (context, onSuccess) => SGTINDetailScreen(
-            key: const ValueKey('__sgtin_embedded_new__'),
-            isEditing: true,
-            embedded: true,
-            onEmbeddedActionSuccess: () {
-              onSuccess();
-              _sgtinCubit.fetchSGTINList();
-            },
-          ),
+          fabNavigateRoute: Constants.opCommissioningNewRoute,
+          showFloatingActionButton: false,
           detailAwaitBuilder: (context, {required listLoading}) =>
               const SGTINDetailScreen(
                 key: ValueKey('__sgtin_split_await_list__'),
@@ -88,7 +84,12 @@ class _SGTINScreenState extends State<SGTINScreen> {
                 awaitingListSelection: true,
               ),
         ),
-        fallback: const SGTINListScreen(),
+        fallback: MasterDetailMobileRedirect(
+          listRoute: Constants.gs1SgtinsRoute,
+          detailRoute: (id) => '${Constants.gs1SgtinsRoute}/$id',
+          editRoute: (id) => '${Constants.gs1SgtinsRoute}/$id/edit',
+          child: const SGTINListScreen(),
+        ),
       ),
     );
   }

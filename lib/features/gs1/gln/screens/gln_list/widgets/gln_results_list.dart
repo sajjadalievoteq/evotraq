@@ -116,6 +116,7 @@ class GlnResultsList extends StatelessWidget {
             child: RefreshIndicator(
               onRefresh: onRefresh,
               child: ListView.separated(
+                key: const PageStorageKey<String>('gln-results-list'),
                 separatorBuilder: (BuildContext context, int index) {
                   return const SizedBox(height: Constants.spacing);
                 },
@@ -135,6 +136,7 @@ class GlnResultsList extends StatelessWidget {
                   if (index < glns.length) {
                     final gln = glns[index];
                     return ConstrainedSectionContent(
+                      key: ValueKey<String>('gln-${gln.glnCode}'),
                       child: RepaintBoundary(
                         child: GlnListItemCard(
                           gln: gln,

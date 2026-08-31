@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:traqtrace_app/core/network/token_manager.dart';
@@ -147,14 +146,12 @@ class WebSocketService {
       });
       // Connection success is confirmed only by the STOMP CONNECTED frame.
     } catch (e) {
-      print('Error connecting to WebSocket: $e');
       _reportConnectionFailure(e.toString());
       _scheduleReconnect();
     }
   }
 
-  void _reportConnectionFailure(String reason) {
-    print('WebSocket connection unavailable: $reason');
+  void _reportConnectionFailure(String _) {
     _connecting = false;
     _isConnected = false;
     if (!_connectionController.isClosed) {
@@ -199,7 +196,6 @@ class WebSocketService {
       final String messageStr = message.toString();
 
       if (messageStr.startsWith('CONNECTED')) {
-        print('WebSocket connected successfully');
         _connecting = false;
         _isConnected = true;
         _reconnectAttempts = 0;
@@ -211,12 +207,9 @@ class WebSocketService {
       } else if (messageStr.startsWith('MESSAGE')) {
         _handleStompMessage(messageStr);
       } else if (messageStr.startsWith('ERROR')) {
-        print('STOMP Error: $messageStr');
         _handleStompError(messageStr);
       }
-    } catch (e) {
-      print('Error processing message: $e');
-    }
+    } catch (_) {}
   }
 
   void _handleStompError(String messageStr) {
@@ -248,8 +241,7 @@ class WebSocketService {
     }
   }
 
-  void _onError(dynamic error) {
-    print('WebSocket Error: $error');
+  void _onError(dynamic _) {
     _connecting = false;
     _isConnected = false;
     if (!_connectionController.isClosed) {
@@ -261,7 +253,6 @@ class WebSocketService {
   }
 
   void _onDisconnect() {
-    print('WebSocket disconnected');
     _connecting = false;
     _isConnected = false;
     if (!_connectionController.isClosed) {
@@ -368,9 +359,7 @@ class WebSocketService {
           _notificationController.add(notification);
         }
       }
-    } catch (e) {
-      print('Error parsing STOMP message: $e');
-    }
+    } catch (_) {}
   }
 
   void _startHeartbeat() {
@@ -403,34 +392,9 @@ class WebSocketService {
 
     _reconnectTimer = Timer(Duration(milliseconds: delayMs), () {
       if (!_isConnected && !_intentionalDisconnect) {
-        _logReconnectAttempt(_reconnectAttempts);
         connect();
       }
     });
-  }
-
-  DateTime? _lastReconnectLogAt;
-  int _suppressedReconnectLogs = 0;
-
-  void _logReconnectAttempt(int attempt) {
-    if (!kDebugMode) return;
-    final now = DateTime.now();
-    final last = _lastReconnectLogAt;
-    if (last != null && now.difference(last) < const Duration(seconds: 15)) {
-      _suppressedReconnectLogs++;
-      return;
-    }
-    final suppressed = _suppressedReconnectLogs;
-    _suppressedReconnectLogs = 0;
-    _lastReconnectLogAt = now;
-    if (suppressed > 0) {
-      debugPrint(
-        'Attempting to reconnect... (attempt $attempt; '
-        'suppressed $suppressed identical logs)',
-      );
-    } else {
-      debugPrint('Attempting to reconnect... (attempt $attempt)');
-    }
   }
 
   void subscribeToNotifications(String subscriptionId) {

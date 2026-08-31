@@ -16,11 +16,13 @@ class TatmeenRecordTile extends StatelessWidget {
     required this.record,
     required this.busy,
     required this.onRetry,
+    required this.onDismiss,
   });
 
   final TatmeenSyncRecord record;
   final bool busy;
   final Future<TatmeenRetryOutcome> Function() onRetry;
+  final Future<void> Function() onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -71,29 +73,64 @@ class TatmeenRecordTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TatmeenSyncStatusBadge(status: record.status),
-                  if (record.status == TatmeenSyncStatus.failed)
-                    FilledButton(
-                      onPressed: busy
-                          ? null
-                          : () async {
-                              final confirmed =
-                                  await showTatmeenRetryRecordDialog(context);
-                              if (!confirmed) return;
-                              final outcome = await onRetry();
-                              if (!context.mounted) return;
-                              if (outcome.succeeded) {
-                                context.showSuccess(outcome.message);
-                              } else {
-                                context.showError(outcome.message);
-                              }
-                            },
-                      child: busy
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Retry'),
+                  if (record.status == TatmeenSyncStatus.failed ||
+                      record.status == TatmeenSyncStatus.pending)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        FilledButton(
+                          onPressed: busy
+                              ? null
+                              : () async {
+                                  final confirmed =
+                                      await showTatmeenRetryRecordDialog(
+                                    context,
+                                    isPending: record.status ==
+                                        TatmeenSyncStatus.pending,
+                                  );
+                                  if (!confirmed) return;
+                                  final outcome = await onRetry();
+                                  if (!context.mounted) return;
+                                  if (outcome.succeeded) {
+                                    context.showSuccess(outcome.message);
+                                  } else {
+                                    context.showError(outcome.message);
+                                  }
+                                },
+                          child: busy
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(
+                                  record.status == TatmeenSyncStatus.pending
+                                      ? 'Resubmit'
+                                      : 'Retry',
+                                ),
+                        ),
+                        if (record.status == TatmeenSyncStatus.pending) ...[
+                          const SizedBox(height: TraqSpacing.xs),
+                          TextButton(
+                            onPressed: busy
+                                ? null
+                                : () async {
+                                    final confirmed =
+                                        await showTatmeenDismissRecordDialog(
+                                      context,
+                                      isPending: true,
+                                    );
+                                    if (!confirmed) return;
+                                    await onDismiss();
+                                    if (!context.mounted) return;
+                                    context.showSuccess(
+                                      'Pending sync dismissed.',
+                                    );
+                                  },
+                            child: const Text('Dismiss'),
+                          ),
+                        ],
+                      ],
                     ),
                 ],
               ),

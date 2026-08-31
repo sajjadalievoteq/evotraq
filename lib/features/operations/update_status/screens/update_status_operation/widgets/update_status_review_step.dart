@@ -56,7 +56,10 @@ class UpdateStatusReviewStep extends StatelessWidget {
               children: [
                 OperationReviewInfoRow('Reference', 'Auto-generated on submit'),
                 const SizedBox(height: 12),
-                OperationReviewInfoRow('Location GLN', locationGln?.glnCode ?? '-'),
+                OperationReviewInfoRow(
+                  'Location GLN',
+                  locationGln?.glnCode ?? '-',
+                ),
                 if (locationGln?.locationName.isNotEmpty == true)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
@@ -68,7 +71,10 @@ class UpdateStatusReviewStep extends StatelessWidget {
                 const SizedBox(height: 12),
                 OperationReviewInfoRow('Status', disposition?.label ?? '-'),
                 const SizedBox(height: 12),
-                OperationReviewInfoRow('Reason', reason.isNotEmpty ? reason : '-'),
+                OperationReviewInfoRow(
+                  'Reason',
+                  reason.isNotEmpty ? reason : '-',
+                ),
                 OperationReviewOptionalFields([
                   OperationReviewField('Comments', comments),
                 ]),
@@ -76,7 +82,7 @@ class UpdateStatusReviewStep extends StatelessWidget {
                 OperationReviewInfoRow(
                   'Event Time',
                   eventTime != null
-                      ? _eventTimeFormat.format(eventTime!.toLocal())
+                      ? _eventTimeFormat.format(eventTime!)
                       : 'Now (at time of submission)',
                 ),
               ],
@@ -95,13 +101,18 @@ class UpdateStatusReviewStep extends StatelessWidget {
                             contentPadding: EdgeInsets.zero,
                             leading: TraqIcon(
                               AppAssets.iconQr,
-                              color: OperationEpcTypeUtils.colorFromValue(context, epc),
+                              color: OperationEpcTypeUtils.colorFromValue(
+                                context,
+                                epc,
+                              ),
                             ),
                             title: Text(
                               epc,
                               style: const TextStyle(fontFamily: 'monospace'),
                             ),
-                            subtitle: Text(OperationEpcTypeUtils.labelFromValue(epc)),
+                            subtitle: Text(
+                              OperationEpcTypeUtils.labelFromValue(epc),
+                            ),
                           ),
                         )
                         .toList(),

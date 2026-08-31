@@ -13,6 +13,8 @@ class CommissioningScreen extends StatelessWidget {
   Widget build(BuildContext context) => OperationEntryScreen(
     showFloatingActionButton: context.canPerform(OperationSteps.commission),
     appBarTitle: 'Commissioning',
+    listRoute: Constants.opCommissioningRoute,
+    detailRoute: (id) => '${Constants.opCommissioningRoute}/$id',
     fabHeroTag: 'commissioning_fab',
     fabAddTooltip: 'New commissioning operation',
     createHeaderText: 'New Commissioning Operation',
@@ -34,11 +36,12 @@ class CommissioningScreen extends StatelessWidget {
               ? onRequestCreate
               : null,
         ),
-    detailViewBuilder: (context, id) => CommissioningOperationDetailScreen(
-      key: ValueKey(id),
-      batchId: id,
-      embedded: true,
-    ),
+    detailViewBuilder: (context, id, {required editing}) =>
+        CommissioningOperationDetailScreen(
+          key: ValueKey(id),
+          batchId: id,
+          embedded: true,
+        ),
     detailAwaitBuilder: (context, {required listLoading}) =>
         CommissioningOperationDetailScreen(
           key: const ValueKey('__commissioning_split_await__'),

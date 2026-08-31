@@ -104,6 +104,7 @@ class SsccResultsList extends StatelessWidget {
             child: RefreshIndicator(
               onRefresh: onRefresh,
               child: ListView.separated(
+                key: const PageStorageKey<String>('sscc-results-list'),
                 controller: scrollController,
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: ClampingScrollPhysics(),
@@ -122,6 +123,7 @@ class SsccResultsList extends StatelessWidget {
                   if (index < state.ssccs.length) {
                     final sscc = state.ssccs[index];
                     return ConstrainedSectionContent(
+                      key: ValueKey<String>('sscc-${sscc.ssccCode}'),
                       child: RepaintBoundary(
                         child: SsccListItemCard(
                           sscc: sscc,

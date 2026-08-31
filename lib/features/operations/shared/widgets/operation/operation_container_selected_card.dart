@@ -16,13 +16,17 @@ class OperationContainerSelectedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        AppColorMapper.operationTypeColor(context, OperationType.packing);
+    final color = AppColorMapper.operationTypeColor(
+      context,
+      OperationType.packing,
+    );
     return Card(
       color: AppColorMapper.operationTypeSoft(context, OperationType.packing),
       child: ListTile(
-        leading: TraqIcon(AppColorMapper.operationTypeIcon(OperationType.packing),
-            color: color),
+        leading: TraqIcon(
+          AppColorMapper.operationTypeIcon(OperationType.packing),
+          color: color,
+        ),
         title: const Text('Container Selected'),
         subtitle: Text(
           containerId,

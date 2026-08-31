@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 
 class TatmeenIntegrationSettings extends Equatable {
   const TatmeenIntegrationSettings({
@@ -42,7 +43,7 @@ class TatmeenIntegrationSettings extends Equatable {
       apiKeyHint: json['apiKeyHint'] as String?,
       updatedAt: updatedAtRaw == null
           ? null
-          : DateTime.tryParse(updatedAtRaw.toString())?.toLocal(),
+          : AppTime.tryParseApi(updatedAtRaw),
       updatedBy: json['updatedBy'] as String?,
       notificationEmails: _stringList(json['notificationEmails']),
       notifyFailedSync: json['notifyFailedSync'] != false,
@@ -144,7 +145,9 @@ class UpdateTatmeenIntegrationSettingsRequest extends Equatable {
     if (notifyConnectionErrors != null) {
       json['notifyConnectionErrors'] = notifyConnectionErrors;
     }
-    if (notifyDailyDigest != null) json['notifyDailyDigest'] = notifyDailyDigest;
+    if (notifyDailyDigest != null) {
+      json['notifyDailyDigest'] = notifyDailyDigest;
+    }
     return json;
   }
 

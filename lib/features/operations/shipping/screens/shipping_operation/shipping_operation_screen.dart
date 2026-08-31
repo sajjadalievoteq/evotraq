@@ -40,7 +40,8 @@ class ShippingOperationScreen extends StatefulWidget {
   final VoidCallback? onEmbeddedActionSuccess;
 
   @override
-  State<ShippingOperationScreen> createState() => _ShippingOperationScreenState();
+  State<ShippingOperationScreen> createState() =>
+      _ShippingOperationScreenState();
 }
 
 class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
@@ -211,10 +212,11 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
 
     switch (_currentStep) {
       case 0:
-        final referenceError = ShippingOperationStepValidator.validateReferenceStep(
-          sourceGln: _sourceGln,
-          destinationGln: _destinationGln,
-        );
+        final referenceError =
+            ShippingOperationStepValidator.validateReferenceStep(
+              sourceGln: _sourceGln,
+              destinationGln: _destinationGln,
+            );
         if (referenceError != null) {
           if (referenceError.contains('Ship From')) {
             setState(() => _sourceGlnError = referenceError);
@@ -227,7 +229,9 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
         }
         return true;
       case 1:
-        final itemsError = ShippingOperationStepValidator.validateItemsStep(_scannedEpcs);
+        final itemsError = ShippingOperationStepValidator.validateItemsStep(
+          _scannedEpcs,
+        );
         if (itemsError != null) {
           _showOperationError(itemsError);
           return false;
@@ -247,19 +251,19 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
       final shippingService = getIt<ShippingOperationService>();
       final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-      final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
+      final failedConversions = List<String>.from(
+        conversionResult['failed'] ?? [],
+      );
 
       if (failedConversions.isNotEmpty) {
-_showOperationError(
+        _showOperationError(
           ShippingSubmitErrorMessage.epcConversionFailures(failedConversions),
         );
         return;
       }
 
       if (epcUris.isEmpty) {
-_showOperationError(
-          ShippingSubmitErrorMessage.emptyEpcList(),
-        );
+        _showOperationError(ShippingSubmitErrorMessage.emptyEpcList());
         return;
       }
 
@@ -306,7 +310,9 @@ _showOperationError(
         eventTime: _eventTime,
       );
 
-      final response = await shippingService.createShippingOperation(shippingRequest);
+      final response = await shippingService.createShippingOperation(
+        shippingRequest,
+      );
 
       if (response.isSuccessOrPartial) {
         if (response.status == OperationStatus.partialSuccess) {
@@ -314,35 +320,27 @@ _showOperationError(
             'Shipping submitted with warnings. Open the record for details.',
           );
         } else {
-          context.showSuccess(
-            'Shipping operation completed successfully.',
-          );
+          context.showSuccess('Shipping operation completed successfully.');
         }
         if (!mounted) return;
 
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
-            context
-                .read<OperationSplitCubit>()
-                .setCreatedId(response.navigableOperationId);
+            context.read<OperationSplitCubit>().setCreatedId(
+              response.navigableOperationId,
+            );
           }
           widget.onEmbeddedActionSuccess!();
         } else {
           popOrGo(context, Constants.opShippingRoute);
         }
       } else {
-_showOperationError(
-          ShippingSubmitErrorMessage.fromResponse(response),
-        );
+        _showOperationError(ShippingSubmitErrorMessage.fromResponse(response));
       }
     } on ApiException catch (e) {
-      _showOperationError(
-        ShippingSubmitErrorMessage.fromApiException(e),
-      );
+      _showOperationError(ShippingSubmitErrorMessage.fromApiException(e));
     } catch (e) {
-      _showOperationError(
-        ShippingSubmitErrorMessage.unexpected(e),
-      );
+      _showOperationError(ShippingSubmitErrorMessage.unexpected(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -421,11 +419,7 @@ _showOperationError(
           onSubmit: _submitShippingOperation,
           appBarTitle: 'Shipping Operation',
           submitLabel: 'Create Shipping Operation',
-          stepPages: [
-            _referenceDetailsStep(),
-            _itemScanStep(),
-            _reviewStep(),
-          ],
+          stepPages: [_referenceDetailsStep(), _itemScanStep(), _reviewStep()],
         );
       },
     );

@@ -8,6 +8,9 @@ import 'package:traqtrace_app/features/operations/commissioning/screens/commissi
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_clear_serials_dialog.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_field_validators.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_serial_pool_status.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_lookup_status.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_state.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 
 extension CommissioningWorkflowActions on CommissioningOperationViewState {
   Future<void> nextStep() async {
@@ -29,14 +32,35 @@ extension CommissioningWorkflowActions on CommissioningOperationViewState {
   }
 
   Future<bool> validateDetailsStep() async {
-    setState(() => locationError = null);
+    setState(() {
+      locationError = null;
+      identifierTypeError = identifiedType == null
+          ? 'Select SGTIN or SSCC'
+          : null;
+    });
     final formValid = step1FormKey.currentState?.validate() ?? false;
-    var isValid = formValid;
+    var isValid = formValid && identifiedType != null;
     if (commissioningLocationGLN == null) {
       setState(() => locationError = 'Commissioning Location is required');
       isValid = false;
     }
     return isValid;
+  }
+
+  void selectIdentifierType(EPCType type) {
+    if (identifiedType == type) return;
+    countryOfOriginController.clear();
+    manufacturingOriginController.clear();
+    shipmentPermitController.clear();
+    productionOrderController.clear();
+    productionLineController.clear();
+    regulatoryMarketController.clear();
+    regulatoryStatusController.clear();
+    setState(() {
+      _resetIdentification();
+      identifiedType = type;
+      identifierTypeError = null;
+    });
   }
 
   Future<bool> validateItemsStep() async {
@@ -79,10 +103,18 @@ extension CommissioningWorkflowActions on CommissioningOperationViewState {
         context.showError(batchErr);
         return false;
       }
-      if (isPharmaSgtin && expiryDate == null) {
+      if (expiryDate == null) {
+        context.showError('Expiry Date is required for commissioning');
+        return false;
+      }
+      if (productionDate == null) {
         context.showError(
-          'Expiry Date is required for pharmaceutical commissioning',
+          'Lot Manufacturing Date is required for Tatmeen commissioning',
         );
+        return false;
+      }
+      if (batchState.status == SgtinBatchLookupStatus.lookingUp) {
+        context.showWarning('Batch lookup is still running — wait and retry.');
         return false;
       }
     }
@@ -121,6 +153,14 @@ extension CommissioningWorkflowActions on CommissioningOperationViewState {
     pharmaGtinIdentifiedFor = null;
     poolCheckCache.clear();
     commissionItems.clear();
+    batchCubit.clear();
+    batchState = const SgtinBatchState();
+    batchLotController.clear();
+    productionDate = null;
+    expiryDate = null;
+    bestBeforeDate = null;
+    productionDateManuallySet = false;
+    expiryManuallySet = false;
   }
 
   Future<void> clearAllItems() async {
@@ -187,6 +227,7 @@ extension CommissioningWorkflowActions on CommissioningOperationViewState {
 
   SsccCommissioningRequest buildSsccCommissioningRequest() {
     final readPoint = readPointGlnController.text.trim();
+    final eventFields = OperationEventTimeCodec.fieldsForRequest(null);
     return SsccCommissioningRequest(
       commissioningReference: referenceController.text.trim().isNotEmpty
           ? referenceController.text.trim()
@@ -200,9 +241,21 @@ extension CommissioningWorkflowActions on CommissioningOperationViewState {
       notes: notesController.text.trim().isNotEmpty
           ? notesController.text.trim()
           : null,
+      batchLotNumber: batchLotController.text.trim().isNotEmpty
+          ? batchLotController.text.trim()
+          : null,
       countryOfOrigin: countryOfOriginController.text.trim().isNotEmpty
           ? countryOfOriginController.text.trim().toUpperCase()
           : null,
+      manufacturingOrigin: manufacturingOriginController.text.trim(),
+      shipmentPermit: shipmentPermitController.text.trim().isNotEmpty
+          ? shipmentPermitController.text.trim()
+          : null,
+      productionDate: productionDate,
+      expiryDate: expiryDate,
+      bestBeforeDate: bestBeforeDate,
+      eventTime: eventFields['eventTime'],
+      eventTimeZoneOffset: eventFields['eventTimeZoneOffset'],
 
       childEpcUris: null,
     );
@@ -235,6 +288,10 @@ extension CommissioningWorkflowActions on CommissioningOperationViewState {
           : null,
       countryOfOrigin: countryOfOriginController.text.trim().isNotEmpty
           ? countryOfOriginController.text.trim().toUpperCase()
+          : null,
+      manufacturingOrigin: manufacturingOriginController.text.trim(),
+      shipmentPermit: shipmentPermitController.text.trim().isNotEmpty
+          ? shipmentPermitController.text.trim()
           : null,
       productionOrder: productionOrderController.text.trim().isNotEmpty
           ? productionOrderController.text.trim()

@@ -12,6 +12,8 @@ class InboxOutboxScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return OperationEntryScreen(
       appBarTitle: 'Inbox / Outbox',
+      listRoute: Constants.inboxOutboxRoute,
+      detailRoute: (id) => '${Constants.opShippingRoute}/$id',
       fabHeroTag: 'inbox_outbox_fab',
       fabAddTooltip: 'Set operational location in Profile',
       createHeaderText: 'Operational Location',
@@ -29,7 +31,7 @@ class InboxOutboxScreen extends StatelessWidget {
         onSelectOperation: onSelect,
         onBindRefresh: bindRefresh,
       ),
-      detailViewBuilder: (context, id) => ShippingOperationDetailScreen(
+      detailViewBuilder: (context, id, {required editing}) => ShippingOperationDetailScreen(
         key: ValueKey('inbox_outbox_$id'),
         operationId: id,
         embedded: true,

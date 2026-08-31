@@ -1,6 +1,7 @@
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 import 'package:uuid/uuid.dart';
@@ -21,7 +22,7 @@ class EPCISEvent {
   final String? disposition;
 
   final String? businessStep;
-  
+
   final GLN? readPoint;
 
   final GLN? businessLocation;
@@ -33,9 +34,9 @@ class EPCISEvent {
   final Map<String, String>? extensions;
 
   final DateTime? createdAt;
-  
+
   final List<SensorElement>? sensorElementList;
-  
+
   final List<CertificationInfo>? certificationInfo;
 
   EPCISEvent({
@@ -63,30 +64,38 @@ class EPCISEvent {
           .map((element) => SensorElement.fromJson(element))
           .toList();
     }
-    
+
     List<CertificationInfo>? certInfo;
     if (json['certificationInfo'] != null) {
       try {
-        print("Processing certification info in EPCISEvent: ${json['certificationInfo']}");
+        print(
+          "Processing certification info in EPCISEvent: ${json['certificationInfo']}",
+        );
 
         if (json['certificationInfo'] is List) {
-          certInfo = (json['certificationInfo'] as List)
-              .map((info) {
-                if (info is Map<String, dynamic>) {
-                  return CertificationInfo.fromJson(info);
-                } else if (info is Map) {
-                  return CertificationInfo.fromJson(Map<String, dynamic>.from(info));
-                } else {
-                  print("Unexpected certification info item type: ${info.runtimeType}");
-                  throw FormatException("Invalid certification info format");
-                }
-              })
-              .toList();
+          certInfo = (json['certificationInfo'] as List).map((info) {
+            if (info is Map<String, dynamic>) {
+              return CertificationInfo.fromJson(info);
+            } else if (info is Map) {
+              return CertificationInfo.fromJson(
+                Map<String, dynamic>.from(info),
+              );
+            } else {
+              print(
+                "Unexpected certification info item type: ${info.runtimeType}",
+              );
+              throw FormatException("Invalid certification info format");
+            }
+          }).toList();
         } else if (json['certificationInfo'] is Map) {
           final info = json['certificationInfo'] as Map;
-          certInfo = [CertificationInfo.fromJson(Map<String, dynamic>.from(info))];
+          certInfo = [
+            CertificationInfo.fromJson(Map<String, dynamic>.from(info)),
+          ];
         } else {
-          print("Unexpected certification info type: ${json['certificationInfo'].runtimeType}");
+          print(
+            "Unexpected certification info type: ${json['certificationInfo'].runtimeType}",
+          );
           certInfo = [];
         }
 
@@ -96,46 +105,56 @@ class EPCISEvent {
         certInfo = [];
       }
     }
-    
+
     return EPCISEvent(
       id: json['id'],
-      eventId: (json['eventId'] != null && json['eventId'].toString().isNotEmpty)
-            ? json['eventId'] 
-            : 'urn:epcglobal:cbv:epcis:event:${Uuid().v4()}',
-      eventTime: DateTime.parse(json['eventTime']).toLocal(),
-      recordTime: DateTime.parse(json['recordTime']).toLocal(),
-      eventTimeZone: json['eventTimeZone'] ?? json['eventTimeZoneOffset'] ?? '+00:00',
-      epcisVersion: json['epcisVersion'] != null 
-          ? (json['epcisVersion'].toString() == '1.3' 
-              ? EPCISVersion.v1_3 
-              : EPCISVersion.v2_0)
+      eventId:
+          (json['eventId'] != null && json['eventId'].toString().isNotEmpty)
+          ? json['eventId']
+          : 'urn:epcglobal:cbv:epcis:event:${Uuid().v4()}',
+      eventTime: AppTime.parseApi(json['eventTime']),
+      recordTime: AppTime.parseApi(json['recordTime']),
+      eventTimeZone:
+          json['eventTimeZone'] ?? json['eventTimeZoneOffset'] ?? '+00:00',
+      epcisVersion: json['epcisVersion'] != null
+          ? (json['epcisVersion'].toString() == '1.3'
+                ? EPCISVersion.v1_3
+                : EPCISVersion.v2_0)
           : EPCISVersion.v2_0,
       disposition: json['disposition'],
       businessStep: json['businessStep'] ?? json['bizStep'],
-      readPoint: json['readPoint'] != null 
-          ? (json['readPoint'] is String 
-              ? GLN.fromCode(json['readPoint'])
-              : GLN.fromJson(json['readPoint']))
+      readPoint: json['readPoint'] != null
+          ? (json['readPoint'] is String
+                ? GLN.fromCode(json['readPoint'])
+                : GLN.fromJson(json['readPoint']))
           : null,
-      businessLocation: json['businessLocation'] != null 
-          ? (json['businessLocation'] is String 
-              ? GLN.fromCode(json['businessLocation'])
-              : GLN.fromJson(json['businessLocation']))
+      businessLocation: json['businessLocation'] != null
+          ? (json['businessLocation'] is String
+                ? GLN.fromCode(json['businessLocation'])
+                : GLN.fromJson(json['businessLocation']))
           : null,
       eventHash: json['eventHash'],
-      bizData: json['bizData'] != null ? Map<String, String>.from(json['bizData']) : null,
-      extensions: json['extensions'] != null ? Map<String, String>.from(json['extensions']) : null,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      bizData: json['bizData'] != null
+          ? Map<String, String>.from(json['bizData'])
+          : null,
+      extensions: json['extensions'] != null
+          ? Map<String, String>.from(json['extensions'])
+          : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null,
       sensorElementList: sensorElements,
       certificationInfo: certInfo,
     );
   }
   Map<String, dynamic> toJson() {
-    final String formattedEventTimeZone = eventTimeZone.isNotEmpty ? eventTimeZone : '+00:00';
+    final String formattedEventTimeZone = eventTimeZone.isNotEmpty
+        ? eventTimeZone
+        : '+00:00';
 
     final String formattedEventTime = _formatDateWithTimezone(eventTime);
     final String formattedRecordTime = _formatDateWithTimezone(recordTime);
-      
+
     final Map<String, dynamic> data = {
       'eventId': eventId,
       'eventTime': formattedEventTime,
@@ -143,9 +162,9 @@ class EPCISEvent {
       'eventTimeZoneOffset': formattedEventTimeZone,
       'eventTimeZone': formattedEventTimeZone,
     };
-    
+
     if (id != null) data['id'] = id;
-    
+
     if (epcisVersion != null) {
       if (epcisVersion == EPCISVersion.v1_3) {
         data['epcisVersion'] = '1.3';
@@ -155,7 +174,7 @@ class EPCISEvent {
     } else {
       data['epcisVersion'] = '2.0';
     }
-    
+
     final versionString = epcisVersion == EPCISVersion.v1_3 ? '1.3' : '2.0';
 
     if (disposition != null) {
@@ -171,7 +190,7 @@ class EPCISEvent {
         businessStep!,
       );
     }
-    
+
     if (readPoint != null) {
       data['readPoint'] = readPoint!.glnCode;
     } else if (businessLocation != null) {
@@ -188,22 +207,30 @@ class EPCISEvent {
       data['bizData'] = {};
     }
     if (extensions != null) data['extensions'] = extensions;
-    if (createdAt != null) data['createdAt'] = _formatDateWithTimezone(createdAt!);
-    
+    if (createdAt != null) {
+      data['createdAt'] = _formatDateWithTimezone(createdAt!);
+    }
+
     if (sensorElementList != null && sensorElementList!.isNotEmpty) {
-      data['sensorElementList'] = sensorElementList!.map((element) => element.toJson()).toList();
+      data['sensorElementList'] = sensorElementList!
+          .map((element) => element.toJson())
+          .toList();
     }
-    
+
     if (certificationInfo != null && certificationInfo!.isNotEmpty) {
-      data['certificationInfo'] = certificationInfo!.map((cert) => cert.toJson()).toList();
+      data['certificationInfo'] = certificationInfo!
+          .map((cert) => cert.toJson())
+          .toList();
     } else {
-      data['certificationInfo'] = [{
-        "certificateNumber": "default",
-        "certificationStandard": "none",
-        "certificationAgency": "none"
-      }];
+      data['certificationInfo'] = [
+        {
+          "certificateNumber": "default",
+          "certificationStandard": "none",
+          "certificationAgency": "none",
+        },
+      ];
     }
-    
+
     return data;
   }
 
@@ -212,8 +239,4 @@ class EPCISEvent {
   }
 }
 
-enum EPCISVersion {
-  v1_3,
-
-  v2_0,
-}
+enum EPCISVersion { v1_3, v2_0 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 
 class OperationEventTimeTile extends StatelessWidget {
   const OperationEventTimeTile({
@@ -25,9 +26,9 @@ class OperationEventTimeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
+    final now = AppTime.nowUae();
     final display = eventTime != null
-        ? _displayFormat.format(eventTime!.toLocal())
+        ? _displayFormat.format(eventTime!)
         : nowLabel;
 
     return ListTile(
@@ -77,13 +78,7 @@ class OperationEventTimeTile extends StatelessWidget {
     if (time == null || !context.mounted) return;
 
     onEventTimeChanged(
-      DateTime(
-        date.year,
-        date.month,
-        date.day,
-        time.hour,
-        time.minute,
-      ),
+      DateTime(date.year, date.month, date.day, time.hour, time.minute),
     );
   }
 }

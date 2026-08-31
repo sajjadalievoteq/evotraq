@@ -1,9 +1,18 @@
+import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/sscc_detail_edit_actions.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/sscc_detail_screen.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_commission_helper.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_commissioning_prefill.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_flow.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 
 extension SSCCDetailActions on SSCCDetailScreenState {
   void startInitialLoad() {
@@ -96,5 +105,94 @@ extension SSCCDetailActions on SSCCDetailScreenState {
   Future<void> refresh() async {
     if (widget.isCreating || widget.awaitingListSelection) return;
     startInitialLoad();
+  }
+
+  void saveOnly() {
+    setState(() => pendingCommissionAfterSave = false);
+    saveSSCC();
+  }
+
+  void saveAndCommission() {
+    setState(() => pendingCommissionAfterSave = true);
+    saveSSCC();
+  }
+
+  void navigateToCommission() {
+    final record = sscc;
+    final code = (record?.ssccCode ?? ssccCodeText()).trim();
+    if (code.isEmpty) return;
+
+    final prefill = record != null
+        ? SsccCommissioningPrefill.fromSscc(
+            sscc: record,
+            issuingGln: issuingGln,
+            shipFromGln: shipFromGln,
+            purchaseOrder: poText(),
+          )
+        : SsccCommissioningPrefill(ssccCode: code);
+
+    context.push(SsccCreateFlow.commissioningRoute(prefill: prefill));
+  }
+
+  Future<void> handleCommissionAfterCreate(
+    SSCC savedSscc, {
+    bool wasCreate = true,
+  }) async {
+    final locationGln = issuingGln?.glnCode ?? savedSscc.issuingGLN?.glnCode;
+    if (locationGln == null || locationGln.isEmpty) {
+      context.showError(
+        'SSCC was saved but commissioning location GLN is missing.',
+      );
+      if (mounted) setState(() => isSaving = false);
+      _finishCreateSuccessNavigation();
+      return;
+    }
+
+    try {
+      await SsccCommissionHelper.commissionAllocatedSscc(
+        ssccCode: savedSscc.ssccCode,
+        commissioningLocationGln: locationGln,
+        readPointGln: shipFromGln?.glnCode ?? savedSscc.shipFromGln,
+        batchLotNumber: containedBatchText().trim().isNotEmpty
+            ? containedBatchText().trim()
+            : savedSscc.containedBatch,
+        expiryDate: containedExpiry ?? savedSscc.containedExpiry,
+        productionDate: packingDate ?? savedSscc.packingDate,
+        commissioningReference: poText().trim().isNotEmpty
+            ? poText().trim()
+            : savedSscc.purchaseOrderNumber,
+      );
+      if (!mounted) return;
+      context.showSuccess(
+        wasCreate
+            ? SsccUiConstants.successSsccCreatedAndCommissioned
+            : SsccUiConstants.successSsccSavedAndCommissioned,
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      context.showError(
+        'SSCC was saved but commissioning failed: ${e.message}',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      context.showError(
+        'SSCC was saved but commissioning failed: $e',
+      );
+    }
+
+    _finishCreateSuccessNavigation();
+    if (mounted) {
+      setState(() => isSaving = false);
+    }
+  }
+
+  void _finishCreateSuccessNavigation() {
+    if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
+      widget.onEmbeddedActionSuccess!();
+      return;
+    }
+    if (mounted) {
+      popOrGo(context, Constants.gs1SsccsRoute);
+    }
   }
 }

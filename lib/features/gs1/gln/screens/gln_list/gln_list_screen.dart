@@ -17,6 +17,7 @@ import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
@@ -32,7 +33,7 @@ class GLNListScreen extends StatefulWidget {
 
   final bool embedded;
   final String? selectedGlnCode;
-  final ValueChanged<String>? onSelectGln;
+  final MasterDetailSelectCallback? onSelectGln;
   final void Function(VoidCallback refresh)? onBindRefresh;
   final VoidCallback? onEmbeddedCreate;
 
@@ -274,7 +275,6 @@ class _GLNListScreenState extends State<GLNListScreen> {
       return;
     }
     context.push(Constants.gs1GlnNewRoute);
-    _searchImmediate();
   }
 
   void _openGlnDetail(String glnCode) {
@@ -283,12 +283,14 @@ class _GLNListScreenState extends State<GLNListScreen> {
       return;
     }
     context.push(GlnRouteConstants.pathForGlnCode(glnCode));
-    _searchImmediate();
   }
 
   void _openGlnEdit(String glnCode) {
+    if (widget.onSelectGln != null) {
+      widget.onSelectGln!(glnCode, editing: true);
+      return;
+    }
     context.push(GlnRouteConstants.pathForGlnCodeEdit(glnCode));
-    _searchImmediate();
   }
 
   void _handleGlnRowMenu(GLN gln, String action) {
@@ -360,10 +362,12 @@ class _GLNListScreenState extends State<GLNListScreen> {
   }
 
   bool get _hasActiveFilters {
-    final statusActive = _selectedStatus != null &&
+    final statusActive =
+        _selectedStatus != null &&
         _selectedStatus != GlnUiConstants.filterAll &&
         _selectedStatus != 'All';
-    final typeActive = _selectedLocationType != null &&
+    final typeActive =
+        _selectedLocationType != null &&
         _selectedLocationType != GlnUiConstants.filterAll &&
         _selectedLocationType != 'All';
     return _searchController.text.trim().isNotEmpty ||
@@ -417,10 +421,7 @@ class _GLNListScreenState extends State<GLNListScreen> {
     }
 
     return Scaffold(
-      appBar: TraqAppBar(
-        context,
-        title: Text(GlnUiConstants.appBarManagement),
-      ),
+      appBar: TraqAppBar(context, title: Text(GlnUiConstants.appBarManagement)),
       drawer: const AppDrawer(),
       body: content,
       floatingActionButton: FloatingActionButton(

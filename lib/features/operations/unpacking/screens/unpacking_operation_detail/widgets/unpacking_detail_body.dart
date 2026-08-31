@@ -15,19 +15,20 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
 
 class UnpackingDetailBody extends StatelessWidget {
-  const UnpackingDetailBody({
-    super.key,
-    required this.operation,
-  });
+  const UnpackingDetailBody({super.key, required this.operation});
 
   final UnpackingResponse operation;
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(context.padding.top,context.padding.top, context.padding.top, 0),
+      padding: EdgeInsets.fromLTRB(
+        context.padding.top,
+        context.padding.top,
+        context.padding.top,
+        0,
+      ),
       child: Column(
-
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           OperationDetailStatusBanner(
@@ -43,12 +44,13 @@ class UnpackingDetailBody extends StatelessWidget {
           OperationDetailSingleGlnLocationCard(
             cardTitle: 'Unpacking Location',
             glnLabel: 'GLN',
-            gln: operation.unpackingLocationGLN ?? operation.operationLocation?.glnCode,
+            gln:
+                operation.unpackingLocationGLN ??
+                operation.operationLocation?.glnCode,
             facilityName: operation.operationLocation?.locationName,
             city: operation.operationLocation?.city,
           ),
           if (UnpackingDetailHelpers.hasProductionDetails(operation)) ...[
-
             OperationDetailProductionCard(
               title: 'Production Details',
               workOrderNumber: operation.workOrderNumber,
@@ -62,15 +64,12 @@ class UnpackingDetailBody extends StatelessWidget {
 
           UnpackingDetailUnpackedItemsCard(operation: operation),
           if (operation.eventIds != null && operation.eventIds!.isNotEmpty) ...[
-
             OperationDetailEventsCard(eventIds: operation.eventIds!),
           ],
           if (operation.messages != null && operation.messages!.isNotEmpty) ...[
-
             OperationDetailMessagesCard(messages: operation.messages!),
           ],
           if (operation.comments != null && operation.comments!.isNotEmpty) ...[
-
             OperationDetailCommentsCard(comments: operation.comments!),
           ],
 

@@ -3,7 +3,6 @@ import 'package:traqtrace_app/data/models/operations/packing/packing_response_mo
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
 
-
 abstract final class PackingSubmitErrorMessage {
   static String epcConversionFailures(List<String> failedBarcodes) =>
       OperationApiErrorMessage.epcConversionFailures(failedBarcodes);
@@ -93,7 +92,8 @@ abstract final class PackingSubmitErrorMessage {
     if (lower.contains('packing location') && lower.contains('not active')) {
       return 'The selected packing location is not active. Ask your administrator to activate this site in master data.';
     }
-    if (lower.contains('packing location') && lower.contains('not registered')) {
+    if (lower.contains('packing location') &&
+        lower.contains('not registered')) {
       return 'The selected packing location is not registered. Ask your administrator to add this GLN to master data.';
     }
     if (lower.contains('invalid packing location gln') ||
@@ -114,7 +114,8 @@ abstract final class PackingSubmitErrorMessage {
     if (lower.contains('network error')) {
       return 'Could not reach the server. Check your connection and try again.';
     }
-    if (lower.contains('unexpected error') || lower.contains('server error occurred')) {
+    if (lower.contains('unexpected error') ||
+        lower.contains('server error occurred')) {
       return text;
     }
 

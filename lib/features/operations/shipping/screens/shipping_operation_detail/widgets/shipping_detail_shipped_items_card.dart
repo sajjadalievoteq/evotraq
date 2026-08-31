@@ -3,10 +3,7 @@ import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
 class ShippingDetailShippedItemsCard extends StatelessWidget {
-  const ShippingDetailShippedItemsCard({
-    super.key,
-    required this.operation,
-  });
+  const ShippingDetailShippedItemsCard({super.key, required this.operation});
 
   final ShippingResponse operation;
 

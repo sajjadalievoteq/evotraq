@@ -23,25 +23,39 @@ class SgtinDetailCubitProviders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget content = batchCubit == null
+        ? child
+        : BlocListener<SgtinBatchCubit, SgtinBatchState>(
+            listenWhen: (previous, current) =>
+                previous.resolvedBatch != current.resolvedBatch ||
+                previous.status != current.status,
+            listener: (context, state) => onBatchStateChanged(state),
+            child: child,
+          );
+
+    if (sgtinCubit != null && batchCubit != null) {
+      content = MultiBlocProvider(
+        providers: [
+          BlocProvider<SGTINCubit>.value(value: sgtinCubit!),
+          BlocProvider<SgtinBatchCubit>.value(value: batchCubit!),
+        ],
+        child: content,
+      );
+    } else if (sgtinCubit != null) {
+      content = BlocProvider<SGTINCubit>.value(
+        value: sgtinCubit!,
+        child: content,
+      );
+    } else if (batchCubit != null) {
+      content = BlocProvider<SgtinBatchCubit>.value(
+        value: batchCubit!,
+        child: content,
+      );
+    }
+
     return BlocProvider<ValidationCubit>.value(
       value: validationCubit,
-      child: MultiBlocProvider(
-        providers: [
-          if (sgtinCubit != null)
-            BlocProvider<SGTINCubit>.value(value: sgtinCubit!),
-          if (batchCubit != null)
-            BlocProvider<SgtinBatchCubit>.value(value: batchCubit!),
-        ],
-        child: batchCubit == null
-            ? child
-            : BlocListener<SgtinBatchCubit, SgtinBatchState>(
-                listenWhen: (previous, current) =>
-                    previous.resolvedBatch != current.resolvedBatch ||
-                    previous.status != current.status,
-                listener: (context, state) => onBatchStateChanged(state),
-                child: child,
-              ),
-      ),
+      child: content,
     );
   }
 }

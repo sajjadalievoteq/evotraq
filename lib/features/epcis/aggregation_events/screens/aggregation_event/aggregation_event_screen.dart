@@ -8,6 +8,8 @@ import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregat
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_event_detail/aggregation_event_detail_screen.dart';
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_events_list/aggregation_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/aggregation_events/utils/aggregation_event_ui_constants.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 
@@ -46,6 +48,7 @@ class _AggregationEventScreenState extends State<AggregationEventScreen> {
       child: SplitOrListIndexedStack(
         split: Gs1SplitViewScreen<AggregationEventsCubit, AggregationEventsState>(
           appBarTitle: AggregationEventUiConstants.appBarManagement,
+          listRoute: Constants.epcisAggregationEventsRoute,
           fabHeroTag: AggregationEventUiConstants.fabHeroTag,
           fabAddTooltip: AggregationEventUiConstants.fabAddTooltip,
           fabCloseTooltip: AggregationEventUiConstants.fabCloseTooltip,
@@ -76,12 +79,12 @@ class _AggregationEventScreenState extends State<AggregationEventScreen> {
                 onBindRefresh: bindRefresh,
                 onEmbeddedCreate: onRequestCreate,
               ),
-          detailViewBuilder: (context, id) => AggregationEventDetailScreen(
+          detailViewBuilder: (context, id, {required editing}) => AggregationEventDetailScreen(
             key: ValueKey(id),
             eventId: id,
             embedded: true,
           ),
-          detailCreateBuilder: (context, onSuccess) =>
+          detailCreateBuilder: (context, onSuccess, {commissionAfterCreate = false}) =>
               AggregationEventFormScreen(
                 key: const ValueKey('__agg_event_embedded_new__'),
                 embedded: true,
@@ -93,7 +96,11 @@ class _AggregationEventScreenState extends State<AggregationEventScreen> {
             awaitingListSelection: true,
           ),
         ),
-        fallback: const AggregationEventsListScreen(),
+        fallback: MasterDetailMobileRedirect(
+          listRoute: Constants.epcisAggregationEventsRoute,
+          detailRoute: (id) => '${Constants.epcisAggregationEventsRoute}/$id',
+          child: const AggregationEventsListScreen(),
+        ),
       ),
     );
   }

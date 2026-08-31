@@ -14,7 +14,8 @@ class ShippingOperationStepValidator {
       sourceMissingMessage: 'Please select Ship From Location (source GLN).',
       destinationMissingMessage:
           'Please select Ship To Location (destination GLN).',
-      sameLocationMessage: 'Ship From and Ship To locations cannot be the same.',
+      sameLocationMessage:
+          'Ship From and Ship To locations cannot be the same.',
       sourceInvalidMessagePrefix: 'Ship From GLN ',
       destinationInvalidMessagePrefix: 'Ship To GLN ',
       sourceInvalidMessageSuffix:
@@ -25,7 +26,8 @@ class ShippingOperationStepValidator {
   }
 
   static String? validateItemsStep(List<String> scannedEpcs) {
-    return OperationStepValidationUtils.validateSerializedItemsStep(scannedEpcs);
+    return OperationStepValidationUtils.validateSerializedItemsStep(
+      scannedEpcs,
+    );
   }
 }
-

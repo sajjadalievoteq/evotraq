@@ -22,6 +22,7 @@ import 'package:traqtrace_app/features/operations/shipping/screens/shipping_oper
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/shipping_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping/shipping_screen.dart';
 import 'package:traqtrace_app/core/navigation/routes/route_access.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 
 List<RouteBase> fulfillmentOperationRoutes(RouteAccess access) => [
   GoRoute(
@@ -45,8 +46,15 @@ List<RouteBase> fulfillmentOperationRoutes(RouteAccess access) => [
   ),
   GoRoute(
     path: Constants.opShippingDetailRoute,
-    redirect: (context, state) =>
-        access.requireOperationStep(OperationSteps.ship),
+    redirect: (context, state) {
+      final operationId = state.pathParameters['operationId'] ?? '';
+      return MasterDetailRoute.redirectDetailRouteIfDesktop(
+        context,
+        authRedirect: access.requireOperationStep(OperationSteps.ship),
+        listRoute: Constants.opShippingRoute,
+        selectedId: operationId,
+      );
+    },
     pageBuilder: (context, state) {
       final operationId = state.pathParameters['operationId']!;
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -80,8 +88,15 @@ List<RouteBase> fulfillmentOperationRoutes(RouteAccess access) => [
   ),
   GoRoute(
     path: Constants.opReceivingDetailRoute,
-    redirect: (context, state) =>
-        access.requireOperationStep(OperationSteps.receive),
+    redirect: (context, state) {
+      final operationId = state.pathParameters['operationId'] ?? '';
+      return MasterDetailRoute.redirectDetailRouteIfDesktop(
+        context,
+        authRedirect: access.requireOperationStep(OperationSteps.receive),
+        listRoute: Constants.opReceivingRoute,
+        selectedId: operationId,
+      );
+    },
     pageBuilder: (context, state) {
       final operationId = state.pathParameters['operationId']!;
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -114,8 +129,15 @@ List<RouteBase> fulfillmentOperationRoutes(RouteAccess access) => [
   ),
   GoRoute(
     path: Constants.opReturnShippingDetailRoute,
-    redirect: (context, state) =>
-        access.requireOperationStep(OperationSteps.returnShip),
+    redirect: (context, state) {
+      final operationId = state.pathParameters['operationId'] ?? '';
+      return MasterDetailRoute.redirectDetailRouteIfDesktop(
+        context,
+        authRedirect: access.requireOperationStep(OperationSteps.returnShip),
+        listRoute: Constants.opReturnShippingRoute,
+        selectedId: operationId,
+      );
+    },
     pageBuilder: (context, state) {
       final operationId = state.pathParameters['operationId']!;
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -150,8 +172,15 @@ List<RouteBase> fulfillmentOperationRoutes(RouteAccess access) => [
   ),
   GoRoute(
     path: Constants.opCancelShippingDetailRoute,
-    redirect: (context, state) =>
-        access.requireOperationStep(OperationSteps.cancelShip),
+    redirect: (context, state) {
+      final operationId = state.pathParameters['operationId'] ?? '';
+      return MasterDetailRoute.redirectDetailRouteIfDesktop(
+        context,
+        authRedirect: access.requireOperationStep(OperationSteps.cancelShip),
+        listRoute: Constants.opCancelShippingRoute,
+        selectedId: operationId,
+      );
+    },
     pageBuilder: (context, state) {
       final operationId = state.pathParameters['operationId']!;
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -182,8 +211,15 @@ List<RouteBase> fulfillmentOperationRoutes(RouteAccess access) => [
   ),
   GoRoute(
     path: Constants.opCancelReceivingDetailRoute,
-    redirect: (context, state) =>
-        access.requireOperationStep(OperationSteps.cancelReceive),
+    redirect: (context, state) {
+      final operationId = state.pathParameters['operationId'] ?? '';
+      return MasterDetailRoute.redirectDetailRouteIfDesktop(
+        context,
+        authRedirect: access.requireOperationStep(OperationSteps.cancelReceive),
+        listRoute: Constants.opCancelReceivingRoute,
+        selectedId: operationId,
+      );
+    },
     pageBuilder: (context, state) {
       final operationId = state.pathParameters['operationId']!;
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -216,8 +252,15 @@ List<RouteBase> fulfillmentOperationRoutes(RouteAccess access) => [
   ),
   GoRoute(
     path: Constants.opReturnReceivingDetailRoute,
-    redirect: (context, state) =>
-        access.requireOperationStep(OperationSteps.returnReceive),
+    redirect: (context, state) {
+      final operationId = state.pathParameters['operationId'] ?? '';
+      return MasterDetailRoute.redirectDetailRouteIfDesktop(
+        context,
+        authRedirect: access.requireOperationStep(OperationSteps.returnReceive),
+        listRoute: Constants.opReturnReceivingRoute,
+        selectedId: operationId,
+      );
+    },
     pageBuilder: (context, state) {
       final operationId = state.pathParameters['operationId']!;
       return TraqRouterTransitions.sharedAxisHorizontalPage(

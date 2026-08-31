@@ -36,7 +36,10 @@ class OperationDetailTransportCard extends StatelessWidget {
         if (carrier?.isNotEmpty == true)
           OperationDetailInfoRow(label: 'Carrier', value: carrier!),
         if (trackingNumber?.isNotEmpty == true)
-          OperationDetailInfoRow(label: 'Tracking Number', value: trackingNumber!),
+          OperationDetailInfoRow(
+            label: 'Tracking Number',
+            value: trackingNumber!,
+          ),
         if (billOfLadingNumber?.isNotEmpty == true)
           OperationDetailInfoRow(
             label: 'Bill of Lading',

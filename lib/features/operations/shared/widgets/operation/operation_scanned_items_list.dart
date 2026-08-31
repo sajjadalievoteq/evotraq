@@ -124,10 +124,7 @@ class OperationScannedItemsList extends StatelessWidget {
                                 ),
                                 child: Text(
                                   'Status: $warning — may be rejected',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: warn,
-                                  ),
+                                  style: TextStyle(fontSize: 11, color: warn),
                                 ),
                               );
                             },

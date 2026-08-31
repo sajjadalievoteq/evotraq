@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
-import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
-    as status_rules;
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'    as status_rules;
 
 bool canEditSsccRecord(LogisticUnitStatus status) {
   return status == LogisticUnitStatus.DRAFT ||
@@ -23,6 +22,14 @@ bool canManuallyEditSsccStatus(
 
 bool canDeleteSscc(LogisticUnitStatus status) {
   return status == LogisticUnitStatus.DRAFT;
+}
+
+bool canCommissionSsccRecord(LogisticUnitStatus status, {SSCC? sscc}) {
+  if (status != LogisticUnitStatus.ALLOCATED) return false;
+  if (sscc == null) return true;
+  if (sscc.commissionedAt != null) return false;
+  final eventId = sscc.commissioningEventId;
+  return eventId == null || eventId.isEmpty;
 }
 
 bool isSsccAggregationEditable({required bool isCreating}) => isCreating;

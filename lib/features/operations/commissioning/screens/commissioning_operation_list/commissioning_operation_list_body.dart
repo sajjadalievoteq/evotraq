@@ -177,8 +177,8 @@ class CommissioningOperationListBodyState
   void _navigateToDetail(Operation operation) {
     final id = operation.navigableOperationId;
     if (id == null) return;
-    if (widget.embedded) {
-      widget.onSelectOperation?.call(id);
+    if (widget.onSelectOperation != null) {
+      widget.onSelectOperation!.call(id);
     } else {
       context.push('${Constants.opCommissioningRoute}/$id');
     }

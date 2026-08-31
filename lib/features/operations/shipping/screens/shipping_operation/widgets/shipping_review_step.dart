@@ -74,16 +74,13 @@ class ShippingReviewStep extends StatelessWidget {
                 OperationReviewInfoRow(
                   'Event Time',
                   eventTime != null
-                      ? '${eventTime!.toLocal()}'.substring(0, 16)
+                      ? '$eventTime'.substring(0, 16)
                       : 'At time of submission',
                 ),
               ],
             ),
           ),
-          OperationReviewEpcBadgeList(
-            epcs: scannedEpcs,
-            outlineColor: outline,
-          ),
+          OperationReviewEpcBadgeList(epcs: scannedEpcs, outlineColor: outline),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class ReturnShippingResponse {
@@ -57,13 +58,13 @@ class ReturnShippingResponse {
         ? List<String>.from((json['eventIds'] as List).map((e) => e.toString()))
         : null;
 
-    final epcList = (json['epcList'] as List?)
-            ?.map((e) => e.toString())
-            .toList() ??
+    final epcList =
+        (json['epcList'] as List?)?.map((e) => e.toString()).toList() ??
         (json['childEpcList'] as List?)?.map((e) => e.toString()).toList();
 
     return ReturnShippingResponse(
-      returnShippingOperationId: _readNonEmptyString(json['returnShippingOperationId']) ??
+      returnShippingOperationId:
+          _readNonEmptyString(json['returnShippingOperationId']) ??
           _readNonEmptyString(json['operationId']) ??
           _readNonEmptyString(json['id']) ??
           _readNonEmptyString(metadata?['return_shipping_operation_id']) ??
@@ -73,7 +74,8 @@ class ReturnShippingResponse {
           _readNonEmptyString(metadata?['eventId']),
       returnReference: _readNonEmptyString(json['returnReference']),
       eventIds: eventIds,
-      shippedEpcsCount: (json['shippedEpcsCount'] as num?)?.toInt() ??
+      shippedEpcsCount:
+          (json['shippedEpcsCount'] as num?)?.toInt() ??
           (json['processedEpcsCount'] as num?)?.toInt() ??
           (json['shippedItemsCount'] as num?)?.toInt() ??
           epcList?.length,
@@ -82,13 +84,14 @@ class ReturnShippingResponse {
           ? parseOperationStatus(json['status'].toString())
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.tryParse(json['processedAt'].toString())?.toLocal()
+          ? AppTime.tryParseApi(json['processedAt'])
           : null,
       sourceGLN: _readNonEmptyString(json['sourceGLN']),
       destinationGLN: _readNonEmptyString(json['destinationGLN']),
       sourceLocation: OperationGlnDisplay.fromJson(json['sourceLocation']),
-      destinationLocation:
-          OperationGlnDisplay.fromJson(json['destinationLocation']),
+      destinationLocation: OperationGlnDisplay.fromJson(
+        json['destinationLocation'],
+      ),
       carrier: _readNonEmptyString(json['carrier']),
       trackingNumber: _readNonEmptyString(json['trackingNumber']),
       billOfLadingNumber: _readNonEmptyString(json['billOfLadingNumber']),
@@ -133,7 +136,9 @@ class ReturnShippingResponse {
 
   bool get isSuccess => status == OperationStatus.success;
   bool get isSuccessOrPartial =>
-      status == OperationStatus.success || status == OperationStatus.partialSuccess;
+      status == OperationStatus.success ||
+      status == OperationStatus.partialSuccess;
   bool get hasErrors =>
-      status == OperationStatus.failed || status == OperationStatus.validationError;
+      status == OperationStatus.failed ||
+      status == OperationStatus.validationError;
 }

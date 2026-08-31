@@ -110,6 +110,7 @@ class GtinResultsList extends StatelessWidget {
             child: RefreshIndicator(
               onRefresh: onRefresh,
               child: ListView.separated(
+                key: const PageStorageKey<String>('gtin-results-list'),
                 controller: scrollController,
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: ClampingScrollPhysics(),
@@ -126,6 +127,7 @@ class GtinResultsList extends StatelessWidget {
                   if (index < gtins.length) {
                     final gtin = gtins[index];
                     return ConstrainedSectionContent(
+                      key: ValueKey<String>('gtin-${gtin.gtinCode}'),
                       child: RepaintBoundary(
                         child: GtinListItemCard(
                           gtin: gtin,

@@ -9,39 +9,40 @@ import 'package:traqtrace_app/features/operations/shared/screens/operation_detai
 
 final _cancelShippingDetailConfig =
     OperationDetailScreenConfig<CancelShippingResponse>(
-  createCubit: (fallbackErrorMessage) {
-    final service = getIt<CancelShippingOperationService>();
-    return OperationDetailCubit<CancelShippingResponse>(
-      fetchDetail: service.getCancelShippingOperation,
-      fallbackErrorMessage: fallbackErrorMessage,
+      createCubit: (fallbackErrorMessage) {
+        final service = getIt<CancelShippingOperationService>();
+        return OperationDetailCubit<CancelShippingResponse>(
+          fetchDetail: service.getCancelShippingOperation,
+          fallbackErrorMessage: fallbackErrorMessage,
+        );
+      },
+      contentBuilder:
+          (
+            context, {
+            required awaitingSelection,
+            required listLoading,
+            required isLoading,
+            required errorMessage,
+            required operation,
+            required onRetry,
+            onOperationUpdated,
+          }) => CancelShippingDetailContent(
+            awaitingSelection: awaitingSelection,
+            listLoading: listLoading,
+            isLoading: isLoading,
+            errorMessage: errorMessage,
+            operation: operation,
+            onRetry: onRetry,
+          ),
+      titleBuilder: (op) =>
+          op.cancelShippingReference ?? 'Cancel Shipping Detail',
+      listRoute: Constants.opCancelShippingRoute,
+      defaultTitle: 'Cancel Shipping Detail',
+      fallbackErrorMessage:
+          'Unable to load this cancel shipping operation. '
+          'Check your connection and tap Retry. '
+          'If the problem continues, the record may have been deleted or you may not have access to it.',
     );
-  },
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      CancelShippingDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    operation: operation,
-    onRetry: onRetry,
-  ),
-  titleBuilder: (op) => op.cancelShippingReference ?? 'Cancel Shipping Detail',
-  listRoute: Constants.opCancelShippingRoute,
-  defaultTitle: 'Cancel Shipping Detail',
-  fallbackErrorMessage:
-      'Unable to load this cancel shipping operation. '
-      'Check your connection and tap Retry. '
-      'If the problem continues, the record may have been deleted or you may not have access to it.',
-);
 
 class CancelShippingOperationDetailScreen
     extends GenericOperationDetailScreen<CancelShippingResponse> {

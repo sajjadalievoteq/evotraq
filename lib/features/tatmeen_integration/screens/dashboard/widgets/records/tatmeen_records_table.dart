@@ -17,12 +17,14 @@ class TatmeenRecordsTable extends StatelessWidget {
     required this.isLoading,
     required this.isBusy,
     required this.onRetry,
+    required this.onDismiss,
   });
 
   final List<TatmeenSyncRecord> records;
   final bool isLoading;
   final bool Function(String id) isBusy;
   final Future<TatmeenRetryOutcome> Function(TatmeenSyncRecord record) onRetry;
+  final Future<void> Function(TatmeenSyncRecord record) onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +57,7 @@ class TatmeenRecordsTable extends StatelessWidget {
                 record: record,
                 busy: isBusy(record.operationId),
                 onRetry: () => onRetry(record),
+                onDismiss: () => onDismiss(record),
               ),
             ),
           ],

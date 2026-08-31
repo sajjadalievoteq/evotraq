@@ -5,8 +5,11 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
-import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_mode.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/core/extensions/validation_feedback_extension.dart';
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
@@ -14,6 +17,7 @@ import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_status.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
@@ -24,8 +28,8 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_form_bloc_body.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_detail_skeleton.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
-import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
@@ -42,6 +46,8 @@ class SSCCDetailScreen extends StatefulWidget {
   final bool isEditing;
   final bool embedded;
   final bool awaitingListSelection;
+  final bool skipCreateModePrompt;
+  final bool commissionAfterCreate;
   final VoidCallback? onEmbeddedActionSuccess;
 
   const SSCCDetailScreen({
@@ -51,6 +57,8 @@ class SSCCDetailScreen extends StatefulWidget {
     required this.isEditing,
     this.embedded = false,
     this.awaitingListSelection = false,
+    this.skipCreateModePrompt = false,
+    this.commissionAfterCreate = false,
     this.onEmbeddedActionSuccess,
   });
 
@@ -99,12 +107,18 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
   SSCC? sscc;
 
   bool editRedirectHandled = false;
+  bool createModePromptHandled = false;
+  bool pendingCommissionAfterCreate = false;
+  bool pendingCommissionAfterSave = false;
+  bool isSaving = false;
+  late bool commissionAfterCreateActive;
   bool forceMountAllSections = false;
   final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    commissionAfterCreateActive = widget.commissionAfterCreate;
     validationCubit = ValidationCubit();
     formFieldsHydrated =
         widget.awaitingListSelection ||
@@ -122,6 +136,31 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) ensureGlnPickerCatalog();
       });
+    }
+
+    if (widget.isCreating &&
+        !widget.embedded &&
+        !widget.skipCreateModePrompt) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) promptStandaloneCreateMode();
+      });
+    }
+  }
+
+  Future<void> promptStandaloneCreateMode() async {
+    if (createModePromptHandled || !mounted) return;
+    createModePromptHandled = true;
+
+    final mode = await showSsccCreateModeDialog(context);
+    if (!mounted) return;
+
+    if (mode == null) {
+      context.pop();
+      return;
+    }
+
+    if (mode == SsccCreateMode.createAndCommission) {
+      setState(() => commissionAfterCreateActive = true);
     }
   }
 
@@ -191,6 +230,24 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
         canEditMasterData &&
         !widget.awaitingListSelection &&
         (widget.isCreating || recordEditable);
+    final showCommissionAction =
+        !widget.isCreating &&
+        !widget.awaitingListSelection &&
+        formFieldsHydrated &&
+        edit_rules.canCommissionSsccRecord(
+          sscc?.status ?? status,
+          sscc: sscc,
+        ) &&
+        context.canPerform(OperationSteps.commission);
+    final showPrimarySaveButton =
+        allowMasterDataActions ||
+        (showCommissionAction && canEditMasterData);
+    final primaryActionLabel = widget.isCreating && commissionAfterCreateActive
+        ? SsccUiConstants.detailCreateAndCommissionButton
+        : SsccUiConstants.detailSaveButton;
+    final savingActionLabel = widget.isCreating && commissionAfterCreateActive
+        ? SsccUiConstants.detailCreatingAndCommissioningButton
+        : SsccUiConstants.detailSavingButton;
 
     final body = BlocConsumer<SSCCCubit, SSCCState>(
       listenWhen: (previous, current) {
@@ -222,6 +279,11 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
             setState(() {
               formFieldsHydrated = true;
               serverRefreshInFlight = false;
+              if (hasSubmittedForm) {
+                isSaving = false;
+                hasSubmittedForm = false;
+                pendingCommissionAfterSave = false;
+              }
             });
             final message = userFacingSsccErrorMessage(state.error);
             if (hasSubmittedForm) {
@@ -236,31 +298,42 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
 
           if (state.status == SSCCStatus.success &&
               state.selectedSSCC != null) {
-            final sscc = state.selectedSSCC!;
-            final matchesRequest = matchesRequestedSscc(sscc);
+            final incoming = state.selectedSSCC!;
+            final matchesRequest = matchesRequestedSscc(incoming);
             final isSaveResult = hasSubmittedForm;
 
             if (!matchesRequest && !isSaveResult) return;
             if (!isSaveResult &&
                 matchesRequest &&
                 loadedSsccKey == requestedSsccKey &&
-                (sscc == null || !ssccRecordDiffers(sscc!, sscc))) {
+                (this.sscc == null ||
+                    !ssccRecordDiffers(this.sscc!, incoming))) {
               serverRefreshInFlight = false;
               return;
             }
 
-            populateFormFields(sscc);
+            populateFormFields(incoming);
             serverRefreshInFlight = false;
 
             if (hasSubmittedForm) {
               setState(() => hasSubmittedForm = false);
+              final savedSscc = state.selectedSSCC!;
               final ssccCode = ssccCodeText();
               savePharmaExtensionIfNeeded(
-                parseSsccId(state.selectedSSCC?.id ?? sscc?.id),
+                parseSsccId(savedSscc.id),
                 ssccCode,
               );
 
+              if (pendingCommissionAfterCreate || pendingCommissionAfterSave) {
+                final wasCreate = pendingCommissionAfterCreate;
+                pendingCommissionAfterCreate = false;
+                pendingCommissionAfterSave = false;
+                handleCommissionAfterCreate(savedSscc, wasCreate: wasCreate);
+                return;
+              }
+
               context.showSuccess(SsccUiConstants.successSsccSaved);
+              setState(() => isSaving = false);
 
               if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
                 widget.onEmbeddedActionSuccess!();
@@ -346,6 +419,12 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
 
         return _formBlocBody(
           allowMasterDataActions: allowMasterDataActions,
+          showPrimarySaveButton: showPrimarySaveButton,
+          showCommissionAction: showCommissionAction,
+          primaryActionLabel: primaryActionLabel,
+          savingActionLabel: savingActionLabel,
+          isSaving: isSaving,
+          commissionSavingInProgress: isSaving && pendingCommissionAfterSave,
           state: state,
         );
       },
@@ -358,9 +437,11 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
           : (recordEditable
                 ? SsccUiConstants.detailEditTitle
                 : SsccUiConstants.detailViewTitle),
-      showSaveAction: allowMasterDataActions,
-      onSave: saveSSCC,
-      saveActionTooltip: SsccUiConstants.detailSaveButton,
+      showSaveAction: showPrimarySaveButton,
+      onSave: saveOnly,
+      saveEnabled: showPrimarySaveButton && !isSaving,
+      saveInProgress: isSaving,
+      saveActionTooltip: isSaving ? savingActionLabel : primaryActionLabel,
       body: body,
     );
 
@@ -379,6 +460,12 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
 
   SsccDetailFormBlocBody _formBlocBody({
     required bool allowMasterDataActions,
+    required bool showPrimarySaveButton,
+    required bool showCommissionAction,
+    required String primaryActionLabel,
+    required String savingActionLabel,
+    required bool isSaving,
+    required bool commissionSavingInProgress,
     required SSCCState state,
   }) {
     final recordEditable =
@@ -456,7 +543,14 @@ class SSCCDetailScreenState extends State<SSCCDetailScreen>
           ? null
           : addAggregationChild,
       onDisaggregate: aggregationEditable ? disaggregateChild : null,
-      onSave: saveSSCC,
+      onSave: saveOnly,
+      onCommission: saveAndCommission,
+      showPrimarySaveButton: showPrimarySaveButton,
+      showCommissionAction: showCommissionAction,
+      primaryActionLabel: primaryActionLabel,
+      savingActionLabel: savingActionLabel,
+      isSaving: isSaving,
+      commissionSavingInProgress: commissionSavingInProgress,
       onIssuingGlnChanged: (gln) {
         setState(() {
           issuingGln = gln;

@@ -59,34 +59,34 @@ extension SSCCDetailEditActions on SSCCDetailScreenState {
       debugPrint('Error saving SSCC pharmaceutical extension: $e');
     }
   }
-  void populateFormFields(SSCC sscc) {
-    sscc = sscc;
-    hydrateSsccDetailFields(sscc);
-    issuingGln = sscc.issuingGLN;
+  void populateFormFields(SSCC loadedSscc) {
+    sscc = loadedSscc;
+    hydrateSsccDetailFields(loadedSscc);
+    issuingGln = loadedSscc.issuingGLN;
     issuingGlnError = null;
-    containedExpiry = sscc.containedExpiry;
-    shipFromGln = _glnFromStoredCode(sscc.shipFromGln);
-    shipToGln = _glnFromStoredCode(sscc.shipToGln);
-    billToGln = _glnFromStoredCode(sscc.billToGln);
-    shipForGln = _glnFromStoredCode(sscc.shipForGln);
-    custodianGln = _glnFromStoredCode(sscc.currentCustodianGln);
+    containedExpiry = loadedSscc.containedExpiry;
+    shipFromGln = _glnFromStoredCode(loadedSscc.shipFromGln);
+    shipToGln = _glnFromStoredCode(loadedSscc.shipToGln);
+    billToGln = _glnFromStoredCode(loadedSscc.billToGln);
+    shipForGln = _glnFromStoredCode(loadedSscc.shipForGln);
+    custodianGln = _glnFromStoredCode(loadedSscc.currentCustodianGln);
     setState(() {
-      unitType = sscc.unitType;
-      status = sscc.status;
-      contentHomogeneity = sscc.contentHomogeneity;
-      serverTransitions = sscc.availableTransitions ?? const [];
-      packingDate = sscc.packingDate;
+      unitType = loadedSscc.unitType;
+      status = loadedSscc.status;
+      contentHomogeneity = loadedSscc.contentHomogeneity;
+      serverTransitions = loadedSscc.availableTransitions ?? const [];
+      packingDate = loadedSscc.packingDate;
       formFieldsHydrated = true;
     });
 
-    if (sscc.id != null && serverTransitions.isEmpty) {
-      _loadTransitions(sscc.id!);
+    if (loadedSscc.id != null && serverTransitions.isEmpty) {
+      _loadTransitions(loadedSscc.id!);
     }
-    loadAggregationLinks(sscc.ssccCode);
+    loadAggregationLinks(loadedSscc.ssccCode);
     loadedSsccKey = requestedSsccKey;
     applyGlnCatalogToFields();
     ensureGlnPickerCatalog();
-    _enforceEditRouteIfNeeded(sscc);
+    _enforceEditRouteIfNeeded(loadedSscc);
   }
 
   void _enforceEditRouteIfNeeded(SSCC sscc) {
@@ -252,6 +252,9 @@ extension SSCCDetailEditActions on SSCCDetailScreenState {
 
     setState(() {
       hasSubmittedForm = true;
+      isSaving = true;
+      pendingCommissionAfterCreate =
+          widget.isCreating && commissionAfterCreateActive;
     });
 
     String gs1CompanyPrefix = '';

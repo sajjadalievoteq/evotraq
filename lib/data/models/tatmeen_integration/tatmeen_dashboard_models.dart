@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 
 class TatmeenDashboardData extends Equatable {
   const TatmeenDashboardData({
@@ -83,7 +84,7 @@ class TatmeenDashboardStats extends Equatable {
       successfulTrendPct: _double(json['successfulTrendPct']),
       failedTrendPct: _double(json['failedTrendPct']),
       pendingTrendPct: _double(json['pendingTrendPct']),
-      lastSyncedAt: DateTime.parse(json['lastSyncedAt'] as String).toLocal(),
+      lastSyncedAt: AppTime.parseApi(json['lastSyncedAt']),
     );
   }
 
@@ -180,7 +181,7 @@ class TatmeenSyncEvent extends Equatable {
 
   factory TatmeenSyncEvent.fromJson(Map<String, dynamic> json) {
     return TatmeenSyncEvent(
-      timestamp: DateTime.parse(json['timestamp'] as String).toLocal(),
+      timestamp: AppTime.parseApi(json['timestamp']),
       recordType: json['recordType'] as String? ?? 'Sync',
       recordId: json['recordId'] as String? ?? '',
       status: _statusFrom(json['status']),

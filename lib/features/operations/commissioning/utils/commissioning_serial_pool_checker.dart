@@ -86,8 +86,9 @@ class CommissioningSerialPoolChecker {
 
     if (content.isEmpty) {
       return const CommissioningPoolCheckResult(
-        status: CommissioningSerialPoolStatus.notPreAllocated,
-        blockReason: 'Serial not pre-allocated',
+        status: CommissioningSerialPoolStatus.preReserved,
+        sourceStatus: 'NEW',
+        targetStatus: 'ACTIVE',
       );
     }
 
@@ -204,8 +205,9 @@ class CommissioningSerialPoolChecker {
       return _ssccStatusResult(sscc);
     } catch (_) {
       return const CommissioningPoolCheckResult(
-        status: CommissioningSerialPoolStatus.notPreAllocated,
-        blockReason: 'Serial not pre-allocated',
+        status: CommissioningSerialPoolStatus.preReserved,
+        sourceStatus: 'NEW',
+        targetStatus: 'ACTIVE',
       );
     }
   }

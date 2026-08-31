@@ -11,21 +11,23 @@ class ReceivingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
-        showFloatingActionButton:
-            context.canPerform(OperationSteps.receive),
-        appBarTitle: 'Receiving Operations',
-        fabHeroTag: 'receiving_fab',
-        fabAddTooltip: 'New Receiving operation',
-        createHeaderText: 'New Receiving Operation',
-        emptyNoMatchText: 'No Receiving operations match your search.',
-        fabNavigateRoute: Constants.opReceivingCreateRoute,
-        listBuilder: (context, {
+    showFloatingActionButton: context.canPerform(OperationSteps.receive),
+    appBarTitle: 'Receiving Operations',
+    listRoute: Constants.opReceivingRoute,
+    detailRoute: (id) => '${Constants.opReceivingRoute}/$id',
+    fabHeroTag: 'receiving_fab',
+    fabAddTooltip: 'New Receiving operation',
+    createHeaderText: 'New Receiving Operation',
+    emptyNoMatchText: 'No Receiving operations match your search.',
+    fabNavigateRoute: Constants.opReceivingCreateRoute,
+    listBuilder:
+        (
+          context, {
           required selectedId,
           required onSelect,
           required bindRefresh,
           required onRequestCreate,
-        }) =>
-            ReceivingOperationListScreen(
+        }) => ReceivingOperationListScreen(
           embedded: true,
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
@@ -34,17 +36,19 @@ class ReceivingScreen extends StatelessWidget {
               ? onRequestCreate
               : null,
         ),
-        detailViewBuilder: (context, id) => ReceivingOperationDetailScreen(
+    detailViewBuilder: (context, id, {required editing}) =>
+        ReceivingOperationDetailScreen(
           key: ValueKey(id),
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context, {required listLoading}) => ReceivingOperationDetailScreen(
+    detailAwaitBuilder: (context, {required listLoading}) =>
+        ReceivingOperationDetailScreen(
           key: const ValueKey('__receiving_split_await__'),
           embedded: true,
           listLoading: listLoading,
           awaitingSelection: true,
         ),
-        fallbackList: const ReceivingOperationListScreen(),
-      );
+    fallbackList: const ReceivingOperationListScreen(),
+  );
 }

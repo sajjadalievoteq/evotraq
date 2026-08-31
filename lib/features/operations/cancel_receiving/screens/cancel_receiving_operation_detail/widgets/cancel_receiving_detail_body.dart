@@ -12,10 +12,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
 
 class CancelReceivingDetailBody extends StatelessWidget {
-  const CancelReceivingDetailBody({
-    super.key,
-    required this.operation,
-  });
+  const CancelReceivingDetailBody({super.key, required this.operation});
 
   final CancelReceivingResponse operation;
 
@@ -32,7 +29,9 @@ class CancelReceivingDetailBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           OperationDetailStatusBanner(
-            title: operation.cancelReceivingReference ?? 'Cancel Receiving Operation',
+            title:
+                operation.cancelReceivingReference ??
+                'Cancel Receiving Operation',
             operationId: operation.cancelReceivingOperationId,
             itemCount: operation.shippedItemsCount,
           ),

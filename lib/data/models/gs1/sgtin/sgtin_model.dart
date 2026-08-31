@@ -136,16 +136,17 @@ class SGTIN extends Equatable {
       verificationStatus: json['verificationStatus'],
       retentionExpiry: _parseDateTime(json['retentionExpiry']),
       alertCount: (json['alertCount'] as int?) ?? 0,
-      serialGuessingProbability: (json['serialGuessingProbability'] as num?)?.toDouble(),
+      serialGuessingProbability: (json['serialGuessingProbability'] as num?)
+          ?.toDouble(),
       serialEntropySeed: json['serialEntropySeed'] as String?,
       createdBy: json['createdBy'] as String?,
       pharmaExtension: json['pharmaExtension'] is Map<String, dynamic>
           ? SGTINPharmaceuticalExtensionModel.fromJson(
-              json['pharmaExtension'] as Map<String, dynamic>)
+              json['pharmaExtension'] as Map<String, dynamic>,
+            )
           : null,
-      childEpcs: (json['childEpcs'] as List?)
-              ?.map((e) => e.toString())
-              .toList() ??
+      childEpcs:
+          (json['childEpcs'] as List?)?.map((e) => e.toString()).toList() ??
           const [],
     );
   }
@@ -155,41 +156,55 @@ class SGTIN extends Equatable {
       if (id != null) 'id': id.toString(),
       'gtin': gtinCode,
       'serialNumber': serialNumber,
-      if (expiryDate != null) 'expiryDate': _formatDateWithTimezone(expiryDate!),
+      if (expiryDate != null) 'expiryDate': _formatDateOnly(expiryDate!),
       if (batchLotNumber != null) 'batchLotNumber': batchLotNumber,
-      if (productionDate != null) 'productionDate': _formatDateWithTimezone(productionDate!),
-      if (bestBeforeDate != null) 'bestBeforeDate': _formatDateWithTimezone(bestBeforeDate!),
+      if (productionDate != null)
+        'productionDate': _formatDateOnly(productionDate!),
+      if (bestBeforeDate != null)
+        'bestBeforeDate': _formatDateOnly(bestBeforeDate!),
       'status': status.name,
-      if (currentLocation != null) 'currentLocationGLN': currentLocation!.glnCode,
+      if (currentLocation != null)
+        'currentLocationGLN': currentLocation!.glnCode,
       if (currentSsccCode != null) 'currentSSCC': currentSsccCode,
       if (currentSSCC != null && currentSsccCode == null)
         'currentSSCC': currentSSCC!.id,
       if (regulatoryMarket != null) 'regulatoryMarket': regulatoryMarket,
       if (regulatoryStatus != null) 'regulatoryStatus': regulatoryStatus,
-      if (decommissionedReason != null) 'decommissionedReason': decommissionedReason,
-      if (decommissionedDate != null) 'decommissionedDate': _formatDateWithTimezone(decommissionedDate!),
+      if (decommissionedReason != null)
+        'decommissionedReason': decommissionedReason,
+      if (decommissionedDate != null)
+        'decommissionedDate': _formatDateWithTimezone(decommissionedDate!),
       'createdAt': _formatDateWithTimezone(createdAt),
       if (updatedAt != null) 'updatedAt': _formatDateWithTimezone(updatedAt!),
       if (canonicalIdentifier != null)
         'canonicalIdentifier': canonicalIdentifier,
-      if (commissionedAt != null) 'commissionedAt': _formatDateWithTimezone(commissionedAt!),
-      if (commissioningReadpointGln != null) 'commissioningReadpointGln': commissioningReadpointGln,
-      if (commissioningEventId != null) 'commissioningEventId': commissioningEventId,
-      if (expiryDateTime != null) 'expiryDateTime': _formatDateWithTimezone(expiryDateTime!),
-      if (serialGenerationStrategy != null) 'serialGenerationStrategy': serialGenerationStrategy,
+      if (commissionedAt != null)
+        'commissionedAt': _formatDateWithTimezone(commissionedAt!),
+      if (commissioningReadpointGln != null)
+        'commissioningReadpointGln': commissioningReadpointGln,
+      if (commissioningEventId != null)
+        'commissioningEventId': commissioningEventId,
+      if (expiryDateTime != null)
+        'expiryDateTime': _formatDateWithTimezone(expiryDateTime!),
+      if (serialGenerationStrategy != null)
+        'serialGenerationStrategy': serialGenerationStrategy,
       if (serialOrigin != null) 'serialOrigin': serialOrigin,
       if (serialRangeId != null) 'serialRangeId': serialRangeId,
       if (parentEpc != null) 'parentEpc': parentEpc,
-      if (aggregatedAt != null) 'aggregatedAt': _formatDateWithTimezone(aggregatedAt!),
-      if (currentCustodianGln != null) 'currentCustodianGln': currentCustodianGln,
+      if (aggregatedAt != null)
+        'aggregatedAt': _formatDateWithTimezone(aggregatedAt!),
+      if (currentCustodianGln != null)
+        'currentCustodianGln': currentCustodianGln,
       if (latestEventId != null) 'latestEventId': latestEventId,
       if (latestBizStep != null) 'latestBizStep': latestBizStep,
       if (latestDisposition != null) 'latestDisposition': latestDisposition,
       'verificationCount': verificationCount,
       if (verificationStatus != null) 'verificationStatus': verificationStatus,
-      if (retentionExpiry != null) 'retentionExpiry': _formatDateWithTimezone(retentionExpiry!),
+      if (retentionExpiry != null)
+        'retentionExpiry': _formatDateOnly(retentionExpiry!),
       'alertCount': alertCount,
-      if (serialGuessingProbability != null) 'serialGuessingProbability': serialGuessingProbability,
+      if (serialGuessingProbability != null)
+        'serialGuessingProbability': serialGuessingProbability,
       if (serialEntropySeed != null) 'serialEntropySeed': serialEntropySeed,
       if (createdBy != null) 'createdBy': createdBy,
       if (pharmaExtension != null) 'pharmaExtension': pharmaExtension!.toJson(),
@@ -256,13 +271,14 @@ class SGTIN extends Equatable {
       decommissionedDate: decommissionedDate ?? this.decommissionedDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      canonicalIdentifier:
-          canonicalIdentifier ?? this.canonicalIdentifier,
+      canonicalIdentifier: canonicalIdentifier ?? this.canonicalIdentifier,
       commissionedAt: commissionedAt ?? this.commissionedAt,
-      commissioningReadpointGln: commissioningReadpointGln ?? this.commissioningReadpointGln,
+      commissioningReadpointGln:
+          commissioningReadpointGln ?? this.commissioningReadpointGln,
       commissioningEventId: commissioningEventId ?? this.commissioningEventId,
       expiryDateTime: expiryDateTime ?? this.expiryDateTime,
-      serialGenerationStrategy: serialGenerationStrategy ?? this.serialGenerationStrategy,
+      serialGenerationStrategy:
+          serialGenerationStrategy ?? this.serialGenerationStrategy,
       serialOrigin: serialOrigin ?? this.serialOrigin,
       serialRangeId: serialRangeId ?? this.serialRangeId,
       parentEpc: parentEpc ?? this.parentEpc,
@@ -275,7 +291,8 @@ class SGTIN extends Equatable {
       verificationStatus: verificationStatus ?? this.verificationStatus,
       retentionExpiry: retentionExpiry ?? this.retentionExpiry,
       alertCount: alertCount ?? this.alertCount,
-      serialGuessingProbability: serialGuessingProbability ?? this.serialGuessingProbability,
+      serialGuessingProbability:
+          serialGuessingProbability ?? this.serialGuessingProbability,
       serialEntropySeed: serialEntropySeed ?? this.serialEntropySeed,
       createdBy: createdBy ?? this.createdBy,
       pharmaExtension: pharmaExtension ?? this.pharmaExtension,
@@ -292,19 +309,47 @@ class SGTIN extends Equatable {
 
   @override
   List<Object?> get props => [
-        id, gtinCode, serialNumber, expiryDate, batchLotNumber, productionDate,
-        bestBeforeDate, status, currentLocation, currentSSCC, currentSsccCode,
-        regulatoryMarket,
-        regulatoryStatus, decommissionedReason, decommissionedDate, createdAt,
-        updatedAt, canonicalIdentifier, commissionedAt,
-        commissioningReadpointGln, commissioningEventId, expiryDateTime,
-        serialGenerationStrategy, serialOrigin, serialRangeId, parentEpc,
-        aggregatedAt, currentCustodianGln, latestEventId, latestBizStep,
-        latestDisposition, verificationCount, verificationStatus, retentionExpiry,
-        alertCount, serialGuessingProbability, serialEntropySeed, createdBy,
-        pharmaExtension,
-        childEpcs,
-      ];
+    id,
+    gtinCode,
+    serialNumber,
+    expiryDate,
+    batchLotNumber,
+    productionDate,
+    bestBeforeDate,
+    status,
+    currentLocation,
+    currentSSCC,
+    currentSsccCode,
+    regulatoryMarket,
+    regulatoryStatus,
+    decommissionedReason,
+    decommissionedDate,
+    createdAt,
+    updatedAt,
+    canonicalIdentifier,
+    commissionedAt,
+    commissioningReadpointGln,
+    commissioningEventId,
+    expiryDateTime,
+    serialGenerationStrategy,
+    serialOrigin,
+    serialRangeId,
+    parentEpc,
+    aggregatedAt,
+    currentCustodianGln,
+    latestEventId,
+    latestBizStep,
+    latestDisposition,
+    verificationCount,
+    verificationStatus,
+    retentionExpiry,
+    alertCount,
+    serialGuessingProbability,
+    serialEntropySeed,
+    createdBy,
+    pharmaExtension,
+    childEpcs,
+  ];
 
   static String? _parseCanonicalIdentifier(Map<String, dynamic> json) {
     final canonical = json['canonicalIdentifier'];
@@ -352,11 +397,19 @@ class SGTIN extends Equatable {
     return iso.endsWith('Z') ? iso : '${iso}Z';
   }
 
+  String _formatDateOnly(DateTime dateTime) {
+    final year = dateTime.year.toString().padLeft(4, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final day = dateTime.day.toString().padLeft(2, '0');
+    return '$year-$month-$day';
+  }
+
   static GLN? _parseCurrentLocation(Map<String, dynamic> json) {
     if (json['currentLocationGLN'] != null) {
       return GLN(
         glnCode: json['currentLocationGLN'] as String,
-        locationName: json['currentLocationName'] as String? ?? 'Unknown Location',
+        locationName:
+            json['currentLocationName'] as String? ?? 'Unknown Location',
         addressLine1: '',
         city: '',
         stateProvince: '',

@@ -41,7 +41,6 @@ class CancelShippingOperationScreen extends StatefulWidget {
   final bool embedded;
   final VoidCallback? onEmbeddedActionSuccess;
 
-  
   final Map<String, dynamic>? initialPrefill;
 
   @override
@@ -49,7 +48,8 @@ class CancelShippingOperationScreen extends StatefulWidget {
       _CancelShippingOperationScreenState();
 }
 
-class _CancelShippingOperationScreenState extends State<CancelShippingOperationScreen> {
+class _CancelShippingOperationScreenState
+    extends State<CancelShippingOperationScreen> {
   static const _wizardSteps = [
     OperationStepConfig.details,
     OperationStepConfig.items,
@@ -219,11 +219,12 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
 
     switch (_currentStep) {
       case 0:
-        final referenceError = CancelShippingOperationStepValidator.validateReferenceStep(
-          sourceGln: _sourceGln,
-          destinationGln: _destinationGln,
-          cancelReason: _cancelReasonController.text,
-        );
+        final referenceError =
+            CancelShippingOperationStepValidator.validateReferenceStep(
+              sourceGln: _sourceGln,
+              destinationGln: _destinationGln,
+              cancelReason: _cancelReasonController.text,
+            );
         if (referenceError != null) {
           if (referenceError.contains('Ship-From')) {
             setState(() => _sourceGlnError = referenceError);
@@ -237,7 +238,9 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
         return true;
       case 1:
         final itemsError =
-            CancelShippingOperationStepValidator.validateItemsStep(_scannedEpcs);
+            CancelShippingOperationStepValidator.validateItemsStep(
+              _scannedEpcs,
+            );
         if (itemsError != null) {
           context.showError(itemsError);
           return false;
@@ -256,7 +259,9 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
     try {
       final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-      final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
+      final failedConversions = List<String>.from(
+        conversionResult['failed'] ?? [],
+      );
 
       if (failedConversions.isNotEmpty) {
         context.showError(
@@ -322,8 +327,8 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
         actingGln: actingGln,
         originalShippingReference:
             _originalReferenceController.text.trim().isNotEmpty
-                ? _originalReferenceController.text.trim()
-                : null,
+            ? _originalReferenceController.text.trim()
+            : null,
         comments: _commentsController.text.trim().isNotEmpty
             ? _commentsController.text.trim()
             : null,
@@ -345,20 +350,22 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
 
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
-            context
-                .read<OperationSplitCubit>()
-                .setCreatedId(response.navigableOperationId);
+            context.read<OperationSplitCubit>().setCreatedId(
+              response.navigableOperationId,
+            );
           }
           widget.onEmbeddedActionSuccess!();
         } else {
           popOrGo(context, Constants.opCancelShippingRoute);
         }
       } else {
-        context.showError(OperationErrorTranslator.translateMessages(
-          response.messages,
-          fallback:
-              'The cancel shipping operation could not be completed. Check your inputs and try again.',
-        ));
+        context.showError(
+          OperationErrorTranslator.translateMessages(
+            response.messages,
+            fallback:
+                'The cancel shipping operation could not be completed. Check your inputs and try again.',
+          ),
+        );
       }
     } on ApiException catch (e) {
       context.showError(e.getUserFriendlyMessage());
@@ -380,13 +387,16 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
       );
       return;
     }
-    final duplicate = OperationEpcScanValidator.checkDuplicate(epc, _scannedEpcs);
+    final duplicate = OperationEpcScanValidator.checkDuplicate(
+      epc,
+      _scannedEpcs,
+    );
     if (duplicate != null) {
       context.showError('This EPC is already in the list.');
       return;
     }
     setState(() => _scannedEpcs.add(epc));
-    
+
     _checkEpcStatus(epc);
   }
 
@@ -400,8 +410,7 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
       } else {
         setState(() => _itemWarnings.remove(epc));
       }
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   @override
@@ -434,11 +443,7 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
           onSubmit: _submitCancelShippingOperation,
           appBarTitle: 'Cancel Shipping',
           submitLabel: 'Cancel Shipment',
-          stepPages: [
-            _referenceDetailsStep(),
-            _itemScanStep(),
-            _reviewStep(),
-          ],
+          stepPages: [_referenceDetailsStep(), _itemScanStep(), _reviewStep()],
         );
       },
     );

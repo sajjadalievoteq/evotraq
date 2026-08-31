@@ -11,9 +11,7 @@ class OperationDetailCommentsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return OperationDetailGroupCard(
       title: 'Comments',
-      children: [
-        OperationDetailInfoRow(label: 'Notes', value: comments),
-      ],
+      children: [OperationDetailInfoRow(label: 'Notes', value: comments)],
     );
   }
 }

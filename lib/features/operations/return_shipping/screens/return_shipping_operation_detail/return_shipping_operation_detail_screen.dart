@@ -9,39 +9,39 @@ import 'package:traqtrace_app/features/operations/shared/screens/operation_detai
 
 final _returnShippingDetailConfig =
     OperationDetailScreenConfig<ReturnShippingResponse>(
-  createCubit: (fallbackErrorMessage) {
-    final service = getIt<ReturnShippingOperationService>();
-    return OperationDetailCubit<ReturnShippingResponse>(
-      fetchDetail: service.getReturnShippingOperation,
-      fallbackErrorMessage: fallbackErrorMessage,
+      createCubit: (fallbackErrorMessage) {
+        final service = getIt<ReturnShippingOperationService>();
+        return OperationDetailCubit<ReturnShippingResponse>(
+          fetchDetail: service.getReturnShippingOperation,
+          fallbackErrorMessage: fallbackErrorMessage,
+        );
+      },
+      contentBuilder:
+          (
+            context, {
+            required awaitingSelection,
+            required listLoading,
+            required isLoading,
+            required errorMessage,
+            required operation,
+            required onRetry,
+            onOperationUpdated,
+          }) => ReturnShippingDetailContent(
+            awaitingSelection: awaitingSelection,
+            listLoading: listLoading,
+            isLoading: isLoading,
+            errorMessage: errorMessage,
+            operation: operation,
+            onRetry: onRetry,
+          ),
+      titleBuilder: (op) => op.returnReference ?? 'Return Shipping Detail',
+      listRoute: Constants.opReturnShippingRoute,
+      defaultTitle: 'Return Shipping Detail',
+      fallbackErrorMessage:
+          'Unable to load this return shipping operation. '
+          'Check your connection and tap Retry. '
+          'If the problem continues, the record may have been deleted or you may not have access to it.',
     );
-  },
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      ReturnShippingDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    operation: operation,
-    onRetry: onRetry,
-  ),
-  titleBuilder: (op) => op.returnReference ?? 'Return Shipping Detail',
-  listRoute: Constants.opReturnShippingRoute,
-  defaultTitle: 'Return Shipping Detail',
-  fallbackErrorMessage:
-      'Unable to load this return shipping operation. '
-      'Check your connection and tap Retry. '
-      'If the problem continues, the record may have been deleted or you may not have access to it.',
-);
 
 class ReturnShippingOperationDetailScreen
     extends GenericOperationDetailScreen<ReturnShippingResponse> {

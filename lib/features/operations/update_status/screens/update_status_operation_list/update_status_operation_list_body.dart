@@ -170,7 +170,7 @@ class UpdateStatusOperationListBodyState
   void _navigateToDetail(Operation operation) {
     final id = operation.navigableOperationId;
     if (id == null) return;
-    if (widget.embedded && widget.onSelectOperation != null) {
+    if (widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
       context.push('${Constants.opUpdateStatusRoute}/$id');

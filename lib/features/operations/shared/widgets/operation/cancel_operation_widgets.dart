@@ -10,7 +10,6 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
-
 class CancelOperationReviewStep extends StatelessWidget {
   const CancelOperationReviewStep({
     super.key,
@@ -107,7 +106,7 @@ class CancelOperationReviewStep extends StatelessWidget {
                 OperationReviewInfoRow(
                   isReceiving ? 'Cancel Time' : 'Event Time',
                   eventTime != null
-                      ? '${eventTime!.toLocal()}'.substring(0, 16)
+                      ? '$eventTime'.substring(0, 16)
                       : 'At time of submission',
                 ),
               ],

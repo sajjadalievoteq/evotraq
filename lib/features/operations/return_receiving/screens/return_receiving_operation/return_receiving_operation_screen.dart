@@ -31,6 +31,7 @@ import 'package:traqtrace_app/data/models/operations/shared/pharma_return_contex
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_context_builder.dart';
 import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+
 class ReturnReceivingOperationScreen extends StatefulWidget {
   const ReturnReceivingOperationScreen({
     super.key,
@@ -42,9 +43,12 @@ class ReturnReceivingOperationScreen extends StatefulWidget {
   final VoidCallback? onEmbeddedActionSuccess;
   final PharmaReturnContext? pharmaReturnContext;
   @override
-  State<ReturnReceivingOperationScreen> createState() => _ReturnReceivingOperationScreenState();
+  State<ReturnReceivingOperationScreen> createState() =>
+      _ReturnReceivingOperationScreenState();
 }
-class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperationScreen> {
+
+class _ReturnReceivingOperationScreenState
+    extends State<ReturnReceivingOperationScreen> {
   static const _wizardSteps = [
     OperationStepConfig.details,
     OperationStepConfig.items,
@@ -173,8 +177,7 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
         _itemWarnings.clear();
       }),
       groupCardTitle: 'Add EPCs to Receive',
-      pageHeaderTitle:
-          _isPrefilled ? 'Returned Items' : 'Scan Items to Return',
+      pageHeaderTitle: _isPrefilled ? 'Returned Items' : 'Scan Items to Return',
       pageHeaderSubtitle: _isPrefilled
           ? 'Serial numbers from the return shipment (read-only).'
           : 'Scan SGTIN or SSCC labels for this return receipt.',
@@ -250,10 +253,11 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
 
     switch (_currentStep) {
       case 0:
-        final referenceError = ReturnReceivingOperationStepValidator.validateReferenceStep(
-          sourceGln: _sourceGln,
-          receivingGln: _receivingGln,
-        );
+        final referenceError =
+            ReturnReceivingOperationStepValidator.validateReferenceStep(
+              sourceGln: _sourceGln,
+              receivingGln: _receivingGln,
+            );
         if (referenceError != null) {
           if (referenceError.contains('Returned From')) {
             setState(() => _sourceGlnError = referenceError);
@@ -266,7 +270,10 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
         }
         return true;
       case 1:
-        final itemsError = ReturnReceivingOperationStepValidator.validateItemsStep(_scannedEpcs);
+        final itemsError =
+            ReturnReceivingOperationStepValidator.validateItemsStep(
+              _scannedEpcs,
+            );
         if (itemsError != null) {
           context.showError(itemsError);
           return false;
@@ -286,7 +293,9 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
       final receivingService = getIt<ReturnReceivingOperationService>();
       final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-      final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
+      final failedConversions = List<String>.from(
+        conversionResult['failed'] ?? [],
+      );
 
       if (failedConversions.isNotEmpty) {
         context.showError(
@@ -326,18 +335,17 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
         receivingLocation: OperationGlnDisplay.fromGln(_receivingGln),
         returnAuthorizationNumber:
             _returnAuthorizationController.text.trim().isNotEmpty
-                ? _returnAuthorizationController.text.trim()
-                : null,
+            ? _returnAuthorizationController.text.trim()
+            : null,
         purchaseOrderNumber: _purchaseOrderController.text.trim().isNotEmpty
             ? _purchaseOrderController.text.trim()
             : null,
         despatchAdviceNumber: _despatchAdviceController.text.trim().isNotEmpty
             ? _despatchAdviceController.text.trim()
             : null,
-        receivingAdviceNumber:
-            _receivingAdviceController.text.trim().isNotEmpty
-                ? _receivingAdviceController.text.trim()
-                : null,
+        receivingAdviceNumber: _receivingAdviceController.text.trim().isNotEmpty
+            ? _receivingAdviceController.text.trim()
+            : null,
         invoiceNumber: _invoiceController.text.trim().isNotEmpty
             ? _invoiceController.text.trim()
             : null,
@@ -367,8 +375,9 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
             : null,
       );
 
-      final response =
-          await receivingService.createReturnReceivingOperation(receivingRequest);
+      final response = await receivingService.createReturnReceivingOperation(
+        receivingRequest,
+      );
 
       if (response.isSuccessOrPartial) {
         if (response.status == OperationStatus.partialSuccess) {
@@ -376,28 +385,28 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
             'Return receiving submitted with warnings. Open the record for details.',
           );
         } else {
-          context.showSuccess(
-            'Return receiving completed successfully.',
-          );
+          context.showSuccess('Return receiving completed successfully.');
         }
         if (!mounted) return;
 
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
-            context
-                .read<OperationSplitCubit>()
-                .setCreatedId(response.navigableOperationId);
+            context.read<OperationSplitCubit>().setCreatedId(
+              response.navigableOperationId,
+            );
           }
           widget.onEmbeddedActionSuccess!();
         } else {
           popOrGo(context, Constants.opReturnReceivingRoute);
         }
       } else {
-        context.showError(OperationErrorTranslator.translateMessages(
-          response.messages,
-          fallback:
-              'The ReturnReceiving operation could not be completed. Check your inputs and try again.',
-        ));
+        context.showError(
+          OperationErrorTranslator.translateMessages(
+            response.messages,
+            fallback:
+                'The ReturnReceiving operation could not be completed. Check your inputs and try again.',
+          ),
+        );
       }
     } on ApiException catch (e) {
       context.showError(e.getUserFriendlyMessage());
@@ -415,11 +424,12 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
   }
 
   Future<bool> _addEpc(String barcode, {bool showSuccessToast = false}) async {
-    final duplicate = OperationEpcScanValidator.checkDuplicate(barcode, _scannedEpcs);
+    final duplicate = OperationEpcScanValidator.checkDuplicate(
+      barcode,
+      _scannedEpcs,
+    );
     if (duplicate != null) {
-      context.showError(
-        'This EPC is already in the list.',
-      );
+      context.showError('This EPC is already in the list.');
       return false;
     }
 
@@ -430,7 +440,7 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
     }
 
     setState(() => _scannedEpcs.add(barcode));
-    
+
     _checkEpcStatus(barcode);
     if (showSuccessToast) {
       context.showSuccess('Item added');
@@ -448,8 +458,7 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
       } else {
         setState(() => _itemWarnings.remove(epc));
       }
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   @override
@@ -482,11 +491,7 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
           onSubmit: _submitReturnReceivingOperation,
           appBarTitle: 'Return Receiving',
           submitLabel: 'Create Return Receiving',
-          stepPages: [
-            _referenceDetailsStep(),
-            _itemScanStep(),
-            _reviewStep(),
-          ],
+          stepPages: [_referenceDetailsStep(), _itemScanStep(), _reviewStep()],
         );
       },
     );

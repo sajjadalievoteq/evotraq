@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class ReturnReceivingResponse {
@@ -52,23 +53,22 @@ class ReturnReceivingResponse {
 
   factory ReturnReceivingResponse.fromJson(Map<String, dynamic> json) {
     final eventIds = json['eventIds'] != null
-        ? List<String>.from(
-            (json['eventIds'] as List).map((e) => e.toString()),
-          )
+        ? List<String>.from((json['eventIds'] as List).map((e) => e.toString()))
         : null;
 
-    final epcList = (json['epcList'] as List?)
-            ?.map((e) => e.toString())
-            .toList() ??
+    final epcList =
+        (json['epcList'] as List?)?.map((e) => e.toString()).toList() ??
         (json['childEpcList'] as List?)?.map((e) => e.toString()).toList();
 
     return ReturnReceivingResponse(
-      returnReceivingOperationId: _str(json['returnReceivingOperationId']) ??
+      returnReceivingOperationId:
+          _str(json['returnReceivingOperationId']) ??
           _str(json['navigableOperationId']) ??
           _str(json['operationId']),
       returnReceivingReference: _str(json['returnReceivingReference']),
       eventIds: eventIds,
-      processedEpcsCount: (json['processedEpcsCount'] as num?)?.toInt() ??
+      processedEpcsCount:
+          (json['processedEpcsCount'] as num?)?.toInt() ??
           (json['shippedEpcsCount'] as num?)?.toInt() ??
           epcList?.length,
       epcList: epcList,
@@ -76,12 +76,14 @@ class ReturnReceivingResponse {
           ? parseOperationStatus(json['status'].toString())
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.tryParse(json['processedAt'].toString())?.toLocal()
+          ? AppTime.tryParseApi(json['processedAt'])
           : null,
       sourceGLN: _str(json['sourceGLN']),
       receivingGLN: _str(json['receivingGLN']),
       sourceLocation: OperationGlnDisplay.fromJson(json['sourceLocation']),
-      receivingLocation: OperationGlnDisplay.fromJson(json['receivingLocation']),
+      receivingLocation: OperationGlnDisplay.fromJson(
+        json['receivingLocation'],
+      ),
       purchaseOrderNumber: _str(json['purchaseOrderNumber']),
       despatchAdviceNumber: _str(json['despatchAdviceNumber']),
       receivingAdviceNumber: _str(json['receivingAdviceNumber']),
@@ -91,8 +93,7 @@ class ReturnReceivingResponse {
       carrier: _str(json['carrier']),
       trackingNumber: _str(json['trackingNumber']),
       comments: _str(json['comments']),
-      messages:
-          (json['messages'] as List?)?.map((e) => e.toString()).toList(),
+      messages: (json['messages'] as List?)?.map((e) => e.toString()).toList(),
       processingTimeMs: (json['processingTimeMs'] as num?)?.toInt(),
     );
   }

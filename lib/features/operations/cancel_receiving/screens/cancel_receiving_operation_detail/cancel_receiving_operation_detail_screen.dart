@@ -9,39 +9,40 @@ import 'package:traqtrace_app/features/operations/shared/screens/operation_detai
 
 final _cancelReceivingDetailConfig =
     OperationDetailScreenConfig<CancelReceivingResponse>(
-  createCubit: (fallbackErrorMessage) {
-    final service = getIt<CancelReceivingOperationService>();
-    return OperationDetailCubit<CancelReceivingResponse>(
-      fetchDetail: service.getCancelReceivingOperation,
-      fallbackErrorMessage: fallbackErrorMessage,
+      createCubit: (fallbackErrorMessage) {
+        final service = getIt<CancelReceivingOperationService>();
+        return OperationDetailCubit<CancelReceivingResponse>(
+          fetchDetail: service.getCancelReceivingOperation,
+          fallbackErrorMessage: fallbackErrorMessage,
+        );
+      },
+      contentBuilder:
+          (
+            context, {
+            required awaitingSelection,
+            required listLoading,
+            required isLoading,
+            required errorMessage,
+            required operation,
+            required onRetry,
+            onOperationUpdated,
+          }) => CancelReceivingDetailContent(
+            awaitingSelection: awaitingSelection,
+            listLoading: listLoading,
+            isLoading: isLoading,
+            errorMessage: errorMessage,
+            operation: operation,
+            onRetry: onRetry,
+          ),
+      titleBuilder: (op) =>
+          op.cancelReceivingReference ?? 'Cancel Receiving Detail',
+      listRoute: Constants.opCancelReceivingRoute,
+      defaultTitle: 'Cancel Receiving Detail',
+      fallbackErrorMessage:
+          'Unable to load this cancel receiving operation. '
+          'Check your connection and tap Retry. '
+          'If the problem continues, the record may have been deleted or you may not have access to it.',
     );
-  },
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      CancelReceivingDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    operation: operation,
-    onRetry: onRetry,
-  ),
-  titleBuilder: (op) => op.cancelReceivingReference ?? 'Cancel Receiving Detail',
-  listRoute: Constants.opCancelReceivingRoute,
-  defaultTitle: 'Cancel Receiving Detail',
-  fallbackErrorMessage:
-      'Unable to load this cancel receiving operation. '
-      'Check your connection and tap Retry. '
-      'If the problem continues, the record may have been deleted or you may not have access to it.',
-);
 
 class CancelReceivingOperationDetailScreen
     extends GenericOperationDetailScreen<CancelReceivingResponse> {

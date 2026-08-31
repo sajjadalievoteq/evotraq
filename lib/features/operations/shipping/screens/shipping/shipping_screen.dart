@@ -11,21 +11,23 @@ class ShippingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
-        showFloatingActionButton:
-            context.canPerform(OperationSteps.ship),
-        appBarTitle: 'Shipping Operations',
-        fabHeroTag: 'shipping_fab',
-        fabAddTooltip: 'New shipping operation',
-        createHeaderText: 'New Shipping Operation',
-        emptyNoMatchText: 'No shipping operations match your search.',
-        fabNavigateRoute: Constants.opShippingCreateRoute,
-        listBuilder: (context, {
+    showFloatingActionButton: context.canPerform(OperationSteps.ship),
+    appBarTitle: 'Shipping Operations',
+    listRoute: Constants.opShippingRoute,
+    detailRoute: (id) => '${Constants.opShippingRoute}/$id',
+    fabHeroTag: 'shipping_fab',
+    fabAddTooltip: 'New shipping operation',
+    createHeaderText: 'New Shipping Operation',
+    emptyNoMatchText: 'No shipping operations match your search.',
+    fabNavigateRoute: Constants.opShippingCreateRoute,
+    listBuilder:
+        (
+          context, {
           required selectedId,
           required onSelect,
           required bindRefresh,
           required onRequestCreate,
-        }) =>
-            ShippingOperationListScreen(
+        }) => ShippingOperationListScreen(
           embedded: true,
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
@@ -34,17 +36,19 @@ class ShippingScreen extends StatelessWidget {
               ? onRequestCreate
               : null,
         ),
-        detailViewBuilder: (context, id) => ShippingOperationDetailScreen(
+    detailViewBuilder: (context, id, {required editing}) =>
+        ShippingOperationDetailScreen(
           key: ValueKey(id),
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context, {required listLoading}) => ShippingOperationDetailScreen(
+    detailAwaitBuilder: (context, {required listLoading}) =>
+        ShippingOperationDetailScreen(
           key: const ValueKey('__shipping_split_await__'),
           embedded: true,
           listLoading: listLoading,
           awaitingSelection: true,
         ),
-        fallbackList: const ShippingOperationListScreen(),
-      );
+    fallbackList: const ShippingOperationListScreen(),
+  );
 }

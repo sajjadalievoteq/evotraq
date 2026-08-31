@@ -14,10 +14,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
 
 class ReturnReceivingDetailBody extends StatelessWidget {
-  const ReturnReceivingDetailBody({
-    super.key,
-    required this.operation,
-  });
+  const ReturnReceivingDetailBody({super.key, required this.operation});
 
   final ReturnReceivingResponse operation;
 
@@ -34,7 +31,9 @@ class ReturnReceivingDetailBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           OperationDetailStatusBanner(
-            title: operation.returnReceivingReference ?? 'Return Receiving Operation',
+            title:
+                operation.returnReceivingReference ??
+                'Return Receiving Operation',
             operationId: operation.returnReceivingOperationId,
             itemCount: operation.processedEpcsCount,
           ),

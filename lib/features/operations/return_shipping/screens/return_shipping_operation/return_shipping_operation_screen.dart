@@ -48,10 +48,12 @@ class ReturnShippingOperationScreen extends StatefulWidget {
   final PharmaReturnContext? pharmaReturnContext;
 
   @override
-  State<ReturnShippingOperationScreen> createState() => _ReturnShippingOperationScreenState();
+  State<ReturnShippingOperationScreen> createState() =>
+      _ReturnShippingOperationScreenState();
 }
 
-class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationScreen> {
+class _ReturnShippingOperationScreenState
+    extends State<ReturnShippingOperationScreen> {
   static const _wizardSteps = [
     OperationStepConfig.details,
     OperationStepConfig.items,
@@ -176,8 +178,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
         _itemWarnings.clear();
       }),
       groupCardTitle: 'Add EPCs to Shipment',
-      pageHeaderTitle:
-          _isPrefilled ? 'Returned Items' : 'Scan Items to Return',
+      pageHeaderTitle: _isPrefilled ? 'Returned Items' : 'Scan Items to Return',
       pageHeaderSubtitle: _isPrefilled
           ? 'Serial numbers from the return shipment (read-only).'
           : 'Scan SGTIN or SSCC labels for this return shipment.',
@@ -247,22 +248,24 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
 
     switch (_currentStep) {
       case 0:
-        final referenceError = ReturnShippingOperationStepValidator.validateReferenceStep(
-          sourceGln: _sourceGln,
-        );
+        final referenceError =
+            ReturnShippingOperationStepValidator.validateReferenceStep(
+              sourceGln: _sourceGln,
+            );
         if (referenceError != null) {
           setState(() => _sourceGlnError = referenceError);
           return false;
         }
         if (_selectedReturnReason == null) {
-          context.showError(
-            'Select a reason for return before continuing.',
-          );
+          context.showError('Select a reason for return before continuing.');
           return false;
         }
         return true;
       case 1:
-        final itemsError = ReturnShippingOperationStepValidator.validateItemsStep(_scannedEpcs);
+        final itemsError =
+            ReturnShippingOperationStepValidator.validateItemsStep(
+              _scannedEpcs,
+            );
         if (itemsError != null) {
           context.showError(itemsError);
           return false;
@@ -282,17 +285,19 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
       final shippingService = getIt<ReturnShippingOperationService>();
       final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-      final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
+      final failedConversions = List<String>.from(
+        conversionResult['failed'] ?? [],
+      );
 
       if (failedConversions.isNotEmpty) {
-          context.showError(
+        context.showError(
           '${failedConversions.length} EPC(s) could not be converted. Remove invalid scans and try again.\n${failedConversions.join('\n')}',
         );
         return;
       }
 
       if (epcUris.isEmpty) {
-          context.showError(
+        context.showError(
           'No valid EPCs were captured. Scan at least one SGTIN or SSCC.',
         );
         return;
@@ -323,8 +328,8 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
             : null,
         returnAuthorizationNumber:
             _returnAuthorizationController.text.trim().isNotEmpty
-                ? _returnAuthorizationController.text.trim()
-                : null,
+            ? _returnAuthorizationController.text.trim()
+            : null,
         purchaseOrderNumber: _purchaseOrderController.text.trim().isNotEmpty
             ? _purchaseOrderController.text.trim()
             : null,
@@ -351,7 +356,9 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
         ),
       );
 
-      final response = await shippingService.createReturnShippingOperation(shippingRequest);
+      final response = await shippingService.createReturnShippingOperation(
+        shippingRequest,
+      );
 
       if (response.isSuccessOrPartial) {
         if (response.status == OperationStatus.partialSuccess) {
@@ -359,33 +366,33 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
             'Return shipping submitted with warnings. Open the record for details.',
           );
         } else {
-          context.showSuccess(
-            'Return shipping completed successfully.',
-          );
+          context.showSuccess('Return shipping completed successfully.');
         }
         if (!mounted) return;
 
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
-            context
-                .read<OperationSplitCubit>()
-                .setCreatedId(response.navigableOperationId);
+            context.read<OperationSplitCubit>().setCreatedId(
+              response.navigableOperationId,
+            );
           }
           widget.onEmbeddedActionSuccess!();
         } else {
           popOrGo(context, Constants.opReturnShippingRoute);
         }
       } else {
-        context.showError(OperationErrorTranslator.translateMessages(
-          response.messages,
-          fallback:
-              'The shipping operation could not be completed. Check your inputs and try again.',
-        ));
+        context.showError(
+          OperationErrorTranslator.translateMessages(
+            response.messages,
+            fallback:
+                'The shipping operation could not be completed. Check your inputs and try again.',
+          ),
+        );
       }
     } on ApiException catch (e) {
       context.showError(e.getUserFriendlyMessage());
     } catch (_) {
-          context.showError(
+      context.showError(
         'An unexpected error occurred while submitting the shipping operation.',
       );
     } finally {
@@ -398,11 +405,12 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
   }
 
   Future<bool> _addEpc(String barcode, {bool showSuccessToast = false}) async {
-    final duplicate = OperationEpcScanValidator.checkDuplicate(barcode, _scannedEpcs);
+    final duplicate = OperationEpcScanValidator.checkDuplicate(
+      barcode,
+      _scannedEpcs,
+    );
     if (duplicate != null) {
-          context.showError(
-        'This EPC is already in the list.',
-      );
+      context.showError('This EPC is already in the list.');
       return false;
     }
 
@@ -413,7 +421,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
     }
 
     setState(() => _scannedEpcs.add(barcode));
-    
+
     _checkEpcStatus(barcode);
     if (showSuccessToast) {
       context.showSuccess('Item added');
@@ -431,8 +439,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
       } else {
         setState(() => _itemWarnings.remove(epc));
       }
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   @override
@@ -465,11 +472,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
           onSubmit: _submitReturnShippingOperation,
           appBarTitle: 'Return Shipping',
           submitLabel: 'Create Return Shipping',
-          stepPages: [
-            _referenceDetailsStep(),
-            _itemScanStep(),
-            _reviewStep(),
-          ],
+          stepPages: [_referenceDetailsStep(), _itemScanStep(), _reviewStep()],
         );
       },
     );

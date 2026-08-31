@@ -1,4 +1,1 @@
-enum UnpackingScope {
-  partial,
-  wholeContainer,
-}
+enum UnpackingScope { partial, wholeContainer }

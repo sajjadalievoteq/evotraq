@@ -130,7 +130,7 @@ class AggregationReferenceDataChecker {
       AggregationMissingReference(
         kind: AggregationReferenceKind.sgtin,
         displayValue: '$gtin / $serial',
-        createRoute: Constants.gs1SgtinNewRoute,
+        createRoute: Constants.opCommissioningNewRoute,
         contextLabel: contextLabel,
       ),
     );

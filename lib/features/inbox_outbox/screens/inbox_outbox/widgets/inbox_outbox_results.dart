@@ -74,7 +74,7 @@ class InboxOutboxResults extends StatelessWidget {
         onTap: () {
           final id = operation.navigableOperationId;
           if (id == null) return;
-          if (embedded && onSelectOperation != null) {
+          if (onSelectOperation != null) {
             onSelectOperation!(id);
           } else {
             context.push('${Constants.opShippingRoute}/$id');

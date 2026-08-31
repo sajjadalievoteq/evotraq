@@ -1,7 +1,6 @@
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/backend_error_parser.dart';
 
-
 abstract final class OperationApiErrorMessage {
   static bool isStructuredErrorBody(Map<String, dynamic> json) =>
       BackendErrorParser.isStructuredErrorBody(json);
@@ -10,7 +9,9 @@ abstract final class OperationApiErrorMessage {
       BackendErrorParser.parseMap(json).displayMessage;
 
   static String fromApiException(ApiException exception) {
-    final fromBody = BackendErrorParser.parse(exception.responseBody).displayMessage;
+    final fromBody = BackendErrorParser.parse(
+      exception.responseBody,
+    ).displayMessage;
     if (fromBody != null && fromBody.isNotEmpty) {
       return fromBody;
     }

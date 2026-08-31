@@ -6,9 +6,7 @@ import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scop
 class UnpackingOperationStepValidator {
   UnpackingOperationStepValidator._();
 
-  static String? validateReferenceStep({
-    required GLN? unpackingLocationGln,
-  }) {
+  static String? validateReferenceStep({required GLN? unpackingLocationGln}) {
     if (unpackingLocationGln == null) {
       return 'Please select the Unpacking Location — search for the GLN of the facility where unpacking is taking place.';
     }

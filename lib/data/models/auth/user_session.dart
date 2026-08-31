@@ -1,3 +1,5 @@
+import 'package:traqtrace_app/core/utils/app_time.dart';
+
 class UserSession {
   final String id;
   final String device;
@@ -22,8 +24,8 @@ class UserSession {
           ? json['device'] as String
           : 'Unknown device',
       ipAddress: json['ipAddress'] as String?,
-      lastSeenAt: DateTime.parse(json['lastSeenAt'] as String).toLocal(),
-      createdAt: DateTime.parse(json['createdAt'] as String).toLocal(),
+      lastSeenAt: AppTime.parseApi(json['lastSeenAt']),
+      createdAt: AppTime.parseApi(json['createdAt']),
       current: json['current'] == true,
     );
   }

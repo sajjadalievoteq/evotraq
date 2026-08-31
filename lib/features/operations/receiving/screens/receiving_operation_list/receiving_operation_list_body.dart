@@ -177,7 +177,7 @@ class ReceivingOperationListBodyState
   void _navigateToDetail(Operation operation) {
     final id = operation.navigableOperationId;
     if (id == null) return;
-    if (widget.embedded && widget.onSelectOperation != null) {
+    if (widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
       context.push('${Constants.opReceivingRoute}/$id');
@@ -321,7 +321,8 @@ class ReceivingOperationListBodyState
                   !context.canPerform(OperationSteps.receive)
               ? null
               : FloatingActionButton.extended(
-                  onPressed: () => context.push(Constants.opReceivingCreateRoute),
+                  onPressed: () =>
+                      context.push(Constants.opReceivingCreateRoute),
                   label: TraqIcon(AppAssets.iconPlus),
                 ),
           body: body,

@@ -45,7 +45,7 @@ class UnpackingContainerContentsTable extends StatelessWidget {
               scope == UnpackingScope.wholeContainer
                   ? '${contents.length} direct child EPC(s) — all will be unpacked on submit.'
                   : '${selectedEpcs.length} of ${contents.length} selected. '
-                      'Tick rows below, or add items by scanning / typing an EPC.',
+                        'Tick rows below, or add items by scanning / typing an EPC.',
               style: TextStyle(fontSize: 12, color: theme.colorScheme.primary),
             ),
             const SizedBox(height: 12),
@@ -59,10 +59,16 @@ class UnpackingContainerContentsTable extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Column(
                   children: [
-                    Text(loadError!, style: TextStyle(color: theme.colorScheme.error)),
+                    Text(
+                      loadError!,
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
                     if (onRetry != null) ...[
                       const SizedBox(height: 8),
-                      TextButton(onPressed: onRetry, child: const Text('Retry')),
+                      TextButton(
+                        onPressed: onRetry,
+                        child: const Text('Retry'),
+                      ),
                     ],
                   ],
                 ),
@@ -97,7 +103,8 @@ class UnpackingContainerContentsTable extends StatelessWidget {
                         DataColumn(label: Text('Parent container')),
                       ],
                       rows: contents.map((node) {
-                        final selected = scope == UnpackingScope.wholeContainer ||
+                        final selected =
+                            scope == UnpackingScope.wholeContainer ||
                             selectedEpcs.contains(node.epc);
                         return DataRow(
                           selected: selected,
@@ -129,8 +136,9 @@ class UnpackingContainerContentsTable extends StatelessWidget {
                                   child: Text(
                                     node.epc,
                                     overflow: TextOverflow.ellipsis,
-                                    style:
-                                        const TextStyle(fontFamily: 'monospace'),
+                                    style: const TextStyle(
+                                      fontFamily: 'monospace',
+                                    ),
                                   ),
                                 ),
                               ),

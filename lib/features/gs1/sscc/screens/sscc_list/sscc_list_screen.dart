@@ -2,7 +2,6 @@ import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
@@ -12,13 +11,14 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_list/widgets/sscc_l
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_list/widgets/sscc_advanced_filters_panel.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_list/widgets/sscc_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart' as edit_rules;
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
+    as edit_rules;
 import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_flow.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class SSCCListScreen extends StatefulWidget {
@@ -33,7 +33,7 @@ class SSCCListScreen extends StatefulWidget {
 
   final bool embedded;
   final String? selectedSsccCode;
-  final ValueChanged<String>? onSelectSscc;
+  final MasterDetailSelectCallback? onSelectSscc;
   final void Function(VoidCallback refresh)? onBindRefresh;
   final VoidCallback? onEmbeddedCreate;
 
@@ -112,32 +112,31 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
 
   void _search() {
     context.read<SSCCCubit>().fetchSSCCList(
-          ssccCode: _searchController.text.isNotEmpty
-              ? _searchController.text
-              : null,
-          containerType: _selectedContainerType,
-          containerStatus: _selectedStatus,
-          sourceLocationName: _sourceLocationController.text.isNotEmpty
-              ? _sourceLocationController.text
-              : null,
-          destinationLocationName:
-              _destinationLocationController.text.isNotEmpty
-                  ? _destinationLocationController.text
-                  : null,
-          gs1CompanyPrefix: _companyPrefixController.text.isNotEmpty
-              ? _companyPrefixController.text
-              : null,
-          packingDateFrom: _packingDateFrom,
-          packingDateTo: _packingDateTo,
-          shippingDateFrom: _shippingDateFrom,
-          shippingDateTo: _shippingDateTo,
-          receivingDateFrom: _receivingDateFrom,
-          receivingDateTo: _receivingDateTo,
-          page: 0,
-          size: _pageSize,
-          sortBy: _selectedSortBy ?? 'createdAt',
-          sortDirection: _sortDirection,
-        );
+      ssccCode: _searchController.text.isNotEmpty
+          ? _searchController.text
+          : null,
+      containerType: _selectedContainerType,
+      containerStatus: _selectedStatus,
+      sourceLocationName: _sourceLocationController.text.isNotEmpty
+          ? _sourceLocationController.text
+          : null,
+      destinationLocationName: _destinationLocationController.text.isNotEmpty
+          ? _destinationLocationController.text
+          : null,
+      gs1CompanyPrefix: _companyPrefixController.text.isNotEmpty
+          ? _companyPrefixController.text
+          : null,
+      packingDateFrom: _packingDateFrom,
+      packingDateTo: _packingDateTo,
+      shippingDateFrom: _shippingDateFrom,
+      shippingDateTo: _shippingDateTo,
+      receivingDateFrom: _receivingDateFrom,
+      receivingDateTo: _receivingDateTo,
+      page: 0,
+      size: _pageSize,
+      sortBy: _selectedSortBy ?? 'createdAt',
+      sortDirection: _sortDirection,
+    );
   }
 
   void _searchImmediate() {
@@ -154,33 +153,32 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
     if (!cubitState.hasMoreData) return;
 
     context.read<SSCCCubit>().fetchSSCCList(
-          ssccCode: _searchController.text.isNotEmpty
-              ? _searchController.text
-              : null,
-          containerType: _selectedContainerType,
-          containerStatus: _selectedStatus,
-          sourceLocationName: _sourceLocationController.text.isNotEmpty
-              ? _sourceLocationController.text
-              : null,
-          destinationLocationName:
-              _destinationLocationController.text.isNotEmpty
-                  ? _destinationLocationController.text
-                  : null,
-          gs1CompanyPrefix: _companyPrefixController.text.isNotEmpty
-              ? _companyPrefixController.text
-              : null,
-          packingDateFrom: _packingDateFrom,
-          packingDateTo: _packingDateTo,
-          shippingDateFrom: _shippingDateFrom,
-          shippingDateTo: _shippingDateTo,
-          receivingDateFrom: _receivingDateFrom,
-          receivingDateTo: _receivingDateTo,
-          page: cubitState.page + 1,
-          size: _pageSize,
-          sortBy: _selectedSortBy ?? 'createdAt',
-          sortDirection: _sortDirection,
-          isLoadMore: true,
-        );
+      ssccCode: _searchController.text.isNotEmpty
+          ? _searchController.text
+          : null,
+      containerType: _selectedContainerType,
+      containerStatus: _selectedStatus,
+      sourceLocationName: _sourceLocationController.text.isNotEmpty
+          ? _sourceLocationController.text
+          : null,
+      destinationLocationName: _destinationLocationController.text.isNotEmpty
+          ? _destinationLocationController.text
+          : null,
+      gs1CompanyPrefix: _companyPrefixController.text.isNotEmpty
+          ? _companyPrefixController.text
+          : null,
+      packingDateFrom: _packingDateFrom,
+      packingDateTo: _packingDateTo,
+      shippingDateFrom: _shippingDateFrom,
+      shippingDateTo: _shippingDateTo,
+      receivingDateFrom: _receivingDateFrom,
+      receivingDateTo: _receivingDateTo,
+      page: cubitState.page + 1,
+      size: _pageSize,
+      sortBy: _selectedSortBy ?? 'createdAt',
+      sortDirection: _sortDirection,
+      isLoadMore: true,
+    );
   }
 
   Future<void> _refresh() async {
@@ -271,21 +269,14 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
       return;
     }
     context.push(SsccRouteConstants.pathForSsccCode(ssccCode));
-    _searchImmediate();
   }
 
   void _navigateToEdit(String ssccCode) {
-    context.push(SsccRouteConstants.pathForSsccCodeEdit(ssccCode));
-    _searchImmediate();
-  }
-
-  void _navigateToCreate() {
-    if (widget.onEmbeddedCreate != null) {
-      widget.onEmbeddedCreate!();
+    if (widget.onSelectSscc != null) {
+      widget.onSelectSscc!(ssccCode, editing: true);
       return;
     }
-    context.push(Constants.gs1SsccNewRoute);
-    _searchImmediate();
+    context.push(SsccRouteConstants.pathForSsccCodeEdit(ssccCode));
   }
 
   void _handleSsccRowMenu(SSCC sscc, String action) {
@@ -407,7 +398,9 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
           onRefresh: _refresh,
           onClearFilters: _clearAllFilters,
           hasActiveFilters: _hasActiveFilters,
-          onCreate: _navigateToCreate,
+          onCreate:
+              widget.onEmbeddedCreate ??
+              () => SsccCreateFlow.promptAndNavigate(context),
           onTapSscc: _navigateToDetails,
           onRowMenuAction: _handleSsccRowMenu,
           onLoadMore: _loadMore,
@@ -426,20 +419,16 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
       ),
       drawer: const AppDrawer(),
       body: content,
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'sscc_list_standalone_add_fab',
-        onPressed: _navigateToCreate,
-        tooltip: SsccUiConstants.fabAddNew,
-        child: TraqIcon(AppAssets.iconPlus),
-      ),
     );
   }
 
   String _sortLabel() {
-    final fieldLabel = SsccUiConstants.sortFieldLabels[_selectedSortBy] ??
+    final fieldLabel =
+        SsccUiConstants.sortFieldLabels[_selectedSortBy] ??
         SsccUiConstants.sortFieldFallback;
-    final orderLabel =
-        _sortDirection == 'ASC' ? 'A–Z / Oldest' : 'Z–A / Newest';
+    final orderLabel = _sortDirection == 'ASC'
+        ? 'A–Z / Oldest'
+        : 'Z–A / Newest';
     return 'Sort by $fieldLabel ($orderLabel)';
   }
 }

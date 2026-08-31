@@ -136,6 +136,8 @@ class UseTatmeenRecords extends ChangeNotifier {
       403 => 'You don\'t have permission to retry this record.',
       404 =>
         'This record was not found — it may have already been processed or removed.',
+      409 =>
+        'This Tatmeen submission is already processing. Refresh in a moment.',
       500 => 'Server error. Please try again in a moment.',
       _ => e.getUserFriendlyMessage(),
     };

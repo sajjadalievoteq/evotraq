@@ -11,21 +11,23 @@ class ReturnReceivingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
-        showFloatingActionButton:
-            context.canPerform(OperationSteps.returnReceive),
-        appBarTitle: 'Return Receiving',
-        fabHeroTag: 'return_receiving_fab',
-        fabAddTooltip: 'New return receiving',
-        createHeaderText: 'New Return Receiving',
-        emptyNoMatchText: 'No return receiving match your search.',
-        fabNavigateRoute: Constants.opReturnReceivingCreateRoute,
-        listBuilder: (context, {
+    showFloatingActionButton: context.canPerform(OperationSteps.returnReceive),
+    appBarTitle: 'Return Receiving',
+    listRoute: Constants.opReturnReceivingRoute,
+    detailRoute: (id) => '${Constants.opReturnReceivingRoute}/$id',
+    fabHeroTag: 'return_receiving_fab',
+    fabAddTooltip: 'New return receiving',
+    createHeaderText: 'New Return Receiving',
+    emptyNoMatchText: 'No return receiving match your search.',
+    fabNavigateRoute: Constants.opReturnReceivingCreateRoute,
+    listBuilder:
+        (
+          context, {
           required selectedId,
           required onSelect,
           required bindRefresh,
           required onRequestCreate,
-        }) =>
-            ReturnReceivingOperationListScreen(
+        }) => ReturnReceivingOperationListScreen(
           embedded: true,
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
@@ -34,17 +36,19 @@ class ReturnReceivingScreen extends StatelessWidget {
               ? onRequestCreate
               : null,
         ),
-        detailViewBuilder: (context, id) => ReturnReceivingOperationDetailScreen(
+    detailViewBuilder: (context, id, {required editing}) =>
+        ReturnReceivingOperationDetailScreen(
           key: ValueKey(id),
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context, {required listLoading}) => ReturnReceivingOperationDetailScreen(
+    detailAwaitBuilder: (context, {required listLoading}) =>
+        ReturnReceivingOperationDetailScreen(
           key: const ValueKey('__return_receiving_split_await__'),
           embedded: true,
           listLoading: listLoading,
           awaitingSelection: true,
         ),
-        fallbackList: const ReturnReceivingOperationListScreen(),
-      );
+    fallbackList: const ReturnReceivingOperationListScreen(),
+  );
 }

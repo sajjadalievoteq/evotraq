@@ -37,7 +37,10 @@ class OperationDetailTwoGlnLocationCard extends StatelessWidget {
         if (sourceGln != null)
           OperationDetailInfoRowCopy(label: sourceGlnLabel, value: sourceGln!),
         if (sourceLocationName?.isNotEmpty == true)
-          OperationDetailInfoRow(label: 'From Facility', value: sourceLocationName!),
+          OperationDetailInfoRow(
+            label: 'From Facility',
+            value: sourceLocationName!,
+          ),
         if (sourceCity?.isNotEmpty == true)
           OperationDetailInfoRow(label: 'From City', value: sourceCity!),
         if (showDirectionRow)
@@ -48,7 +51,10 @@ class OperationDetailTwoGlnLocationCard extends StatelessWidget {
             value: destinationGln!,
           ),
         if (destinationLocationName?.isNotEmpty == true)
-          OperationDetailInfoRow(label: 'To Facility', value: destinationLocationName!),
+          OperationDetailInfoRow(
+            label: 'To Facility',
+            value: destinationLocationName!,
+          ),
         if (destinationCity?.isNotEmpty == true)
           OperationDetailInfoRow(label: 'To City', value: destinationCity!),
       ],

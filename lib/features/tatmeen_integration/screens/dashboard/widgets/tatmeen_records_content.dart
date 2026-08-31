@@ -74,6 +74,7 @@ class TatmeenRecordsContent extends StatelessWidget {
                   isLoading: records.isLoading,
                   isBusy: records.isBusy,
                   onRetry: (record) => records.retryRecord(record.operationId),
+                  onDismiss: (record) => records.dismissRecord(record.operationId),
                 ),
         ),
       ],

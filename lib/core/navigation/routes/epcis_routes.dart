@@ -19,6 +19,7 @@ import 'package:traqtrace_app/features/epcis/transformation_events/screens/trans
 import 'package:traqtrace_app/features/epcis/transformation_events/screens/transformation_events_list/transformation_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/widgets/epcis_shell.dart';
 import 'package:traqtrace_app/core/navigation/routes/route_access.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 
 List<RouteBase> epcisRoutes(RouteAccess access) => [
   ShellRoute(
@@ -140,18 +141,31 @@ List<RouteBase> epcisRoutes(RouteAccess access) => [
         },
         redirect: (context, state) {
           if (!access.authState.isAuthenticated) {
-            // Top-level redirect owns login?from= while auth settles.
             return null;
           }
           final id = state.pathParameters['id'] ?? '';
           if (id.contains(':') || id.contains(';') || id.contains('/')) {
             return ObjectEventRouteConstants.detailLocation(id);
           }
-          return null;
+          if (id.isEmpty) return null;
+          return MasterDetailRoute.redirectToListIfDesktop(
+            context,
+            listRoute: Constants.epcisObjectEventsRoute,
+            selectedId: id,
+          );
         },
       ),
       GoRoute(
         path: Constants.epcisAggregationEventDetailRoute,
+        redirect: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          if (id.isEmpty) return null;
+          return MasterDetailRoute.redirectToListIfDesktop(
+            context,
+            listRoute: Constants.epcisAggregationEventsRoute,
+            selectedId: id,
+          );
+        },
         pageBuilder: (context, state) {
           final aggregationEventId = state.pathParameters['id'] ?? '';
           return TraqRouterTransitions.sharedAxisHorizontalPage(

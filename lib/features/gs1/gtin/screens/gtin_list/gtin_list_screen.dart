@@ -71,7 +71,10 @@ class _GTINListScreenState extends State<GTINListScreen> {
     final primary = PrimaryFetchScope.maybeOf(context)?.isPrimary ?? true;
     if (!primary) return;
     _didRunPrimaryInitialFetch = true;
-    context.read<GTINCubit>().fetchGTINList();
+    final cubit = context.read<GTINCubit>();
+    if (cubit.state.gtins == null) {
+      cubit.fetchGTINList(size: _pageSize);
+    }
   }
 
   @override
@@ -234,7 +237,6 @@ class _GTINListScreenState extends State<GTINListScreen> {
       return;
     }
     context.push('${Constants.gs1GtinsRoute}/$gtinCode');
-    _searchImmediate();
   }
 
   void _navigateToCreateGTIN() {
@@ -243,13 +245,13 @@ class _GTINListScreenState extends State<GTINListScreen> {
       return;
     }
     context.push(Constants.gs1GtinNewRoute);
-    _searchImmediate();
   }
 
   bool get _hasActiveFilters {
-    final statusActive = _selectedStatus != null &&
-        _selectedStatus != GtinUiConstants.filterAll;
-    final packagingActive = _selectedPackagingLevel != null &&
+    final statusActive =
+        _selectedStatus != null && _selectedStatus != GtinUiConstants.filterAll;
+    final packagingActive =
+        _selectedPackagingLevel != null &&
         _selectedPackagingLevel != GtinUiConstants.filterAll;
     return _searchController.text.trim().isNotEmpty ||
         _productNameController.text.trim().isNotEmpty ||

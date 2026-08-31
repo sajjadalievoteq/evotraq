@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_state.dart';
@@ -9,6 +10,8 @@ class OperationEntryScreen extends StatefulWidget {
   const OperationEntryScreen({
     super.key,
     required this.appBarTitle,
+    required this.listRoute,
+    required this.detailRoute,
     required this.fabHeroTag,
     required this.fabAddTooltip,
     required this.fabNavigateRoute,
@@ -22,6 +25,8 @@ class OperationEntryScreen extends StatefulWidget {
   });
 
   final String appBarTitle;
+  final String listRoute;
+  final String Function(String id) detailRoute;
   final String fabHeroTag;
   final String fabAddTooltip;
   final String fabNavigateRoute;
@@ -31,14 +36,20 @@ class OperationEntryScreen extends StatefulWidget {
   final Widget Function(
     BuildContext context, {
     required String? selectedId,
-    required ValueChanged<String> onSelect,
+    required MasterDetailSelectCallback onSelect,
     required void Function(VoidCallback refresh) bindRefresh,
     required VoidCallback onRequestCreate,
-  }) listBuilder;
+  })
+  listBuilder;
 
-  final Widget Function(BuildContext context, String id) detailViewBuilder;
+  final Widget Function(
+    BuildContext context,
+    String id, {
+    required bool editing,
+  })
+  detailViewBuilder;
   final Widget Function(BuildContext context, {required bool listLoading})
-      detailAwaitBuilder;
+  detailAwaitBuilder;
   final Widget? fallbackList;
   final bool showFloatingActionButton;
 
@@ -68,6 +79,7 @@ class _OperationEntryScreenState extends State<OperationEntryScreen> {
       child: SplitOrListIndexedStack(
         split: Gs1SplitViewScreen<OperationSplitCubit, OperationSplitState>(
           appBarTitle: widget.appBarTitle,
+          listRoute: widget.listRoute,
           fabHeroTag: widget.fabHeroTag,
           fabAddTooltip: widget.fabAddTooltip,
           fabCloseTooltip: 'Close create panel',
@@ -87,14 +99,19 @@ class _OperationEntryScreenState extends State<OperationEntryScreen> {
           detailAwaitBuilder: widget.detailAwaitBuilder,
           showFloatingActionButton: widget.showFloatingActionButton,
         ),
-        fallback: widget.fallbackList ??
-            widget.listBuilder(
-              context,
-              selectedId: null,
-              onSelect: (_) {},
-              bindRefresh: (_) {},
-              onRequestCreate: () {},
-            ),
+        fallback: MasterDetailMobileRedirect(
+          listRoute: widget.listRoute,
+          detailRoute: widget.detailRoute,
+          child:
+              widget.fallbackList ??
+              widget.listBuilder(
+                context,
+                selectedId: null,
+                onSelect: (_, {editing = false}) {},
+                bindRefresh: (_) {},
+                onRequestCreate: () {},
+              ),
+        ),
       ),
     );
   }

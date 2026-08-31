@@ -24,7 +24,8 @@ class ReturnReceivingOperationStepValidator {
   }
 
   static String? validateItemsStep(List<String> scannedEpcs) {
-    return OperationStepValidationUtils.validateSerializedItemsStep(scannedEpcs);
+    return OperationStepValidationUtils.validateSerializedItemsStep(
+      scannedEpcs,
+    );
   }
 }
-

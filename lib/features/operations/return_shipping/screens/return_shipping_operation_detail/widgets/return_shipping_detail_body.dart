@@ -14,10 +14,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
 
 class ReturnShippingDetailBody extends StatelessWidget {
-  const ReturnShippingDetailBody({
-    super.key,
-    required this.operation,
-  });
+  const ReturnShippingDetailBody({super.key, required this.operation});
 
   final ReturnShippingResponse operation;
 
@@ -46,10 +43,12 @@ class ReturnShippingDetailBody extends StatelessWidget {
             destinationGlnLabel: 'Ship To GLN',
             sourceGln: operation.sourceGLN ?? operation.sourceLocation?.glnCode,
             destinationGln:
-                operation.destinationGLN ?? operation.destinationLocation?.glnCode,
+                operation.destinationGLN ??
+                operation.destinationLocation?.glnCode,
             sourceLocationName: operation.sourceLocation?.locationName,
             sourceCity: operation.sourceLocation?.city,
-            destinationLocationName: operation.destinationLocation?.locationName,
+            destinationLocationName:
+                operation.destinationLocation?.locationName,
             destinationCity: operation.destinationLocation?.city,
           ),
           if (ReturnShippingDetailHelpers.hasTransportDetails(operation)) ...[

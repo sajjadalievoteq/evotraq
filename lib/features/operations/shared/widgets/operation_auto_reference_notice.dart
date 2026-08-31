@@ -3,10 +3,7 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class OperationAutoReferenceNotice extends StatelessWidget {
-  const OperationAutoReferenceNotice({
-    super.key,
-    required this.operationLabel,
-  });
+  const OperationAutoReferenceNotice({super.key, required this.operationLabel});
 
   final String operationLabel;
 
@@ -17,11 +14,10 @@ class OperationAutoReferenceNotice extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: TraqIcon(AppAssets.iconSparkle, color: colorScheme.primary),
-      title:  Text(
+      title: Text(
         'Reference will be generated automatically when you submit.',
-        style: TextStyle(color: colorScheme.onSurfaceVariant,),
+        style: TextStyle(color: colorScheme.onSurfaceVariant),
       ),
-
     );
   }
 }

@@ -33,16 +33,20 @@ class CancelReceivingPharmaReadinessChecker {
     );
 
     if (cancelReason.trim().isEmpty) {
-      issues.add('A cancellation reason is required (DSCSA §582 / FMD Art. 22).');
+      issues.add(
+        'A cancellation reason is required (DSCSA §582 / FMD Art. 22).',
+      );
     }
 
     if (originalReceivingReference == null ||
         originalReceivingReference.trim().isEmpty) {
-      issues.add('Original Receiving Reference (GINC) is missing. '
-          'DSCSA requires the original Transaction Information number to be referenced '
-          'in the bizTransactionList of a cancel receiving event. '
-          'Enter the GINC from the original receiving event, or confirm this cancellation is not '
-          'subject to DSCSA before proceeding without it.');
+      issues.add(
+        'Original Receiving Reference (GINC) is missing. '
+        'DSCSA requires the original Transaction Information number to be referenced '
+        'in the bizTransactionList of a cancel receiving event. '
+        'Enter the GINC from the original receiving event, or confirm this cancellation is not '
+        'subject to DSCSA before proceeding without it.',
+      );
     }
 
     return issues;

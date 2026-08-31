@@ -33,16 +33,20 @@ class CancelShippingPharmaReadinessChecker {
     );
 
     if (cancelReason.trim().isEmpty) {
-      issues.add('A cancellation reason is required (DSCSA §582 / FMD Art. 22).');
+      issues.add(
+        'A cancellation reason is required (DSCSA §582 / FMD Art. 22).',
+      );
     }
 
     if (originalShippingReference == null ||
         originalShippingReference.trim().isEmpty) {
-      issues.add('Original Shipping Reference (GINC) is missing. '
-          'DSCSA requires the original Transaction Information number to be referenced '
-          'in the bizTransactionList of a cancel shipping event. '
-          'Enter the GINC from the original shipment, or confirm this cancellation is not '
-          'subject to DSCSA before proceeding without it.');
+      issues.add(
+        'Original Shipping Reference (GINC) is missing. '
+        'DSCSA requires the original Transaction Information number to be referenced '
+        'in the bizTransactionList of a cancel shipping event. '
+        'Enter the GINC from the original shipment, or confirm this cancellation is not '
+        'subject to DSCSA before proceeding without it.',
+      );
     }
 
     return issues;

@@ -11,21 +11,23 @@ class CancelReceivingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
-        showFloatingActionButton:
-            context.canPerform(OperationSteps.cancelReceive),
-        appBarTitle: 'Cancel Receiving',
-        fabHeroTag: 'cancel_receiving_fab',
-        fabAddTooltip: 'New Cancellation',
-        createHeaderText: 'New Cancel Receiving',
-        emptyNoMatchText: 'No Cancel Receiving match your search.',
-        fabNavigateRoute: Constants.opCancelReceivingCreateRoute,
-        listBuilder: (context, {
+    showFloatingActionButton: context.canPerform(OperationSteps.cancelReceive),
+    appBarTitle: 'Cancel Receiving',
+    listRoute: Constants.opCancelReceivingRoute,
+    detailRoute: (id) => '${Constants.opCancelReceivingRoute}/$id',
+    fabHeroTag: 'cancel_receiving_fab',
+    fabAddTooltip: 'New Cancellation',
+    createHeaderText: 'New Cancel Receiving',
+    emptyNoMatchText: 'No Cancel Receiving match your search.',
+    fabNavigateRoute: Constants.opCancelReceivingCreateRoute,
+    listBuilder:
+        (
+          context, {
           required selectedId,
           required onSelect,
           required bindRefresh,
           required onRequestCreate,
-        }) =>
-            CancelReceivingOperationListScreen(
+        }) => CancelReceivingOperationListScreen(
           embedded: true,
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
@@ -34,17 +36,19 @@ class CancelReceivingScreen extends StatelessWidget {
               ? onRequestCreate
               : null,
         ),
-        detailViewBuilder: (context, id) => CancelReceivingOperationDetailScreen(
+    detailViewBuilder: (context, id, {required editing}) =>
+        CancelReceivingOperationDetailScreen(
           key: ValueKey(id),
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context, {required listLoading}) => CancelReceivingOperationDetailScreen(
+    detailAwaitBuilder: (context, {required listLoading}) =>
+        CancelReceivingOperationDetailScreen(
           key: const ValueKey('__cancel_receiving_split_await__'),
           embedded: true,
           listLoading: listLoading,
           awaitingSelection: true,
         ),
-        fallbackList: const CancelReceivingOperationListScreen(),
-      );
+    fallbackList: const CancelReceivingOperationListScreen(),
+  );
 }

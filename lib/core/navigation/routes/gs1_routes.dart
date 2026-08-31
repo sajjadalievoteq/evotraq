@@ -2,6 +2,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/gs1_tools_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/gln_detail_screen.dart';
@@ -31,6 +32,15 @@ List<RouteBase> gs1Routes() => [
   ),
   GoRoute(
     path: Constants.gs1GtinDetailRoute,
+    redirect: (context, state) {
+      final gtinCode = state.pathParameters['gtinCode'] ?? '';
+      if (gtinCode.isEmpty) return null;
+      return MasterDetailRoute.redirectToListIfDesktop(
+        context,
+        listRoute: Constants.gs1GtinsRoute,
+        selectedId: gtinCode,
+      );
+    },
     pageBuilder: (context, state) {
       final gtinCode = state.pathParameters['gtinCode'] ?? '';
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -41,6 +51,16 @@ List<RouteBase> gs1Routes() => [
   ),
   GoRoute(
     path: Constants.gs1GtinEditRoute,
+    redirect: (context, state) {
+      final gtinCode = state.pathParameters['gtinCode'] ?? '';
+      if (gtinCode.isEmpty) return null;
+      return MasterDetailRoute.redirectToListIfDesktop(
+        context,
+        listRoute: Constants.gs1GtinsRoute,
+        selectedId: gtinCode,
+        editing: true,
+      );
+    },
     pageBuilder: (context, state) {
       final gtinCode = state.pathParameters['gtinCode'] ?? '';
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -66,6 +86,16 @@ List<RouteBase> gs1Routes() => [
   ),
   GoRoute(
     path: Constants.gs1GlnDetailRoute,
+    redirect: (context, state) {
+      final glnId =
+          state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
+      if (glnId.isEmpty) return null;
+      return MasterDetailRoute.redirectToListIfDesktop(
+        context,
+        listRoute: Constants.gs1GlnsRoute,
+        selectedId: glnId,
+      );
+    },
     pageBuilder: (context, state) {
       final glnId =
           state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
@@ -77,6 +107,17 @@ List<RouteBase> gs1Routes() => [
   ),
   GoRoute(
     path: Constants.gs1GlnEditRoute,
+    redirect: (context, state) {
+      final glnId =
+          state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
+      if (glnId.isEmpty) return null;
+      return MasterDetailRoute.redirectToListIfDesktop(
+        context,
+        listRoute: Constants.gs1GlnsRoute,
+        selectedId: glnId,
+        editing: true,
+      );
+    },
     pageBuilder: (context, state) {
       final glnId =
           state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
@@ -95,14 +136,31 @@ List<RouteBase> gs1Routes() => [
   ),
   GoRoute(
     path: Constants.gs1SsccNewRoute,
-    pageBuilder: (context, state) =>
-        TraqRouterTransitions.sharedAxisHorizontalPage(
-          key: state.pageKey,
-          child: const SSCCDetailScreen(isEditing: true),
+    pageBuilder: (context, state) {
+      final skipPrompt = state.uri.queryParameters['skipCreatePrompt'] == '1';
+      final commissionAfterCreate =
+          state.uri.queryParameters['commissionAfterCreate'] == '1';
+      return TraqRouterTransitions.sharedAxisHorizontalPage(
+        key: state.pageKey,
+        child: SSCCDetailScreen(
+          isEditing: true,
+          skipCreateModePrompt: skipPrompt,
+          commissionAfterCreate: commissionAfterCreate,
         ),
+      );
+    },
   ),
   GoRoute(
     path: Constants.gs1SsccDetailRoute,
+    redirect: (context, state) {
+      final ssccCode = state.pathParameters['ssccId'] ?? '';
+      if (ssccCode.isEmpty) return null;
+      return MasterDetailRoute.redirectToListIfDesktop(
+        context,
+        listRoute: Constants.gs1SsccsRoute,
+        selectedId: ssccCode,
+      );
+    },
     pageBuilder: (context, state) {
       final ssccCode = state.pathParameters['ssccId'] ?? '';
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -116,6 +174,16 @@ List<RouteBase> gs1Routes() => [
   ),
   GoRoute(
     path: Constants.gs1SsccEditRoute,
+    redirect: (context, state) {
+      final ssccCode = state.pathParameters['ssccId'] ?? '';
+      if (ssccCode.isEmpty) return null;
+      return MasterDetailRoute.redirectToListIfDesktop(
+        context,
+        listRoute: Constants.gs1SsccsRoute,
+        selectedId: ssccCode,
+        editing: true,
+      );
+    },
     pageBuilder: (context, state) {
       final ssccCode = state.pathParameters['ssccId'] ?? '';
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -137,11 +205,7 @@ List<RouteBase> gs1Routes() => [
   ),
   GoRoute(
     path: Constants.gs1SgtinNewRoute,
-    pageBuilder: (context, state) =>
-        TraqRouterTransitions.sharedAxisHorizontalPage(
-          key: state.pageKey,
-          child: const SGTINDetailScreen(isEditing: true),
-        ),
+    redirect: (context, state) => Constants.opCommissioningNewRoute,
   ),
   GoRoute(
     path: Constants.gs1SgtinByEpcRoute,
@@ -158,6 +222,15 @@ List<RouteBase> gs1Routes() => [
   ),
   GoRoute(
     path: Constants.gs1SgtinDetailRoute,
+    redirect: (context, state) {
+      final id = state.pathParameters['id'] ?? '';
+      if (id.isEmpty) return null;
+      return MasterDetailRoute.redirectToListIfDesktop(
+        context,
+        listRoute: Constants.gs1SgtinsRoute,
+        selectedId: id,
+      );
+    },
     pageBuilder: (context, state) {
       final id = state.pathParameters['id'] ?? '';
       return TraqRouterTransitions.sharedAxisHorizontalPage(
@@ -168,6 +241,16 @@ List<RouteBase> gs1Routes() => [
   ),
   GoRoute(
     path: Constants.gs1SgtinEditRoute,
+    redirect: (context, state) {
+      final id = state.pathParameters['id'] ?? '';
+      if (id.isEmpty) return null;
+      return MasterDetailRoute.redirectToListIfDesktop(
+        context,
+        listRoute: Constants.gs1SgtinsRoute,
+        selectedId: id,
+        editing: true,
+      );
+    },
     pageBuilder: (context, state) {
       final id = state.pathParameters['id'] ?? '';
       return TraqRouterTransitions.sharedAxisHorizontalPage(

@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class UpdateStatusResponse {
@@ -39,30 +40,32 @@ class UpdateStatusResponse {
         ? List<String>.from((json['eventIds'] as List).map((e) => e.toString()))
         : null;
 
-    final epcList = (json['epcList'] as List?)
-            ?.map((e) => e.toString())
-            .toList() ??
+    final epcList =
+        (json['epcList'] as List?)?.map((e) => e.toString()).toList() ??
         (json['childEpcList'] as List?)?.map((e) => e.toString()).toList();
 
     return UpdateStatusResponse(
       decommissioningOperationId:
           _readNonEmptyString(json['decommissioningOperationId']) ??
-              _readNonEmptyString(json['operationId']) ??
-              _firstNonEmptyString(eventIds),
-      decommissioningReference:
-          _readNonEmptyString(json['decommissioningReference']),
+          _readNonEmptyString(json['operationId']) ??
+          _firstNonEmptyString(eventIds),
+      decommissioningReference: _readNonEmptyString(
+        json['decommissioningReference'],
+      ),
       eventIds: eventIds,
-      decommissionedEpcsCount: (json['decommissionedEpcsCount'] as num?)?.toInt() ??
-          epcList?.length,
+      decommissionedEpcsCount:
+          (json['decommissionedEpcsCount'] as num?)?.toInt() ?? epcList?.length,
       epcList: epcList,
       status: json['status'] != null
           ? parseOperationStatus(json['status'].toString())
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.tryParse(json['processedAt'].toString())?.toLocal()
+          ? AppTime.tryParseApi(json['processedAt'])
           : null,
       locationGLN: _readNonEmptyString(json['locationGLN']),
-      operationLocation: OperationGlnDisplay.fromJson(json['operationLocation']),
+      operationLocation: OperationGlnDisplay.fromJson(
+        json['operationLocation'],
+      ),
       disposition: _readNonEmptyString(json['disposition']),
       reason: _readNonEmptyString(json['reason']),
       comments: _readNonEmptyString(json['comments']),

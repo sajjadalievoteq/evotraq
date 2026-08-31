@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
@@ -53,8 +53,6 @@ class ReceivingDetailContent extends StatelessWidget {
       );
     }
 
-    return ReceivingDetailBody(
-      operation: operation!,
-    );
+    return ReceivingDetailBody(operation: operation!);
   }
 }

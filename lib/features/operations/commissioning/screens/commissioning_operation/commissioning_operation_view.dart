@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
@@ -18,13 +21,25 @@ import 'package:traqtrace_app/features/operations/commissioning/utils/commission
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_state.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_commissioning_prefill.dart';
 
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/commissioning_identification_actions.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/commissioning_workflow_actions.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/commissioning_submission_actions.dart';
 
 class CommissioningOperationView extends StatefulWidget {
-  const CommissioningOperationView({super.key});
+  const CommissioningOperationView({
+    super.key,
+    this.initialIdentifierType,
+    this.initialEpc,
+    this.ssccPrefill,
+  });
+
+  final EPCType? initialIdentifierType;
+  final String? initialEpc;
+  final SsccCommissioningPrefill? ssccPrefill;
 
   @override
   State<CommissioningOperationView> createState() =>
@@ -47,6 +62,8 @@ class CommissioningOperationViewState
   final readPointGlnController = TextEditingController();
 
   final countryOfOriginController = TextEditingController();
+  final manufacturingOriginController = TextEditingController();
+  final shipmentPermitController = TextEditingController();
   final productionOrderController = TextEditingController();
   final productionLineController = TextEditingController();
   final regulatoryMarketController = TextEditingController();
@@ -60,6 +77,9 @@ class CommissioningOperationViewState
   late final CommissioningEpcResolver epcResolver;
   late final CommissioningSerialPoolChecker poolChecker;
   late final GTINService gtinService;
+  late final SgtinBatchCubit batchCubit;
+  StreamSubscription<SgtinBatchState>? batchSubscription;
+  SgtinBatchState batchState = const SgtinBatchState();
 
   GTIN? selectedGTIN;
   String? gtinLoadInFlightFor;
@@ -67,6 +87,7 @@ class CommissioningOperationViewState
   final Map<String, CommissioningPoolCheckResult> poolCheckCache = {};
 
   EPCType? identifiedType;
+  String? identifierTypeError;
   EPCParseResult? primaryParsed;
   String? guessabilityWarning;
 
@@ -86,7 +107,14 @@ class CommissioningOperationViewState
 
   bool get isPharmaSgtin => identifiedType == EPCType.sgtin && isPharmaGtin;
 
-  bool get _isDetailsStepValid => commissioningLocationGLN != null;
+  void _onDetailsChanged() => setState(() {});
+
+  bool get _isDetailsStepValid =>
+      identifiedType != null &&
+      commissioningLocationGLN != null &&
+      (identifiedType == EPCType.sscc ||
+          (manufacturingOriginController.text.trim().isNotEmpty &&
+              shipmentPermitController.text.trim().isNotEmpty));
 
   bool get _isStep2Valid =>
       commissionItems.isNotEmpty &&
@@ -105,17 +133,98 @@ class CommissioningOperationViewState
       poolChecker: poolChecker,
     );
     gtinService = getIt<GTINService>();
+    batchCubit = getIt<SgtinBatchCubit>();
+    batchSubscription = batchCubit.stream.listen(_onBatchStateChanged);
     batchLotController.addListener(onBatchLotTextChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) => loadLocations());
+    manufacturingOriginController.addListener(_onDetailsChanged);
+    shipmentPermitController.addListener(_onDetailsChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await loadLocations();
+      if (!mounted) return;
+      await applyInitialRouteParams();
+    });
+  }
+
+  Future<void> applyInitialRouteParams() async {
+    final initialType = widget.initialIdentifierType;
+    if (initialType != null) {
+      selectIdentifierType(initialType);
+    }
+
+    final initialEpc = widget.initialEpc?.trim();
+    if (initialEpc == null || initialEpc.isEmpty) {
+      await applySsccPrefill();
+      return;
+    }
+
+    EPCParseResult? parsed;
+    try {
+      parsed = parseToEPC(initialEpc);
+    } catch (_) {
+      parsed = await epcFallbackResolve(initialEpc);
+    }
+    if (!mounted || parsed == null) return;
+
+    if (identifiedType != null && parsed.type != identifiedType) {
+      context.showError(
+        'Expected ${identifiedType!.name.toUpperCase()} — got ${parsed.typeLabel}',
+      );
+      return;
+    }
+
+    await onScanItemAdded(parsed);
+    await applySsccPrefill();
+  }
+
+  Future<void> applySsccPrefill() async {
+    final prefill = widget.ssccPrefill;
+    if (prefill == null) return;
+
+    if (prefill.commissioningReference != null) {
+      referenceController.text = prefill.commissioningReference!;
+    }
+    if (prefill.batchLotNumber != null) {
+      batchLotController.text = prefill.batchLotNumber!;
+    }
+    if (prefill.readPointGln != null) {
+      readPointGlnController.text = prefill.readPointGln!;
+    }
+    if (prefill.expiryDate != null) {
+      expiryDate = prefill.expiryDate;
+      expiryManuallySet = true;
+    }
+    if (prefill.productionDate != null) {
+      productionDate = prefill.productionDate;
+      productionDateManuallySet = true;
+    }
+
+    final locationGln = prefill.commissioningLocationGln;
+    if (locationGln != null && locationGln.isNotEmpty) {
+      final match = availableLocations
+          .where((g) => g.glnCode == locationGln)
+          .firstOrNull;
+      if (match != null) {
+        commissioningLocationGLN = match;
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override
   void dispose() {
     pageController.dispose();
+    manufacturingOriginController.removeListener(_onDetailsChanged);
+    shipmentPermitController.removeListener(_onDetailsChanged);
     batchLotController.dispose();
+    batchSubscription?.cancel();
+    batchCubit.close();
     referenceController.dispose();
     readPointGlnController.dispose();
     countryOfOriginController.dispose();
+    manufacturingOriginController.dispose();
+    shipmentPermitController.dispose();
     productionOrderController.dispose();
     productionLineController.dispose();
     regulatoryMarketController.dispose();
@@ -123,6 +232,23 @@ class CommissioningOperationViewState
     operatorIdController.dispose();
     notesController.dispose();
     super.dispose();
+  }
+
+  void _onBatchStateChanged(SgtinBatchState next) {
+    if (!mounted) return;
+    final batch = next.resolvedBatch;
+    setState(() {
+      batchState = next;
+      if (batch != null) {
+        productionDate = _parseBatchDate(batch.manufactureDate);
+        expiryDate = _parseBatchDate(batch.expiryDate);
+      }
+    });
+  }
+
+  DateTime? _parseBatchDate(String? value) {
+    if (value == null || value.isEmpty) return null;
+    return DateTime.tryParse(value);
   }
 
   @override
@@ -166,8 +292,7 @@ class CommissioningOperationViewState
                     currentStep: currentStep,
                     steps: _wizardSteps,
                     pageController: pageController,
-                    onPageChanged: (page) =>
-                        setState(() => currentStep = page),
+                    onPageChanged: (page) => setState(() => currentStep = page),
                     onPrevious: previousStep,
                     onNext: nextStep,
                     onSubmit: submit,

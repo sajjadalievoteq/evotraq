@@ -20,9 +20,7 @@ class ReturnShippingPharmaReadinessChecker {
       );
     }
     if (epcs.isEmpty) {
-      issues.add(
-        'No EPCs captured. At least one SGTIN or SSCC is required.',
-      );
+      issues.add('No EPCs captured. At least one SGTIN or SSCC is required.');
     }
     issues.addAll(
       OperationPharmaReadinessChecker.epcIssues(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_batch_dates_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_scan_step.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_batch_state.dart';
 
 class CommissioningStep2SerialNumbers extends StatelessWidget {
   const CommissioningStep2SerialNumbers({
@@ -23,6 +24,7 @@ class CommissioningStep2SerialNumbers extends StatelessWidget {
     this.requireExpiry = false,
     this.stepFormKey,
     this.itemProductNames = const {},
+    this.batchLookupState = const SgtinBatchState(),
   });
 
   final List<String> scannedEpcs;
@@ -43,6 +45,7 @@ class CommissioningStep2SerialNumbers extends StatelessWidget {
   final bool requireExpiry;
   final GlobalKey<FormState>? stepFormKey;
   final Map<String, String> itemProductNames;
+  final SgtinBatchState batchLookupState;
 
   bool get _showBatchDates => identifiedType == EPCType.sgtin;
 
@@ -57,6 +60,7 @@ class CommissioningStep2SerialNumbers extends StatelessWidget {
             onSelectDate: onSelectDate,
             onClearDate: onClearDate,
             requireExpiry: requireExpiry,
+            batchLookupState: batchLookupState,
           )
         : null;
 
@@ -67,11 +71,15 @@ class CommissioningStep2SerialNumbers extends StatelessWidget {
       onClearAll: onClearAll,
       groupCardTitle: 'Add EPCs to Commission',
       pageHeaderTitle: 'Scan Items to Commission',
-      pageHeaderSubtitle: 'Scan SGTIN or SSCC labels to commission.',
+      pageHeaderSubtitle: identifiedType == null
+          ? 'Select SGTIN or SSCC in Step 1 first.'
+          : 'Scan ${identifiedType!.name.toUpperCase()} labels to commission.',
       scannedListTitle: 'Items to Commission',
       scannedQueuedLabel: 'queued for commissioning',
       hierarchyScreenTitle: 'Commissioning Hierarchy',
-      allowedTypes: const [EPCType.sgtin, EPCType.sscc],
+      allowedTypes: identifiedType == null
+          ? const [EPCType.sgtin, EPCType.sscc]
+          : [identifiedType!],
       onParseFallback: onParseFallback,
       fillHeight: fillHeight,
       showPageHeader: !embeddedInPanel,

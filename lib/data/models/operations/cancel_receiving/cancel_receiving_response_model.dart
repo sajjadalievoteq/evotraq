@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class CancelReceivingResponse {
@@ -49,24 +50,25 @@ class CancelReceivingResponse {
         ? List<String>.from((json['eventIds'] as List).map((e) => e.toString()))
         : null;
 
-    final epcList = (json['epcList'] as List?)
-            ?.map((e) => e.toString())
-            .toList() ??
+    final epcList =
+        (json['epcList'] as List?)?.map((e) => e.toString()).toList() ??
         (json['childEpcList'] as List?)?.map((e) => e.toString()).toList();
 
     return CancelReceivingResponse(
       cancelReceivingOperationId:
           _readNonEmptyString(json['cancelReceivingOperationId']) ??
-              _readNonEmptyString(json['operationId']) ??
-              _readNonEmptyString(json['id']) ??
-              _readNonEmptyString(metadata?['cancel_receiving_operation_id']) ??
-              _firstNonEmptyString(eventIds) ??
-              _readNonEmptyString(metadata?['event_id']) ??
-              _readNonEmptyString(metadata?['eventId']),
-      cancelReceivingReference:
-          _readNonEmptyString(json['cancelReceivingReference']),
+          _readNonEmptyString(json['operationId']) ??
+          _readNonEmptyString(json['id']) ??
+          _readNonEmptyString(metadata?['cancel_receiving_operation_id']) ??
+          _firstNonEmptyString(eventIds) ??
+          _readNonEmptyString(metadata?['event_id']) ??
+          _readNonEmptyString(metadata?['eventId']),
+      cancelReceivingReference: _readNonEmptyString(
+        json['cancelReceivingReference'],
+      ),
       eventIds: eventIds,
-      cancelledEpcsCount: (json['cancelledEpcsCount'] as num?)?.toInt() ??
+      cancelledEpcsCount:
+          (json['cancelledEpcsCount'] as num?)?.toInt() ??
           (json['processedEpcsCount'] as num?)?.toInt() ??
           epcList?.length,
       epcList: epcList,
@@ -74,15 +76,18 @@ class CancelReceivingResponse {
           ? parseOperationStatus(json['status'].toString())
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.tryParse(json['processedAt'].toString())?.toLocal()
+          ? AppTime.tryParseApi(json['processedAt'])
           : null,
       sourceGLN: _readNonEmptyString(json['sourceGLN']),
       receivingGLN: _readNonEmptyString(json['receivingGLN']),
       sourceLocation: OperationGlnDisplay.fromJson(json['sourceLocation']),
-      receivingLocation: OperationGlnDisplay.fromJson(json['receivingLocation']),
+      receivingLocation: OperationGlnDisplay.fromJson(
+        json['receivingLocation'],
+      ),
       cancelReason: _readNonEmptyString(json['cancelReason']),
-      originalReceivingReference:
-          _readNonEmptyString(json['originalReceivingReference']),
+      originalReceivingReference: _readNonEmptyString(
+        json['originalReceivingReference'],
+      ),
       comments: _readNonEmptyString(json['comments']),
       messages: (json['messages'] as List?)?.map((e) => e.toString()).toList(),
       processingTimeMs: (json['processingTimeMs'] as num?)?.toInt(),

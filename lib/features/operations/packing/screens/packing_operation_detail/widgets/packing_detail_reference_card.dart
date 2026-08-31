@@ -6,10 +6,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_formatters.dart';
 
 class PackingDetailReferenceCard extends StatelessWidget {
-  const PackingDetailReferenceCard({
-    super.key,
-    required this.operation,
-  });
+  const PackingDetailReferenceCard({super.key, required this.operation});
 
   final PackingResponse operation;
 
@@ -24,11 +21,16 @@ class PackingDetailReferenceCard extends StatelessWidget {
             value: operation.packingReference!,
           ),
         if (operation.operatorId != null)
-          OperationDetailInfoRow(label: 'Operator ID', value: operation.operatorId!),
+          OperationDetailInfoRow(
+            label: 'Operator ID',
+            value: operation.operatorId!,
+          ),
         if (operation.processedAt != null)
           OperationDetailInfoRow(
             label: 'Processed At',
-            value: OperationDetailFormatters.formatDateTime(operation.processedAt!),
+            value: OperationDetailFormatters.formatDateTime(
+              operation.processedAt!,
+            ),
           ),
       ],
     );

@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/phar
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_detail_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_form_body.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart' as edit_rules;
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 
 class SsccDetailFormBlocBody extends StatelessWidget {
   const SsccDetailFormBlocBody({
@@ -64,6 +65,13 @@ class SsccDetailFormBlocBody extends StatelessWidget {
     required this.onAddChild,
     required this.onDisaggregate,
     required this.onSave,
+    this.onCommission,
+    this.showPrimarySaveButton = false,
+    this.showCommissionAction = false,
+    this.primaryActionLabel = SsccUiConstants.detailSaveButton,
+    this.savingActionLabel = SsccUiConstants.detailSavingButton,
+    this.isSaving = false,
+    this.commissionSavingInProgress = false,
     required this.onIssuingGlnChanged,
     required this.onInputModeChanged,
     required this.onGenerateSsccCode,
@@ -141,6 +149,13 @@ class SsccDetailFormBlocBody extends StatelessWidget {
     required String disaggregationEventId,
   })? onDisaggregate;
   final VoidCallback onSave;
+  final VoidCallback? onCommission;
+  final bool showPrimarySaveButton;
+  final bool showCommissionAction;
+  final String primaryActionLabel;
+  final String savingActionLabel;
+  final bool isSaving;
+  final bool commissionSavingInProgress;
 
   final ValueChanged<GLN?> onIssuingGlnChanged;
   final ValueChanged<SsccInputMode> onInputModeChanged;
@@ -231,6 +246,13 @@ class SsccDetailFormBlocBody extends StatelessWidget {
       onAddChild: onAddChild,
       onDisaggregate: onDisaggregate,
       onSave: onSave,
+      onCommission: onCommission,
+      showPrimarySaveButton: showPrimarySaveButton,
+      showCommissionAction: showCommissionAction,
+      primaryActionLabel: primaryActionLabel,
+      savingActionLabel: savingActionLabel,
+      isSaving: isSaving,
+      commissionSavingInProgress: commissionSavingInProgress,
       onIssuingGlnChanged: onIssuingGlnChanged,
       onInputModeChanged: onInputModeChanged,
       onGenerateSsccCode: onGenerateSsccCode,

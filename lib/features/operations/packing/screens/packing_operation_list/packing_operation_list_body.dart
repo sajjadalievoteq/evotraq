@@ -176,7 +176,7 @@ class PackingOperationListBodyState extends State<PackingOperationListBody> {
   void _navigateToDetail(Operation operation) {
     final id = operation.navigableOperationId;
     if (id == null) return;
-    if (widget.embedded && widget.onSelectOperation != null) {
+    if (widget.onSelectOperation != null) {
       widget.onSelectOperation!(id);
     } else {
       context.push('${Constants.opPackingRoute}/$id');

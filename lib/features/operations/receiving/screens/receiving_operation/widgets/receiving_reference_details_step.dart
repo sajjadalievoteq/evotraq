@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/shipment_reference_details_step.dart';
 
@@ -50,39 +50,39 @@ class ReceivingReferenceDetailsStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ShipmentReferenceDetailsStep(
-        pageTitle: 'Receiving Reference Details',
-        pageSubtitle:
-            'Capture receiving reference, ship-from/received-at locations, and shipment details.',
-        operationLabel: 'Receiving',
-        referenceSectionTitle: 'Receiving Reference',
-        eventTimeLabel: 'Received On',
-        documentSectionTitle: 'Business Transactions',
-        documentsRequired: true,
-        documentsHelperText:
-            'DSCSA T3 requires at least one of RECADV, Invoice, or Despatch Advice.',
-        sourceGln: sourceGln,
-        sourceGlnLabel: 'Ship From Location',
-        sourceGlnHint: 'Search and select source GLN',
-        sourceGlnError: sourceGlnError,
-        onSourceGlnChanged: onSourceGlnChanged,
-        destinationGln: receivingGln,
-        destinationGlnLabel: 'Receiving Location (Received At)',
-        destinationGlnHint: 'Search and select receiving GLN',
-        destinationGlnError: receivingGlnError,
-        onDestinationGlnChanged: onReceivingGlnChanged,
-        eventTime: eventTime,
-        onEventTimeChanged: onEventTimeChanged,
-        showPageHeader: showPageHeader,
-        showReferenceSection: showReferenceSection,
-        showLocationSection: showLocationSection,
-        showDocumentSection: showDocumentSection,
-        purchaseOrderController: purchaseOrderController,
-        despatchAdviceController: despatchAdviceController,
-        receivingAdviceController: receivingAdviceController,
-        invoiceController: invoiceController,
-        billOfLadingController: billOfLadingController,
-        carrierController: carrierController,
-        trackingController: trackingController,
-        notesController: notesController,
-      );
+    pageTitle: 'Receiving Reference Details',
+    pageSubtitle:
+        'Capture receiving reference, ship-from/received-at locations, and shipment details.',
+    operationLabel: 'Receiving',
+    referenceSectionTitle: 'Receiving Reference',
+    eventTimeLabel: 'Received On',
+    documentSectionTitle: 'Business Transactions',
+    documentsRequired: true,
+    documentsHelperText:
+        'DSCSA T3 requires at least one of RECADV, Invoice, or Despatch Advice.',
+    sourceGln: sourceGln,
+    sourceGlnLabel: 'Ship From Location',
+    sourceGlnHint: 'Search and select source GLN',
+    sourceGlnError: sourceGlnError,
+    onSourceGlnChanged: onSourceGlnChanged,
+    destinationGln: receivingGln,
+    destinationGlnLabel: 'Receiving Location (Received At)',
+    destinationGlnHint: 'Search and select receiving GLN',
+    destinationGlnError: receivingGlnError,
+    onDestinationGlnChanged: onReceivingGlnChanged,
+    eventTime: eventTime,
+    onEventTimeChanged: onEventTimeChanged,
+    showPageHeader: showPageHeader,
+    showReferenceSection: showReferenceSection,
+    showLocationSection: showLocationSection,
+    showDocumentSection: showDocumentSection,
+    purchaseOrderController: purchaseOrderController,
+    despatchAdviceController: despatchAdviceController,
+    receivingAdviceController: receivingAdviceController,
+    invoiceController: invoiceController,
+    billOfLadingController: billOfLadingController,
+    carrierController: carrierController,
+    trackingController: trackingController,
+    notesController: notesController,
+  );
 }

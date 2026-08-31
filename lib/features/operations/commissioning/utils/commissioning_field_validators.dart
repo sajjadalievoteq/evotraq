@@ -54,6 +54,16 @@ abstract final class CommissioningFieldValidators {
     return null;
   }
 
+  static String? validateShipmentPermitRequired(String? value) {
+    final v = (value ?? '').trim();
+    if (v.isEmpty) return 'Shipment / Local Sales Permit is required';
+    return _optionalText(
+      v,
+      fieldName: 'Shipment / Local Sales Permit',
+      maxLen: 100,
+    );
+  }
+
   static String? validateProductionOrderOptional(String? value) =>
       _optionalText(value, fieldName: 'Production Order', maxLen: 100);
 
@@ -96,5 +106,13 @@ abstract final class CommissioningFieldValidators {
       return 'Read Point GLN must be exactly 13 digits';
     }
     return sgtin_validators.validateGln(v, fieldName: 'Read Point GLN');
+  }
+
+  static String? validateEventTimeZoneOffset(String? value) {
+    final v = (value ?? '').trim();
+    if (!RegExp(r'^[+-](?:0\d|1[0-4]):[0-5]\d$').hasMatch(v)) {
+      return 'Time Zone Offset must use ±HH:MM (for example +04:00)';
+    }
+    return null;
   }
 }

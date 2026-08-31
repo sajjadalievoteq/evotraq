@@ -9,39 +9,40 @@ import 'package:traqtrace_app/features/operations/shared/screens/operation_detai
 
 final _returnReceivingDetailConfig =
     OperationDetailScreenConfig<ReturnReceivingResponse>(
-  createCubit: (fallbackErrorMessage) {
-    final service = getIt<ReturnReceivingOperationService>();
-    return OperationDetailCubit<ReturnReceivingResponse>(
-      fetchDetail: service.getReturnReceivingOperation,
-      fallbackErrorMessage: fallbackErrorMessage,
+      createCubit: (fallbackErrorMessage) {
+        final service = getIt<ReturnReceivingOperationService>();
+        return OperationDetailCubit<ReturnReceivingResponse>(
+          fetchDetail: service.getReturnReceivingOperation,
+          fallbackErrorMessage: fallbackErrorMessage,
+        );
+      },
+      contentBuilder:
+          (
+            context, {
+            required awaitingSelection,
+            required listLoading,
+            required isLoading,
+            required errorMessage,
+            required operation,
+            required onRetry,
+            onOperationUpdated,
+          }) => ReturnReceivingDetailContent(
+            awaitingSelection: awaitingSelection,
+            listLoading: listLoading,
+            isLoading: isLoading,
+            errorMessage: errorMessage,
+            operation: operation,
+            onRetry: onRetry,
+          ),
+      titleBuilder: (op) =>
+          op.returnReceivingReference ?? 'Return Receiving Detail',
+      listRoute: Constants.opReturnReceivingRoute,
+      defaultTitle: 'Return Receiving Detail',
+      fallbackErrorMessage:
+          'Unable to load this return receiving operation. '
+          'Check your connection and tap Retry. '
+          'If the problem continues, the record may have been deleted or you may not have access to it.',
     );
-  },
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      ReturnReceivingDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    operation: operation,
-    onRetry: onRetry,
-  ),
-  titleBuilder: (op) => op.returnReceivingReference ?? 'Return Receiving Detail',
-  listRoute: Constants.opReturnReceivingRoute,
-  defaultTitle: 'Return Receiving Detail',
-  fallbackErrorMessage:
-      'Unable to load this return receiving operation. '
-      'Check your connection and tap Retry. '
-      'If the problem continues, the record may have been deleted or you may not have access to it.',
-);
 
 class ReturnReceivingOperationDetailScreen
     extends GenericOperationDetailScreen<ReturnReceivingResponse> {

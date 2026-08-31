@@ -4,9 +4,7 @@ import 'package:traqtrace_app/features/operations/packing/utils/packing_step_val
 class PackingOperationStepValidator {
   PackingOperationStepValidator._();
 
-  static String? validateReferenceStep({
-    required GLN? packingLocationGln,
-  }) {
+  static String? validateReferenceStep({required GLN? packingLocationGln}) {
     if (packingLocationGln == null) {
       return PackingStepValidationMessages.packingLocationRequired;
     }

@@ -13,7 +13,8 @@ class ReceivingOperationStepValidator {
       destinationGln: receivingGln,
       sourceMissingMessage: 'Please select Ship From Location (source GLN).',
       destinationMissingMessage: 'Please select Receiving Location.',
-      sameLocationMessage: 'Ship From and Receiving locations cannot be the same.',
+      sameLocationMessage:
+          'Ship From and Receiving locations cannot be the same.',
       sourceInvalidMessagePrefix: 'Source GLN ',
       destinationInvalidMessagePrefix: 'Receiving GLN ',
       sourceInvalidMessageSuffix: ' is not a valid GS1 GLN.',
@@ -22,7 +23,8 @@ class ReceivingOperationStepValidator {
   }
 
   static String? validateItemsStep(List<String> scannedEpcs) {
-    return OperationStepValidationUtils.validateSerializedItemsStep(scannedEpcs);
+    return OperationStepValidationUtils.validateSerializedItemsStep(
+      scannedEpcs,
+    );
   }
 }
-

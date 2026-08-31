@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:traqtrace_app/core/utils/app_time.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 
 enum TatmeenRecordsStatusFilter { all, successful, failed, pending }
@@ -78,7 +79,7 @@ class TatmeenAttemptHistory extends Equatable {
 
   factory TatmeenAttemptHistory.fromJson(Map<String, dynamic> json) {
     return TatmeenAttemptHistory(
-      timestamp: DateTime.parse(json['timestamp'] as String).toLocal(),
+      timestamp: AppTime.parseApi(json['timestamp']),
       errorMessage: json['errorMessage'] as String? ?? '',
     );
   }
@@ -166,7 +167,7 @@ class TatmeenSyncRecord extends Equatable {
           if (item is Map)
             TatmeenAttemptHistory.fromJson(Map<String, dynamic>.from(item)),
       ],
-      createdAt: DateTime.parse(json['createdAt'] as String).toLocal(),
+      createdAt: AppTime.parseApi(json['createdAt']),
     );
   }
 

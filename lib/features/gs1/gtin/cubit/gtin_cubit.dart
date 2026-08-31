@@ -142,12 +142,16 @@ class GTINCubit extends Cubit<GTINState> {
           ),
         );
       } else {
-        final List<GTIN> updatedGtins = List.from(state.gtins!)..addAll(gtins);
+        // Keep already-rendered rows in place while pagination appends. Sorting the
+        // entire accumulated list here moves existing rows above/below the current
+        // viewport and makes the list appear to jump when the next page arrives.
+        final List<GTIN> updatedGtins = List.from(state.gtins!)
+          ..addAll(_sortGtinsByProductName(gtins, ascending: ascending));
         emit(
           state.copyWith(
             status: nextStatus,
             isGtinListLoading: false,
-            gtins: _sortGtinsByProductName(updatedGtins, ascending: ascending),
+            gtins: updatedGtins,
             currentPage: page,
             hasMoreData: hasMoreData,
             isFetchingMore: false,

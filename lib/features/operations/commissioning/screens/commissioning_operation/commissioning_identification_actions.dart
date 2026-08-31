@@ -46,6 +46,7 @@ extension CommissioningIdentificationActions
 
   void onBatchLotTextChanged() {
     if (!mounted) return;
+    batchCubit.onBatchLotInputChanged(batchLotController.text);
     setState(() {});
   }
 
@@ -54,23 +55,25 @@ extension CommissioningIdentificationActions
       final catalog = getIt<GlnPickerCatalog>();
       final glns = await catalog.ensureLoaded();
       if (!mounted) return;
-      setState(
-        () => availableLocations = glns.where((g) => g.active).toList(),
-      );
+      setState(() => availableLocations = glns.where((g) => g.active).toList());
     } catch (e) {
       debugPrint('Error loading GLNs for commissioning picker: $e');
     }
   }
 
   Future<void> onScanItemAdded(EPCParseResult result) async {
-    if (commissionItems.isEmpty) {
-      await _processResolvedEpc(result, isPrimary: true);
+    if (identifiedType == null) {
+      context.showError('Select SGTIN or SSCC in Step 1 first');
       return;
     }
-    if (identifiedType != null && result.type != identifiedType) {
+    if (result.type != identifiedType) {
       context.showError(
         'Expected ${identifiedType!.name.toUpperCase()} — got ${result.typeLabel}',
       );
+      return;
+    }
+    if (commissionItems.isEmpty) {
+      await _processResolvedEpc(result, isPrimary: true);
       return;
     }
     if (commissionItems.any((i) => i.epc == result.epc)) {
@@ -229,6 +232,8 @@ extension CommissioningIdentificationActions
         selectedGTIN = gtin;
         gtinLoadInFlightFor = null;
       });
+      batchCubit.onGtinChanged(gtinId: gtin.id, gtinCode: normalized);
+      batchCubit.onBatchLotInputChanged(batchLotController.text);
     } catch (_) {
       if (!mounted || gtinLoadInFlightFor != normalized) return;
       setState(() => gtinLoadInFlightFor = null);

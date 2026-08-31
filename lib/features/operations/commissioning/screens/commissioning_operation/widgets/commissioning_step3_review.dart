@@ -27,6 +27,8 @@ class CommissioningStep3Review extends StatelessWidget {
     required this.bestBeforeDate,
     required this.items,
     this.countryOfOrigin,
+    this.manufacturingOrigin,
+    this.shipmentPermit,
     this.productionOrder,
     this.productionLine,
     this.regulatoryMarket,
@@ -45,6 +47,8 @@ class CommissioningStep3Review extends StatelessWidget {
   final DateTime? bestBeforeDate;
   final List<CommissioningEpcItem> items;
   final String? countryOfOrigin;
+  final String? manufacturingOrigin;
+  final String? shipmentPermit;
   final String? productionOrder;
   final String? productionLine;
   final String? regulatoryMarket;
@@ -123,6 +127,18 @@ class CommissioningStep3Review extends StatelessWidget {
                 if (countryOfOrigin != null && countryOfOrigin!.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   SgtinInfoRow('Country of Origin', countryOfOrigin),
+                ],
+                if (manufacturingOrigin != null &&
+                    manufacturingOrigin!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  SgtinInfoRow(
+                    'Manufacturing Origin',
+                    manufacturingOrigin == 'I' ? 'International' : 'Local',
+                  ),
+                ],
+                if (shipmentPermit != null && shipmentPermit!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  SgtinInfoRow('Shipment / Local Sales Permit', shipmentPermit),
                 ],
                 if (productionOrder != null && productionOrder!.isNotEmpty) ...[
                   const SizedBox(height: 12),

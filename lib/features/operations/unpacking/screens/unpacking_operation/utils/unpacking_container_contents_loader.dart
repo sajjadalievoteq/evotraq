@@ -22,11 +22,8 @@ abstract final class UnpackingContainerContentsLoader {
     final nodes = <HierarchyNode>[...first.children];
     if (!first.hasMore) return nodes;
 
-    final remainingPages = first.totalPages > 1
-        ? first.totalPages - 1
-        : 0;
+    final remainingPages = first.totalPages > 1 ? first.totalPages - 1 : 0;
     if (remainingPages <= 0) {
-      
       var page = 1;
       while (true) {
         final result = await hierarchyService.getHierarchyChildren(

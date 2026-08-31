@@ -19,6 +19,7 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/phar
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_code_section.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_header_card.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_lazy_viewport_section.dart';
 
@@ -79,6 +80,13 @@ class SsccDetailFormBody extends StatelessWidget {
     required this.onAddChild,
     required this.onDisaggregate,
     required this.onSave,
+    this.onCommission,
+    this.showPrimarySaveButton = false,
+    this.showCommissionAction = false,
+    this.primaryActionLabel = SsccUiConstants.detailSaveButton,
+    this.savingActionLabel = SsccUiConstants.detailSavingButton,
+    this.isSaving = false,
+    this.commissionSavingInProgress = false,
     required this.onIssuingGlnChanged,
     required this.onInputModeChanged,
     required this.onGenerateSsccCode,
@@ -158,6 +166,13 @@ class SsccDetailFormBody extends StatelessWidget {
   })?
   onDisaggregate;
   final VoidCallback onSave;
+  final VoidCallback? onCommission;
+  final bool showPrimarySaveButton;
+  final bool showCommissionAction;
+  final String primaryActionLabel;
+  final String savingActionLabel;
+  final bool isSaving;
+  final bool commissionSavingInProgress;
 
   final ValueChanged<GLN?> onIssuingGlnChanged;
   final ValueChanged<SsccInputMode> onInputModeChanged;
@@ -381,21 +396,38 @@ class SsccDetailFormBody extends StatelessWidget {
                       ),
                 ),
                 const SizedBox(height: 24),
-                if (embedded && allowMasterDataActions) ...[
-                  CustomButtonWidget(
-                    onTap: onSave,
-                    title: SsccUiConstants.detailSaveButton,
-                    height: 50,
-                  ),
-                  const SizedBox(height: 32),
+                if (showPrimarySaveButton) ...[
+                  _buildSaveButton(context),
+                  SizedBox(height: showCommissionAction ? 16 : 32),
                 ],
-                if (allowMasterDataActions &&
-                    (!embedded || MediaQuery.of(context).size.width < 600))
-                  CustomButtonWidget(
-                    onTap: onSave,
-                    title: SsccUiConstants.detailSaveButton,
-                    height: 50,
+                if (showCommissionAction && onCommission != null) ...[
+                  const SizedBox(height: 16),
+                  Gs1GroupCard(
+                    title: 'Actions',
+                    outlineColor: borderColor,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          SsccUiConstants.commissionActionHint,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        CustomButtonWidget(
+                          onTap: isSaving ? null : onCommission,
+                          title: commissionSavingInProgress
+                              ? SsccUiConstants.detailSavingAndCommissioningButton
+                              : SsccUiConstants.detailSaveAndCommissionButton,
+                          height: 50,
+                        ),
+                      ],
+                    ),
                   ),
+                ],
                 const SizedBox(height: 32),
               ],
             ),
@@ -403,6 +435,27 @@ class SsccDetailFormBody extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSaveButton(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final showSavingLabel =
+        isSaving && !commissionSavingInProgress;
+    return CustomButtonWidget(
+      onTap: isSaving ? null : onSave,
+      title: showSavingLabel ? savingActionLabel : primaryActionLabel,
+      iconWidget: showSavingLabel
+          ? SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: scheme.onPrimary,
+              ),
+            )
+          : null,
+      height: 50,
     );
   }
 }

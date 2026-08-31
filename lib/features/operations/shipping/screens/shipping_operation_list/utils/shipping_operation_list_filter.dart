@@ -29,9 +29,9 @@ class ShippingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.shippingReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.shippingReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||
@@ -39,9 +39,9 @@ class ShippingOperationListFilter {
               false) ||
           (operation.trackingNumber?.toLowerCase().contains(normalizedQuery) ??
               false) ||
-          (operation.shippingOperationId
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+          (operation.shippingOperationId?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false);
     }).toList();
 
@@ -65,7 +65,8 @@ class ShippingOperationListFilter {
     final normalizedTracking = trackingFilter?.toLowerCase().trim() ?? '';
 
     final filtered = operations.where((operation) {
-      if (statusFilter != null && (operation.status?.name ?? '') != statusFilter) {
+      if (statusFilter != null &&
+          (operation.status?.name ?? '') != statusFilter) {
         return false;
       }
 
@@ -76,9 +77,9 @@ class ShippingOperationListFilter {
 
       if (normalizedQuery.isEmpty) return true;
 
-      return (operation.operationReference
-                  ?.toLowerCase()
-                  .contains(normalizedQuery) ??
+      return (operation.operationReference?.toLowerCase().contains(
+                normalizedQuery,
+              ) ??
               false) ||
           (operation.sourceGLN?.toLowerCase().contains(normalizedQuery) ??
               false) ||

@@ -83,15 +83,15 @@ abstract final class OperationPermissions {
 
   /// Write-step key for a home/drawer [OperationType], or `null` if none.
   static String stepForOperationType(OperationType type) => switch (type) {
-        OperationType.commissioning => OperationSteps.commission,
-        OperationType.updateStatus => OperationSteps.updateStatus,
-        OperationType.packing => OperationSteps.pack,
-        OperationType.unpacking => OperationSteps.unpack,
-        OperationType.shipping => OperationSteps.ship,
-        OperationType.cancelShipping => OperationSteps.cancelShip,
-        OperationType.returnShipping => OperationSteps.returnShip,
-        OperationType.receiving => OperationSteps.receive,
-        OperationType.cancelReceiving => OperationSteps.cancelReceive,
-        OperationType.returnReceiving => OperationSteps.returnReceive,
-      };
+    OperationType.commissioning => OperationSteps.commission,
+    OperationType.updateStatus => OperationSteps.updateStatus,
+    OperationType.packing => OperationSteps.pack,
+    OperationType.unpacking => OperationSteps.unpack,
+    OperationType.shipping => OperationSteps.ship,
+    OperationType.cancelShipping => OperationSteps.cancelShip,
+    OperationType.returnShipping => OperationSteps.returnShip,
+    OperationType.receiving => OperationSteps.receive,
+    OperationType.cancelReceiving => OperationSteps.cancelReceive,
+    OperationType.returnReceiving => OperationSteps.returnReceive,
+  };
 }

@@ -15,25 +15,25 @@ final _receivingDetailConfig = OperationDetailScreenConfig<ReceivingResponse>(
       fallbackErrorMessage: fallbackErrorMessage,
     );
   },
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      ReceivingDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    operation: operation,
-    onRetry: onRetry,
-    onOperationUpdated: onOperationUpdated,
-  ),
+  contentBuilder:
+      (
+        context, {
+        required awaitingSelection,
+        required listLoading,
+        required isLoading,
+        required errorMessage,
+        required operation,
+        required onRetry,
+        onOperationUpdated,
+      }) => ReceivingDetailContent(
+        awaitingSelection: awaitingSelection,
+        listLoading: listLoading,
+        isLoading: isLoading,
+        errorMessage: errorMessage,
+        operation: operation,
+        onRetry: onRetry,
+        onOperationUpdated: onOperationUpdated,
+      ),
   titleBuilder: (op) => op.receivingReference ?? 'Receiving Detail',
   listRoute: Constants.opReceivingRoute,
   defaultTitle: 'Receiving Detail',

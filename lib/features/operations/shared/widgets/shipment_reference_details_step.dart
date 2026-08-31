@@ -306,13 +306,13 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
                     TextField(
                       controller: purchaseOrderController,
                       decoration: InputDecoration(
-                        labelText: documentsRequired &&
-                                _shippingT3DocumentFields
+                        labelText:
+                            documentsRequired && _shippingT3DocumentFields
                             ? 'Purchase Order Number *'
                             : 'Purchase Order Number',
                         hintText: 'e.g., PO-784511',
-                        helperText: documentsRequired &&
-                                _shippingT3DocumentFields
+                        helperText:
+                            documentsRequired && _shippingT3DocumentFields
                             ? 'At least one of Purchase Order or Despatch Advice is required (DSCSA T3).'
                             : null,
                         helperMaxLines: 2,
@@ -330,11 +330,12 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
                             ? 'Despatch Advice Number *'
                             : 'Despatch Advice Number',
                         hintText: 'e.g., DESADV-12001',
-                        helperText: documentsRequired && _receivingT3DocumentFields
+                        helperText:
+                            documentsRequired && _receivingT3DocumentFields
                             ? 'At least one of RECADV, Invoice, or DESADV is required (DSCSA T3).'
                             : documentsRequired && _shippingT3DocumentFields
-                                ? 'At least one of Purchase Order or Despatch Advice is required (DSCSA T3).'
-                                : null,
+                            ? 'At least one of Purchase Order or Despatch Advice is required (DSCSA T3).'
+                            : null,
                         helperMaxLines: 2,
                         border: const OutlineInputBorder(),
                         prefixIcon: const TraqIcon(AppAssets.iconDocument),
@@ -346,13 +347,13 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
                     TextField(
                       controller: receivingAdviceController,
                       decoration: InputDecoration(
-                        labelText: documentsRequired &&
-                                _receivingT3DocumentFields
+                        labelText:
+                            documentsRequired && _receivingT3DocumentFields
                             ? 'Receiving Advice Number (RECADV) *'
                             : 'Receiving Advice Number (RECADV)',
                         hintText: 'e.g., RECADV-2026-0042',
-                        helperText: documentsRequired &&
-                                _receivingT3DocumentFields
+                        helperText:
+                            documentsRequired && _receivingT3DocumentFields
                             ? 'At least one of RECADV, Invoice, or DESADV is required (DSCSA T3).'
                             : 'Optional — EDI Receiving Advice document number (if applicable)',
                         helperMaxLines: 2,
@@ -366,13 +367,13 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
                     TextField(
                       controller: invoiceController,
                       decoration: InputDecoration(
-                        labelText: documentsRequired &&
-                                _receivingT3DocumentFields
+                        labelText:
+                            documentsRequired && _receivingT3DocumentFields
                             ? 'Invoice Number *'
                             : 'Invoice Number',
                         hintText: 'e.g., INV-45021',
-                        helperText: documentsRequired &&
-                                _receivingT3DocumentFields
+                        helperText:
+                            documentsRequired && _receivingT3DocumentFields
                             ? 'At least one of RECADV, Invoice, or DESADV is required (DSCSA T3).'
                             : null,
                         helperMaxLines: 2,
@@ -449,14 +450,12 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
       trackingController != null ||
       notesController != null;
 
-  
   bool get _shippingT3DocumentFields =>
       purchaseOrderController != null &&
       despatchAdviceController != null &&
       receivingAdviceController == null &&
       invoiceController == null;
 
-  
   bool get _receivingT3DocumentFields =>
       receivingAdviceController != null || invoiceController != null;
 }

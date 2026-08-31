@@ -1,4 +1,3 @@
-
 class OperationReviewField {
   const OperationReviewField(this.label, this.value);
 

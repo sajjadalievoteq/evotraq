@@ -29,15 +29,12 @@ class OperationAdvancedFiltersPanel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (filterField != null) ...[
-          filterField!,
-          const SizedBox(height: 8),
-        ],
+        if (filterField != null) ...[filterField!, const SizedBox(height: 8)],
         Text(
           footerHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
@@ -49,9 +46,7 @@ class OperationAdvancedFiltersPanel extends StatelessWidget {
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
           items: sortFieldLabels.entries
-              .map(
-                (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
-              )
+              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
               .toList(),
           onChanged: onSortByChanged,
         ),

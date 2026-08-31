@@ -30,6 +30,7 @@ class TatmeenErrorSummary extends StatelessWidget {
         title: 'Unable to load error summary',
         message: error!,
         onRetry: onRetry,
+        iconAsset: AppAssets.iconAlert,
         padding: EdgeInsets.zero,
       );
     }

@@ -31,6 +31,7 @@ class TatmeenStatusBreakdownChart extends StatelessWidget {
         title: 'Unable to load status breakdown',
         message: error!,
         onRetry: onRetry,
+        iconAsset: AppAssets.iconDashboard,
         padding: EdgeInsets.zero,
       );
     }

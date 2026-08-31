@@ -11,6 +11,7 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_list/widgets/sscc_l
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -48,7 +49,7 @@ class SsccResultsList extends StatelessWidget {
           current.status == SSCCStatus.error &&
           previous.status != SSCCStatus.error,
       listener: (context, state) {
-        if (state.error != null) {
+        if (state.error != null && state.ssccs.isNotEmpty) {
           context.showError(userFacingSsccErrorMessage(state.error));
         }
       },
@@ -58,6 +59,19 @@ class SsccResultsList extends StatelessWidget {
 
         if (isInitialLoad) {
           return const Gs1ListLoadingShimmer();
+        }
+
+        if (state.status == SSCCStatus.error &&
+            state.error != null &&
+            state.ssccs.isEmpty) {
+          return ConstrainedSectionContent(
+            child: AppErrorState(
+              message: userFacingSsccErrorMessage(state.error),
+              iconAsset: NavIcons.sscc,
+              title: 'Unable to load SSCCs',
+              onRetry: () => onRefresh(),
+            ),
+          );
         }
 
         if (state.ssccs.isEmpty) {

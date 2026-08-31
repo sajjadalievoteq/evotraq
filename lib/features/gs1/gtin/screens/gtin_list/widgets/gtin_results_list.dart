@@ -8,6 +8,7 @@ import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_list/widgets/gtin_list_item_card.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -45,7 +46,8 @@ class GtinResultsList extends StatelessWidget {
         return current.status == GTINStatus.error;
       },
       listener: (context, state) {
-        if (state.listFetchError != null) {
+        if (state.listFetchError != null &&
+            (state.gtins?.isNotEmpty ?? false)) {
           debugPrint(
             '[GTIN UI] listFetchError (snackbar): ${state.listFetchError}',
           );
@@ -68,6 +70,16 @@ class GtinResultsList extends StatelessWidget {
         }
 
         final gtins = state.gtins;
+        if (state.listFetchError != null && (gtins == null || gtins.isEmpty)) {
+          return ConstrainedSectionContent(
+            child: AppErrorState(
+              message: state.listFetchError,
+              iconAsset: NavIcons.gtin,
+              title: 'Unable to load GTINs',
+              onRetry: () => onRefresh(),
+            ),
+          );
+        }
         if (gtins == null || gtins.isEmpty) {
           return ConstrainedSectionContent(
             child: AppEmptyState(

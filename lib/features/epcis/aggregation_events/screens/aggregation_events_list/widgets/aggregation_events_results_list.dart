@@ -10,6 +10,7 @@ import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart
 import 'package:traqtrace_app/features/epcis/aggregation_events/utils/aggregation_event_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregation_events_list/widgets/aggregation_event_list_item_card.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -43,7 +44,8 @@ class AggregationEventsResultsList extends StatelessWidget {
           prev.status != AggregationEventsStatus.error &&
           curr.listFetchError != null,
       listener: (context, state) {
-        if (state.listFetchError != null) {
+        if (state.listFetchError != null &&
+            state.aggregationEvents.isNotEmpty) {
           context.showError(state.listFetchError!);
         }
       },
@@ -53,6 +55,17 @@ class AggregationEventsResultsList extends StatelessWidget {
 
         if (isInitialLoad) {
           return const Gs1ListLoadingShimmer();
+        }
+
+        if (state.listFetchError != null && state.aggregationEvents.isEmpty) {
+          return ConstrainedSectionContent(
+            child: AppErrorState(
+              message: state.listFetchError,
+              iconAsset: NavIcons.aggregationEvents,
+              title: 'Unable to load aggregation events',
+              onRetry: () => onRefresh(),
+            ),
+          );
         }
 
         if (state.aggregationEvents.isEmpty) {

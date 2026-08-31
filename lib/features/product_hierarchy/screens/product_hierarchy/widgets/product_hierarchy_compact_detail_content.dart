@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/empty_state_visual.dart';
+import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_cubit.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_state.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_sidebar_content.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_sidebar_skeleton.dart';
@@ -29,10 +32,16 @@ class ProductHierarchyCompactDetailContent extends StatelessWidget {
       );
     }
     if ((state.detailsError ?? '').isNotEmpty) {
-      return AppEmptyDetail(
+      return AppErrorState(
         iconAsset: NavIcons.productHierarchy,
         title: 'Unable to load node details',
-        subtitle: state.detailsError!,
+        message: state.detailsError,
+        density: EmptyStateDensity.compact,
+        onRetry: state.selectedEpc == null
+            ? null
+            : () => context.read<ProductHierarchyCubit>().selectEpc(
+                state.selectedEpc!,
+              ),
       );
     }
     return const ProductHierarchySidebarSkeleton();

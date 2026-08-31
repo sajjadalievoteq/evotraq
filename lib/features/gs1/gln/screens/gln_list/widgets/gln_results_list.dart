@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/widgets/gln_list_item_card.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -50,12 +51,14 @@ class GlnResultsList extends StatelessWidget {
                 previous.error != current.error);
       },
       listener: (context, state) {
-        if (state.listFetchError != null) {
+        if (state.listFetchError != null && state.glns.isNotEmpty) {
           context.showError(state.listFetchError!);
           context.read<GLNCubit>().clearGlnListError();
           return;
         }
-        if (state.status == GLNStatus.error && state.error != null) {
+        if (state.status == GLNStatus.error &&
+            state.error != null &&
+            state.glns.isNotEmpty) {
           context.showError(state.error!);
         }
       },
@@ -70,6 +73,20 @@ class GlnResultsList extends StatelessWidget {
         if (state.glns.isEmpty &&
             (state.isGlnListLoading || state.status == GLNStatus.initial)) {
           return const Gs1ListLoadingShimmer();
+        }
+
+        final initialError =
+            state.listFetchError ??
+            (state.status == GLNStatus.error ? state.error : null);
+        if (initialError != null && state.glns.isEmpty) {
+          return ConstrainedSectionContent(
+            child: AppErrorState(
+              message: initialError,
+              iconAsset: NavIcons.gln,
+              title: 'Unable to load GLNs',
+              onRetry: () => onRefresh(),
+            ),
+          );
         }
 
         if (state.glns.isEmpty) {

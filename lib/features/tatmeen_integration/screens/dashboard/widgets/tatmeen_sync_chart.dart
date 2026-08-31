@@ -33,6 +33,7 @@ class TatmeenSyncChart extends StatelessWidget {
         title: 'Unable to load chart',
         message: error!,
         onRetry: onRetry,
+        iconAsset: AppAssets.iconBarChart,
         padding: EdgeInsets.zero,
       );
     }

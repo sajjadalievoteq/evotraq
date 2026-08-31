@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
@@ -137,6 +138,7 @@ class JobQueuePanelState extends State<JobQueuePanel>
                 title: 'Unable to load job queue',
                 message: state.error ?? 'Failed to load job queue data',
                 onRetry: _cubit.loadInitial,
+                iconAsset: AppAssets.iconQueue,
                 padding: embedded
                     ? const EdgeInsets.symmetric(vertical: TraqSpacing.lg)
                     : TraqSpacing.pagePad,

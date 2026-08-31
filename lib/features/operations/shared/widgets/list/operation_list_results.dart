@@ -67,6 +67,7 @@ class OperationListResults<T> extends StatelessWidget {
       return OperationListErrorView(
         errorMessage: errorMessage!,
         onRetry: onRetry,
+        iconAsset: emptyIconAsset ?? NavIcons.packaging,
       );
     }
 

@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
@@ -8,6 +10,7 @@ import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_status.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_filters.dart';
 import 'package:traqtrace_app/core/utils/gs1_utils.dart';
+
 class SSCCCubit extends Cubit<SSCCState> {
   final SSCCService _ssccService;
   SSCCCubit({required SSCCService ssccService})
@@ -16,6 +19,7 @@ class SSCCCubit extends Cubit<SSCCState> {
   Future<void> fetchSSCCs({int page = 0, int size = 20}) async {
     await loadSSCCList(page: page, size: size);
   }
+
   Future<void> fetchSSCCById(String id) async {
     emit(
       state.copyWith(
@@ -39,6 +43,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       _handleError(e, 'Failed to load SSCC by ID');
     }
   }
+
   Future<void> fetchSSCCByCode(String ssccCode) async {
     emit(
       state.copyWith(
@@ -62,6 +67,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       _handleError(e, 'Failed to load SSCC by code');
     }
   }
+
   Future<void> createSSCC(SSCC sscc) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
@@ -73,6 +79,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       _handleError(e, 'Failed to create SSCC');
     }
   }
+
   Future<void> updateSSCC(String id, SSCC sscc) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
@@ -84,6 +91,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       _handleError(e, 'Failed to update SSCC');
     }
   }
+
   Future<void> deleteSSCC(String id) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
@@ -100,6 +108,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       _handleError(e, 'Failed to delete SSCC');
     }
   }
+
   Future<void> updateSSCCStatus(String id, String newStatus) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
@@ -112,6 +121,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       _handleError(e, 'Failed to update SSCC status');
     }
   }
+
   Future<List<String>> fetchAvailableTransitions(String id) async {
     try {
       return await _ssccService.getAvailableTransitions(id);
@@ -120,6 +130,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       return const [];
     }
   }
+
   Future<List<SsccAggregationLink>> fetchAggregationLinks(
     String ssccCode,
   ) async {
@@ -129,6 +140,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       return const [];
     }
   }
+
   Future<SsccAggregationLink?> addAggregationChild({
     required String ssccId,
     required String childEpc,
@@ -147,6 +159,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       return null;
     }
   }
+
   Future<bool> disaggregateChild({
     required int linkId,
     required String disaggregationEventId,
@@ -162,6 +175,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       return false;
     }
   }
+
   Future<void> validateSSCCCode(String ssccCode) async {
     emit(state.copyWith(status: SSCCStatus.loading));
     try {
@@ -177,6 +191,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       _handleError(e, 'Failed to validate SSCC code');
     }
   }
+
   Future<void> generateSSCCCode(
     String gs1CompanyPrefix,
     String extensionDigit,
@@ -197,6 +212,7 @@ class SSCCCubit extends Cubit<SSCCState> {
       _handleError(e, 'Failed to generate SSCC code');
     }
   }
+
   Future<void> generateSSCCFromGLN(
     String glnCode,
     String extensionDigit,
@@ -485,6 +501,8 @@ class SSCCCubit extends Cubit<SSCCState> {
     String message = prefix;
     if (e is ApiException) {
       message = e.getUserFriendlyMessage();
+    } else if (e is DioException && ApiExceptionMapper.isNetworkFailure(e)) {
+      message = ApiExceptionMapper.networkErrorMessage;
     } else {
       final detail = e.toString();
       message = detail.length > 200 ? '$prefix.' : '$prefix: $detail';

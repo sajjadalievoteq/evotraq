@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -210,8 +211,6 @@ class _TransactionEventsListScreenState
   }
 
   void _navigateToEventDetails(TransactionEvent event) {
-
-
     String idToUse;
 
     if (event.id != null && event.id!.isNotEmpty) {
@@ -274,32 +273,11 @@ class _TransactionEventsListScreenState
           }
 
           if (state.error != null && state.transactionEvents.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TraqIcon(AppAssets.iconAlert,
-                    size: 48.0,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  const SizedBox(height: 16.0),
-                  Text(
-                    'Error loading transaction events',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    state.error!,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: _refreshData,
-                    child: const Text('Try Again'),
-                  ),
-                ],
-              ),
+            return AppErrorState(
+              title: 'Unable to load transaction events',
+              message: state.error,
+              iconAsset: NavIcons.epcisEvents,
+              onRetry: _refreshData,
             );
           }
 
@@ -308,7 +286,11 @@ class _TransactionEventsListScreenState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TraqIcon(NavIcons.epcisEvents, size: 48.0, color: Colors.grey[400]),
+                  TraqIcon(
+                    NavIcons.epcisEvents,
+                    size: 48.0,
+                    color: Colors.grey[400],
+                  ),
                   const SizedBox(height: 16.0),
                   Text(
                     'No Transaction Events Found',
@@ -388,4 +370,3 @@ class _TransactionEventsListScreenState
     );
   }
 }
-      

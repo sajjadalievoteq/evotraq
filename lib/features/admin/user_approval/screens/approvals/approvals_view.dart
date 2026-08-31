@@ -1,6 +1,8 @@
 import 'package:traqtrace_app/core/layout/app_responsive_body.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
@@ -93,7 +95,8 @@ class ApprovalsViewState extends State<ApprovalsView> {
       showDrawer: true,
       child: BlocConsumer<UserApprovalCubit, UserApprovalState>(
         listener: (context, state) {
-          if (state.status == UserApprovalStatus.error) {
+          if (state.status == UserApprovalStatus.error &&
+              state.pendingApprovals.isNotEmpty) {
             if (_isRefreshing) {
               setState(() => _isRefreshing = false);
             }
@@ -111,6 +114,16 @@ class ApprovalsViewState extends State<ApprovalsView> {
                   (state.status == UserApprovalStatus.initial ||
                       state.status == UserApprovalStatus.loading)) {
                 return const UserApprovalsLoadingView();
+              }
+
+              if (state.pendingApprovals.isEmpty &&
+                  state.status == UserApprovalStatus.error) {
+                return AppErrorState(
+                  title: 'Unable to load pending approvals',
+                  message: state.error ?? UserApprovalConstants.errorMessage,
+                  iconAsset: NavIcons.pendingApprovals,
+                  onRetry: _refreshApprovalsList,
+                );
               }
 
               final query = _searchController.text.trim();

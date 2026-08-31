@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/empty_state_visual.dart';
 import 'package:traqtrace_app/data/models/auth/user_session.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
 import 'package:traqtrace_app/features/user/screens/profile/widgets/profile_session_tile.dart';
@@ -32,19 +34,13 @@ class ProfileSessionsSection extends StatelessWidget {
     }
 
     if (state.sessionsStatus == SessionsStatus.error) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            state.sessionsError ?? UserStrings.sessionsLoadError,
-            style: TextStyle(color: context.colors.textMuted),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: onRetry,
-            child: const Text(UserStrings.sessionsRetry),
-          ),
-        ],
+      return AppErrorState(
+        title: 'Unable to load sessions',
+        message: state.sessionsError ?? UserStrings.sessionsLoadError,
+        iconAsset: AppAssets.iconComputer,
+        onRetry: onRetry,
+        retryLabel: UserStrings.sessionsRetry,
+        density: EmptyStateDensity.compact,
       );
     }
 

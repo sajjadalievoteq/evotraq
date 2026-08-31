@@ -8,6 +8,7 @@ import 'package:traqtrace_app/features/gs1/sgtin/cubit/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -43,7 +44,7 @@ class SgtinResultsList extends StatelessWidget {
           current.status == SGTINStatus.error &&
           previous.status != SGTINStatus.error,
       listener: (context, state) {
-        if (state.error != null) {
+        if (state.error != null && (state.sgtins?.isNotEmpty ?? false)) {
           context.showError(state.error!);
         }
       },
@@ -56,6 +57,18 @@ class SgtinResultsList extends StatelessWidget {
         }
 
         final sgtins = state.sgtins;
+        if (state.status == SGTINStatus.error &&
+            state.error != null &&
+            (sgtins == null || sgtins.isEmpty)) {
+          return ConstrainedSectionContent(
+            child: AppErrorState(
+              message: state.error,
+              iconAsset: NavIcons.sgtin,
+              title: 'Unable to load SGTINs',
+              onRetry: () => onRefresh(),
+            ),
+          );
+        }
         if (sgtins == null || sgtins.isEmpty) {
           return ConstrainedSectionContent(
             child: AppEmptyState(

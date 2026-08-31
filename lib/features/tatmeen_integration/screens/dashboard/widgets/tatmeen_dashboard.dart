@@ -62,6 +62,7 @@ class _TatmeenDashboardState extends State<TatmeenDashboard> {
             title: 'Unable to load Tatmeen dashboard',
             message: _dashboard.error ?? 'Unknown error',
             onRetry: _dashboard.refetch,
+            iconAsset: AppAssets.iconTatmeenIntegration,
             padding: EdgeInsets.zero,
           );
         }

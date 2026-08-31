@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/dio_service_logging.dart';
+import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
+import 'package:traqtrace_app/core/network/app_network_exception.dart';
 
 class DioService {
   late Dio _dio;
@@ -230,17 +232,20 @@ class DioService {
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
-          DioServiceLogger.logError(e);
-          final code = e.response?.statusCode;
+          final effectiveError = ApiExceptionMapper.isNetworkFailure(e)
+              ? AppNetworkException.from(e)
+              : e;
+          DioServiceLogger.logError(effectiveError);
+          final code = effectiveError.response?.statusCode;
           if (code == 401 || code == 403) {
             await handleAuthFailureStatus(
-              options: e.requestOptions,
+              options: effectiveError.requestOptions,
               statusCode: code,
-              response: e.response,
+              response: effectiveError.response,
             );
           }
 
-          return handler.next(e);
+          return handler.next(effectiveError);
         },
       ),
     );

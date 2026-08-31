@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
-import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 
 class ProductHierarchyTreeErrorView extends StatelessWidget {
   const ProductHierarchyTreeErrorView({super.key, required this.message});
@@ -9,10 +9,10 @@ class ProductHierarchyTreeErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppEmptyState(
+    return AppErrorState(
       iconAsset: NavIcons.aggregationHierarchy,
       title: 'Unable to load hierarchy',
-      subtitle: message,
+      message: message,
     );
   }
 }

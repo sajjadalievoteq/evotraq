@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 
 class OperationDetailErrorView extends StatelessWidget {
   const OperationDetailErrorView({
@@ -14,28 +14,12 @@ class OperationDetailErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TraqIcon(
-              AppAssets.iconAlert,
-              size: 48,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 12),
-            Text(errorMessage, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: TraqIcon(AppAssets.iconRefresh),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
-      ),
+    return AppErrorState(
+      title: 'Unable to load operation',
+      message: errorMessage,
+      iconAsset: AppAssets.iconPackage,
+      onRetry: onRetry,
+      retryLabel: 'Retry',
     );
   }
 }

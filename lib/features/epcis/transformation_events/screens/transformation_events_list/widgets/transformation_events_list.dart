@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/transformation_events_cubit.dart';
@@ -31,24 +31,11 @@ class TransformationEventsList extends StatelessWidget {
         }
 
         if (state.errorMessage != null && state.transformationEvents.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TraqIcon(
-                  AppAssets.iconAlert,
-                  size: 48,
-                  color: AppColorMapper.errorColor(context),
-                ),
-                const SizedBox(height: 16),
-                Text('Error: ${state.errorMessage}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: onRefresh,
-                  child: const Text('Try Again'),
-                ),
-              ],
-            ),
+          return AppErrorState(
+            title: 'Unable to load transformation events',
+            message: state.errorMessage,
+            iconAsset: AppAssets.iconTransform,
+            onRetry: () => onRefresh(),
           );
         }
 

@@ -1,6 +1,8 @@
 import 'package:traqtrace_app/core/layout/app_responsive_body.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
@@ -143,7 +145,8 @@ class UserManagementViewState extends State<UserManagementView> {
       showDrawer: true,
       child: BlocConsumer<UserManagementCubit, UserManagementState>(
         listener: (context, state) {
-          if (state.status == UserManagementStatus.error) {
+          if (state.status == UserManagementStatus.error &&
+              state.users.isNotEmpty) {
             context.showError(
               state.error ?? UserManagementConstants.genericErrorMessage,
             );
@@ -158,6 +161,18 @@ class UserManagementViewState extends State<UserManagementView> {
                   (state.status == UserManagementStatus.initial ||
                       state.status == UserManagementStatus.loading)) {
                 return const UserManagementLoadingView();
+              }
+
+              if (state.users.isEmpty &&
+                  state.status == UserManagementStatus.error) {
+                return AppErrorState(
+                  title: 'Unable to load users',
+                  message:
+                      state.error ??
+                      UserManagementConstants.genericErrorMessage,
+                  iconAsset: NavIcons.userManagement,
+                  onRetry: _refreshUserList,
+                );
               }
 
               final query = _searchController.text.trim();

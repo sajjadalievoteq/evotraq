@@ -3,10 +3,23 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/app_network_exception.dart';
 import 'package:traqtrace_app/core/network/backend_error_parser.dart';
 
-
 abstract final class ApiExceptionMapper {
+  static const networkErrorMessage = AppNetworkException.messageText;
+
+  static bool isNetworkFailure(DioException exception) {
+    return switch (exception.type) {
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout ||
+      DioExceptionType.connectionError => true,
+      DioExceptionType.unknown => exception.response == null,
+      _ => false,
+    };
+  }
+
   static ApiException fromHttpResponse(
     Response<dynamic> response, {
     required String fallbackMessage,
@@ -32,10 +45,13 @@ abstract final class ApiExceptionMapper {
     final raw = exception.response?.data;
     final details = BackendErrorParser.parse(raw);
     final body = _stringify(raw);
+    final isNetworkError = isNetworkFailure(exception);
     final apiException = ApiException(
       statusCode: exception.response?.statusCode,
-      code: details.code,
-      message: details.displayMessage ?? fallbackMessage,
+      code: isNetworkError ? 'NETWORK_ERROR' : details.code,
+      message: isNetworkError
+          ? networkErrorMessage
+          : (details.displayMessage ?? fallbackMessage),
       validationMessages: details.validationMessages,
       responseBody: body,
       originalException: exception,
@@ -71,7 +87,7 @@ abstract final class ApiExceptionMapper {
       final preview = body.length <= _logBodyPreviewChars
           ? body
           : '${body.substring(0, _logBodyPreviewChars)}… '
-              '[truncated ${body.length - _logBodyPreviewChars} chars]';
+                '[truncated ${body.length - _logBodyPreviewChars} chars]';
       debugPrint('[ApiExceptionMapper] responseBody: $preview');
     }
     if (stackTrace != null) {

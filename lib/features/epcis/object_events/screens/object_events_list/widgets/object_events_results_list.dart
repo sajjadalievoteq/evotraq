@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_events_list/utils/object_event_list_ui_constants.dart';
@@ -41,28 +41,11 @@ class ObjectEventsResultsList extends StatelessWidget {
         }
 
         if (state.listFetchError != null && state.objectEvents.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TraqIcon(
-                  AppAssets.iconAlert,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  state.listFetchError!,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: onRefresh,
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+          return AppErrorState(
+            message: state.listFetchError,
+            iconAsset: NavIcons.objectEvents,
+            title: 'Unable to load object events',
+            onRetry: () => onRefresh(),
           );
         }
 
@@ -77,8 +60,9 @@ class ObjectEventsResultsList extends StatelessWidget {
             hasItems: filtered,
             hasActiveFilters: filtered,
             onClearFilters: onClearFilters,
-            primaryActionLabel:
-                filtered ? null : ObjectEventListUiConstants.emptyAddAction,
+            primaryActionLabel: filtered
+                ? null
+                : ObjectEventListUiConstants.emptyAddAction,
             primaryActionIconAsset: filtered ? null : AppAssets.iconPlus,
             onPrimaryAction: filtered ? null : onCreate,
           );

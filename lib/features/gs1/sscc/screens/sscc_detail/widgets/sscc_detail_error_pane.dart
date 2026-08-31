@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/widgets/error_state/app_error_state.dart';
 
 class SsccDetailErrorPane extends StatelessWidget {
   const SsccDetailErrorPane({
@@ -16,28 +15,12 @@ class SsccDetailErrorPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TraqIcon(
-            AppAssets.iconAlert,
-            color: AppColorMapper.errorColor(context),
-            size: 48,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            errorMessage ?? SsccUiConstants.errorGeneric,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: onRetry,
-            label: const Text('Retry'),
-          ),
-        ],
-      ),
+    return AppErrorState(
+      title: 'Unable to load SSCC',
+      message: errorMessage ?? SsccUiConstants.errorGeneric,
+      iconAsset: NavIcons.sscc,
+      onRetry: onRetry,
+      retryLabel: 'Retry',
     );
   }
 }

@@ -38,6 +38,7 @@ class TatmeenRecentActivity extends StatelessWidget {
         title: 'Unable to load recent activity',
         message: error!,
         onRetry: onRetry,
+        iconAsset: AppAssets.iconHistory,
         padding: EdgeInsets.zero,
       );
     }

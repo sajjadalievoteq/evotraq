@@ -9,6 +9,9 @@ import 'package:traqtrace_app/features/epcis/object_events/screens/object_event_
 import 'package:traqtrace_app/features/epcis/object_events/screens/object_events_list/utils/object_event_list_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/object_events/utils/object_event_shared_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/object_events/utils/object_event_route_constants.dart';
+import 'package:traqtrace_app/features/epcis/object_events/utils/object_event_route_constants.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';

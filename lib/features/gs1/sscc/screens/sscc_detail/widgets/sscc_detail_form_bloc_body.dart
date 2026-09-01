@@ -10,6 +10,7 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skel
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_form_body.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart' as edit_rules;
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 
 class SsccDetailFormBlocBody extends StatelessWidget {
   const SsccDetailFormBlocBody({

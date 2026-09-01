@@ -11,6 +11,7 @@ import 'package:traqtrace_app/data/services/auth/auth_service.dart';
 import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
+import 'package:traqtrace_app/data/services/world_countries/world_countries_cache.dart';
 
 import 'package:traqtrace_app/data/services/automation_center/notification_api_service.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
@@ -170,6 +171,8 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerLazySingleton<GlnPickerCatalog>(
     () => GlnPickerCatalog(glnService: getIt<GLNService>()),
   );
+
+  getIt.registerLazySingleton<WorldCountriesCache>(() => WorldCountriesCache());
 
   getIt.registerLazySingleton<EPCConversionService>(
     () => EPCConversionService(dioService: getIt<DioService>()),

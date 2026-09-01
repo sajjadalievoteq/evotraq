@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
+import 'package:traqtrace_app/core/navigation/routes/feature_routes_bundle.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/auth/user.dart';
@@ -76,7 +77,10 @@ void main() {
 
     setUp(() {
       authCubit = _MockAuthCubit();
-      appRouter = AppRouter(authCubit: authCubit);
+      appRouter = AppRouter(
+        authCubit: authCubit,
+        featureRoutes: featureRoutes,
+      );
     });
 
     test(

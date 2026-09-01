@@ -22,6 +22,7 @@ class SplashContent extends StatelessWidget {
     final t = context.text;
 
     return TraqStaggeredEntrance(
+      deferPlay: false,
       slide: TraqEntranceSlide.up,
       duration: TraqAnimationConstants.splashEntrance,
       stagger: TraqAnimationConstants.splashStagger,
@@ -29,7 +30,10 @@ class SplashContent extends StatelessWidget {
       beginScale: TraqAnimationConstants.splashInitialScale,
       children: [
         Align(
-          child: SplashBrandIconTilt(child: SplashBrandIcon(size: iconSize)),
+          child: SplashBrandIconTilt(
+            deferPlay: false,
+            child: SplashBrandIcon(size: iconSize),
+          ),
         ),
         Align(
           child: Padding(

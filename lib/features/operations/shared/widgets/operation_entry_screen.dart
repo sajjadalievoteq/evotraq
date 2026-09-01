@@ -42,11 +42,7 @@ class OperationEntryScreen extends StatefulWidget {
   })
   listBuilder;
 
-  final Widget Function(
-    BuildContext context,
-    String id, {
-    required bool editing,
-  })
+  final Widget Function(BuildContext context, String id, {required bool editing})
   detailViewBuilder;
   final Widget Function(BuildContext context, {required bool listLoading})
   detailAwaitBuilder;

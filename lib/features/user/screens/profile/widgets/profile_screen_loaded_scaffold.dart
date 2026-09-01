@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/user/screens/profile/widgets/profile_scre
 import 'package:traqtrace_app/features/user/screens/profile/widgets/profile_screen_mobile_body.dart';
 import 'package:traqtrace_app/features/user/utils/user_strings.dart';
 
-class ProfileScreenLoadedScaffold extends StatelessWidget {
+class ProfileScreenLoadedScaffold extends StatefulWidget {
   const ProfileScreenLoadedScaffold({
     super.key,
     required this.user,
@@ -23,20 +23,67 @@ class ProfileScreenLoadedScaffold extends StatelessWidget {
   final Widget preferencesModule;
 
   @override
+  State<ProfileScreenLoadedScaffold> createState() =>
+      _ProfileScreenLoadedScaffoldState();
+}
+
+class _ProfileScreenLoadedScaffoldState extends State<ProfileScreenLoadedScaffold>
+    with SingleTickerProviderStateMixin {
+  static const _tabs = [
+    UserStrings.infoTitle,
+    UserStrings.securityTitle,
+    UserStrings.preferencesTitle,
+  ];
+
+  TabController? _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.isDesktopWide) {
+      _tabController = TabController(length: _tabs.length, vsync: this);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfileScreenLoadedScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isDesktopWide == widget.isDesktopWide) return;
+
+    _tabController?.dispose();
+    _tabController = widget.isDesktopWide
+        ? null
+        : TabController(length: _tabs.length, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TraqAppBar(
         context,
         title: const Text(UserStrings.profileManagementTitle),
         centerTitle: false,
+        bottom: widget.isDesktopWide
+            ? null
+            : TabBar(
+                controller: _tabController,
+                tabs: _tabs.map((label) => Tab(text: label)).toList(),
+              ),
       ),
       drawer: const AppDrawer(),
-      body: isDesktopWide
-          ? ProfileScreenDesktopBody(user: user)
+      body: widget.isDesktopWide
+          ? ProfileScreenDesktopBody(user: widget.user)
           : ProfileScreenMobileBody(
-              infoModule: infoModule,
-              securityModule: securityModule,
-              preferencesModule: preferencesModule,
+              tabController: _tabController!,
+              infoModule: widget.infoModule,
+              securityModule: widget.securityModule,
+              preferencesModule: widget.preferencesModule,
             ),
     );
   }

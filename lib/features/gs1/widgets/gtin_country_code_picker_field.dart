@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:world_countries/world_countries.dart';
 
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/data/services/world_countries/world_countries_cache.dart';
 
 class GtinCountryCodePickerField extends StatefulWidget {
   const GtinCountryCodePickerField({
@@ -73,6 +75,10 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
   }
 
   String _countryName(WorldCountry c) {
+    final cache = getIt<WorldCountriesCache>();
+    final translated = cache.countryName(c);
+    if (translated != null) return translated;
+
     try {
       final dynamic n = (c as dynamic).name;
       if (n is String) return n;
@@ -85,6 +91,11 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
   }
 
   Future<void> _openPicker(BuildContext context) async {
+    final cache = getIt<WorldCountriesCache>();
+    if (!cache.isLoaded) {
+      await cache.ensureLoaded();
+    }
+
     WorldCountry? chosen;
     final existing = widget.controller.text.trim();
     if (existing.isNotEmpty) {
@@ -92,6 +103,7 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
     }
 
     final picker = CountryPicker(
+      maps: cache.isoMaps,
       chosen: chosen == null ? const [] : [chosen],
       onSelect: (c) {
         chosen = c;

@@ -43,6 +43,14 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
+  Future<void> loadSessionsIfNeeded() async {
+    if (state.sessionsStatus == SessionsStatus.loading ||
+        state.sessionsStatus == SessionsStatus.success) {
+      return;
+    }
+    await _fetchSessions();
+  }
+
   Future<void> loadSessions() async {
     emit(
       state.copyWith(
@@ -50,6 +58,10 @@ class ProfileCubit extends Cubit<ProfileState> {
         clearSessionsError: true,
       ),
     );
+    await _fetchSessions();
+  }
+
+  Future<void> _fetchSessions() async {
     try {
       final sessions = await _authService.listSessions();
       emit(
@@ -73,8 +85,15 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(state.copyWith(isRevokingSession: true, clearSessionsError: true));
     try {
       await _authService.revokeSession(sessionId);
-      await loadSessions();
-      emit(state.copyWith(isRevokingSession: false));
+      emit(
+        state.copyWith(
+          isRevokingSession: false,
+          sessions: state.sessions
+              .where((session) => session.id != sessionId)
+              .toList(),
+          clearSessionsError: true,
+        ),
+      );
       return true;
     } catch (e) {
       emit(
@@ -90,8 +109,13 @@ class ProfileCubit extends Cubit<ProfileState> {
     );
     try {
       await _authService.revokeOtherSessions();
-      await loadSessions();
-      emit(state.copyWith(isRevokingOtherSessions: false));
+      emit(
+        state.copyWith(
+          isRevokingOtherSessions: false,
+          sessions: state.sessions.where((session) => session.current).toList(),
+          clearSessionsError: true,
+        ),
+      );
       return true;
     } catch (e) {
       emit(

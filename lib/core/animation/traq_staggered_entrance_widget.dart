@@ -15,6 +15,7 @@ class TraqStaggeredEntrance extends StatefulWidget {
     this.beginScale = TraqAnimationConstants.fieldInitialScale,
     this.risePx,
     this.slidePx,
+    this.deferPlay = true,
   });
 
   final List<Widget> children;
@@ -24,6 +25,9 @@ class TraqStaggeredEntrance extends StatefulWidget {
   final bool playEntrance;
   final double beginScale;
   final double? risePx;
+
+  /// When false, starts immediately — for overlays outside the route tree (splash).
+  final bool deferPlay;
 
   /// Horizontal travel for [TraqEntranceSlide.fromRight]. When null, uses the
   /// layout width (branding) or [TraqAnimationConstants.brandingSlidePx].
@@ -90,13 +94,15 @@ class _TraqStaggeredEntranceState extends State<TraqStaggeredEntrance>
     super.initState();
     _controller = AnimationController(vsync: this, duration: _totalDuration);
     _rebuildSlots();
-    traqSchedulePlay(_startIfNeeded);
+    traqSchedulePlay(_startIfNeeded, defer: widget.deferPlay);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!traqPlayStarted) traqSchedulePlay(_startIfNeeded);
+    if (!traqPlayStarted) {
+      traqSchedulePlay(_startIfNeeded, defer: widget.deferPlay);
+    }
   }
 
   @override

@@ -8,8 +8,9 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_mode.dart';
-import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_flow.dart';
 import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/core/extensions/validation_feedback_extension.dart';
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
@@ -29,8 +30,8 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_detail_skeleton.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
-import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
     as edit_rules;

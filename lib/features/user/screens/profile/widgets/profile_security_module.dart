@@ -26,18 +26,6 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
   final _confirmPasswordController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final cubit = context.read<ProfileCubit>();
-      if (cubit.state.sessionsStatus == SessionsStatus.initial) {
-        cubit.loadSessions();
-      }
-    });
-  }
-
-  @override
   void dispose() {
     _currentPasswordController.dispose();
     _newPasswordController.dispose();

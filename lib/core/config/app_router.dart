@@ -6,23 +6,16 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_navigation.dart';
 import 'package:traqtrace_app/core/config/router_not_found_screen.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
+import 'package:traqtrace_app/core/config/platform_startup_route.dart';
 import 'package:traqtrace_app/core/config/splash_redirect_utils.dart';
-
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 
-import 'package:traqtrace_app/core/navigation/routes/admin_routes.dart';
-import 'package:traqtrace_app/core/navigation/routes/automation_routes.dart';
 import 'package:traqtrace_app/core/navigation/routes/core_routes.dart';
-import 'package:traqtrace_app/core/navigation/routes/epcis_routes.dart';
-import 'package:traqtrace_app/core/navigation/routes/fulfillment_operation_routes.dart';
-import 'package:traqtrace_app/core/navigation/routes/gs1_routes.dart';
-import 'package:traqtrace_app/core/navigation/routes/handling_operation_routes.dart';
-import 'package:traqtrace_app/core/navigation/routes/notification_routes.dart';
 import 'package:traqtrace_app/core/navigation/routes/route_access.dart';
-import 'package:traqtrace_app/core/navigation/routes/tatmeen_routes.dart';
-import 'package:traqtrace_app/core/navigation/routes/tool_routes.dart';
+
+typedef FeatureRoutesBuilder = List<RouteBase> Function(RouteAccess access);
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -66,10 +59,17 @@ class AppRouter {
   );
 
   final AuthCubit authCubit;
+  final FeatureRoutesBuilder featureRoutes;
+
+  final String _initialLocation;
 
   late final RouteAccess routeAccess = RouteAccess(authCubit);
 
-  AppRouter({required this.authCubit}) {
+  AppRouter({
+    required this.authCubit,
+    required this.featureRoutes,
+    String? initialLocation,
+  }) : _initialLocation = initialLocation ?? resolvePlatformStartupRoute() {
     // `push` keeps reverse animations; by default go_router does not put those
     // pages in the browser URL. Enable this so drill-downs stay shareable/deeplinkable.
     GoRouter.optionURLReflectsImperativeAPIs = true;
@@ -150,7 +150,7 @@ class AppRouter {
     navigatorKey: rootNavigatorKey,
     refreshListenable: GoRouterRefreshStream(authCubit.stream),
     debugLogDiagnostics: _enableRouterDiagnostics,
-    initialLocation: Constants.splashRoute,
+    initialLocation: _initialLocation,
     redirect: (context, state) {
       return computeRedirect(
         path: state.uri.path,
@@ -160,15 +160,7 @@ class AppRouter {
     },
     routes: [
       ...coreRoutes(),
-      ...adminRoutes(routeAccess),
-      ...automationRoutes(routeAccess),
-      ...tatmeenRoutes(routeAccess),
-      ...gs1Routes(),
-      ...epcisRoutes(routeAccess),
-      ...fulfillmentOperationRoutes(routeAccess),
-      ...handlingOperationRoutes(routeAccess),
-      ...notificationRoutes(),
-      ...toolRoutes(),
+      ...featureRoutes(routeAccess),
     ],
     errorPageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
       key: state.pageKey,

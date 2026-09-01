@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/data/models/auth/user_session.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
+import 'package:traqtrace_app/features/user/utils/user_strings.dart';
 import 'package:traqtrace_app/features/user/screens/profile/widgets/profile_sessions_section.dart';
 
 Widget _host(Widget child) => MaterialApp(
@@ -25,9 +26,24 @@ ProfileSessionsSection _section({
 }
 
 void main() {
-  testWidgets('sessions section preserves loading state', (tester) async {
-    await tester.pumpWidget(_host(_section(state: const ProfileState())));
+  testWidgets('sessions section shows spinner only while explicitly loading', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(
+        _section(
+          state: const ProfileState(sessionsStatus: SessionsStatus.loading),
+        ),
+      ),
+    );
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('sessions section stays empty while background preload runs', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_host(_section(state: const ProfileState())));
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('sessions section preserves error and retry behavior', (
@@ -46,8 +62,8 @@ void main() {
       ),
     );
 
-    expect(find.text('Unable to load sessions'), findsOneWidget);
-    await tester.tap(find.byType(TextButton));
+    expect(find.text('Unable to load sessions'), findsWidgets);
+    await tester.tap(find.text(UserStrings.sessionsRetry));
     expect(retries, 1);
   });
 

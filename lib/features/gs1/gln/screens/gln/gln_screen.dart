@@ -9,6 +9,9 @@ import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/gln_list_screen.
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';

@@ -25,12 +25,15 @@ class ProfileSessionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (state.sessionsStatus == SessionsStatus.loading ||
-        state.sessionsStatus == SessionsStatus.initial) {
+    if (state.sessionsStatus == SessionsStatus.loading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
         child: Center(child: CircularProgressIndicator()),
       );
+    }
+
+    if (state.sessionsStatus == SessionsStatus.initial) {
+      return const SizedBox.shrink();
     }
 
     if (state.sessionsStatus == SessionsStatus.error) {

@@ -2,8 +2,10 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/commissioning_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/commissioning_operation_screen.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_commissioning_prefill.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_commissioning_prefill.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning/commissioning_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/packing_operation_detail_screen.dart';
@@ -18,6 +20,7 @@ import 'package:traqtrace_app/features/operations/update_status/screens/update_s
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status/update_status_screen.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/hierarchy_screen.dart';
 import 'package:traqtrace_app/core/navigation/routes/route_access.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 
 List<RouteBase> handlingOperationRoutes(RouteAccess access) => [

@@ -22,6 +22,16 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  var _sessionsPreloadStarted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_sessionsPreloadStarted) return;
+    _sessionsPreloadStarted = true;
+    context.read<ProfileCubit>().loadSessionsIfNeeded();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(

@@ -23,6 +23,7 @@ import 'package:traqtrace_app/features/operations/shipping/screens/shipping_oper
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping/shipping_screen.dart';
 import 'package:traqtrace_app/core/navigation/routes/route_access.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 
 List<RouteBase> fulfillmentOperationRoutes(RouteAccess access) => [
   GoRoute(

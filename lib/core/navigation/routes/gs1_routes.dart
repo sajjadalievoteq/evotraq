@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/gs1_tools_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/gln_detail_screen.dart';

@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_picker_catalog.dart';
+import 'package:traqtrace_app/data/services/world_countries/world_countries_cache.dart';
 import 'package:traqtrace_app/data/services/reference_data_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
@@ -234,6 +235,12 @@ extension AuthCubitSession on AuthCubit {
     }
   }
 
+  void _clearWorldCountriesCache() {
+    if (getIt.isRegistered<WorldCountriesCache>()) {
+      getIt<WorldCountriesCache>().clear();
+    }
+  }
+
   void _clearReferenceDataService() {
     if (getIt.isRegistered<ReferenceDataService>()) {
       getIt<ReferenceDataService>().clear();
@@ -243,6 +250,7 @@ extension AuthCubitSession on AuthCubit {
   void clearSessionCaches() {
     _clearHomeOverviewSession();
     _clearGlnPickerCatalog();
+    _clearWorldCountriesCache();
     _clearReferenceDataService();
     _resetCbvVocabulary();
   }

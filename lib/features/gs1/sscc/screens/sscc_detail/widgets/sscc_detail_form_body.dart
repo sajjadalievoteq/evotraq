@@ -20,6 +20,7 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_header_card.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_lazy_viewport_section.dart';
 

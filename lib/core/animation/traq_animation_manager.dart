@@ -89,11 +89,16 @@ mixin TraqDeferredPlay<T extends StatefulWidget> on State<T> {
 
   void traqMarkPlayed() => _traqPlayStarted = true;
 
-  void traqSchedulePlay(VoidCallback play) {
+  void traqSchedulePlay(VoidCallback play, {bool defer = true}) {
     if (_traqPlayStarted || _traqPlayQueued) return;
     _traqPlayQueued = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_runPlay(play));
+      if (defer) {
+        unawaited(_runPlay(play));
+      } else {
+        _traqPlayQueued = false;
+        if (mounted && !_traqPlayStarted) play();
+      }
     });
   }
 

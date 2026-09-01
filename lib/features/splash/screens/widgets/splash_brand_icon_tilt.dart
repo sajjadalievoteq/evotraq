@@ -3,9 +3,14 @@ import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 
 class SplashBrandIconTilt extends StatefulWidget {
-  const SplashBrandIconTilt({super.key, required this.child});
+  const SplashBrandIconTilt({
+    super.key,
+    required this.child,
+    this.deferPlay = true,
+  });
 
   final Widget child;
+  final bool deferPlay;
 
   @override
   State<SplashBrandIconTilt> createState() => _SplashBrandIconTiltState();
@@ -47,13 +52,15 @@ class _SplashBrandIconTiltState extends State<SplashBrandIconTilt>
       ),
     ]).animate(_controller);
 
-    traqSchedulePlay(_startIfNeeded);
+    traqSchedulePlay(_startIfNeeded, defer: widget.deferPlay);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!traqPlayStarted) traqSchedulePlay(_startIfNeeded);
+    if (!traqPlayStarted) {
+      traqSchedulePlay(_startIfNeeded, defer: widget.deferPlay);
+    }
   }
 
   void _startIfNeeded() {

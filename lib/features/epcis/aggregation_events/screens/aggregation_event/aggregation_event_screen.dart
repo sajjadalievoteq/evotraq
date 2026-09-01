@@ -10,6 +10,8 @@ import 'package:traqtrace_app/features/epcis/aggregation_events/screens/aggregat
 import 'package:traqtrace_app/features/epcis/aggregation_events/utils/aggregation_event_ui_constants.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 

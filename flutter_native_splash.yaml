@@ -1,0 +1,21 @@
+# Native launch — solid brand color + logo only. Flutter splash adds texture
+# and animation after the engine starts.
+flutter_native_splash:
+  color: "#F2F2EF"
+  color_dark: "#1C1C1B"
+  image: assets/images/logo/logo.png
+  image_dark: assets/images/logo/logo.png
+  android_gravity: center
+  ios_content_mode: center
+  fullscreen: true
+  android: true
+  ios: true
+  web: true
+
+  android_12:
+    color: "#F2F2EF"
+    color_dark: "#1C1C1B"
+    image: assets/images/logo/logo.png
+    image_dark: assets/images/logo/logo.png
+    icon_background_color: "#F2F2EF"
+    icon_background_color_dark: "#1C1C1B"

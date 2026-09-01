@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/home/dashboard_service.dart';
+import 'package:traqtrace_app/data/services/world_countries/world_countries_cache.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -36,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // Live updates arrive over the WebSocket heartbeat push; REST polling only runs as a
     // fallback while the socket is disconnected (see HomeCubit._onConnectionChanged).
     _homeCubit.connectWebSocket();
+    unawaited(getIt<WorldCountriesCache>().preload());
   }
 
   @override

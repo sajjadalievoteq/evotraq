@@ -42,5 +42,3 @@ class SplashBrandIcon extends StatelessWidget {
     );
   }
 }
-
-/// Subtle looping lean: tilt clockwise on [Alignment.bottomRight], then settle.

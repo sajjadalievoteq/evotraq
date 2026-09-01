@@ -16,7 +16,9 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
 import 'package:traqtrace_app/core/widgets/custom_snackbar_presenter.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_flow.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_flow.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_route.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';

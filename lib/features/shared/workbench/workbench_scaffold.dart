@@ -7,7 +7,6 @@ import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_rail.dart';
 
-/// Shared master–detail workbench chrome (grouped rail + panel).
 class WorkbenchScaffold extends StatelessWidget {
   const WorkbenchScaffold({
     super.key,
@@ -131,4 +130,4 @@ class WorkbenchScaffold extends StatelessWidget {
             ),
     );
   }
-}
+}

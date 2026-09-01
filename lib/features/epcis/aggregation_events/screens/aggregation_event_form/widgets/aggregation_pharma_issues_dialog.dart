@@ -13,7 +13,6 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
   final List<String> issues;
   final bool allowProceed;
 
-  /// Shown when [allowProceed] is false (hard block).
   final String blockedTitle;
 
   static Future<bool?> show(
@@ -90,4 +89,4 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
             ],
     );
   }
-}
+}

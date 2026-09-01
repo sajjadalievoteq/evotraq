@@ -18,12 +18,9 @@ import 'package:traqtrace_app/features/automation_center/widgets/subscription_sc
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_skeleton_shape.dart';
 
 class JobQueuePanel extends StatefulWidget {
-  /// When true, content is intrinsic-height for a parent single-scroll pane
-  /// (Automation Center). Admin full-page use keeps [embedded] false.
+  
   final bool embedded;
 
-  /// Optional shared cubit (Notifications workspace). When null the panel
-  /// creates and owns a DI factory instance.
   final JobQueueCubit? cubit;
 
   const JobQueuePanel({Key? key, this.embedded = false, this.cubit})
@@ -35,9 +32,7 @@ class JobQueuePanel extends StatefulWidget {
 
 class JobQueuePanelState extends State<JobQueuePanel>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  /// Owns the cubit lifecycle when [JobQueuePanel.cubit] is null: created from
-  /// the DI factory, provided down to the tabs via [BlocProvider.value], and
-  /// closed in [dispose]. Live updates arrive over the shared WebSocket.
+  
   late final JobQueueCubit _cubit;
   late final bool _ownsCubit;
 
@@ -99,16 +94,11 @@ class JobQueuePanelState extends State<JobQueuePanel>
     }
   }
 
-  // ---- Public API driven via GlobalKey<JobQueuePanelState> from the parent panel ----
-
   void refreshCurrentTab() => _cubit.refresh();
 
   void showScheduleJobDialog() => _showScheduleJobDialog();
 
-  /// Opens the operations Control Panel. Exposed for the panel header action.
   void showControlPanel() => _showControlPanel();
-
-  // ---- Filter selection over the live snapshot lists (filtering itself is in JobQueueFilters) ----
 
   void _onStatusFilterChanged(String value) {
     setState(() => _selectedStatus = value);
@@ -330,4 +320,4 @@ class JobQueuePanelState extends State<JobQueuePanel>
       context.showError('Failed to submit job: $e');
     }
   }
-}
+}

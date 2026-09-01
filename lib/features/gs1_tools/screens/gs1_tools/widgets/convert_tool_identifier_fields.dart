@@ -3,9 +3,6 @@ import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
 
-/// Consolidated conversion workbench: URN ⇄ Digital Link, EPC ⇄ GS1
-/// identifiers, and Digital Link ⇄ element string.
-
 class ConvertToolIdentifierFields extends StatelessWidget {
   const ConvertToolIdentifierFields({
     super.key,
@@ -109,4 +106,4 @@ class ConvertToolIdentifierFields extends StatelessWidget {
       },
     );
   }
-}
+}

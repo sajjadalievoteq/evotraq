@@ -81,8 +81,7 @@ class _InitiateReturnShippingButtonState
       operationalGln,
       widget.operation.receivingGLN,
     )) {
-      // Operational GLN doesn't match the receiving location: hide the button
-      // entirely (no disabled button or message), same as AcceptReturnButton.
+      
       setState(() => _loading = false);
       return;
     }
@@ -144,4 +143,4 @@ class _InitiateReturnShippingButtonState
       ),
     );
   }
-}
+}

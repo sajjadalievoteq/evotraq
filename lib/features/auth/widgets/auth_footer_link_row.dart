@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-/// Shared prompt + text-button row used on auth forms (login / register links).
 class AuthFooterLinkRow extends StatelessWidget {
   const AuthFooterLinkRow({
     super.key,
@@ -33,4 +32,4 @@ class AuthFooterLinkRow extends StatelessWidget {
       ],
     );
   }
-}
+}

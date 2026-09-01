@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:traqtrace_app/core/storage/hive_storage.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_session.dart';
 
-
 class CbvVocabularyCacheEntry {
   final CbvVocabularySession session;
   final DateTime cachedAt;
@@ -11,21 +10,13 @@ class CbvVocabularyCacheEntry {
   const CbvVocabularyCacheEntry({required this.session, required this.cachedAt});
 }
 
-
-
-
-
 class CbvVocabularyCacheStore {
   CbvVocabularyCacheStore._();
 
   static const _jsonKey = 'cbv_vocabulary_cache_json_v1';
   static const _timestampKey = 'cbv_vocabulary_cache_ts_v1';
 
-  /// Persisted cache lifetime. A cold start with an entry older than this is
-  /// treated as a miss so stale vocabulary is never served indefinitely.
   static const _ttl = Duration(hours: 12);
-
-
 
   static Future<CbvVocabularyCacheEntry?> read() async {
     try {
@@ -34,7 +25,7 @@ class CbvVocabularyCacheStore {
       if (rawJson == null || rawTimestamp == null) return null;
 
       final cachedAt = DateTime.fromMillisecondsSinceEpoch(rawTimestamp);
-      // Expired: drop it and report a miss so the caller re-fetches.
+      
       if (DateTime.now().difference(cachedAt) > _ttl) {
         await clear();
         return null;
@@ -50,8 +41,6 @@ class CbvVocabularyCacheStore {
     }
   }
 
-  
-  
   static Future<void> write(CbvVocabularySession session) async {
     try {
       await HiveStorage.putString(_jsonKey, jsonEncode(session.toJson()));
@@ -69,4 +58,4 @@ class CbvVocabularyCacheStore {
       
     }
   }
-}
+}

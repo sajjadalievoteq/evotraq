@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 
-/// Identifier anatomy (GCP / reference / check digit) using the bundled GCP table.
 abstract final class Gs1Anatomy {
   static List<_GcpRange>? _ranges;
   static Future<void>? _loading;
@@ -38,7 +37,6 @@ abstract final class Gs1Anatomy {
     }
   }
 
-  /// Resolves GCP length for a numeric identifier body (without requiring check digit).
   static int? gcpLengthFor(String digits) {
     final d = CheckDigitUtils.digitsOnly(digits);
     if (d.length < 6) return null;
@@ -55,7 +53,6 @@ abstract final class Gs1Anatomy {
     return null;
   }
 
-  /// Decompose GTIN / GLN / SSCC into GCP + reference + check digit.
   static Map<String, String> decompose(String? value, {required String kind}) {
     final digits = CheckDigitUtils.digitsOnly(value);
     final fields = <String, String>{
@@ -82,7 +79,6 @@ abstract final class Gs1Anatomy {
       return fields;
     }
 
-    // SSCC body: extension(1) + GCP + serial ref
     if (kind.toLowerCase() == 'sscc' && body.length == 17) {
       final ext = body[0];
       final gcp = body.substring(1, 1 + gcpLen);
@@ -93,7 +89,6 @@ abstract final class Gs1Anatomy {
       return fields;
     }
 
-    // GTIN-14 body may include indicator
     if (kind.toLowerCase() == 'gtin' && body.length == 13) {
       final indicator = body[0];
       final rest = body.substring(1);
@@ -106,7 +101,6 @@ abstract final class Gs1Anatomy {
       return fields;
     }
 
-    // GLN / shorter GTINs: GCP from left of body
     final gcp = body.length >= gcpLen ? body.substring(0, gcpLen) : body;
     final reference =
         body.length > gcpLen ? body.substring(gcpLen) : '';
@@ -125,4 +119,4 @@ class _GcpRange {
   final String start;
   final String end;
   final int length;
-}
+}

@@ -33,7 +33,7 @@ void main() {
     );
 
     expect(find.byType(Row), findsWidgets);
-    // Stacked Column with fixed list height is not used on wide layouts.
+    
     expect(
       find.byWidgetPredicate((w) => w is SizedBox && w.height == 220),
       findsNothing,
@@ -138,4 +138,4 @@ void main() {
     expect(find.byType(GridView), findsOneWidget);
     expect(find.byType(Card), findsNWidgets(5));
   });
-}
+}

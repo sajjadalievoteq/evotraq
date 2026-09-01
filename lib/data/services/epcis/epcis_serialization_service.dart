@@ -145,8 +145,6 @@ class EPCISSerializationService {
     return EPCISDocumentDTO.fromJson(jsonData);
   }
 
-  /// Returns the raw backend [EPCISDocumentDTO] JSON (preserves subtype fields
-  /// like action / epcList / parentID that the Flutter [EPCISEvent] DTO drops).
   Future<Map<String, dynamic>> deserializeJsonLdRaw(
     Map<String, dynamic> jsonLdContent,
   ) async {
@@ -365,7 +363,6 @@ class EPCISSerializationService {
     }
   }
 
-  /// Posts a JSON **array** of [EPCISEventDTO]-shaped maps to bulk import.
   Future<Map<String, dynamic>> importEventMaps(List<dynamic> events) async {
     try {
       final headers = await _getHeaders();
@@ -405,8 +402,6 @@ class EPCISSerializationService {
     }
   }
 
-  /// Deserialize JSON-LD → extract typed events array → bulk/import (array body).
-  /// Uses the raw deserialize payload so subtype fields are not stripped.
   Future<Map<String, dynamic>> importEventsFromJsonLd(
     Map<String, dynamic> jsonLdContent,
   ) async {
@@ -421,4 +416,4 @@ class EPCISSerializationService {
       throw Exception('Error importing events from JSON-LD: $e');
     }
   }
-}
+}

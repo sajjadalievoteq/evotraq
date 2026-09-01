@@ -1,13 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Wraps route content in [SelectionArea] so text selection works under the
-/// Navigator [Overlay] (required by [SelectableRegion]).
-///
-/// Do not place [SelectionArea] in [MaterialApp.builder] above the router —
-/// that sits outside Overlay and throws "No Overlay widget found".
-///
-/// Nested [SelectionArea] widgets (inside this one) throw
-/// `_selectable == null` on [StaticSelectionContainerDelegate].
 class RouteAwareSelectionArea extends StatelessWidget {
   const RouteAwareSelectionArea({super.key, required this.child});
 
@@ -15,4 +7,4 @@ class RouteAwareSelectionArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SelectionArea(child: child);
-}
+}

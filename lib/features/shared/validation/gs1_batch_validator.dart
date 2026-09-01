@@ -2,7 +2,6 @@ import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/data/services/barcode/gs1_barcode_parser.dart';
 
-/// One row from user-supplied batch / CSV / paste input.
 class Gs1BatchValidationRow {
   const Gs1BatchValidationRow({
     required this.lineNumber,
@@ -19,14 +18,6 @@ class Gs1BatchValidationRow {
   final String message;
 }
 
-/// Parses user paste/CSV and validates each row with [CheckDigitUtils] / parsers.
-///
-/// Accepted line forms (blank lines and `#` comments ignored):
-/// - `GTIN,12345678901231` or `GTIN:12345678901231` or `GTIN 12345678901231`
-/// - `GLN,…` / `SSCC,…` / `EPC,…` / `BARCODE,…`
-/// - `SGTIN,<gtin>,<serial>` or `SGTIN:<gtin>+<serial>`
-/// - Bare digits: length 8/12/14 → GTIN; 18 → SSCC; 13 → GTIN‑13 (same mod‑10 as GLN)
-/// - Element string / Digital Link starting with `(` or `http` / `urn:` → barcode/EPC parse
 abstract final class Gs1BatchValidator {
   static List<Gs1BatchValidationRow> validatePaste(String input) {
     final lines = input.split(RegExp(r'\r?\n'));
@@ -71,7 +62,6 @@ abstract final class Gs1BatchValidator {
     );
   }
 
-  /// Returns (type, primary, serialOrNull).
   static (String, String, String?)? _parseTyped(String raw) {
     final colon = RegExp(
       r'^(GTIN|GLN|SSCC|SGTIN|EPC|EPCURI|BARCODE|AI)\s*[:=]\s*(.+)$',
@@ -257,4 +247,4 @@ abstract final class Gs1BatchValidator {
       message: 'Invalid GS1 barcode data',
     );
   }
-}
+}

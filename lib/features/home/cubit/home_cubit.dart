@@ -96,7 +96,7 @@ class HomeCubit extends Cubit<HomeState> {
         return;
       }
     } else if (state.throughputByHours.isNotEmpty) {
-      // Force refresh: keep the live 24h window if present, refetch 1H/7D once.
+      
       final kept = <int, ThroughputWindow>{
         if (state.throughputByHours.containsKey(_broadcastThroughputHours))
           _broadcastThroughputHours:
@@ -116,13 +116,6 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  /// [refreshHealth] controls whether this call re-runs the actuator health/info
-  /// check. Health status doesn't ride the WebSocket heartbeat, so the
-  /// reconnect-triggered resync in [_onConnectionChanged] passes `false` — it
-  /// only needs to re-sync dashboard stats/recent events, and skipping the
-  /// health re-check there avoids firing a redundant duplicate actuator
-  /// request when the socket's first "connected" event races with the health
-  /// check already kicked off by the initial [load].
   Future<void> refresh({
     String? accountEmail,
     bool refreshHealth = true,
@@ -162,7 +155,6 @@ class HomeCubit extends Cubit<HomeState> {
     await load(accountEmail: accountEmail, forceRefresh: true);
   }
 
-  /// REST fallback poll — active only while the WebSocket heartbeat is disconnected.
   void startPolling({String? accountEmail}) {
     if (isClosed || !_canReadDashboard) return;
     _pollAccountEmail = accountEmail ?? _pollAccountEmail;
@@ -188,8 +180,6 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  // ---- WebSocket heartbeat push --------------------------------------------
-
   void _initializeWebSocketListeners() {
     _dashboardSubscription = _webSocketService.dashboardSummaryStream.listen(
       _onSummaryPushed,
@@ -205,8 +195,7 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void disconnectWebSocket() {
-    // Shared socket is owned by the authenticated session (AuthCubit). Feature
-    // code must only stop local fallbacks — never tear down the singleton.
+    
     stopPolling();
   }
 
@@ -215,13 +204,10 @@ class HomeCubit extends Cubit<HomeState> {
     emit(state.copyWith(liveUpdatesConnected: connected));
     if (connected) {
       stopPolling();
-      // Immediate REST re-sync so the UI is current without waiting for the first heartbeat.
-      // refreshHealth: false — the actuator health/info check isn't tied to the WebSocket
-      // heartbeat, so re-running it here on every (re)connect only produces a redundant
-      // duplicate call racing with the one the initial `load()` already kicked off.
+      
       unawaited(refresh(accountEmail: _pollAccountEmail, refreshHealth: false));
     } else {
-      // Enable the REST fallback poll immediately (don't wait for the first periodic tick).
+      
       startPolling(accountEmail: _pollAccountEmail);
       _onPollTick();
     }
@@ -268,8 +254,7 @@ class HomeCubit extends Cubit<HomeState> {
         ),
       );
     } catch (_) {
-      // A malformed push must never clobber existing state; the next heartbeat or the REST
-      // fallback (if disconnected) will recover.
+      
     }
   }
 
@@ -301,8 +286,7 @@ class HomeCubit extends Cubit<HomeState> {
       _isRevalidating = true;
     }
     try {
-      // Summary / heartbeat always uses the broadcast window. Other ranges are
-      // prefetched once and switched locally via [selectThroughputHours].
+      
       final overview = await _dashboardService.getSummary(
         recentLimit: 5,
         throughputHours: _broadcastThroughputHours,
@@ -373,8 +357,6 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  /// Prefetch 1H / 7D once after startup (24H comes from summary). Range toggles
-  /// only read [HomeState.throughputByHours] — they do not hit the network.
   Future<void> _prefetchThroughputRanges() async {
     if (isClosed || !_canReadThroughput || state.stats == null) return;
 
@@ -394,7 +376,7 @@ class HomeCubit extends Cubit<HomeState> {
             total: result.total,
           );
         } catch (_) {
-          // Leave the window absent; a later force refresh can retry.
+          
         }
       }),
     );
@@ -460,7 +442,6 @@ class HomeCubit extends Cubit<HomeState> {
     );
   }
 
-  /// Switch the visible throughput range using startup-prefetched windows only.
   void selectThroughputHours(int hours) {
     if (!_canReadThroughput || state.stats == null) return;
     if (hours == state.throughputHours) return;
@@ -490,8 +471,7 @@ class HomeCubit extends Cubit<HomeState> {
     _dashboardSubscription = null;
     _connectionSubscription?.cancel();
     _connectionSubscription = null;
-    // Never disconnect the shared WebSocketService singleton here — other features may still
-    // be using it.
+    
     return super.close();
   }
-}
+}

@@ -9,13 +9,8 @@ import 'package:traqtrace_app/data/models/automation_center/realtime_notificatio
 typedef WebSocketChannelFactory =
     WebSocketChannel Function(Uri uri, Iterable<String> protocols);
 
-/// Application-scoped STOMP WebSocket used by notifications, job-queue, and home.
-///
-/// Ownership: connect while authenticated; [disconnect] only when the session ends
-/// (logout / session expiry). Feature screens must not tear down this shared socket.
 class WebSocketService {
-  /// [tokenManager] (optional for test construction) supplies the current JWT at connect time.
-  /// Production DI always provides it so the STOMP CONNECT frame carries a valid bearer token.
+  
   WebSocketService({
     TokenManager? tokenManager,
     String? baseUrl,
@@ -47,13 +42,8 @@ class WebSocketService {
   Timer? _reconnectTimer;
   int _reconnectAttempts = 0;
 
-  /// Invoked when STOMP authentication fails (expired/invalid token). Wired to the
-  /// same session-expiry path as HTTP 401.
   void Function()? onAuthenticationFailed;
 
-  // Exponential-backoff-with-jitter reconnect parameters. There is deliberately no hard attempt
-  // cap: this socket now serves notifications, the job-queue dashboard, and the home dashboard,
-  // so a dropped connection must keep trying to recover rather than silently stranding any of them.
   static const int _baseReconnectSeconds = 2;
   static const int _maxReconnectSeconds = 30;
   final Random _random = Random();
@@ -61,11 +51,9 @@ class WebSocketService {
   Stream<RealtimeNotification> get notificationStream =>
       _notificationController.stream;
 
-  /// Decoded payloads pushed to the `/topic/job-queue/...` destinations.
   Stream<Map<String, dynamic>> get jobQueueEventStream =>
       _jobQueueController.stream;
 
-  /// Decoded payloads pushed to `/topic/dashboard/summary` (home dashboard heartbeat push).
   Stream<Map<String, dynamic>> get dashboardSummaryStream =>
       _dashboardController.stream;
 
@@ -87,18 +75,12 @@ class WebSocketService {
     Iterable<String> protocols,
   ) => WebSocketChannel.connect(uri, protocols: protocols);
 
-  /// Public API preserved as fire-and-forget `void`. The actual work is async (it reads the
-  /// current JWT before sending CONNECT); callers do not await it.
-  ///
-  /// Idempotent: concurrent callers share one connection attempt. Emits `true` on
-  /// [connectionStream] only after the STOMP `CONNECTED` frame (not when the TCP
-  /// socket opens).
   void connect() {
     unawaited(_connect());
   }
 
   Future<void> _connect() async {
-    // Idempotent: a second caller (e.g. a second cubit) must not tear down a live connection.
+    
     if (_isConnected || _connecting) {
       return;
     }
@@ -113,8 +95,6 @@ class WebSocketService {
         return;
       }
 
-      // Always use the freshest stored JWT so CONNECT authenticates even though callers may
-      // have connected before a token was available.
       final stored = await _tokenManager?.getToken();
       if (stored != null && stored.isNotEmpty) {
         _accessToken = stored;
@@ -144,7 +124,7 @@ class WebSocketService {
         'heart-beat': '10000,10000',
         'Authorization': 'Bearer ${_accessToken ?? ''}',
       });
-      // Connection success is confirmed only by the STOMP CONNECTED frame.
+      
     } catch (e) {
       _reportConnectionFailure(e.toString());
       _scheduleReconnect();
@@ -229,7 +209,7 @@ class WebSocketService {
         lower.contains('401');
 
     if (authFailure) {
-      // Stop reconnecting with a bad token; session expiry owns teardown.
+      
       _intentionalDisconnect = true;
       _reconnectTimer?.cancel();
       onAuthenticationFailed?.call();
@@ -305,13 +285,11 @@ class WebSocketService {
       'destination': '/user/queue/notifications',
     });
 
-    // Job-queue dashboard snapshots (event-driven push migration).
     _sendStompFrame('SUBSCRIBE', {
       'id': 'sub-3',
       'destination': '/topic/job-queue/dashboard',
     });
 
-    // Home dashboard summary heartbeat push.
     _sendStompFrame('SUBSCRIBE', {
       'id': 'sub-4',
       'destination': '/topic/dashboard/summary',
@@ -324,8 +302,6 @@ class WebSocketService {
       final headers = <String, String>{};
       String? body;
 
-      // Line 0 is the command (MESSAGE). Parse headers until the first blank line, then the
-      // remainder is the body (STOMP null terminator stripped).
       for (int i = 1; i < lines.length; i++) {
         final line = lines[i];
         if (line.isEmpty) {
@@ -371,14 +347,11 @@ class WebSocketService {
     });
   }
 
-  /// Pre-jitter backoff ceiling (seconds) for a 1-based reconnect [attempt]: exponential
-  /// (base 2s, doubling) capped at 30s, monotonically non-decreasing, defined for all attempts
-  /// (there is no permanent give-up). Exposed for tests.
   static int reconnectBackoffCeilingSeconds(int attempt) {
     final exponent = min(
       (attempt < 1 ? 0 : attempt - 1),
       5,
-    ); // cap shift so it can't overflow
+    ); 
     return min(_baseReconnectSeconds * (1 << exponent), _maxReconnectSeconds);
   }
 
@@ -386,7 +359,6 @@ class WebSocketService {
     _reconnectTimer?.cancel();
     _reconnectAttempts++;
 
-    // Exponential backoff capped at 30s with full jitter.
     final backoffSeconds = reconnectBackoffCeilingSeconds(_reconnectAttempts);
     final delayMs = (_random.nextDouble() * backoffSeconds * 1000).round();
 
@@ -420,4 +392,4 @@ class WebSocketService {
     _dashboardController.close();
     _connectionController.close();
   }
-}
+}

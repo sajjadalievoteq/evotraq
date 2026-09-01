@@ -122,8 +122,6 @@ class ShippingOperationService {
     }
   }
 
-  /// Convenience list view of [getShippingOperationsPage].
-  /// Prefer `/operations/shipping` for operational UIs (not object bizStep filters).
   Future<List<ShippingResponse>> getAllShippingOperations({
     int page = 0,
     int size = 20,
@@ -327,4 +325,4 @@ class ShippingOperationService {
       );
     }
   }
-}
+}

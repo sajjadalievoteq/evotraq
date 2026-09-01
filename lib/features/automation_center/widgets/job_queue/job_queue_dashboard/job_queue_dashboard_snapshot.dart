@@ -1,5 +1,3 @@
-/// Immutable snapshot for the Job Queue operations dashboard (UI-only).
-/// All fields are derived from existing job-queue API payloads.
 class JobQueueDashboardSnapshot {
   const JobQueueDashboardSnapshot({
     required this.healthy,
@@ -44,8 +42,6 @@ class JobQueueDashboardSnapshot {
   final List<Map<String, dynamic>> queuedJobsList;
   final List<Map<String, dynamic>> recentHistory;
 
-  /// Raw worker-pool statistics map (as returned by the API / WS payload), retained so the
-  /// Workers tab renders its detailed fields from the single snapshot source of truth.
   final Map<String, dynamic> workerPoolStats;
 
   final List<String> issues;
@@ -65,7 +61,6 @@ class JobQueueDashboardSnapshot {
     return (completedJobs / done).clamp(0.0, 1.0);
   }
 
-  /// Null when there is no completed/failed sample yet.
   double? get successRateOrNull {
     final done = completedJobs + failedJobs;
     if (done <= 0) return null;
@@ -76,4 +71,4 @@ class JobQueueDashboardSnapshot {
     if (processingPaused) return 'Paused';
     return healthy ? 'Healthy' : 'Attention';
   }
-}
+}

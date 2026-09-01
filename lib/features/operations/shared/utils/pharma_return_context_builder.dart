@@ -33,11 +33,9 @@ class PharmaReturnContextBuilder {
   final SGTINService _sgtinService;
   final GTINService _gtinService;
 
-  /// Accepting events historically wrote this into ILMD / bizData as camelCase.
   static const _ilmdSourceEventId = 'sourceEventID';
   static const _ilmdReturnReason = 'returnReason';
 
-  /// Return-shipping events persist these in bizData (see ReturnShippingConstants).
   static const _bizDataSourceEventId = 'source_event_id';
   static const _bizDataReturnReason = 'return_reason';
 
@@ -274,8 +272,6 @@ class PharmaReturnContextBuilder {
     return null;
   }
 
-  /// Merge ILMD + bizData so return metadata is found regardless of where the
-  /// backend stored it (return shipping uses bizData snake_case today).
   static Map<String, dynamic> _eventAttributes(ObjectEvent event) {
     return <String, dynamic>{...?event.ilmd, ...?event.bizData};
   }
@@ -309,4 +305,4 @@ class _ProductSnapshot {
   final String? lotNumber;
   final DateTime? expiryDate;
   final String? productDescription;
-}
+}

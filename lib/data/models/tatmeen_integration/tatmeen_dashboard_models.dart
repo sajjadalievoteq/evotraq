@@ -63,7 +63,7 @@ class TatmeenDashboardStats extends Equatable {
     required this.successfulTrendPct,
     required this.failedTrendPct,
     required this.pendingTrendPct,
-    required this.lastSyncedAt,
+    this.lastSyncedAt,
   });
 
   final int totalSynced;
@@ -73,7 +73,7 @@ class TatmeenDashboardStats extends Equatable {
   final double successfulTrendPct;
   final double failedTrendPct;
   final double pendingTrendPct;
-  final DateTime lastSyncedAt;
+  final DateTime? lastSyncedAt;
 
   factory TatmeenDashboardStats.fromJson(Map<String, dynamic> json) {
     return TatmeenDashboardStats(
@@ -84,7 +84,7 @@ class TatmeenDashboardStats extends Equatable {
       successfulTrendPct: _double(json['successfulTrendPct']),
       failedTrendPct: _double(json['failedTrendPct']),
       pendingTrendPct: _double(json['pendingTrendPct']),
-      lastSyncedAt: AppTime.parseApi(json['lastSyncedAt']),
+      lastSyncedAt: AppTime.tryParseApi(json['lastSyncedAt']),
     );
   }
 

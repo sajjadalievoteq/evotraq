@@ -1,4 +1,3 @@
-/// Maps human-readable priority labels to numeric queue priorities.
 abstract final class JobQueuePriorityUtils {
   static int fromLabel(String label) {
     switch (label.toUpperCase()) {
@@ -11,4 +10,4 @@ abstract final class JobQueuePriorityUtils {
         return 5;
     }
   }
-}
+}

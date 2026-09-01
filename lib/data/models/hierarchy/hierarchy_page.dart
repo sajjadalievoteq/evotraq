@@ -9,7 +9,6 @@ class HierarchyPage {
   final bool hasMore;
   final int? cycleCount;
 
-  /// Parent-context / climb-up fields (only set when [focusEpc] mode is used).
   final String? focusEpc;
   final int? focusPage;
   final int? focusIndexInPage;
@@ -57,4 +56,4 @@ class HierarchyPage {
       parentHasParent: json['parentHasParent'] as bool?,
     );
   }
-}
+}

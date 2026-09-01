@@ -1,7 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_type.dart';
 
-/// EPCIS / operations step keys. Keep these aligned with
-/// `OperationSecurityExpressions` on the backend (Phase 2).
 abstract final class OperationSteps {
   static const commission = 'commission';
   static const decommission = 'decommission';
@@ -21,20 +19,6 @@ abstract final class OperationSteps {
   static const delete = 'delete';
 }
 
-/// Single role→step matrix mirroring backend `OperationSecurityExpressions`.
-///
-/// <pre>
-/// Step                              Allowed roles
-/// Commission / decommission         MANUFACTURER, ADMIN
-/// Pack / unpack                     MANUFACTURER, DISTRIBUTOR, ADMIN
-/// Ship / cancel-ship                MANUFACTURER, DISTRIBUTOR, RETAILER, ADMIN
-/// Receive / accept / cancel-receive DISTRIBUTOR, RETAILER, ADMIN
-/// Return-ship / return-receive      DISTRIBUTOR, RETAILER, ADMIN
-/// Transform product                 MANUFACTURER, ADMIN
-/// Update-status                     MANUFACTURER, DISTRIBUTOR, RETAILER, ADMIN
-/// Read operations/events            MANUFACTURER, DISTRIBUTOR, RETAILER, ADMIN
-/// Delete / destructive              ADMIN
-/// </pre>
 abstract final class OperationPermissions {
   static const Set<String> _manufacturerAdmin = {'MANUFACTURER', 'ADMIN'};
   static const Set<String> _manufacturerDistributorAdmin = {
@@ -55,7 +39,6 @@ abstract final class OperationPermissions {
   };
   static const Set<String> _adminOnly = {'ADMIN'};
 
-  /// Canonical matrix. Aliases (pack/unpack → aggregate, etc.) resolve here.
   static const Map<String, Set<String>> _rolesByStep = {
     OperationSteps.commission: _manufacturerAdmin,
     OperationSteps.decommission: _manufacturerAdmin,
@@ -75,13 +58,11 @@ abstract final class OperationPermissions {
     OperationSteps.delete: _adminOnly,
   };
 
-  /// Roles allowed to perform [step], or `null` if the step is unknown.
   static Set<String>? rolesFor(String step) {
     final key = step.trim().toLowerCase();
     return _rolesByStep[key];
   }
 
-  /// Write-step key for a home/drawer [OperationType], or `null` if none.
   static String stepForOperationType(OperationType type) => switch (type) {
     OperationType.commissioning => OperationSteps.commission,
     OperationType.updateStatus => OperationSteps.updateStatus,
@@ -94,4 +75,4 @@ abstract final class OperationPermissions {
     OperationType.cancelReceiving => OperationSteps.cancelReceive,
     OperationType.returnReceiving => OperationSteps.returnReceive,
   };
-}
+}

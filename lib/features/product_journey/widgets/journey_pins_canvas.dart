@@ -227,10 +227,6 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
           ),
         );
 
-        // Horizontal (desktop): the cross-axis is vertical and cannot scroll, so
-        // if the natural canvas is taller than the viewport (short screen) scale
-        // the whole serpentine to fit — never trim top or bottom. (Vertical/mobile
-        // handles overflow via the vertical scroll view below.)
         if (axis == SerpentineAxis.horizontal && canvasH > viewportH + 0.5) {
           return Center(
             child: FittedBox(fit: BoxFit.contain, child: canvas),
@@ -265,4 +261,4 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
 
   static const double _chipHalfW = 60.0;
   static const double _chipHalfH = 11.0;
-}
+}

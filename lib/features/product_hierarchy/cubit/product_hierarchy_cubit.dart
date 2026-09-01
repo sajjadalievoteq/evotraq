@@ -31,9 +31,6 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
   bool recentParentsRequested = false;
   final Map<String, ProductJourney?> _journeyCache = {};
 
-  /// Idle left panel: recent packing ops from [PackingOperationService],
-  /// de-duped by parent container (newest first). Does not clear on
-  /// [openHierarchy] so returning to idle is instant.
   Future<void> loadRecentParents() async {
     if (recentParentsRequested) return;
     if (state.root != null || state.isResolvingRoot) return;
@@ -42,7 +39,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
     recentParentsRequested = true;
     emit(state.copyWith(recentParentsLoading: true));
     try {
-      // Fetch a bit more than 10 so de-dupe by parent still yields ~10 rows.
+      
       final operations = await _packingService.getAllPackingOperations(
         page: 0,
         size: 30,
@@ -100,14 +97,9 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       ),
     );
     try {
-      // Details (journey) are independent of the tree and the focused EPC is
-      // known up front (== normalized input), so start the details fetch NOW —
-      // in parallel with the parent-container lookup, tree page, and probe.
+      
       final journeyFuture = _getJourneyCached(input);
 
-      // Containers open as the view root so a mid-level SSCC keeps its climb arrow.
-      // Leaf SGTINs open from their IMMEDIATE parent container (not the whole-tree
-      // root), with the leaf as focus; climb-up then reaches higher parents.
       final inputType = inferType(input);
       final String viewRootEpc;
       if (inputType == 'SSCC') {
@@ -131,8 +123,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
         page: 0,
         size: pageSize,
       );
-      // Lightweight parent probe — same answer as children?focusEpc without
-      // loading a siblings page we discard.
+      
       final parentProbeFuture = hierarchyService.getParentContainer(
         viewRootEpc,
       );
@@ -156,9 +147,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
         totalPages: page.totalPages,
         hasMore: page.hasMore,
       );
-      // Await the details (started in parallel above) so the tree + node details
-      // reveal together in a single emit — no staggered "tree first, details
-      // later". Both panels show their skeletons until this point.
+      
       dynamic journey;
       String? detailsError;
       try {
@@ -202,9 +191,6 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
     return journey;
   }
 
-  /// Specialized internal helper that only fetches journey data for [epc].
-  /// Assumes [isLoadingDetails] is already set to true by caller in the same
-  /// frame as clearing other loading flags to prevent UI flicker.
   Future<void> _loadDetailsOnly(String epc) async {
     try {
       final journey = await _getJourneyCached(epc);
@@ -222,8 +208,6 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
     }
   }
 
-  /// Climb one level from [epc]: graft parent + siblings above the current
-  /// view-root, reusing the existing expanded subtree by reference.
   Future<void> climbToParent(String epc) async {
     final focus = normalizeProductHierarchyInput(epc);
     if (focus.isEmpty || state.isClimbing) return;
@@ -251,11 +235,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       }
 
       final parentNode = page.parent!;
-      // Seed the grafted parent from a clean page-0 children window so it
-      // forward-paginates on scroll-down at EVERY depth, exactly like the
-      // original root. Focus-anchored seeding left mid-level grafted parents
-      // unable to load their remaining children on scroll (their siblings were
-      // treated as "earlier" pages), so only the root kept paginating.
+      
       final page0 = await hierarchyService.getHierarchyChildren(
         parentNode.epc,
         page: 0,
@@ -266,7 +246,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       final siblings = <HierarchyTreeNodeState>[];
       for (final n in page0.children) {
         if (sameEpc(n.epc, focus)) {
-          // Reuse the current view-root subtree (expansion + loaded descendants).
+          
           siblings.add(previousRoot);
           focusReused = true;
         } else {
@@ -274,9 +254,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
         }
       }
       if (!focusReused) {
-        // Focus child lives on a later page; keep its subtree grafted so it
-        // stays visible. The dedupe-by-EPC merge in loadMoreChildren swaps it
-        // into place (no duplicate) when its real page is scrolled into view.
+        
         siblings.add(previousRoot);
       }
 
@@ -311,7 +289,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
           isClimbing: false,
           isLoadingDetails: true,
           treeVersion: state.treeVersion + 1,
-          // Animate the list up to the new parent (view-root).
+          
           scrollToEpc: parentNode.epc,
           flashFocusEpc: parentNode.epc,
           clearHierarchyError: true,
@@ -379,4 +357,4 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       emit(state.copyWith(isLoadingDetails: false, detailsError: e.toString()));
     }
   }
-}
+}

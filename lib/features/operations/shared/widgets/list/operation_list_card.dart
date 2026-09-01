@@ -30,13 +30,8 @@ class OperationListCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool? isInboxOutbox;
 
-  /// The GLN whose Inbox/Outbox is being viewed. Used to label a shipment as
-  /// "Outgoing" (this GLN is the source) vs "Incoming" (it's the destination).
   final String? perspectiveGln;
 
-  /// Direction badge for the Inbox/Outbox list: outgoing when the viewing GLN
-  /// is the shipment's source, incoming otherwise. Falls back to the operation
-  /// type when the perspective GLN is unknown.
   String _inboxOutboxLabel() {
     final source =
         (operation.metadataString('sourceGLN') ?? operation.primaryGln)?.trim();
@@ -276,4 +271,4 @@ class OperationListCard extends StatelessWidget {
     if (value == null) return null;
     return AppTime.formatUae(value, DateFormat('MMM dd, yyyy HH:mm'));
   }
-}
+}

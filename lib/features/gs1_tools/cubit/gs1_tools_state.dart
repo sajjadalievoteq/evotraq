@@ -23,7 +23,6 @@ class Gs1ToolsState extends Equatable {
 
   final Gs1ToolKind selectedTool;
 
-  /// Optional deep-link mode for the selected tool (consumed once by the panel).
   final String? initialMode;
 
   final WorkbenchSlice convert;
@@ -111,4 +110,4 @@ class Gs1ToolsState extends Equatable {
     serializeExport,
     serializeImport,
   ];
-}
+}

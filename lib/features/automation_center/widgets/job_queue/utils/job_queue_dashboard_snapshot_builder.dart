@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/job_queue_dashboard_snapshot.dart';
 
-/// Builds a [JobQueueDashboardSnapshot] from live job-queue panel state.
 JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
   required Map<String, dynamic> dashboardData,
   required Map<String, dynamic> workerPoolStats,
@@ -102,4 +101,4 @@ JobQueueDashboardSnapshot buildJobQueueDashboardSnapshot({
     queuedSparkline: List<double>.from(queuedSparkline),
     lastUpdated: lastUpdated,
   );
-}
+}

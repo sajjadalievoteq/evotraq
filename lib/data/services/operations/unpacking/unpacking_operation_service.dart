@@ -102,8 +102,6 @@ class UnpackingOperationService {
     }
   }
 
-  /// Convenience list view of [getUnpackingOperationsPage].
-  /// Prefer `/operations/unpacking` for operational UIs (not aggregation bizStep filters).
   Future<List<UnpackingResponse>> getAllUnpackingOperations({
     int page = 0,
     int size = 20,
@@ -307,4 +305,4 @@ class UnpackingOperationService {
       );
     }
   }
-}
+}

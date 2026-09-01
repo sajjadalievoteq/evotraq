@@ -3,7 +3,6 @@ import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 
-/// Identifier validation facade — all mod-10 / length rules via [CheckDigitUtils].
 abstract final class Gs1Validator {
   static bool isValidGTIN(String? value) => CheckDigitUtils.isValidGtin(value);
 
@@ -21,4 +20,4 @@ abstract final class Gs1Validator {
   static bool isValidDigitalLink(String value) {
     return sgtin_validators.validateGs1DigitalLinkUri(value) == null;
   }
-}
+}

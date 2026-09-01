@@ -12,8 +12,7 @@ class InboundCatalogCubit extends Cubit<InboundCatalogState> {
 
   Future<void> load({bool force = false}) async {
     if (_loading) return;
-    // Skip redundant fetches when the workspace-scoped cubit already has data
-    // (Outbound ↔ Inbound section switches remount the panel).
+    
     if (!force &&
         state.status == InboundCatalogStatus.success &&
         state.catalog != null) {
@@ -52,4 +51,4 @@ class InboundCatalogCubit extends Cubit<InboundCatalogState> {
   Future<List<int>> downloadPostmanCollection(String categoryId) {
     return _service.downloadPostmanCollection(categoryId: categoryId);
   }
-}
+}

@@ -15,8 +15,6 @@ class Gs1AiDefinition {
   final String format;
   final bool fnc1;
 
-  /// Fixed AI+value total length when format is a plain `Nn` (no variable part).
-  /// Matches legacy parser semantics (e.g. AI `01` + N14 → 16).
   int? get fixedAiPlusValueLength {
     if (fnc1) return null;
     final m = RegExp(r'^N(\d+)$').firstMatch(format.trim());
@@ -34,17 +32,10 @@ class Gs1AiDefinition {
   }
 }
 
-/// Bundled GS1 Application Identifier reference — single source for the AI
-/// cheat-sheet, [GS1BarcodeParser], and [Gs1ElementStringBuilder].
-///
-/// Prefer [ensureLoaded] (asset). Until then (and in unit tests),
-/// [ensureSynced] uses the embedded seed that mirrors `ai-table.json`.
 abstract final class Gs1AiTable {
   static List<Gs1AiDefinition>? _all;
   static Future<void>? _loading;
 
-  /// Embedded mirror of `assets/gs1/ai-table.json` for sync / test use.
-  /// Keep in sync with the asset — do not invent extra AIs here.
   static const List<Gs1AiDefinition> embeddedSeed = [
     Gs1AiDefinition(code: '00', title: 'SSCC', format: 'N18', fnc1: false),
     Gs1AiDefinition(code: '01', title: 'GTIN', format: 'N14', fnc1: false),
@@ -123,12 +114,10 @@ abstract final class Gs1AiTable {
     return _loading ??= _load();
   }
 
-  /// Ensures [all] is non-empty without awaiting assets (uses [embeddedSeed]).
   static void ensureSynced() {
     _all ??= List<Gs1AiDefinition>.from(embeddedSeed);
   }
 
-  /// Test helper: replace table from a JSON list (or clear with empty).
   static void seedForTest(List<Gs1AiDefinition> defs) {
     _all = List<Gs1AiDefinition>.from(defs);
     _loading = null;
@@ -173,7 +162,6 @@ abstract final class Gs1AiTable {
   static String titleFor(String code) =>
       definitionFor(code)?.title ?? '($code)';
 
-  /// Total length of AI digits + value for fixed-length AIs; null if variable.
   static int? fixedAiPlusValueLength(String code) =>
       definitionFor(code)?.fixedAiPlusValueLength;
 
@@ -197,4 +185,4 @@ abstract final class Gs1AiTable {
         )
         .toList();
   }
-}
+}

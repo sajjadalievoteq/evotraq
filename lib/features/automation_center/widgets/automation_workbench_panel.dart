@@ -5,15 +5,6 @@ import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 
-/// Shared Automation Center panel chrome: one outer [CustomScrollView] for
-/// title, instructions, and body (no nested expand/scroll).
-///
-/// Prefer [bodySlivers] for large lists so rows stay lazily built. When only
-/// [child] is provided it is wrapped in a [SliverToBoxAdapter] (Tatmeen and
-/// compact panels).
-///
-/// Text selection comes from the route-level [SelectionArea]. Nested
-/// [SelectionArea] widgets throw `_selectable == null`.
 class AutomationWorkbenchPanel extends StatelessWidget {
   const AutomationWorkbenchPanel({
     super.key,
@@ -30,17 +21,13 @@ class AutomationWorkbenchPanel extends StatelessWidget {
 
   final String title;
 
-  /// Box content painted inside the card (non-virtualized).
   final Widget? child;
 
-  /// Slivers contributed inside the card chrome (virtualized lists).
   final List<Widget>? bodySlivers;
 
   final WorkbenchInstructions? instructions;
   final List<Widget> actions;
 
-  /// Optional scroll hook for load-more (must be an ancestor listener use-case;
-  /// this also forwards notifications from the panel's [CustomScrollView]).
   final bool Function(ScrollNotification notification)? onScrollNotification;
 
   @override
@@ -133,7 +120,6 @@ class AutomationWorkbenchPanel extends StatelessWidget {
   }
 }
 
-/// Groups heterogeneous slivers without requiring a package dependency.
 class MultiSliver extends StatelessWidget {
   const MultiSliver({super.key, required this.children});
 
@@ -143,4 +129,4 @@ class MultiSliver extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverMainAxisGroup(slivers: children);
   }
-}
+}

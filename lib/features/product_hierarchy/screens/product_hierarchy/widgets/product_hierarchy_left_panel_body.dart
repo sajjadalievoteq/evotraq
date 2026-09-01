@@ -11,7 +11,6 @@ import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarc
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_sidebar_skeleton.dart';
 import 'package:traqtrace_app/features/product_hierarchy/utils/product_hierarchy_identifier_utils.dart';
 
-/// Body of the left panel below the search header (loading / details / idle).
 class ProductHierarchyLeftPanelBody extends StatelessWidget {
   const ProductHierarchyLeftPanelBody({
     super.key,
@@ -74,4 +73,4 @@ class ProductHierarchyLeftPanelBody extends StatelessWidget {
     }
     return const SizedBox.shrink();
   }
-}
+}

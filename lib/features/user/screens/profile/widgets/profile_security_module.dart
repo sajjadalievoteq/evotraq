@@ -145,6 +145,7 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
               ),
               const SizedBox(height: 24),
               CustomElevatedButton(
+                fontSize: 14,
                 label: UserStrings.changePasswordButton,
                 onPressed: _changePassword,
                 isLoading: isLoading,

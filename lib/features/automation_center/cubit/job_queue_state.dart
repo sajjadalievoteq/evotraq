@@ -5,9 +5,6 @@ enum JobQueueStatus { initial, loading, success, error }
 
 enum JobQueueConnectionStatus { disconnected, connecting, connected }
 
-/// State for the Job Queue panel. The [snapshot] is the single source of truth for everything
-/// the panel's tabs render (metrics, active/queued/history lists, worker pool, health); there are
-/// no parallel copies of that data here.
 class JobQueueState extends Equatable {
   final JobQueueStatus status;
   final JobQueueDashboardSnapshot? snapshot;
@@ -31,11 +28,11 @@ class JobQueueState extends Equatable {
       status: status ?? this.status,
       snapshot: snapshot ?? this.snapshot,
       connectionStatus: connectionStatus ?? this.connectionStatus,
-      // Matches NotificationState: error is not carried forward implicitly.
+      
       error: error,
     );
   }
 
   @override
   List<Object?> get props => [status, snapshot, connectionStatus, error];
-}
+}

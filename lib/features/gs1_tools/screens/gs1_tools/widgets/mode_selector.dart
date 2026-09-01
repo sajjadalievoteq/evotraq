@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Compact mode picker shared by the consolidated GS1 Tools panels.
-///
-/// Renders a [SegmentedButton] for three modes or fewer, otherwise falls
-/// back to a [DropdownButtonFormField] so long lists stay usable.
 class Gs1ToolModeSelector extends StatelessWidget {
   const Gs1ToolModeSelector({
     super.key,
@@ -51,7 +47,6 @@ class Gs1ToolModeSelector extends StatelessWidget {
   }
 }
 
-/// Applies cubit [initialMode] once into local mode state.
 mixin Gs1InitialModeMixin<T extends StatefulWidget> on State<T> {
   String? _appliedMode;
 
@@ -71,4 +66,4 @@ mixin Gs1InitialModeMixin<T extends StatefulWidget> on State<T> {
       clear?.call();
     });
   }
-}
+}

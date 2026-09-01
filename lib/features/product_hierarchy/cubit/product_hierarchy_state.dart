@@ -40,27 +40,18 @@ class ProductHierarchyState extends Equatable {
 
   final int treeVersion;
 
-  /// EPC that drives climb focus / selection affordances (changes on climb/select).
   final String? focusEpc;
 
-  /// Originally searched identifier — set once per [openHierarchy], never changed by
-  /// climb or select. Drives the persistent solid-primary tile highlight.
   final String? searchedEpc;
 
-  /// One-shot: tree panel should scroll this EPC into view after layout
-  /// (center for search hits; top for climb parent / view-root).
   final String? scrollToEpc;
 
-  /// One-shot: brief pulse highlight on this EPC.
   final String? flashFocusEpc;
 
-  /// Whether the current root (parent tile) itself has a parent — drives its up-arrow.
   final bool parentHasParent;
 
-  /// Optional toast message (e.g. top of hierarchy).
   final String? climbToast;
 
-  /// Idle left-panel list from [PackingOperationService] (distinct parents).
   final List<PackingResponse> recentParents;
   final bool recentParentsLoading;
 
@@ -149,4 +140,4 @@ class ProductHierarchyState extends Equatable {
     recentParents,
     recentParentsLoading,
   ];
-}
+}

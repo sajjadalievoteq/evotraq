@@ -3,17 +3,11 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 
-/// Shared session catalog for GLN pickers.
-///
-/// Prefers the lightweight `/picker-summaries` projection; falls back to the
-/// full paginated GLN list when that endpoint is unavailable.
 class GlnPickerCatalog {
   GlnPickerCatalog({required GLNService glnService}) : _glnService = glnService;
 
   final GLNService _glnService;
 
-  /// Soft advisory bound for diagnostics; catalog is not truncated so every
-  /// picker option remains available.
   @visibleForTesting
   static const int maxCachedEntriesAdvisory = 10000;
 
@@ -111,4 +105,4 @@ class GlnPickerCatalog {
   }
 
   void clear() => invalidate();
-}
+}

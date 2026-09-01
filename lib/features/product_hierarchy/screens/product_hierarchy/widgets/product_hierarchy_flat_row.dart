@@ -8,7 +8,6 @@ import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarc
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 
-
 class ProductHierarchyFlatRow extends StatelessWidget {
   const ProductHierarchyFlatRow({
     super.key,
@@ -45,11 +44,9 @@ class ProductHierarchyFlatRow extends StatelessWidget {
   }
 
   bool _canClimb(HierarchyTreeNodeState n) {
-    // Leaves never climb.
+    
     if (!n.node.hasChildren) return false;
-    // Only the current view-root can climb — and only if it sits under a parent
-    // that isn't already shown in this view. Every other node's parent is
-    // already visible one row up, so no arrow.
+    
     if (rootEpc != null && _same(n.node.epc, rootEpc)) {
       return parentHasParent;
     }
@@ -113,9 +110,7 @@ class ProductHierarchyFlatRow extends StatelessWidget {
           isExpandedHeader: false,
           isFirst: isFirstInGroupBody,
           isLast: isLastInGroupBody,
-          // The "load earlier" (scroll-up) indicator is driven by the panel's
-          // near-top scroll handler, so it only shows a spinner. The trailing
-          // "load more" sentinel self-triggers when scrolled into view.
+          
           child: isPrevious
               ? ProductHierarchyLoadIndicator(isLoading: parent.isLoading)
               : ProductHierarchyLoadMoreSentinel(
@@ -126,4 +121,4 @@ class ProductHierarchyFlatRow extends StatelessWidget {
         ),
     };
   }
-}
+}

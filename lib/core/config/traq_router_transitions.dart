@@ -9,24 +9,17 @@ import 'package:traqtrace_app/core/widgets/router_transitions/traq_modal_transit
 import 'package:traqtrace_app/core/widgets/router_transitions/traq_shared_axis_horizontal_transition.dart';
 import 'package:traqtrace_app/core/widgets/router_transitions/transition_pointer_guard.dart';
 
-/// Navigation intent for page transitions — not route-specific animation code.
 enum TraqNavigationTransitionType {
-  /// Peer top-level destinations (workspace replace).
+  
   fadeThrough,
 
-  /// List → detail / push navigation (horizontal shared-axis inspired).
   sharedAxisHorizontal,
 
-  /// Auth shell panel swaps (login, register, forgot password, …).
   auth,
 
-  /// Wizards, create flows, overlays (shared-axis Z inspired).
   modal,
 }
 
-/// Slide-first router motion. All timings/offsets come from
-/// [TraqAnimationConstants]. Reduced-motion is gated by
-/// [TraqAnimationManager.reduceMotion].
 abstract final class TraqRouterTransitions {
   static Page<T> page<T extends Object?>({
     required LocalKey key,
@@ -55,7 +48,6 @@ abstract final class TraqRouterTransitions {
     };
   }
 
-  /// Peer destinations: horizontal slide (right-to-left) + fade.
   static Page<T> fadeThroughPage<T extends Object?>({
     required LocalKey key,
     required Widget child,
@@ -74,18 +66,11 @@ abstract final class TraqRouterTransitions {
     );
   }
 
-  /// Parent-navigator page for a feature [ShellRoute].
-  ///
-  /// A `builder`-only [ShellRoute] is wrapped in a platform [MaterialPage],
-  /// which has no horizontal slide on desktop/web. Use this so Home → feature
-  /// matches other drill-downs. Pass [GoRouterState.pageKey] (stable for a
-  /// given shell across child routes).
   static Page<T> featureShellPage<T extends Object?>({
     required LocalKey key,
     required Widget child,
   }) => sharedAxisHorizontalPage(key: key, child: child);
 
-  /// List → detail: horizontal slide (primary cue) + light fade.
   static Page<T> sharedAxisHorizontalPage<T extends Object?>({
     required LocalKey key,
     required Widget child,
@@ -104,7 +89,6 @@ abstract final class TraqRouterTransitions {
     );
   }
 
-  /// Auth shell panel content — existing fade + scale.
   static Page<T> authShellPage<T extends Object?>({
     required LocalKey key,
     required Widget child,
@@ -128,7 +112,6 @@ abstract final class TraqRouterTransitions {
     );
   }
 
-  /// Modal / create: vertical slide up + fade.
   static Page<T> modalPage<T extends Object?>({
     required LocalKey key,
     required Widget child,
@@ -182,4 +165,4 @@ abstract final class TraqRouterTransitions {
       },
     );
   }
-}
+}

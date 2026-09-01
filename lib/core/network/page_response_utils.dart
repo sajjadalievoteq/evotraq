@@ -1,4 +1,3 @@
-/// Helpers for backend {@code PageResponse} (content + page metadata).
 class PageResponseUtils {
   PageResponseUtils._();
 
@@ -24,8 +23,6 @@ class PageResponseUtils {
   static int totalPages(Map<String, dynamic> data, {int fallback = 1}) =>
       (data['totalPages'] ?? fallback) as int;
 
-  /// Normalizes a decoded GET body into page metadata + [content] list.
-  /// Supports legacy bare JSON arrays.
   static Map<String, dynamic> normalizeBody(dynamic decoded, {int fallbackSize = defaultPageSize}) {
     if (decoded is List) {
       return {
@@ -86,4 +83,4 @@ class PageResponseUtils {
 
     return all;
   }
-}
+}

@@ -80,6 +80,7 @@ class _OperationalGlnPreferenceCardState
               ),
             const SizedBox(height: 16),
             CustomElevatedButton(
+              fontSize: 14,
               label: 'Save Operational GLN',
               onPressed: _selectedGln == null || _saving ? () {} : _save,
               isLoading: _saving,

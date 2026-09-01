@@ -22,7 +22,6 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
     emit(const CommissioningOperationState());
   }
 
-  /// True when the GTIN has a pharmaceutical extension (expiry required on commission).
   Future<bool> onPharmaGtinIdentified(String gtinCode) async {
     try {
       final ext = await _pharmaceuticalService.getExtensionByGtinCode(gtinCode);
@@ -69,4 +68,4 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
       return null;
     }
   }
-}
+}

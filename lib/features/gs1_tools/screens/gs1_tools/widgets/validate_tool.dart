@@ -12,8 +12,6 @@ import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/valid
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 
-/// Consolidated validation workbench: single identifier, batch paste,
-/// check-digit calculator, and AI/identifier anatomy decomposer.
 class ValidateTool extends StatefulWidget {
   const ValidateTool({super.key});
 
@@ -287,4 +285,4 @@ class _ValidateToolState extends State<ValidateTool> with Gs1InitialModeMixin {
       },
     );
   }
-}
+}

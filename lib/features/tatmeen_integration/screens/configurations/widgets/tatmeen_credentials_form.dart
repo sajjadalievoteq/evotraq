@@ -134,7 +134,7 @@ class _TatmeenCredentialsFormState extends State<TatmeenCredentialsForm> {
           Text('Credentials', style: context.text.h3.copyWith(fontSize: 16)),
           const SizedBox(height: TraqSpacing.sm),
           Text(
-            'Username, password, and API key are required before Tatmeen can be enabled.',
+            'Username, password, and API key are required before Tatmeen can connect to external services.',
             style: context.text.bodySm.copyWith(
               color: context.colors.textMuted,
             ),

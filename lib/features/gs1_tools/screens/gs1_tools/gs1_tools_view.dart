@@ -7,7 +7,6 @@ import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/gs1_t
 import 'package:traqtrace_app/features/shared/workbench/workbench_rail.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_scaffold.dart';
 
-/// Unified GS1 Tools workbench: mode-driven tools + EPCIS Serialization.
 class Gs1ToolsView extends StatelessWidget {
   const Gs1ToolsView({required this.groups});
 
@@ -32,4 +31,4 @@ class Gs1ToolsView extends StatelessWidget {
       },
     );
   }
-}
+}

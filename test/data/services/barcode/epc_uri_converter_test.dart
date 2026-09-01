@@ -4,7 +4,7 @@ import 'package:traqtrace_app/data/services/barcode/epc_uri_converter.dart';
 void main() {
   group('EPCURIConverter.convertToEPCUri bare 18 digits', () {
     test('prefers SGTIN when first 14 digits are a valid GTIN', () {
-      // Also a valid SSCC check digit — must not silently become /00/.
+      
       expect(
         EPCURIConverter.convertToEPCUri('462920004419654152'),
         'https://id.gs1.org/01/46292000441965/21/4152',
@@ -36,4 +36,4 @@ void main() {
       );
     });
   });
-}
+}

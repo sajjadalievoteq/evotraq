@@ -1,18 +1,3 @@
-/// Hand-authored sample payloads showing third-party developers exactly what
-/// TraqTrace sends for an API/webhook notification, so they can build their
-/// receiving endpoint against a real, accurate shape rather than guessing.
-///
-/// These mirror the actual serialization paths used at delivery time:
-///  - JSON: [WebhookServiceImpl.buildWebhookPayload] (backend), which wraps a
-///    plain Jackson-serialized `List<EPCISEventDTO>` (default bean naming,
-///    ObjectEvent fields included) under `timestamp`/`eventCount`/`source`/`events`.
-///  - XML: [EPCISXmlSerializer.serializeEvents] (backend), the raw EPCIS 1.3
-///    XML document shape (element order: eventTime, recordTime,
-///    eventTimeZoneOffset, eventID, then type-specific fields, then the common
-///    business fields, then bizTransactionList/sourceList/destinationList/ilmd).
-///
-/// If either backend serializer's output shape changes, update these samples
-/// to match so they stay trustworthy references.
 class SubscriptionSamplePayloads {
   SubscriptionSamplePayloads._();
 
@@ -117,4 +102,4 @@ class SubscriptionSamplePayloads {
   </EPCISBody>
 </epcis:EPCISDocument>
 ''';
-}
+}

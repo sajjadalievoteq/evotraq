@@ -4,13 +4,8 @@ import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Color emphasis for [SubscriptionDetailsStatTile].
 enum SubscriptionStatTone { neutral, success, error, info }
 
-/// Colored metric tile used in the subscription details page's delivery
-/// statistics grid. Self-contained (doesn't depend on any shared card-list
-/// stat widget) so it renders the same whether the details page is shown
-/// full-page or embedded inside Subscription Management's inline panel.
 class SubscriptionDetailsStatTile extends StatelessWidget {
   const SubscriptionDetailsStatTile({
     super.key,
@@ -76,4 +71,4 @@ class SubscriptionDetailsStatTile extends StatelessWidget {
       ),
     );
   }
-}
+}

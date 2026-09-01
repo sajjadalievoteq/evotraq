@@ -11,7 +11,6 @@ import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/mode_
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 
-/// NDC ↔ GTIN converter (US pharma 10/11-digit NDC to GS1 GTIN-14).
 class NdcTool extends StatefulWidget {
   const NdcTool({super.key});
 
@@ -168,4 +167,4 @@ class _NdcToolState extends State<NdcTool> with Gs1InitialModeMixin {
       },
     );
   }
-}
+}

@@ -31,8 +31,7 @@ Future<void> printImageBytes({
     throw StateError('Unable to open print window (popup blocked)');
   }
 
-  // Revoke after the print window has had a chance to load.
   Future<void>.delayed(const Duration(seconds: 60), () {
     html.Url.revokeObjectUrl(url);
   });
-}
+}

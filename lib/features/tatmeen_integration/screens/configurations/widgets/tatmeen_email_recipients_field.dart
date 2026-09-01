@@ -7,11 +7,6 @@ import 'package:traqtrace_app/features/auth/utils/auth_email_validator.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_input_field.dart';
 import 'package:traqtrace_app/features/auth/widgets/input/auth_input_field_type.dart';
 
-/// Multi-email chip field for Tatmeen alert recipients.
-///
-/// Uses [AuthInputField] (email type) for per-address validation. The Add
-/// button lives only here so login/signup and other [AuthInputField]
-/// screens are unchanged.
 class TatmeenEmailRecipientsField extends StatefulWidget {
   const TatmeenEmailRecipientsField({
     super.key,
@@ -164,4 +159,4 @@ class _TatmeenEmailRecipientsFieldState
       ],
     );
   }
-}
+}

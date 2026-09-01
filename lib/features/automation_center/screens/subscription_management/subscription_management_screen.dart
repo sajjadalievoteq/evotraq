@@ -13,8 +13,6 @@ import 'package:traqtrace_app/features/automation_center/widgets/subscription_sc
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_scaffold/subscription_filter_chips.dart';
 import 'package:traqtrace_app/features/automation_center/screens/subscription_management/widgets/subscription_labeled_filter.dart';
 
-/// Subscription-management filter options (UI labels only; filter logic stays
-/// in [SubscriptionFilterUtils.filterManagement]).
 const List<SubscriptionFilterOption> kSubscriptionManagementFilterOptions = [
   SubscriptionFilterOption(label: 'All', value: 'all'),
   SubscriptionFilterOption(label: 'API', value: 'webhook'),
@@ -27,11 +25,9 @@ const List<SubscriptionFilterOption> kSubscriptionStatusFilterOptions = [
   SubscriptionFilterOption(label: 'Paused', value: 'paused'),
 ];
 
-/// Alert Subscriptions panel content for Automation Center.
 class SubscriptionManagementScreen extends StatefulWidget {
   const SubscriptionManagementScreen({super.key, this.onViewAllActivity});
 
-  /// Switches the parent Notifications workspace to the Activity tab.
   final VoidCallback? onViewAllActivity;
 
   @override
@@ -176,4 +172,4 @@ class SubscriptionManagementScreenState
   void _resumeSubscription(String subscriptionId) {
     context.read<NotificationCubit>().resumeSubscription(subscriptionId);
   }
-}
+}

@@ -12,7 +12,6 @@ import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
 import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_rail.dart';
 
-/// Unified GS1 Tools workbench: mode-driven tools + EPCIS Serialization.
 class Gs1ToolsScreen extends StatelessWidget {
   const Gs1ToolsScreen({super.key, this.initialTool, this.initialMode});
 
@@ -72,4 +71,4 @@ class Gs1ToolsScreen extends StatelessWidget {
       child: Gs1ToolsView(groups: railGroups),
     );
   }
-}
+}

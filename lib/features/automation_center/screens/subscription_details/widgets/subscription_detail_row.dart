@@ -18,11 +18,8 @@ class SubscriptionDetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  /// Use the theme's monospace style for the value — for technical values
-  /// like webhook URLs, GLNs, and EPC patterns.
   final bool monospace;
 
-  /// Show a copy-to-clipboard affordance next to the value.
   final bool copyable;
 
   @override
@@ -74,4 +71,4 @@ class SubscriptionDetailRow extends StatelessWidget {
       ),
     );
   }
-}
+}

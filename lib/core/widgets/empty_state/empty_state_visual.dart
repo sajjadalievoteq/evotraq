@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/empty_state_icon_aura.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/empty_state_action_row.dart';
 
-
 class EmptyStateVisualScaffold extends StatefulWidget {
   const EmptyStateVisualScaffold({
     super.key,
@@ -141,9 +140,6 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
       ),
     );
 
-    // Overflow-safe: center when there's room, scroll when the region is
-    // shorter than the content (prevents RenderFlex bottom-overflow in bounded
-    // panel bodies). Works whether height is bounded or unbounded.
     final centered = LayoutBuilder(
       builder: (context, constraints) {
         final minHeight = constraints.hasBoundedHeight
@@ -241,4 +237,4 @@ class _EmptyMetrics {
   final TextStyle Function(ThemeData theme) titleStyle;
 }
 
-const kDefaultEmptyStateIcon = NavIcons.packaging;
+const kDefaultEmptyStateIcon = NavIcons.packaging;

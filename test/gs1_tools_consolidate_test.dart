@@ -18,7 +18,7 @@ void main() {
 
   group('CheckDigitUtils extended keys', () {
     test('GTIN-13 and SSCC round-trip check digit', () {
-      // Classic GS1 example GTIN-13: 4006381333931
+      
       expect(CheckDigitUtils.validateGtin('4006381333931'), isNull);
       expect(CheckDigitUtils.isValidMod10('4006381333931'), isTrue);
       final body = '400638133393';
@@ -114,4 +114,4 @@ void main() {
       );
     });
   });
-}
+}

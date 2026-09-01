@@ -47,8 +47,6 @@ class DashboardQuickActionCard extends StatelessWidget {
           builder: (context, constraints) {
             final width = constraints.maxWidth;
 
-            // Only genuinely narrow tiles scale down; wider tiles keep a
-            // constant compact scale so the card fits its capped height.
             final isNarrow = width < 200;
 
             final iconSize = isNarrow ? 14.0 : 18.0;
@@ -123,4 +121,4 @@ class DashboardQuickActionCard extends StatelessWidget {
       ),
     );
   }
-}
+}

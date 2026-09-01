@@ -3,16 +3,6 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:traqtrace_app/features/automation_center/utils/notification_constants.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/create_subscription/subscription_multi_select_field.dart';
 
-/// Advanced event-filtering section for the create/edit subscription dialog.
-///
-/// Filters by which supply-chain [operation][operations] produced the event
-/// (Shipping, Receiving, Packing, ...), plus free-text read point / EPC pattern
-/// filters. Previously this also exposed raw event-type and CBV
-/// business-step/disposition vocabulary dropdowns backed by a live CBV
-/// lookup service; those were removed in favor of the Operations selector,
-/// which maps onto concepts users already work with day to day.
-///
-/// [operations]: com.traqtrace.modules.operations.shared.constants.OperationType
 class SubscriptionAdvancedSection extends StatelessWidget {
   const SubscriptionAdvancedSection({super.key});
 
@@ -57,4 +47,4 @@ class SubscriptionAdvancedSection extends StatelessWidget {
       ],
     );
   }
-}
+}

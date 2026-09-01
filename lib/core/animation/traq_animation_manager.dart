@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-/// Shared non-visual timing policy for Traq motion.
 abstract final class TraqAnimationManager {
   static bool reduceMotion(BuildContext context) =>
       MediaQuery.of(context).disableAnimations;
@@ -10,11 +9,6 @@ abstract final class TraqAnimationManager {
   static Duration durationOf(BuildContext context, Duration normal) =>
       reduceMotion(context) ? Duration.zero : normal;
 
-  /// Resolves when this subtree can play motion the user will actually see.
-  ///
-  /// [addPostFrameCallback] only waits for the framework to *build* a frame.
-  /// Tickers still run during route fades (opacity 0) and before the first
-  /// GPU raster, so entrance animations were finishing off-screen.
   static Future<bool> waitUntilReadyToPlay(BuildContext context) async {
     final binding = WidgetsBinding.instance;
     await binding.waitUntilFirstFrameRasterized;
@@ -80,7 +74,6 @@ abstract final class TraqAnimationManager {
   }
 }
 
-/// Starts a one-shot play callback after [TraqAnimationManager.waitUntilReadyToPlay].
 mixin TraqDeferredPlay<T extends StatefulWidget> on State<T> {
   bool _traqPlayStarted = false;
   bool _traqPlayQueued = false;

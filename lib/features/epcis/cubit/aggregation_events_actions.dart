@@ -34,7 +34,6 @@ extension AggregationEventsActions on AggregationEventsCubit {
     }
   }
 
-  /// Pack via `/operations/packing` (validated projection path), not raw aggregation POST.
   Future<AggregationEvent> createPackEvent({
     required String parentEPC,
     required List<String> childEPCs,
@@ -106,7 +105,6 @@ extension AggregationEventsActions on AggregationEventsCubit {
     }
   }
 
-  /// Unpack via `/operations/unpacking` (validated projection path), not raw aggregation POST.
   Future<AggregationEvent> createUnpackEvent({
     required String parentEPC,
     List<String>? childEPCs,
@@ -194,7 +192,7 @@ extension AggregationEventsActions on AggregationEventsCubit {
       try {
         return await service.getAggregationEventByIdentifier(id);
       } catch (_) {
-        // Fall through to a client-side stub for list UX.
+        
       }
     }
     final now = DateTime.now();
@@ -285,4 +283,4 @@ extension AggregationEventsActions on AggregationEventsCubit {
       return false;
     }
   }
-}
+}

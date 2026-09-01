@@ -14,8 +14,6 @@ import 'package:traqtrace_app/features/automation_center/screens/notification_ce
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/delivery_activity_status_badge.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_meta_chip.dart';
 
-/// Exhausted [NotificationBatch] row for the Activity feed: same card language
-/// as [DeliveryActivityEventRow], with a local-loading "Retry now" action.
 class BatchDeliveryEventRow extends StatefulWidget {
   const BatchDeliveryEventRow({
     super.key,
@@ -150,4 +148,4 @@ class _BatchDeliveryEventRowState extends State<BatchDeliveryEventRow> {
       ),
     );
   }
-}
+}

@@ -7,8 +7,6 @@ import 'package:traqtrace_app/data/models/operations/shared/operation_status.dar
 import 'package:traqtrace_app/data/models/operations/shared/operation_type.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
-/// Theme-aware semantic colors for operations, statuses, and EPC/event types.
-/// Resolved by [Brightness] so light and dark stay consistent across the app.
 @immutable
 class OperationPalette {
   const OperationPalette({
@@ -159,13 +157,10 @@ class OperationPalette {
   final Color infoSoft;
   final List<Color> chartSeries;
 
-  /// Alias for [statusSuccess]; use in generic success/warning/error contexts.
   Color get success => statusSuccess;
 
-  /// Alias for [statusPartialSuccess]; use in generic success/warning/error contexts.
   Color get warning => statusPartialSuccess;
 
-  /// Alias for [statusFailed]; use in generic success/warning/error contexts.
   Color get error => statusFailed;
 
   static OperationPalette of(BuildContext context) {
@@ -243,7 +238,6 @@ class OperationPalette {
     OperationScanItemType.unknown => epcInvalid,
   };
 
-  /// Light palette — slightly muted for white/light surfaces.
   static const light = OperationPalette(
     opCommissioning: Color(0xFF2563EB),
     opPacking: Color(0xFF4F8B3E),
@@ -322,7 +316,6 @@ class OperationPalette {
     ],
   );
 
-  /// Dark palette — brighter accents for dark surfaces.
   static const dark = OperationPalette(
     opCommissioning: Color(0xFF60A5FA),
     opPacking: Color(0xFF7BD389),
@@ -400,4 +393,4 @@ class OperationPalette {
       Color(0xFF818CF8),
     ],
   );
-}
+}

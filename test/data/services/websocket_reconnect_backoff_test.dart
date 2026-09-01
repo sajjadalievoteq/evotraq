@@ -34,7 +34,7 @@ void main() {
           attempt,
         );
         expect(ceiling, greaterThanOrEqualTo(previous));
-        expect(ceiling, greaterThan(0)); // always schedules another attempt
+        expect(ceiling, greaterThan(0)); 
         previous = ceiling;
       }
     });
@@ -158,4 +158,4 @@ void main() {
       service.dispose();
     });
   });
-}
+}

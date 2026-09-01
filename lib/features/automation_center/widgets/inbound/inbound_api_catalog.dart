@@ -36,8 +36,7 @@ class _InboundApiCatalogState extends State<InboundApiCatalog> {
   @override
   void initState() {
     super.initState();
-    // Load only when this cubit instance has not completed a fetch yet.
-    // Workspace-scoped cubit survives Outbound ↔ Inbound section switches.
+    
     final cubit = context.read<InboundCatalogCubit>();
     if (cubit.state.status == InboundCatalogStatus.initial) {
       cubit.load();
@@ -80,8 +79,7 @@ class _InboundApiCatalogState extends State<InboundApiCatalog> {
   Widget build(BuildContext context) {
     return BlocBuilder<InboundCatalogCubit, InboundCatalogState>(
       builder: (context, state) {
-        // Keep existing catalog visible during refresh; skeleton only when
-        // there is nothing to show yet.
+        
         final showSkeleton =
             state.catalog == null &&
             (state.status == InboundCatalogStatus.loading ||
@@ -298,4 +296,4 @@ class _InboundApiCatalogState extends State<InboundApiCatalog> {
       },
     );
   }
-}
+}

@@ -114,8 +114,7 @@ class SystemSettingsCubit extends Cubit<SystemSettingsState> {
       emit(
         state.copyWith(settings: settings, dataStatistics: null, error: null),
       );
-      // Industry mode changes the vocabulary the backend serves; force a
-      // re-fetch so CBV pickers reflect the new mode instead of stale terms.
+      
       if (getIt.isRegistered<CbvVocabularyService>()) {
         unawaited(getIt<CbvVocabularyService>().refresh());
       }
@@ -151,4 +150,4 @@ class SystemSettingsCubit extends Cubit<SystemSettingsState> {
   void reset() {
     emit(SystemSettingsState.initial());
   }
-}
+}

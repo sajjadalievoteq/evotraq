@@ -29,7 +29,7 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
       await _validateAnatomy(kind ?? 'gtin', value ?? '');
       return;
     }
-    // single
+    
     final k = (kind ?? 'gtin').toLowerCase();
     if (k == 'sgtin') {
       final err = CheckDigitUtils.validateSgtin(gtin ?? value, serial);
@@ -206,8 +206,6 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
     );
   }
 
-  // ─── Build ────────────────────────────────────────────────────────────────
-
   void buildIdentifier({
     required String mode,
     String? extensionDigit,
@@ -263,13 +261,12 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
       return;
     }
 
-    // GTIN packaging / indicator
     final digits = CheckDigitUtils.digitsOnly(gtin);
     if (digits.isEmpty) {
       emitError(Gs1ToolKind.build, 'Enter a GTIN');
       return;
     }
-    // Strip check digit if present at a known full length
+    
     String body;
     if (CheckDigitUtils.gtinLengths.contains(digits.length) &&
         CheckDigitUtils.isValidMod10(digits)) {
@@ -283,7 +280,6 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
       return;
     }
 
-    // Normalize to 13-digit body (indicator + 12) for GTIN-14
     var core = body;
     while (core.length < 13) {
       core = '0$core';
@@ -330,5 +326,4 @@ extension Gs1ToolsValidationActions on Gs1ToolsCubit {
     );
   }
 
-  // ─── Barcode ──────────────────────────────────────────────────────────────
-}
+}

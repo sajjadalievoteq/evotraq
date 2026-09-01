@@ -34,8 +34,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     _accountEmail = context.read<AuthCubit>().state.user?.email;
     _homeCubit.load(accountEmail: _accountEmail);
-    // Live updates arrive over the WebSocket heartbeat push; REST polling only runs as a
-    // fallback while the socket is disconnected (see HomeCubit._onConnectionChanged).
+    
     _homeCubit.connectWebSocket();
     unawaited(getIt<WorldCountriesCache>().preload());
   }

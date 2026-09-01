@@ -29,7 +29,7 @@ class GS1BarcodeApiService {
 
   Future<Map<String, dynamic>> verifyGS1Barcode(String gs1ElementString) async {
     final headers = await _getHeaders();
-    // Backend maps both /barcodes/gs1/verify and /barcodes/verify to the same handler.
+    
     final queryParameters = {'data': gs1ElementString};
 
     debugPrint(
@@ -75,4 +75,4 @@ class GS1BarcodeApiService {
       return null;
     }
   }
-}
+}

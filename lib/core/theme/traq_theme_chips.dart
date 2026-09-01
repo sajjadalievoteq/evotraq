@@ -14,9 +14,7 @@ abstract final class TraqThemeChips {
     checkmarkColor: onPrimary,
     deleteIconColor: c.textMuted,
     secondarySelectedColor: c.primary,
-    // FilterChip only resolves [TextStyle.color] as a WidgetStateProperty
-    // (selected / disabled / …). WidgetStateTextStyle on the whole style
-    // is ignored for selection, which left selected labels dark on primary.
+    
     labelStyle: text.bodySm.copyWith(
       color: WidgetStateColor.resolveWith(
         (states) =>
@@ -38,4 +36,4 @@ abstract final class TraqThemeChips {
     ),
     showCheckmark: true,
   );
-}
+}

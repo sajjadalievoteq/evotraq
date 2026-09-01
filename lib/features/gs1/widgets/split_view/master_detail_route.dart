@@ -42,7 +42,6 @@ abstract final class MasterDetailRoute {
     ).toString();
   }
 
-  /// Runs [authRedirect] first, then desktop list redirect when applicable.
   static String? redirectDetailRouteIfDesktop(
     BuildContext context, {
     required String? authRedirect,

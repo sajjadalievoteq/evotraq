@@ -19,11 +19,9 @@ const List<SubscriptionFilterOption> kDeliveryActivityFilterOptions = [
   SubscriptionFilterOption(label: 'Pending', value: 'pending'),
 ];
 
-/// Per-event delivery inbox for notification webhooks / emails.
 class NotificationCenterScreen extends StatefulWidget {
   const NotificationCenterScreen({super.key, this.onManageSubscriptions});
 
-  /// Switches the parent Notifications workspace to the Subscriptions tab.
   final VoidCallback? onManageSubscriptions;
 
   @override
@@ -146,4 +144,4 @@ class NotificationCenterScreenState extends State<NotificationCenterScreen> {
       },
     );
   }
-}
+}

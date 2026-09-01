@@ -8,9 +8,6 @@ class SubscriptionDeliveryTestProgressDialog extends StatelessWidget {
 
   final String deliveryMethod;
 
-  /// Display label for the destination being checked. `deliveryMethod`'s
-  /// internal value stays 'WEBHOOK' (unchanged, to avoid touching stored
-  /// data/matching logic) but the app now presents that channel as "API".
   String get _destinationLabel =>
       deliveryMethod == 'WEBHOOK' ? 'API' : deliveryMethod.toLowerCase();
 
@@ -31,4 +28,4 @@ class SubscriptionDeliveryTestProgressDialog extends StatelessWidget {
       ),
     );
   }
-}
+}

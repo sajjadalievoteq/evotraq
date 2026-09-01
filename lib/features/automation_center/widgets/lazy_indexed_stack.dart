@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Like [IndexedStack], but children are built only when first selected and then
-/// kept alive so section state (cubits, scroll, filters) is preserved.
-///
-/// On Flutter web all stack children remain in the hit-test tree even when
-/// invisible, so hidden tabs absorb pointer / scroll events. Wrapping inactive
-/// children in [IgnorePointer] prevents that.
 class LazyIndexedStack extends StatefulWidget {
   const LazyIndexedStack({
     super.key,
@@ -42,8 +36,7 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
   void didUpdateWidget(LazyIndexedStack oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.children.length != _activated.length) {
-      // Replace the list — never [List.clear] a [List.filled] fixed-length list
-      // (throws UnsupportedError: set length on web/JS).
+      
       final next = List<bool>.filled(
         widget.children.length,
         false,
@@ -71,15 +64,13 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
     final children = <Widget>[
       for (var i = 0; i < widget.children.length; i++)
         if (!_activated[i])
-          // Not yet built — keep a zero-size placeholder so IndexedStack
-          // indices stay stable.
+          
           const SizedBox.shrink()
         else if (i != activeIndex)
-          // Built but inactive: absorb no pointer / scroll events so the
-          // active tab's scrollable receives them on Flutter web.
+          
           IgnorePointer(child: widget.children[i])
         else
-          // Active tab — pass through normally.
+          
           widget.children[i],
     ];
 
@@ -90,4 +81,4 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
       children: children,
     );
   }
-}
+}

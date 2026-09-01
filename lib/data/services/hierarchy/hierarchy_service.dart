@@ -74,7 +74,6 @@ class HierarchyService {
     }
   }
 
-  /// Climb one level: resolve active parent of [focusEpc] and return siblings page.
   Future<HierarchyPage> getParentContext(
     String focusEpc, {
     int size = 20,
@@ -174,4 +173,4 @@ class HierarchyService {
       return normalized;
     }
   }
-}
+}

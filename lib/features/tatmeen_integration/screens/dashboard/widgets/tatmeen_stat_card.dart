@@ -61,17 +61,23 @@ class TatmeenStatCard extends StatelessWidget {
                 value,
                 style: context.text.h2.copyWith(fontWeight: FontWeight.w700),
               ),
-              if (trend != null) ...[
-                const SizedBox(height: TraqSpacing.xs),
-                Text(
-                  '${trend! >= 0 ? '↑' : '↓'} ${trend!.abs().toStringAsFixed(1)}% vs last month',
+              const SizedBox(height: TraqSpacing.xs),
+              Visibility(
+                visible: trend != null,
+                maintainAnimation: true,
+                maintainSize: true,
+                maintainState: true,
+                child: Text(
+                  '${(trend ?? 0) >= 0 ? '↑' : '↓'} ${(trend ?? 0).abs().toStringAsFixed(1)}% vs last month',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: context.text.bodySm.copyWith(
-                    color: trend! >= 0
+                    color: (trend ?? 0) >= 0
                         ? context.colors.success
                         : context.colors.error,
                   ),
                 ),
-              ],
+              ),
             ],
           ),
         ),

@@ -6,9 +6,6 @@ import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Cross-cutting health rollup â€” no duplicated tab content (metrics, activity
-/// feeds, live toggles, or job dashboards live on their own tabs).
-
 class AutomationInlineAlert extends StatelessWidget {
   const AutomationInlineAlert({
     required this.tone,
@@ -68,4 +65,4 @@ class AutomationInlineAlert extends StatelessWidget {
       ),
     );
   }
-}
+}

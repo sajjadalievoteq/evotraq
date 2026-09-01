@@ -1,6 +1,7 @@
 import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_background_texture.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -9,6 +10,8 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/product_journey/screens/journey_dashboard/widgets/journey_search_bar_suffix_actions.dart';
 
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+
+import '../../../../../core/config/app_assets.dart';
 
 class JourneySearchBar extends StatelessWidget {
   const JourneySearchBar({
@@ -53,13 +56,13 @@ class JourneySearchBar extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: context.colors.primary,
-          image: DecorationImage(
-            image: AssetImage(AppAssets.traqBackgroundPng),
-            fit: BoxFit.cover,
-            opacity: 0.2,
-          ),
         ),
-        child: Padding(
+        child: Stack(
+          children: [
+            const Positioned.fill(
+              child: TraqBackgroundTexture(overlayOpacity: 0),
+            ),
+            Padding(
           padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
           child: AppLayoutBuilder(
             builder: (context, layout) {
@@ -131,6 +134,8 @@ class JourneySearchBar extends StatelessWidget {
               );
             },
           ),
+        ),
+          ],
         ),
       ),
     );

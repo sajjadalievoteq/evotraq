@@ -104,9 +104,6 @@ class PackingOperationService {
     }
   }
 
-  /// Convenience list view of [getPackingOperationsPage].
-  /// Prefer the page method for paged UIs; operational reads use `/operations/packing`
-  /// (not `/events/aggregation/business-step/packing`).
   Future<List<PackingResponse>> getAllPackingOperations({
     int page = 0,
     int size = 20,
@@ -310,4 +307,4 @@ class PackingOperationService {
       );
     }
   }
-}
+}

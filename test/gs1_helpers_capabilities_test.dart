@@ -54,16 +54,16 @@ void main() {
 
   group('CheckDigitUtils extended keys', () {
     test('GSRN / GDTI / GRAI mod-10', () {
-      // Build valid bodies then append computed check digit
-      const gsrnBody = '06141411234567890'; // 17 digits
+      
+      const gsrnBody = '06141411234567890'; 
       final gsrn = '$gsrnBody${CheckDigitUtils.calculateMod10String(gsrnBody)}';
       expect(CheckDigitUtils.validateGsrn(gsrn), isNull);
 
-      const gdtiBody = '061414112345'; // 12
+      const gdtiBody = '061414112345'; 
       final gdti = '$gdtiBody${CheckDigitUtils.calculateMod10String(gdtiBody)}';
       expect(CheckDigitUtils.validateGdti(gdti), isNull);
 
-      const graiBody = '0614141123456'; // 13
+      const graiBody = '0614141123456'; 
       final grai = '$graiBody${CheckDigitUtils.calculateMod10String(graiBody)}';
       expect(CheckDigitUtils.validateGrai(grai), isNull);
 
@@ -75,7 +75,7 @@ void main() {
 
   group('GTIN packaging check digit', () {
     test('GTIN-13 body → GTIN-14 with indicator', () {
-      // Classic: 4006381333931 → body 400638133393 → pad to 13 with indicator 0
+      
       const gtin13 = '4006381333931';
       expect(CheckDigitUtils.validateGtin(gtin13), isNull);
       final body12 = gtin13.substring(0, 12);
@@ -90,8 +90,8 @@ void main() {
   group('SSCC builder check digit', () {
     test('extension + gcp + serial → valid SSCC-18', () {
       const ext = '0';
-      const gcp = '0614141'; // 7
-      const serial = '123456789'; // 9 → 1+7+9=17
+      const gcp = '0614141'; 
+      const serial = '123456789'; 
       final body = '$ext$gcp$serial';
       expect(body.length, 17);
       final full = '$body${CheckDigitUtils.calculateMod10String(body)}';
@@ -126,4 +126,4 @@ void main() {
       expect(CheckDigitUtils.validateGtin(from10), isNull);
     });
   });
-}
+}

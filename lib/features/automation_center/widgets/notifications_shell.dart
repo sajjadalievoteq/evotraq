@@ -5,10 +5,6 @@ import 'package:traqtrace_app/data/services/automation_center/notification_api_s
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 
-/// Provides [NotificationCubit] for the notifications feature route subtree.
-///
-/// Lifetime matches the go_router [ShellRoute] session: the cubit persists
-/// across intra-feature navigation and is disposed when leaving the feature.
 class NotificationsShell extends StatelessWidget {
   const NotificationsShell({super.key, required this.child});
 
@@ -24,4 +20,4 @@ class NotificationsShell extends StatelessWidget {
       child: child,
     );
   }
-}
+}

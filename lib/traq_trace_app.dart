@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/widgets/snack_bar_interaction_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:traqtrace_app/core/config/platform_startup_route.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -19,7 +18,6 @@ import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/utils/app_screen_util.dart';
 
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/features/splash/screens/splash_screen.dart';
 
 import 'package:traqtrace_app/data/services/admin/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/auth/auth_service.dart';
@@ -27,60 +25,11 @@ import 'package:traqtrace_app/data/services/profile_service.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
-class TraqTraceApp extends StatefulWidget {
+class TraqTraceApp extends StatelessWidget {
   const TraqTraceApp({super.key});
 
   @override
-  State<TraqTraceApp> createState() => _TraqTraceAppState();
-}
-
-class _TraqTraceAppState extends State<TraqTraceApp> {
-  Object? _error;
-  bool _initReady = false;
-
-  /// Captured synchronously so async init cannot lose the browser URL on reload.
-  late final String _startupRoute = resolvePlatformStartupRoute();
-
-  void _onBootstrapReady() {
-    if (!mounted) return;
-    setState(() => _initReady = true);
-  }
-
-  void _onBootstrapError(Object error, StackTrace stackTrace) {
-    debugPrint('FATAL ERROR DURING APP START: $error');
-    debugPrint(stackTrace.toString());
-    if (!mounted) return;
-    setState(() => _error = error);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_error != null) {
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SelectableText(
-              'Failed to start application.\n\nError: $_error\n\n'
-              'Check browser console for more details.',
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (!_initReady) {
-      return MaterialApp(
-        theme: TraqTheme.light(),
-        darkTheme: TraqTheme.dark(),
-        debugShowCheckedModeBanner: false,
-        home: SplashScreen(
-          startupRoute: _startupRoute,
-          onReady: _onBootstrapReady,
-          onError: _onBootstrapError,
-        ),
-      );
-    }
-
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),

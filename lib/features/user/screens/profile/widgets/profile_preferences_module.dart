@@ -110,6 +110,7 @@ class _ProfilePreferencesModuleState extends State<ProfilePreferencesModule> {
                     ),
                     const SizedBox(height: 16),
                     CustomElevatedButton(
+                      fontSize: 14,
                       label: UserStrings.saveNotificationPreferences,
                       onPressed: _saveNotificationPreferences,
                       isLoading: isSavingNotif,
@@ -180,6 +181,7 @@ class _ProfilePreferencesModuleState extends State<ProfilePreferencesModule> {
                     ),
                     const SizedBox(height: 16),
                     CustomElevatedButton(
+                      fontSize: 14,
                       label: UserStrings.saveAppPreferences,
                       onPressed: _saveAppPreferences,
                       isLoading: isSavingApp,

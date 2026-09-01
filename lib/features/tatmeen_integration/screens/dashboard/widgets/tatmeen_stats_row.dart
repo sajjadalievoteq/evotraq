@@ -39,7 +39,6 @@ class TatmeenStatsRow extends StatelessWidget {
               value: NumberFormat.decimalPattern().format(s.totalSynced),
               iconAsset: AppAssets.iconDatabase,
               color: context.colors.textMuted,
-              trend: s.failedTrendPct,
               onTap: onSelectStatus == null
                   ? null
                   : () => onSelectStatus!(TatmeenRecordsStatusFilter.all),

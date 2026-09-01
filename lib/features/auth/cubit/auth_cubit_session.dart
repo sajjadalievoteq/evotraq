@@ -15,19 +15,9 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 
 extension AuthCubitSession on AuthCubit {
-  /// Roles that must never reach [AuthStatus.authenticated] through the
-  /// Flutter web frontend. B2B_SERVICE is an integration-testing role meant
-  /// for partners calling the documented APIs directly (see the Inbound API
-  /// catalog in Automation Center) - it must keep working against the auth
-  /// API itself, so this check runs only after login/session-restore fetch
-  /// the user, and it is enforced here (client-side) rather than by
-  /// rejecting the credentials at the API layer.
+  
   static const Set<String> _frontendBlockedRoles = {'B2B_SERVICE'};
 
-  /// If [user]'s role is not permitted to use the web frontend, tears down
-  /// any partial session state and emits an explanatory error instead of
-  /// ever emitting [AuthStatus.authenticated]. Returns true when the caller
-  /// (login/checkAuth) should stop and return immediately.
   Future<bool> rejectIfFrontendBlockedRole(User user) async {
     final role = user.role.trim().toUpperCase();
     if (!_frontendBlockedRoles.contains(role)) return false;
@@ -108,7 +98,6 @@ extension AuthCubitSession on AuthCubit {
     _ensureSharedWebSocketConnected();
   }
 
-  /// Pointer / keyboard / scroll from the live UI. WebSocket traffic is ignored.
   void noteUserActivity() {
     if (state.status != AuthStatus.authenticated) return;
     lastUserActivityAt = DateTime.now();
@@ -135,8 +124,6 @@ extension AuthCubitSession on AuthCubit {
     unawaited(authService.pingActivity());
   }
 
-  /// Refresh the JWT shortly before `exp` when the user is still active.
-  /// Idle users are logged out instead of silently extending the session.
   void _scheduleTokenRefresh(String token) {
     tokenExpiryTimer?.cancel();
     tokenExpiryTimer = null;
@@ -184,21 +171,6 @@ extension AuthCubitSession on AuthCubit {
     }
   }
 
-  /// Closes any dialog/bottom-sheet routes still on screen (e.g. the
-  /// New/Edit Subscription dialog). Must run synchronously and *before*
-  /// [AuthCubit.forceUnauthenticated] emits the unauthenticated state:
-  /// GoRouter's redirect is deferred to the next frame (see
-  /// GoRouterRefreshStream), so without this a dialog left open at the
-  /// moment of logout survives as an orphaned overlay when the underlying
-  /// page is swapped out, and its BlocProvider.value/FormBuilder
-  /// InheritedElement can unmount while it still has live dependents -
-  /// tripping framework.dart's `_dependents.isEmpty` assertion. Popping it
-  /// here first lets Flutter tear it down through the normal deactivate/
-  /// unmount path instead.
-  ///
-  /// `popUntil` only removes routes for which the predicate is false, so
-  /// this stops as soon as it reaches the underlying page route - it never
-  /// touches page-level navigation.
   void closeAnyOpenDialogs() {
     final navigator = rootNavigatorKey.currentState;
     if (navigator == null) return;
@@ -208,7 +180,7 @@ extension AuthCubitSession on AuthCubit {
   void backfillOperationalGln(User user) {
     unawaited(
       OperationalGlnStore.backfillIfNeeded(user).catchError((_) {
-        // Best-effort migration: storage failure must not destabilize auth.
+        
       }),
     );
   }

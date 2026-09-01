@@ -84,9 +84,7 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
     final next = AutomationCenterSections.normalizeTab(tab, isAdmin: isAdmin);
     if (next == _selectedTab) return;
     setState(() => _selectedTab = next);
-    // Keep workspace navigation local. Replacing the GoRouter page from the
-    // same pointer event that selected a tab can leave the outgoing Scaffold's
-    // closed drawer in the hit-test tree before its next layout on Flutter web.
+    
   }
 
   @override
@@ -272,4 +270,4 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
 
     return Title(title: 'Notifications', color: Colors.white, child: body);
   }
-}
+}

@@ -154,9 +154,7 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
     }
 
     if (_isSource) {
-      // Forward shipment we shipped, still in transit: the only action is to cancel it.
-      // Accepting a return is handled on the return shipment's own detail (isReturn branch),
-      // which also arrives as an incoming Inbox item — it must not appear on the outbound shipment.
+      
       return RoleGate(
         step: OperationSteps.cancelShip,
         child: Padding(
@@ -171,4 +169,4 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
 
     return const SizedBox.shrink();
   }
-}
+}

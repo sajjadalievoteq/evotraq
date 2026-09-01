@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Per-tool help shown at the top of [WorkbenchPanelShell].
 class WorkbenchInstructions {
   const WorkbenchInstructions({
     required this.summary,
@@ -13,28 +12,21 @@ class WorkbenchInstructions {
     this.audience,
   });
 
-  /// One line: what it does.
   final String summary;
 
-  /// One line: when/why you'd use it + who.
   final String useCase;
 
-  /// 2–4 short how-to steps.
   final List<String> steps;
 
-  /// Sample input (optional) — prefills via Load example only.
   final String? exampleInput;
 
-  /// What the example shows (optional).
   final String? exampleNote;
 
-  /// Informational tag, e.g. `'Everyday'` or `'Advanced / Integrator'`.
   final String? audience;
 }
 
 typedef WorkbenchExampleLoader = void Function(String exampleInput);
 
-/// Compact, theme-aware instructions card with use-case + collapsible how-to.
 class WorkbenchInstructionsCard extends StatelessWidget {
   const WorkbenchInstructionsCard({
     super.key,
@@ -178,4 +170,4 @@ class WorkbenchInstructionsCard extends StatelessWidget {
       ),
     );
   }
-}
+}

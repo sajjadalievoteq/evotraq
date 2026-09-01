@@ -6,8 +6,6 @@ import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/job_queue_dashboard_snapshot.dart';
 
-/// Cross-cutting health rollup â€” no duplicated tab content (metrics, activity
-/// feeds, live toggles, or job dashboards live on their own tabs).
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_health_summary.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_overall_health_hero.dart';
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_inline_alert.dart';
@@ -141,4 +139,4 @@ class AutomationHealthDashboard extends StatelessWidget {
       lastUpdated: snapshot?.lastUpdated,
     );
   }
-}
+}

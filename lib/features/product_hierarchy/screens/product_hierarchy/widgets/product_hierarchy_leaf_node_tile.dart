@@ -135,8 +135,6 @@ class ProductHierarchyLeafNodeTile extends StatelessWidget {
     );
   }
 
-  /// Renders `status:<status>`; appends the disposition only when it carries
-  /// information different from the status (avoids "ACTIVE • active").
   String? _statusLine(String? statusRaw, String? dispositionRaw) {
     final status = (statusRaw ?? '').trim();
     final disp = (dispositionRaw ?? '').trim();
@@ -153,4 +151,4 @@ class ProductHierarchyLeafNodeTile extends StatelessWidget {
     if (raw.length <= 28) return raw;
     return '${raw.substring(0, 25)}…';
   }
-}
+}

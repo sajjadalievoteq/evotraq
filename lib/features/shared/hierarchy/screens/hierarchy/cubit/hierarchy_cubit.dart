@@ -45,7 +45,7 @@ class HierarchyCubit extends Cubit<HierarchyState> {
       );
 
       final highlight = (normalizedInput != rootEpc) ? normalizedInput : null;
-      // Derive summary from children page — avoid a second traversal hierarchy call.
+      
       final hasNested = page.children.any((c) => c.hasChildren);
       final summary = HierarchySummary(
         totalItemCount: page.total,
@@ -140,4 +140,4 @@ class HierarchyCubit extends Cubit<HierarchyState> {
       );
     }
   }
-}
+}

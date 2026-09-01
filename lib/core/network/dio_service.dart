@@ -111,9 +111,6 @@ class DioService {
     return permissionMarkers.any(lower.contains);
   }
 
-  /// Retained as a bootstrap hook for callers. Bearer-token detection now
-  /// provides the startup-race guard, so a real authenticated 401 is never
-  /// ignored for an arbitrary grace period.
   void markAuthSettled() {}
 
   Future<void> handleUnauthorized(RequestOptions options) async {
@@ -139,10 +136,7 @@ class DioService {
     }
 
     if (statusCode == 403) {
-      // 403 = authenticated but NOT authorized (e.g. a role-restricted
-      // endpoint like dashboard/GLNs for a USER). This must never log the user
-      // out. Invalid/expired sessions come back as 401 (handled above), so on a
-      // 403 we simply surface the error and keep the session.
+      
       return;
     }
   }
@@ -427,4 +421,4 @@ class DioService {
     _cachedAuthToken = null;
     await _secureStorage.delete(key: AppConfig.authTokenKey);
   }
-}
+}

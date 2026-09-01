@@ -3,20 +3,11 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-/// Opt-in full request/response body logging.
-///
-/// Enable only for local deep debugging:
-/// `flutter run --dart-define=DIO_LOG_FULL_BODIES=true`
-///
-/// Default is **false** even in [kDebugMode] so large JSON payloads are not
-/// retained as pretty-printed strings in the debug console / JS heap.
 const bool kDioLogFullBodies =
     bool.fromEnvironment('DIO_LOG_FULL_BODIES', defaultValue: false);
 
-/// Max characters retained for a body preview when full logging is off.
 const int kDioBodyPreviewLimitChars = 4096;
 
-/// Paths treated as large/master-data style responses: metadata + short preview only.
 const List<String> kDioLargePayloadPathHints = [
   '/master-data/',
   '/glns',
@@ -141,7 +132,6 @@ abstract final class DioServiceLogger {
     debugPrint(buffer.toString());
   }
 
-  /// Visible for unit tests.
   @visibleForTesting
   static String formatBodyForTest(
     dynamic data, {
@@ -224,7 +214,6 @@ abstract final class DioServiceLogger {
       return '(streamed ResponseBody)';
     }
 
-    // Prefer metadata for collections without pretty-printing the whole tree.
     if (data is List) {
       final meta =
           'List(length=${data.length}${data.isEmpty ? '' : ', firstType=${data.first.runtimeType}'})';
@@ -250,7 +239,7 @@ abstract final class DioServiceLogger {
     if (data is String) {
       final trimmed = data.trim();
       if (trimmed.isEmpty) return '(empty)';
-      // Do not decode solely for logging when not opting into full bodies.
+      
       if (!forceFull) {
         return _truncate(trimmed, previewLimit);
       }
@@ -394,4 +383,4 @@ abstract final class DioServiceLogger {
   }
 
   static bool _isSensitiveKey(String key) => _sensitiveKey.hasMatch(key);
-}
+}

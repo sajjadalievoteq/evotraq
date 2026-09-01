@@ -8,10 +8,6 @@ class SubscriptionFilterOption {
   final String value;
 }
 
-/// Shared filter-chip row for subscription list screens.
-///
-/// Filter *logic* stays in [SubscriptionFilterUtils]; this widget only renders
-/// the chip UI from a caller-supplied option list.
 class SubscriptionFilterChips extends StatelessWidget {
   const SubscriptionFilterChips({
     super.key,
@@ -39,4 +35,4 @@ class SubscriptionFilterChips extends StatelessWidget {
       ],
     );
   }
-}
+}

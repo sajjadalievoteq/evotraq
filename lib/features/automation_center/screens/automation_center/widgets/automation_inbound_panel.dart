@@ -7,10 +7,6 @@ import 'package:traqtrace_app/features/automation_center/widgets/automation_work
 import 'package:traqtrace_app/features/automation_center/widgets/inbound/inbound_api_catalog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/inbound/system_users_card.dart';
 
-/// Inbound Automation Center panel.
-///
-/// Expects an [InboundCatalogCubit] from an ancestor (workspace-scoped) so the
-/// catalog survives Outbound ↔ Inbound section switches without a skeleton flash.
 class AutomationInboundPanel extends StatelessWidget {
   const AutomationInboundPanel({super.key});
 
@@ -63,4 +59,4 @@ class AutomationInboundPanel extends StatelessWidget {
       ),
     );
   }
-}
+}

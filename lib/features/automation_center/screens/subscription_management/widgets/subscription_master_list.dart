@@ -18,9 +18,7 @@ class SubscriptionMasterList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A shrink-wrapped ListView is a viewport and cannot report intrinsic dimensions. The
-    // embedded desktop master/detail layout uses IntrinsicHeight so both panes remain equal
-    // height; use ordinary box children in that mode while preserving the exact row spacing.
+    
     if (shrinkWrap) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -48,4 +46,4 @@ class SubscriptionMasterList extends StatelessWidget {
       onTap: () => onSelected(subscription),
     );
   }
-}
+}

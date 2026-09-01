@@ -30,7 +30,6 @@ class HomeState extends Equatable {
   final String? errorMessage;
   final int throughputHours;
 
-  /// Prefetched commissioning windows keyed by hours (1 / 24 / 168).
   final Map<int, ThroughputWindow> throughputByHours;
   final bool throughputLoading;
   final bool healthLoading;
@@ -88,4 +87,4 @@ class HomeState extends Equatable {
     refreshFailed,
     liveUpdatesConnected,
   ];
-}
+}

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/traq_background_texture.dart';
 
 class CardWithBackgroundWidget extends StatelessWidget {
   const CardWithBackgroundWidget({
@@ -18,9 +18,6 @@ class CardWithBackgroundWidget extends StatelessWidget {
   final double? elevation;
   final EdgeInsetsGeometry? margin;
 
-  static const AssetImage _backgroundImage =
-      AssetImage(AppAssets.traqBackgroundPng);
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -33,19 +30,12 @@ class CardWithBackgroundWidget extends StatelessWidget {
           color: isPrimary == true
               ? context.colors.primary
               : context.colors.background,
-          image: const DecorationImage(
-            image: _backgroundImage,
-            fit: BoxFit.cover,
-            opacity: 0.2,
-          ),
         ),
         child: Stack(
           fit: StackFit.passthrough,
           children: [
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withOpacity(0.1),
-              ),
+            const Positioned.fill(
+              child: TraqBackgroundTexture(fit: BoxFit.cover),
             ),
             child,
           ],

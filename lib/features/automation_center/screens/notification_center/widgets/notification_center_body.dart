@@ -28,7 +28,6 @@ class NotificationCenterBody extends StatelessWidget {
   final VoidCallback onClearFilters;
   final VoidCallback onPrimaryAction;
 
-  /// Shared near-end handler for the outer workbench [CustomScrollView].
   static bool handleOuterScroll(
     BuildContext context,
     ScrollNotification notification,
@@ -80,7 +79,7 @@ class NotificationCenterBody extends StatelessWidget {
       for (final subscription in state.subscriptions)
         subscription.id: subscription.subscriptionName,
     };
-    // Server already filters by outcome; keep a local match as a safety net.
+    
     final filtered = state.deliveryActivity
         .where(
           (event) => DeliveryActivityOutcome.fromStatus(
@@ -108,9 +107,6 @@ class NotificationCenterBody extends StatelessWidget {
       );
     }
 
-    // Failed batches used to be pinned above the feed, which made old failures
-    // sit on top of newer deliveries. Merge everything into one newest-first
-    // timeline, and only include batches when the filter allows failures.
     final showFailedBatches =
         selectedFilter == 'all' || selectedFilter == 'failed';
     final timeline = <({DateTime time, Widget child})>[
@@ -178,8 +174,6 @@ class NotificationCenterBody extends StatelessWidget {
         ),
     ];
 
-    // Embedded workbench path: no nested scroll — outer CustomScrollView owns
-    // scrolling and load-more via [handleOuterScroll].
     if (shrinkWrap) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -196,4 +190,4 @@ class NotificationCenterBody extends StatelessWidget {
       ),
     );
   }
-}
+}

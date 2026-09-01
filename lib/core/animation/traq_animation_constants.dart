@@ -15,8 +15,6 @@ abstract final class TraqAnimationConstants {
 
   static const int entranceMs = 280;
 
-  /// Branding panel entrance — short enough to avoid feeling sluggish alongside
-  /// the auth form motion that runs in parallel.
   static const int brandingEntranceMs = 760;
   static const int brandingStaggerMs = 88;
 
@@ -25,8 +23,7 @@ abstract final class TraqAnimationConstants {
   static const int splashProgressCycleMs = 1800;
   static const Curve splashProgressCurve = Curves.easeInOutCubic;
 
-  /// Splash logo lean: tilt right on bottom-right, then settle back.
-  static const double splashTiltAngle = 0.25; // ~7°
+  static const double splashTiltAngle = 0.25; 
   static const int splashTiltOutDurationMs = 800;
   static const int splashTiltReturnDurationMs = 560;
   static const int splashTiltPauseMs = 600;
@@ -55,24 +52,20 @@ abstract final class TraqAnimationConstants {
   static const Offset slideUp = Offset(0, slideUpDy);
   static const Offset slideRight = Offset(slideRightDx, 0);
 
-  // Router / navigation motion language — slide-first, snappy decelerations.
   static const int navForwardMs = 600;
   static const int navReverseMs = 420;
   static const Curve navCurve = Curves.easeOutCubic;
   static const Curve navReverseCurve = Curves.easeInCubic;
 
-  /// Peer replace: soft vertical slide + fade (scale kept nearly neutral).
   static const double navFadeThroughBeginScale = 0.99;
   static const double navFadeThroughIncomingStart = 0.0;
   static const double navFadeThroughOutgoingEnd = 0.45;
   static const double navFadeThroughDy = 0.04;
 
-  /// List → detail: clear horizontal slide is the primary cue.
   static const double navSharedAxisDx = 0.18;
   static const double navSharedAxisBeginScale = 1.0;
   static const double navSharedAxisOutgoingDx = 0.08;
 
-  /// Modal / create: vertical slide up.
   static const double navModalBeginScale = 0.99;
   static const double navModalDy = 0.08;
 
@@ -112,9 +105,8 @@ abstract final class TraqAnimationConstants {
   static Duration get swap => formDuration;
   static Duration get stagger => staggerDelay;
 
-  /// Throughput bars morphing placeholder → data (and later data → data).
   static const int throughputMorphMs = formDurationMs;
 
   static Duration get throughputMorph =>
       const Duration(milliseconds: throughputMorphMs);
-}
+}

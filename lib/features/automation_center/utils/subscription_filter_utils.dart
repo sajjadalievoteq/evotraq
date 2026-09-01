@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/automation_center/notification_subscription.dart';
 
-/// Shared subscription list filters for notification center and management UIs.
 abstract final class SubscriptionFilterUtils {
   static List<NotificationSubscription> filterCenter(
     List<NotificationSubscription> subscriptions,
@@ -29,8 +28,7 @@ abstract final class SubscriptionFilterUtils {
     String deliveryFilter, {
     String statusFilter = 'all',
   }) {
-    // Preserve compatibility with older callers that supplied status as the
-    // single positional filter while the UI migrates to two filter dimensions.
+    
     final legacyStatus =
         deliveryFilter == 'active' || deliveryFilter == 'paused';
     final effectiveDelivery = legacyStatus ? 'all' : deliveryFilter;
@@ -53,7 +51,6 @@ abstract final class SubscriptionFilterUtils {
     }).toList();
   }
 
-  /// Client-side search over name, endpoint, and subscription type.
   static List<NotificationSubscription> search(
     List<NotificationSubscription> subscriptions,
     String query,
@@ -66,4 +63,4 @@ abstract final class SubscriptionFilterUtils {
           sub.subscriptionType.toLowerCase().contains(q);
     }).toList();
   }
-}
+}

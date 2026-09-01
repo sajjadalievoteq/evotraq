@@ -29,8 +29,6 @@ class AuthFormPanel extends StatelessWidget {
 
     final surface = wrapInCard ? AuthSurfaceCard(child: child) : child;
 
-    // Header is static — field stagger inside the form + one surface fade/scale
-    // is enough. Avoid stacking a third entrance ticker on the same panel.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -64,4 +62,4 @@ class AuthFormPanel extends StatelessWidget {
       ],
     );
   }
-}
+}

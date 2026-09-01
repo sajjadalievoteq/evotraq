@@ -223,8 +223,6 @@ class WebhookNotification extends Equatable {
     this.response,
   });
 
-  /// Maps backend [WebhookNotificationDTO] field names (`eventIds`,
-  /// `attemptCount`, `deliveryTime`, `responseBody`) plus legacy aliases.
   factory WebhookNotification.fromJson(Map<String, dynamic> json) {
     final eventIds = json['eventIds'];
     String eventId = json['eventId']?.toString() ?? '';
@@ -297,7 +295,7 @@ class NotificationBatch extends Equatable {
   final String? subscriptionName;
   final int? batchSize;
   final String
-  status; // PENDING | PROCESSING | SENT | DELIVERED | FAILED | CANCELLED
+  status; 
   final int? deliveryAttempts;
   final String? lastError;
   final DateTime? scheduledTime;
@@ -346,4 +344,4 @@ class NotificationBatch extends Equatable {
     deliveryAttempts,
     lastError,
   ];
-}
+}

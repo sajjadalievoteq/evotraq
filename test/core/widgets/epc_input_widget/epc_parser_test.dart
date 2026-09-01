@@ -104,8 +104,7 @@ void main() {
     });
 
     test('bare 18 digits with valid GTIN prefer SGTIN over SSCC', () {
-      // GTIN 46292000441965 + serial 4152 — also happens to be a valid SSCC
-      // check digit; must NOT become https://id.gs1.org/00/462920004419654152.
+      
       const bare = '462920004419654152';
       final result = parseToEPC(bare);
 
@@ -151,4 +150,4 @@ void main() {
       );
     });
   });
-}
+}

@@ -1,6 +1,6 @@
 import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_background_texture.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_branding_section.dart';
@@ -28,19 +28,8 @@ class AuthShellDesktop extends StatelessWidget {
                 child: Stack(
                   children: [
                     Positioned.fill(child: Container(color: c.background)),
-                    Container(
-                      height: MediaQuery.sizeOf(context).height,
-                      width: MediaQuery.sizeOf(context).width,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(AppAssets.traqBackgroundPng),
-                          fit: BoxFit.cover,
-                          opacity: 0.2,
-                        ),
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: Container(color: Colors.black.withOpacity(0.2)),
+                    const Positioned.fill(
+                      child: TraqBackgroundTexture(overlayOpacity: 0.2),
                     ),
                     Padding(
                       padding: context.padding,

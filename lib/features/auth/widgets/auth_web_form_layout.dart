@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_panel.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_branding_section.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_background_texture.dart';
 
 class AuthWebFormLayout extends StatelessWidget {
   const AuthWebFormLayout({
@@ -39,20 +39,7 @@ class AuthWebFormLayout extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(child: Container(color: c.background)),
-                  Container(
-                    height: MediaQuery.sizeOf(context).height,
-                    width: MediaQuery.sizeOf(context).width,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(AppAssets.traqBackgroundPng),
-                        fit: BoxFit.cover,
-                        opacity: 0.2,
-                      ),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: Container(color: Colors.black.withOpacity(0.2)),
-                  ),
+                  const Positioned.fill(child: TraqBackgroundTexture(overlayOpacity: 0.2)),
                   Padding(
                     padding: context.padding,
                     child: Align(

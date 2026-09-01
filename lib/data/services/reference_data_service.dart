@@ -147,10 +147,9 @@ class ReferenceDataService {
     }
   }
 
-  /// Drop all session-scoped lookup futures (call on logout).
   void clear() {
     _productNameCache.clear();
     _gtinNameCache.clear();
     _glnCache.clear();
   }
-}
+}

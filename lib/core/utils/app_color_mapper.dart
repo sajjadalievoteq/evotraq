@@ -12,16 +12,11 @@ import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_vali
 
 enum AppEventColorScheme { admin, epcis }
 
-/// Generic semantic buckets, independent of any specific domain model.
 enum AppSemanticState { success, warning, error, info, neutral }
 
-/// Single source of truth for operation / status / EPC / event colors and icons.
-/// All colors come from [OperationPalette] (light + dark).
 abstract final class AppColorMapper {
   static OperationPalette palette(BuildContext context) =>
       OperationPalette.of(context);
-
-  // ── Semantic state ─────────────────────────────────────────────────────────
 
   static Color stateColor(BuildContext context, AppSemanticState state) {
     final p = palette(context);
@@ -51,8 +46,6 @@ abstract final class AppColorMapper {
     return series[index.abs() % series.length];
   }
 
-  // ── OperationType ──────────────────────────────────────────────────────────
-
   static Color operationTypeColor(BuildContext context, OperationType type) =>
       palette(context).forOperationType(type);
 
@@ -75,7 +68,6 @@ abstract final class AppColorMapper {
         OperationType.updateStatus => NavIcons.updateStatus,
       };
 
-  /// Maps a CBV / biz-step token (or raw URI fragment) to the operation palette.
   static Color bizStepColor(BuildContext context, String businessStep) {
     final p = palette(context);
     final s = businessStep.toLowerCase();
@@ -109,8 +101,6 @@ abstract final class AppColorMapper {
     return p.neutral;
   }
 
-  // ── OperationStatus ────────────────────────────────────────────────────────
-
   static Color operationStatusColor(
     BuildContext context,
     OperationStatus status,
@@ -125,15 +115,11 @@ abstract final class AppColorMapper {
         OperationStatus.accepted => AppAssets.iconBox,
       };
 
-  // ── Commissioning batch ────────────────────────────────────────────────────
-
   static Color commissioningBatchStatusColor(
     BuildContext context,
     CommissioningBatchStatus status,
   ) =>
       palette(context).forCommissioningBatchStatus(status);
-
-  // ── ItemStatus (SGTIN lifecycle) ───────────────────────────────────────────
 
   static Color itemStatusColor(BuildContext context, ItemStatus status) =>
       palette(context).forItemStatus(status);
@@ -154,23 +140,17 @@ abstract final class AppColorMapper {
         ItemStatus.EXCEPTION => AppAssets.iconXCircle,
       };
 
-  // ── LogisticUnitStatus (SSCC) ──────────────────────────────────────────────
-
   static Color logisticUnitStatusColor(
     BuildContext context,
     LogisticUnitStatus status,
   ) =>
       palette(context).forLogisticUnitStatus(status);
 
-  // ── EPC scan type ──────────────────────────────────────────────────────────
-
   static Color operationEpcTypeColor(
     BuildContext context,
     OperationScanItemType type,
   ) =>
       palette(context).forEpcType(type);
-
-  // ── Event type ─────────────────────────────────────────────────────────────
 
   static Color eventTypeColor(
     BuildContext context,
@@ -181,9 +161,6 @@ abstract final class AppColorMapper {
     return _eventTypeFromPalette(p, eventType, scheme);
   }
 
-  /// Resolves a palette from either [context] or [brightness]; one of the two
-  /// is required. Prefer [context] when available (e.g. inside `build`);
-  /// use [brightness] in painters / non-widget code that already knows it.
   static Color eventType(
     String eventType, {
     required AppEventColorScheme scheme,
@@ -232,8 +209,6 @@ abstract final class AppColorMapper {
     if (isTransformation) return p.eventTransformation;
     return p.eventUnknown;
   }
-
-  // ── Severity / gauges ──────────────────────────────────────────────────────
 
   static Color severity(BuildContext context, String severity) {
     final p = palette(context);
@@ -340,4 +315,4 @@ abstract final class AppColorMapper {
 
   static Color journeyLatestColor(BuildContext context) =>
       palette(context).journeyLatest;
-}
+}

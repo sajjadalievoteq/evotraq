@@ -15,9 +15,6 @@ class NotificationCubit extends Cubit<NotificationState> {
   StreamSubscription? _realtimeSubscription;
   StreamSubscription? _connectionSubscription;
 
-  /// True once subscriptions have been fetched at least once this session.
-  /// Prevents redundant re-fetches when switching between the panels that
-  /// share this cubit. Manual refresh / mutations pass `force: true`.
   bool _subscriptionsLoaded = false;
   bool _loadInFlight = false;
   bool _forceReloadPending = false;
@@ -89,13 +86,9 @@ class NotificationCubit extends Cubit<NotificationState> {
   }
 
   Future<void> loadSubscriptions({bool force = false}) async {
-    // Skip redundant fetches: load once on entry, then serve cached data when
-    // switching panels. A load already in flight is also skipped. `force` (Refresh
-    // button and post-mutation reloads) always re-fetches.
-    // One in-flight fetch at a time (covers force-refresh races too).
+    
     if (_loadInFlight) {
-      // A mutation/manual refresh racing the initial load must not be lost.
-      // Coalesce any number of forced requests into exactly one follow-up.
+      
       if (force) _forceReloadPending = true;
       return;
     }
@@ -105,7 +98,7 @@ class NotificationCubit extends Cubit<NotificationState> {
       if (!isClosed) {
         emit(state.copyWith(status: NotificationStatus.loading));
       }
-      // Backend returns the full active list (no server-side paging).
+      
       final subscriptions = await _apiService.getSubscriptions();
 
       _subscriptionsLoaded = true;
@@ -406,8 +399,6 @@ class NotificationCubit extends Cubit<NotificationState> {
     webSocketService.connect();
   }
 
-  /// Stops applying notification pushes locally. Job-queue and home consumers
-  /// keep using the shared socket.
   void disableNotificationLive() {
     if (isClosed) return;
     emit(state.copyWith(notificationLiveEnabled: false));
@@ -427,7 +418,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     _realtimeSubscription = null;
     await _connectionSubscription?.cancel();
     _connectionSubscription = null;
-    // Never disconnect the shared WebSocketService singleton here.
+    
     return super.close();
   }
-}
+}

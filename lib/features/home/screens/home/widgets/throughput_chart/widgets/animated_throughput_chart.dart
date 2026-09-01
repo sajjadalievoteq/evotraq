@@ -8,12 +8,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/home/screens/home/utils/throughput_chart_utils.dart';
 
-/// Mini bar chart that uses the bars themselves as the loading indicator.
-///
-/// First appearance staggers bars up from the baseline into a deterministic
-/// placeholder silhouette while [loading] is true, then morphs into [values].
-/// Later updates interpolate previous → new heights without replaying the
-/// entrance. Bars stay still between transitions — no continuous height pulse.
 class AnimatedThroughputChart extends StatefulWidget {
   const AnimatedThroughputChart({
     super.key,
@@ -29,7 +23,6 @@ class AnimatedThroughputChart extends StatefulWidget {
   final List<String> labels;
   final bool loading;
 
-  /// `1` is the 24-hour view, which densifies bottom labels when narrow.
   final int rangeIndex;
 
   @override
@@ -465,4 +458,4 @@ class _ThroughputAxesPainter extends CustomPainter {
         oldDelegate.mutedLabelColor != mutedLabelColor ||
         !listEquals(oldDelegate.labels, labels);
   }
-}
+}

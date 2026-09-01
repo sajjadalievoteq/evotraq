@@ -1,12 +1,16 @@
-# Native launch — solid brand color + logo only. Flutter splash adds texture
-# and animation after the engine starts.
+# Native launch — solid brand color + logo only. Bootstrap runs behind this
+# screen until [dismissNativeSplash] is called from [AppStartupGate].
+#
+# Source logo: assets/images/logo/logo.svg
+# Regenerate platform splashes: python tool/generate_native_splash.py
 flutter_native_splash:
   color: "#F2F2EF"
   color_dark: "#1C1C1B"
-  image: assets/images/logo/logo.png
-  image_dark: assets/images/logo/logo.png
+  image: assets/images/logo/logo.svg
+  image_dark: assets/images/logo/logo.svg
   android_gravity: center
-  ios_content_mode: center
+  ios_content_mode: scaleAspectFit
+  web_image_mode: center
   fullscreen: true
   android: true
   ios: true
@@ -15,7 +19,7 @@ flutter_native_splash:
   android_12:
     color: "#F2F2EF"
     color_dark: "#1C1C1B"
-    image: assets/images/logo/logo.png
-    image_dark: assets/images/logo/logo.png
+    image: assets/images/logo/logo.svg
+    image_dark: assets/images/logo/logo.svg
     icon_background_color: "#F2F2EF"
     icon_background_color_dark: "#1C1C1B"

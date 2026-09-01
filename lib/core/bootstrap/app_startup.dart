@@ -10,10 +10,6 @@ import 'package:traqtrace_app/core/storage/hive_storage.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
-/// Hive, DI, deferred route chunks, and [AppRouter] registration.
-///
-/// [startupRoute] should be captured before any async work (see
-/// [resolvePlatformStartupRoute]) so web reload keeps the address-bar path.
 Future<void> initializeApplication({required String startupRoute}) async {
   await HiveStorage.init();
 

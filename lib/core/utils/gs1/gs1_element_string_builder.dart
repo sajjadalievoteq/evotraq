@@ -1,13 +1,10 @@
 import 'package:traqtrace_app/core/utils/gs1/gs1_ai_table.dart';
 
-/// Builds GS1 element strings (FNC1 between variable-length AIs).
-/// Fixed vs variable length comes from [Gs1AiTable] (same source as the parser).
 abstract final class Gs1ElementStringBuilder {
   static const fnc1 = '\u001D';
 
   static Set<String> get fixedLengthAis => Gs1AiTable.fixedLengthAiCodes;
 
-  /// Returns (rawWithFnc1, humanReadable).
   static ({String raw, String human}) build(Map<String, String> ais) {
     Gs1AiTable.ensureSynced();
     final cleaned = <String, String>{};
@@ -31,4 +28,4 @@ abstract final class Gs1ElementStringBuilder {
     });
     return (raw: buffer.toString(), human: human.toString());
   }
-}
+}

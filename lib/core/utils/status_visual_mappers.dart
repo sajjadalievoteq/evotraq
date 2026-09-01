@@ -3,10 +3,6 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
-/// Shared color/icon lookups for status, severity, and job/workflow states used
-/// across dashboards (admin monitoring, automation-center job queue, etc.). All
-/// colors are theme-aware and resolved from [AppColorMapper] / `OperationPalette`
-/// — never raw [Colors].
 abstract final class StatusVisualMappers {
   static Color bulkJobStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
@@ -332,4 +328,4 @@ abstract final class StatusVisualMappers {
         return AppColorMapper.neutralColor(context);
     }
   }
-}
+}

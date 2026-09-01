@@ -5,8 +5,6 @@ import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
 
-/// Consolidated barcode generation / verification workbench.
-
 class BarcodeToolFields extends StatelessWidget {
   const BarcodeToolFields({
     super.key,
@@ -196,4 +194,4 @@ class BarcodeToolFields extends StatelessWidget {
         );
     }
   }
-}
+}

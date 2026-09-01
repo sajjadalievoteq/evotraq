@@ -20,15 +20,12 @@ class AuthCubit extends Cubit<AuthState> {
   final Duration _loginTimeout;
   final Duration _verifyEmailTimeout;
 
-  /// Serializes concurrent session-expiry notifications (many parallel 401s).
   bool _sessionExpiryInFlight = false;
 
-  /// One-shot JWT refresh timer for the current authenticated session.
   Timer? tokenExpiryTimer;
 
   Timer? idleTimer;
 
-  /// Token identity associated with [tokenExpiryTimer] (stale-timer guard).
   String? scheduledExpiryToken;
 
   DateTime? lastUserActivityAt;
@@ -44,7 +41,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   static const Duration verifyEmailTimeout = Duration(seconds: 15);
 
-  /// Matches `security.session.idle-timeout-ms` (15 minutes).
   static const Duration idleTimeout = Duration(minutes: 15);
 
   static const Duration activityPingThrottle = Duration(seconds: 60);
@@ -208,11 +204,6 @@ class AuthCubit extends Cubit<AuthState> {
     await forceUnauthenticated();
   }
 
-  /// Centralized path for JWT timer expiry, HTTP 401, and STOMP auth failures.
-  ///
-  /// Emits unauthenticated immediately so GoRouter redirects to Login without a
-  /// browser refresh. Remote logout is best-effort and must not block navigation
-  /// (awaiting a hung logout POST previously left the UI on a protected screen).
   Future<void> sessionExpired() async {
     if (state.status == AuthStatus.unauthenticated) return;
     if (_sessionExpiryInFlight) return;
@@ -268,7 +259,6 @@ class AuthCubit extends Cubit<AuthState> {
     return super.close();
   }
 
-  /// Replaces the cached authenticated user without changing auth status.
   void applyCachedUser(User user) {
     if (state.status != AuthStatus.authenticated) return;
     emit(state.copyWith(user: user));
@@ -458,4 +448,4 @@ class AuthCubit extends Cubit<AuthState> {
       );
     }
   }
-}
+}

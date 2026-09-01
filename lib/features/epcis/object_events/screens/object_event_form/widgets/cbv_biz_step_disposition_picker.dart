@@ -65,8 +65,7 @@ class _CbvBizStepDispositionPickerState
     _selectedDisposition = widget.initialDisposition;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // Self-heal: make sure vocabulary is loaded when the screen opens
-      // (no-op if already cached; re-fetches if the singleton is stale/empty).
+      
       context.read<CbvVocabularyCubit>().loadVocabulary();
       if (!widget.isViewOnly) {
         final state = context.read<CbvVocabularyCubit>().state;
@@ -309,4 +308,4 @@ class _CbvBizStepDispositionPickerState
       },
     );
   }
-}
+}

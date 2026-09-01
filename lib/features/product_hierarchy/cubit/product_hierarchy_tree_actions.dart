@@ -59,9 +59,7 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
       );
       _mutate(target, (n) {
         n.isLoading = false;
-        // Dedupe by EPC: skip any child already present (e.g. a grafted/expanded
-        // subtree kept from a climb) so we keep the loaded node instead of
-        // appending a duplicate plain one.
+        
         for (final c in page.children) {
           final exists = n.loadedChildren.any(
             (e) => sameEpc(e.node.epc, c.epc),
@@ -81,10 +79,6 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
     }
   }
 
-  /// Prepend the child page immediately *before* [target].firstLoadedPage
-  /// (climb-grafted parents only). Dedupes by EPC so a grafted/expanded subtree
-  /// isn't duplicated. Returns the number of newly inserted rows so the caller
-  /// can preserve scroll position after the prepend.
   Future<int> loadPreviousChildren(HierarchyTreeNodeState target) async {
     if (!target.hasPrevious || target.isLoading) return 0;
     final prevPage = target.firstLoadedPage - 1;
@@ -158,9 +152,6 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
     emit(state.copyWith(searchResults: const []));
   }
 
-  /// Reset to the idle left panel (drop the loaded tree + node details +
-  /// selection/search), keeping the recent-parents list so idle is instant.
-  /// Mirrors Product Journey's clear-on-search-cancel behavior.
   void clear() {
     final recent = state.recentParents;
     final recentLoading = state.recentParentsLoading;
@@ -201,4 +192,4 @@ extension ProductHierarchyTreeActions on ProductHierarchyCubit {
     if (lower.contains(':sgtin:') || lower.contains('/01/')) return 'SGTIN';
     return 'EPC';
   }
-}
+}

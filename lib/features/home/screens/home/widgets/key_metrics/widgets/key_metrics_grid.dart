@@ -75,27 +75,7 @@ class KeyMetricsGrid extends StatelessWidget {
                 context.colors.secondary,
                 () => context.push(HomeNavigation.epcisAggregationEvents),
               ),
-              // (
-              //   HomeStrings.metricTransactionEvents,
-              //   (eventCounts['Transaction'] ?? 0).toString(),
-              //   NavIcons.epcisEvents,
-              //   context.colors.warning,
-              //   () => context.push(HomeNavigation.epcisTransactionEvents),
-              // ),
-              // (
-              //   HomeStrings.metricTransformationEvents,
-              //   (eventCounts['Transformation'] ?? 0).toString(),
-              //   NavIcons.conversion,
-              //   context.colors.primaryMuted,
-              //   () => context.push(HomeNavigation.epcisTransformationEvents),
-              // ),
-              // (
-              //   HomeStrings.metricTotalEvents,
-              //   stats?.totalEvents.toString() ?? '0',
-              //   NavIcons.allEvents,
-              //   context.colors.textMuted,
-              //   () => context.push(HomeNavigation.epcisObjectEvents),
-              // ),
+              
             ];
 
         const gap = 12.0;
@@ -109,8 +89,7 @@ class KeyMetricsGrid extends StatelessWidget {
             if (cols < 1) cols = 1;
             if (cols > maxCols) cols = maxCols;
             final tileW = (maxW - gap * (cols - 1)) / cols;
-            // Height is capped so wide tiles stay compact instead of growing
-            // proportionally with the available width.
+            
             final tileH = (tileW * 9 / 16).clamp(96.0, 116.0);
 
             return Wrap(
@@ -153,4 +132,4 @@ class KeyMetricsGrid extends StatelessWidget {
       },
     );
   }
-}
+}

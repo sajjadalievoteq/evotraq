@@ -158,7 +158,6 @@ class CommissioningSerialPoolChecker {
       );
     }
 
-    // Legacy orphan: COMMISSIONED without event — still retryable.
     if (status == ItemStatus.COMMISSIONED) {
       return CommissioningPoolCheckResult(
         status: CommissioningSerialPoolStatus.preReserved,
@@ -167,7 +166,6 @@ class CommissioningSerialPoolChecker {
       );
     }
 
-    // Orphan after GS1 path: ACTIVE without commissioning event id.
     if (status == ItemStatus.ACTIVE) {
       return CommissioningPoolCheckResult(
         status: CommissioningSerialPoolStatus.preReserved,
@@ -254,4 +252,4 @@ class CommissioningSerialPoolChecker {
       blockReason: 'SSCC cannot be commissioned from ${status.name}',
     );
   }
-}
+}

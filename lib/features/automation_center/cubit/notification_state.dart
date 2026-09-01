@@ -3,7 +3,6 @@ import 'package:traqtrace_app/data/models/automation_center/notification_subscri
 import 'package:traqtrace_app/data/models/automation_center/realtime_notification.dart'
     hide NotificationBatch;
 
-/// Subscription list / detail load operations (independent of socket + mutations).
 enum NotificationStatus {
   initial,
   loading,
@@ -14,7 +13,6 @@ enum NotificationStatus {
   subscriptionDeleted,
 }
 
-/// Shared-socket connection progress for Delivery Activity UI.
 enum NotificationConnectionStatus {
   disconnected,
   connecting,
@@ -26,8 +24,6 @@ class NotificationState extends Equatable {
   final NotificationStatus status;
   final NotificationConnectionStatus connectionStatus;
 
-  /// When true, Delivery Activity applies realtime notification payloads locally.
-  /// Does not own the shared WebSocket connection.
   final bool notificationLiveEnabled;
 
   final List<NotificationSubscription> subscriptions;
@@ -39,7 +35,6 @@ class NotificationState extends Equatable {
   final Map<String, dynamic>? webhookTestResult;
   final Map<String, dynamic>? emailTestResult;
 
-  /// Cross-subscription delivery event feed for the Activity tab.
   final List<WebhookNotification> deliveryActivity;
   final bool deliveryActivityLoading;
   final bool deliveryActivityLoadingMore;
@@ -48,7 +43,6 @@ class NotificationState extends Equatable {
   final String deliveryActivityOutcome;
   final String? deliveryActivityError;
 
-  /// Exhausted batches awaiting manual retry (FAILED with deliveryAttempts >= 3).
   final List<NotificationBatch> failedBatches;
   final bool failedBatchesLoading;
   final bool failedBatchesLoadingMore;
@@ -191,4 +185,4 @@ class NotificationState extends Equatable {
     lastLoadedStatsSubscriptionId,
     lastRealtimeNotification,
   ];
-}
+}

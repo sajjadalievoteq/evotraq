@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:traqtrace_app/core/web/web_download_io.dart' as web_download;
 
-/// Desktop/mobile fallback: save the image so the OS print flow can be used.
 Future<void> printImageBytes({
   required List<int> bytes,
   String mimeType = 'image/png',
@@ -13,4 +12,4 @@ Future<void> printImageBytes({
     filename: '${title.toLowerCase().replaceAll(' ', '_')}.png',
     mimeType: mimeType,
   );
-}
+}

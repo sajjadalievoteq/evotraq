@@ -4,8 +4,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Compact operational metric tile: neutral surface, small accent, optional
-/// sparkline. Avoids oversized pastel panels when values are zero.
 class JobQueueMetricCard extends StatefulWidget {
   const JobQueueMetricCard({
     super.key,
@@ -135,4 +133,4 @@ class _JobQueueMetricCardState extends State<JobQueueMetricCard> {
       ),
     );
   }
-}
+}

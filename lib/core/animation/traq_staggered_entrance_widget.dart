@@ -26,11 +26,8 @@ class TraqStaggeredEntrance extends StatefulWidget {
   final double beginScale;
   final double? risePx;
 
-  /// When false, starts immediately — for overlays outside the route tree (splash).
   final bool deferPlay;
 
-  /// Horizontal travel for [TraqEntranceSlide.fromRight]. When null, uses the
-  /// layout width (branding) or [TraqAnimationConstants.brandingSlidePx].
   final double? slidePx;
 
   @override
@@ -78,7 +75,7 @@ class _TraqStaggeredEntranceState extends State<TraqStaggeredEntrance>
 
   double _horizontalSlidePx(BoxConstraints constraints) {
     if (widget.slide != TraqEntranceSlide.fromRight) return 0;
-    // Cap travel â€” full-panel-width slides are expensive and feel sluggish.
+    
     if (widget.slidePx != null) return widget.slidePx!;
     return TraqAnimationConstants.brandingSlidePx;
   }
@@ -202,8 +199,6 @@ class _TraqStaggeredEntranceState extends State<TraqStaggeredEntrance>
       );
     }
 
-    // No outer AnimatedBuilder: FadeTransition / ScaleTransition listen to the
-    // cached slot animations so the Column and children are not rebuilt every tick.
     return LayoutBuilder(
       builder: (context, constraints) {
         final horizontalSlidePx = _horizontalSlidePx(constraints);

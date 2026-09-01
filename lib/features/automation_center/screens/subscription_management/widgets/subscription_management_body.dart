@@ -207,9 +207,6 @@ class _SubscriptionManagementBodyState
               );
             }
 
-            // The Automation workspace gives this body a finite height. Keep both panes inside
-            // that bound and let their existing ListViews scroll normally; intrinsic measurement
-            // is neither needed nor supported by viewports.
             if (!widget.shrinkWrap) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -221,9 +218,6 @@ class _SubscriptionManagementBodyState
               );
             }
 
-            // In the single-scroll Automation workspace this branch has unbounded height. Let
-            // both panes report their natural box height; IntrinsicHeight cannot measure the
-            // shrink-wrapped lists used by the panes.
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -237,4 +231,4 @@ class _SubscriptionManagementBodyState
       },
     );
   }
-}
+}

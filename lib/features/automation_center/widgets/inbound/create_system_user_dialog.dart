@@ -176,10 +176,7 @@ class _CreateSystemUserDialogState extends State<CreateSystemUserDialog> {
                   name: 'partyGln',
                   label: 'Party GLN (optional)',
                   validators: [
-                    // Only enforce the 13-digit pattern once something has
-                    // actually been typed - FormBuilderValidators.match runs
-                    // the regex unconditionally, so leaving this field blank
-                    // (it's optional) was incorrectly failing validation.
+                    
                     (value) {
                       if (value == null || value.isEmpty) return null;
                       return RegExp(r'^\d{13}$').hasMatch(value)
@@ -212,4 +209,4 @@ class _CreateSystemUserDialogState extends State<CreateSystemUserDialog> {
       ],
     );
   }
-}
+}

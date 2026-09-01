@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_colors.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 
-
 sealed class ProductHierarchyFlatItem {
   const ProductHierarchyFlatItem();
 }
@@ -44,11 +43,8 @@ final class ProductHierarchySentinelItem extends ProductHierarchyFlatItem {
   final bool isFirstInGroupBody;
   final bool isLastInGroupBody;
 
-  /// True for the leading "load earlier siblings" indicator (scroll-up), false
-  /// for the trailing "load more" indicator (scroll-down).
   final bool isPrevious;
 }
-
 
 List<ProductHierarchyFlatItem> flattenProductHierarchy(
   HierarchyTreeNodeState root,
@@ -72,7 +68,6 @@ List<ProductHierarchyFlatItem> flattenProductHierarchy(
         inGroupBody: inGroupBody,
         isFirstInGroupBody: isFirst,
         
-        
         isLastInGroupBody: isLast && !expanded,
       ),
     );
@@ -80,7 +75,7 @@ List<ProductHierarchyFlatItem> flattenProductHierarchy(
     if (!expanded) return;
 
     final kids = node.loadedChildren;
-    // Only the view-root (depth 0) can page backwards after a climb.
+    
     final showPrevious = depth == 0 && node.hasPrevious;
     final showMore = node.hasMore;
 
@@ -135,4 +130,4 @@ Color productHierarchyAccentForDepth(TraqColors c, int depth) {
     default:
       return c.identifierSgtin;
   }
-}
+}

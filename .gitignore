@@ -54,3 +54,6 @@ build/
 
 # Specifically ignore Android build folder
 android/app/build/
+
+# Ephemeral raster extracted from logo.svg for flutter_native_splash
+tool/.native_splash_logo.png

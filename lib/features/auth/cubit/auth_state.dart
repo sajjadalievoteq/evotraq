@@ -25,9 +25,6 @@ class AuthState extends Equatable {
   final String? message;
   final String? registeredEmail;
 
-  /// True after the first startup [AuthCubit.checkAuth] / [AuthCubit.sessionExpired]
-  /// settles. Stays true for the rest of the app session so login/register loading
-  /// never re-shows the startup splash.
   final bool bootstrapCompleted;
 
   const AuthState({
@@ -62,14 +59,12 @@ class AuthState extends Equatable {
 
   bool get isAuthenticated => status == AuthStatus.authenticated;
 
-  /// Canonical uppercase role name, or `null` when unauthenticated / unset.
   String? get role {
     final value = user?.role.trim();
     if (value == null || value.isEmpty) return null;
     return value.toUpperCase();
   }
 
-  /// Canonical admin check — use this instead of ad-hoc `role == 'ADMIN'`.
   bool get isAdmin => isAuthenticated && role == 'ADMIN';
 
   bool get isManufacturer => isAuthenticated && role == 'MANUFACTURER';
@@ -83,10 +78,6 @@ class AuthState extends Equatable {
 
   bool hasAnyRole(Iterable<String> roles) => roles.any(hasRole);
 
-  /// Whether this user may perform an EPCIS / operations [step].
-  ///
-  /// Mirrors backend `OperationSecurityExpressions`. ADMIN is always allowed.
-  /// Unknown steps return false.
   bool canPerform(String step) {
     if (!isAuthenticated) return false;
     if (isAdmin) return true;
@@ -95,20 +86,14 @@ class AuthState extends Equatable {
     return hasAnyRole(allowed);
   }
 
-  /// Mirrors `DashboardSecurityExpressions.READ_ANY` on the backend, which
-  /// guards `/dashboard/summary` (home stats, throughput, recent events).
   bool get canReadDashboard =>
       hasAnyRole(const ['ADMIN', 'MANUFACTURER', 'DISTRIBUTOR', 'RETAILER']);
 
-  /// Mirrors backend aggregate / manufacturer-distributor throughput access.
-  /// Retailers are excluded.
   bool get canReadThroughput =>
       hasAnyRole(const ['ADMIN', 'MANUFACTURER', 'DISTRIBUTOR']);
 
-  /// `/internal/actuator/**` is admin-only in `SecurityConfig`.
   bool get canReadSystemHealth => isAdmin;
 
-  /// Mirrors backend `OperationSecurityExpressions.SUPPLY_CHAIN_PARTIES`.
   bool get canAccessTatmeenIntegration => hasAnyRole(const [
     'ADMIN',
     'MANUFACTURER',
@@ -127,4 +112,4 @@ class AuthState extends Equatable {
     registeredEmail,
     bootstrapCompleted,
   ];
-}
+}

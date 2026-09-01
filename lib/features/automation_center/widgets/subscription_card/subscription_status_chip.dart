@@ -6,16 +6,13 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_tonal_status_chip.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_solid_status_chip.dart';
 
-/// Visual treatment for [SubscriptionStatusChip].
 enum SubscriptionStatusChipStyle {
-  /// Outlined/tonal chip: tinted background, colored icon + text (card lists).
+  
   tonal,
 
-  /// Solid filled chip: status color background, white icon + text (details).
   solid,
 }
 
-/// Canonical subscription status chip (status → color/icon), case-insensitive.
 class SubscriptionStatusChip extends StatelessWidget {
   const SubscriptionStatusChip({
     super.key,
@@ -63,4 +60,4 @@ class SubscriptionStatusChip extends StatelessWidget {
       ),
     };
   }
-}
+}

@@ -97,7 +97,6 @@ void main() {
 
       expect(find.text('tab-0'), findsOneWidget);
 
-      // Simulate auth expiry: admin-only Job Operations tab disappears.
       setHostState(() {
         childCount = 3;
         index = 0;
@@ -108,4 +107,4 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
-}
+}

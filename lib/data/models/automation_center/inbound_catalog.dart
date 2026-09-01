@@ -220,7 +220,6 @@ Map<String, String> _stringMap(Object? raw) {
   return raw.map((key, value) => MapEntry('$key', value?.toString() ?? ''));
 }
 
-/// Builds an example relative URL from backend path + structured example.
 String buildCatalogExampleUrl(InboundCatalogEndpoint endpoint) {
   var path = endpoint.path;
   endpoint.example.pathParameters.forEach((key, value) {
@@ -256,4 +255,4 @@ String buildCatalogCurl(InboundCatalogEndpoint endpoint) {
       ? " -H 'Content-Type: application/json' --data '${jsonEncode(endpoint.example.body)}'"
       : '';
   return "curl -X ${endpoint.method} '{{baseUrl}}$resolvedPath'$authorization$body";
-}
+}

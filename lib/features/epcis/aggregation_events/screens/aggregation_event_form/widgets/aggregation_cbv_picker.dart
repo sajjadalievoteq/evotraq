@@ -52,7 +52,7 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // Self-heal: ensure vocabulary is loaded on open (no-op if cached).
+      
       context.read<CbvVocabularyCubit>().loadVocabulary();
       final state = context.read<CbvVocabularyCubit>().state;
       if (state.isLoaded) _applyDefaults(state);
@@ -245,4 +245,4 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
       },
     );
   }
-}
+}

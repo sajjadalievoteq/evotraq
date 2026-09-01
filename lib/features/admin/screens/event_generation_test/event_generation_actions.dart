@@ -207,7 +207,7 @@ extension EventGenerationActions on EventGenerationTestScreenState {
         Future.delayed(const Duration(seconds: 2), pollSimulationStatus);
       }
     } catch (e) {
-      // Keep polling silent for transient backend errors.
+      
     }
   }
 
@@ -245,4 +245,4 @@ extension EventGenerationActions on EventGenerationTestScreenState {
         return 'Simulation ${simulationStatus!.status}';
     }
   }
-}
+}

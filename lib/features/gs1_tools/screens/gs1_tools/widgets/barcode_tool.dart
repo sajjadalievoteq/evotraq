@@ -19,7 +19,6 @@ import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/mode_
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 
-/// Consolidated barcode generation / verification workbench.
 class BarcodeTool extends StatefulWidget {
   const BarcodeTool({super.key});
 
@@ -338,4 +337,4 @@ class _BarcodeToolState extends State<BarcodeTool> with Gs1InitialModeMixin {
       },
     );
   }
-}
+}

@@ -53,7 +53,5 @@ String nominalStatusLine(bool healthy, DateTime now) {
   return HomeStrings.statusNominalHealthy(greeting);
 }
 
-/// Used when the signed-in user cannot read service health, so claiming
-/// "nominal" or "degraded" would be misleading.
 String greetingOnlyStatusLine(DateTime now) =>
-    HomeStrings.statusGreetingOnly(greetingFor(now));
+    HomeStrings.statusGreetingOnly(greetingFor(now));

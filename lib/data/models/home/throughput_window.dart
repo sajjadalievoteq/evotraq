@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// One commissioning-throughput window (buckets + total) cached for a range toggle.
 class ThroughputWindow extends Equatable {
   const ThroughputWindow({
     required this.buckets,
@@ -12,4 +11,4 @@ class ThroughputWindow extends Equatable {
 
   @override
   List<Object?> get props => [buckets, total];
-}
+}

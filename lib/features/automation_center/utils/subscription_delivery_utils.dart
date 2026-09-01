@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Helpers for deriving delivery channel display from a subscription endpoint.
 abstract final class SubscriptionDeliveryUtils {
   static bool isEmailEndpoint(String webhookUrl) {
     return webhookUrl.contains('@') && !webhookUrl.startsWith('http');
@@ -15,4 +14,4 @@ abstract final class SubscriptionDeliveryUtils {
         ? AppAssets.iconMail
         : AppAssets.iconLink;
   }
-}
+}

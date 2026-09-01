@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_background_texture.dart';
 
 class TraqAppBarFlexibleBackground extends StatelessWidget {
   const TraqAppBarFlexibleBackground({super.key, required this.color});
@@ -8,21 +8,9 @@ class TraqAppBarFlexibleBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: color,
-            image: const DecorationImage(
-              image: AssetImage(AppAssets.traqBackgroundPng),
-              fit: BoxFit.cover,
-              opacity: 0.2,
-            ),
-          ),
-        ),
-        ColoredBox(color: Colors.black.withOpacity(0.1)),
-      ],
+    return ColoredBox(
+      color: color,
+      child: const TraqBackgroundTexture(),
     );
   }
 }

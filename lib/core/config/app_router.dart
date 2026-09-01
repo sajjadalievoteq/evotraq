@@ -29,13 +29,6 @@ class GoRouterRefreshStream extends ChangeNotifier {
   void _refresh() {
     if (_disposed || _refreshScheduled) return;
 
-    // Authentication can change while a protected route is building (for
-    // example, when an initState API request returns 401). Mutating the
-    // Navigator synchronously at that point can unmount a route-scoped
-    // BlocProvider before Flutter has detached all of its dependents, which
-    // triggers framework.dart's `_dependents.isEmpty` assertion. Always apply
-    // stream-driven redirects at the next frame boundary and coalesce parallel
-    // 401s into one router refresh.
     _refreshScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _refreshScheduled = false;
@@ -70,8 +63,7 @@ class AppRouter {
     required this.featureRoutes,
     String? initialLocation,
   }) : _initialLocation = initialLocation ?? resolvePlatformStartupRoute() {
-    // `push` keeps reverse animations; by default go_router does not put those
-    // pages in the browser URL. Enable this so drill-downs stay shareable/deeplinkable.
+    
     GoRouter.optionURLReflectsImperativeAPIs = true;
   }
 
@@ -103,8 +95,6 @@ class AppRouter {
 
   bool _isRootPath(String path) => path == '/' || path.isEmpty;
 
-  /// Pure auth/location state machine. Browser URL is the source of truth —
-  /// no Hive restore and no parking protected URLs on `/splash`.
   String? computeRedirect({
     required String path,
     String? fromQuery,
@@ -113,14 +103,11 @@ class AppRouter {
     final authState = authCubit.state;
     final isAuthenticated = authState.isAuthenticated;
 
-    // Auth still resolving: keep the current URL (including deep links).
-    // Only send bare `/` to splash for cold-start branding.
     if (_isAuthCheckPending() && !isAuthenticated) {
       if (_isRootPath(path)) return Constants.splashRoute;
       return null;
     }
 
-    // Cold-start / explicit splash exit.
     if (path == Constants.splashRoute) {
       if (isAuthenticated) {
         return resolveSplashPendingLocationFrom(fromQuery) ??
@@ -133,12 +120,10 @@ class AppRouter {
       return isAuthenticated ? Constants.homeRoute : Constants.loginRoute;
     }
 
-    // Authenticated users leave auth-only screens (honor login `from=`).
     if (isAuthenticated && _isAuthOnlyPath(path)) {
       return resolvePendingLocationFrom(fromQuery) ?? Constants.homeRoute;
     }
 
-    // Settled unauthenticated → login, preserving the requested deep link.
     if (!isAuthenticated && !_isPublicPath(path)) {
       return loginLocationWithFrom(currentLocation ?? path);
     }

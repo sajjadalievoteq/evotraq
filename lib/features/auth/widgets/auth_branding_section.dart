@@ -100,7 +100,6 @@ class AuthBrandingSection extends StatelessWidget {
         final panelHeight =
             constraints.maxHeight.isFinite ? constraints.maxHeight : null;
 
-        // Single child entrance preserves spaceBetween layout with one ticker.
         return SizedBox(
           height: panelHeight,
           width: layoutWidth,
@@ -199,4 +198,4 @@ class AuthBrandingSection extends StatelessWidget {
       },
     );
   }
-}
+}

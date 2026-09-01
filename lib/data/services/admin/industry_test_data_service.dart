@@ -194,22 +194,18 @@ class IndustryTestDataService {
     required Function(int current, int total, String eventInfo) onProgress,
   }) async {
     
-    
     onProgress(1, 1, 'Delegating to connected supply-chain orchestrator…');
     await generatePharmaFullConnectedSupplyChain(
       onProgress: (current, total, status) => onProgress(current, total, status),
     );
   }
 
-  
-  
   Future<Map<String, dynamic>> generatePharmaFullConnectedSupplyChain({
     required Function(int current, int total, String status) onProgress,
   }) async {
     onProgress(1, 3, 'Seeding GLNs, GTINs, SGTINs, SSCCs…');
     onProgress(2, 3, 'Running commissioning, packing, shipping, receiving…');
-    // No client timeout — full supply-chain seed can run for many minutes.
-    // Dio: Duration.zero disables the limit (null would fall back to BaseOptions).
+    
     final body = await _postAdminJson(
       '/admin/industry-demo-data/pharma/supply-chain/full',
       connectTimeout: Duration.zero,
@@ -235,8 +231,6 @@ class IndustryTestDataService {
     return body;
   }
 
-  
-  
   Future<Map<String, dynamic>> generatePackedHierarchy({
     int levels = 10,
     int childrenPerLevel = 100,
@@ -280,7 +274,6 @@ class IndustryTestDataService {
     return response;
   }
 
-  
   Future<Map<String, dynamic>> cleanupPackedHierarchy({
     required String runId,
   }) async {
@@ -322,4 +315,4 @@ class IndustryTestDataService {
       return {};
     }
   }
-}
+}

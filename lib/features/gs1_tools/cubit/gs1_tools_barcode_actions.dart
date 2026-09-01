@@ -137,7 +137,6 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
       return;
     }
 
-    // ean13 / upca / itf14 / qrDl via generic endpoint (may be unsupported server-side)
     final payload = (data ?? gtin ?? elementString ?? '').trim();
     if (payload.isEmpty) {
       emitError(Gs1ToolKind.barcode, 'Data is required');
@@ -146,7 +145,7 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     if (m == 'ean13' || m == 'upca' || m == 'itf14') {
       final err = CheckDigitUtils.validateGtin(payload);
       if (err != null && m != 'upca') {
-        // still try — upc-a is 12
+        
       }
     }
     final format = switch (m) {
@@ -199,7 +198,6 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
         'Local GLN': safe(local['GLN']),
       };
 
-      // Pharma pack (01 present): flag missing mandatory AIs 21/17/10.
       if (gtin != null && gtin.isNotEmpty) {
         final missing = <String>[];
         if (serial == null || serial.isEmpty) missing.add('21 (serial)');
@@ -233,8 +231,6 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
       );
     });
   }
-
-  // ─── AI / Element String ──────────────────────────────────────────────────
 
   void aiTool({required String mode, String? input, Map<String, String>? ais}) {
     final m = mode.toLowerCase();
@@ -327,8 +323,6 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     );
   }
 
-  // ─── NDC ↔ GTIN ───────────────────────────────────────────────────────────
-
   void convertNdc({
     required String mode,
     required String input,
@@ -387,15 +381,13 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     );
   }
 
-  // ─── GS1 Lookup ───────────────────────────────────────────────────────────
-
   Future<void> lookupGs1(String identifier) async {
     final id = identifier.trim();
     if (id.isEmpty) {
       emitError(Gs1ToolKind.lookup, 'Enter a GTIN or GLN to look up');
       return;
     }
-    // No GEPIR/Verified-by-GS1 backend endpoint is wired in this app yet.
+    
     emit(
       state.withSlice(
         Gs1ToolKind.lookup,
@@ -410,5 +402,4 @@ extension Gs1ToolsBarcodeActions on Gs1ToolsCubit {
     );
   }
 
-  // ─── EPCIS Serialization (unchanged domain) ───────────────────────────────
-}
+}

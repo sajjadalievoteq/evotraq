@@ -36,7 +36,7 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
       _convertElementBridge(input ?? '');
       return;
     }
-    // urn-dl / digital-link build+parse
+    
     _convertUrnDl(
       input: input ?? '',
       gtin: gtin,
@@ -365,5 +365,4 @@ extension Gs1ToolsConversionActions on Gs1ToolsCubit {
     return 'gtin';
   }
 
-  // ─── Validate ─────────────────────────────────────────────────────────────
-}
+}

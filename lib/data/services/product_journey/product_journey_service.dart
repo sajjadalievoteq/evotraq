@@ -30,7 +30,7 @@ class ProductJourneyService {
   Future<ProductJourney?> getJourneyByEpc(String epcUri) async {
     try {
       final headers = await _getHeaders();
-      // Backend already canonicalizes; avoid a prior /search round-trip.
+      
       final canonicalEpc = Gs1CanonicalIdentifier.forStorage(epcUri);
 
       final response = await _dioService.get(
@@ -62,9 +62,6 @@ class ProductJourneyService {
     try {
       final headers = await _getHeaders();
 
-      
-      
-      
       final searchResponse = await _dioService.get(
         '$_baseUrl/product-journey/search',
         queryParameters: {'q': serialNumber, 'size': '5'},
@@ -93,7 +90,6 @@ class ProductJourneyService {
         }
       }
 
-      
       final epcUri =
           EPCURIConverter.convertGTINSerialToEPCUri(gtin, serialNumber);
       if (epcUri != null) return getJourneyByEpc(epcUri);
@@ -117,8 +113,6 @@ class ProductJourneyService {
     final trimmed = input.trim();
     if (trimmed.isEmpty) return null;
 
-    // Preserve already-typed Digital Links / URNs end-to-end. Do not re-run
-    // bare-barcode heuristics that can rewrite /01/…/21/… into /00/….
     if (_isTypedEpcUri(trimmed)) {
       return getJourneyByEpc(trimmed);
     }
@@ -135,7 +129,7 @@ class ProductJourneyService {
   Future<ProductJourney?> _journeyForParsed(EPCParseResult parsed) async {
     switch (parsed.type) {
       case EPCType.sgtin:
-        // Prefer the typed / constructed Digital Link on the parse result.
+        
         final direct = await getJourneyByEpc(parsed.epc);
         if (direct != null) return direct;
 
@@ -166,7 +160,6 @@ class ProductJourneyService {
       return getJourneyByEpc(trimmed);
     }
 
-    
     if (trimmed.contains('(') && trimmed.contains(')')) {
       final normalized = gs1AiToEpcUri(trimmed);
       if (normalized != null) return getJourneyByEpc(normalized);
@@ -194,7 +187,6 @@ class ProductJourneyService {
   Future<List<ProductSearchResult>> searchProducts(String query) async {
     final trimmed = query.trim();
 
-    
     if (Gs1CanonicalIdentifier.isSerializedInstance(trimmed) ||
         Gs1CanonicalIdentifier.isValid(trimmed)) {
       try {
@@ -222,8 +214,6 @@ class ProductJourneyService {
       }
     }
 
-    
-    
     if (trimmed.contains('(') && trimmed.contains(')')) {
       try {
         final parsed = parseToEPC(trimmed);
@@ -289,4 +279,4 @@ class ProductJourneyService {
     };
   }
 
-}
+}

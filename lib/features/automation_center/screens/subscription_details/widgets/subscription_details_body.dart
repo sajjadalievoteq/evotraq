@@ -23,7 +23,6 @@ class SubscriptionDetailsBody extends StatelessWidget {
   final NotificationSubscription subscription;
   final NotificationStats? stats;
 
-  /// When true, omit outer scroll padding (host provides panel chrome).
   final bool embedded;
 
   static const Map<String, String> _frequencyLabels = {
@@ -62,8 +61,7 @@ class SubscriptionDetailsBody extends StatelessWidget {
     );
     final operationTypeLabels =
         SubscriptionQueryFilterUtils.operationTypeLabels(queryParameters);
-    // Legacy-only: subscriptions created before the Operations selector may
-    // still have raw CBV business-step/disposition filters stored.
+    
     final bizStep = SubscriptionQueryFilterUtils.businessStep(queryParameters);
     final disposition = SubscriptionQueryFilterUtils.disposition(
       queryParameters,
@@ -268,4 +266,4 @@ class SubscriptionDetailsBody extends StatelessWidget {
       child: content,
     );
   }
-}
+}

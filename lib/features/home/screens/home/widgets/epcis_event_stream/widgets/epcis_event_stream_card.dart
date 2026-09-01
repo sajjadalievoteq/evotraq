@@ -56,37 +56,7 @@ class EpcisEventStreamCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Container(
-                    //   padding: const EdgeInsets.symmetric(
-                    //     horizontal: 8,
-                    //     vertical: 4,
-                    //   ),
-                    //   decoration: BoxDecoration(
-                    //     color: context.colors.success.withValues(alpha: 0.12),
-                    //     borderRadius: BorderRadius.circular(4),
-                    //   ),
-                    //   child: Text(
-                    //     HomeStrings.epcisStreamLive,
-                    //     style: context.text.cap.copyWith(
-                    //       fontSize: 10,
-                    //       fontWeight: FontWeight.w700,
-                    //       color: context.colors.success,
-                    //       letterSpacing: 0.6,
-                    //     ),
-                    //   ),
-                    // ),
-
-                    // TextButton(
-                    //   onPressed: () =>
-                    //       context.go(HomeNavigation.epcisObjectEvents),
-                    //   child: Text(
-                    //     HomeStrings.epcisStreamViewAll,
-                    //     style: context.text.body.copyWith(
-                    //       fontWeight: FontWeight.w600,
-                    //       color: context.colors.primary,
-                    //     ),
-                    //   ),
-                    // ),
+                    
                   ],
                 ),
                 Padding(
@@ -102,4 +72,4 @@ class EpcisEventStreamCard extends StatelessWidget {
       },
     );
   }
-}
+}

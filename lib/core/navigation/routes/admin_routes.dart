@@ -25,7 +25,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -43,7 +43,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -61,7 +61,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -91,7 +91,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -109,7 +109,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -127,7 +127,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -139,8 +139,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
   ),
   GoRoute(
     path: Constants.adminIntegrationValidationRoute,
-    // Integration self-tests write/delete DB rows and are not user-facing.
-    // Backend service remains @Profile("!prod") for CI/dev only.
+    
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
         return null;
@@ -156,7 +155,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -174,7 +173,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -192,7 +191,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -210,7 +209,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -228,7 +227,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -266,7 +265,7 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
     ),
     redirect: (context, state) {
       if (!access.authState.isAuthenticated) {
-        // Top-level redirect owns login?from= while auth settles.
+        
         return null;
       }
       if (!access.authState.isAdmin) {
@@ -276,4 +275,4 @@ List<RouteBase> adminRoutes(RouteAccess access) => [
       return null;
     },
   ),
-];
+];

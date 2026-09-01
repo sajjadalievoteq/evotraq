@@ -155,7 +155,6 @@ class GS1BarcodeParser {
       return barcode;
     }
 
-    
     String normalized = barcode
         .replaceAll(String.fromCharCode(29), '<GS>')
         .replaceAll('|', '<GS>');
@@ -164,8 +163,6 @@ class GS1BarcodeParser {
       normalized = normalized.substring(4);
     }
 
-    // Bare 18 digits are ambiguous (SSCC vs GTIN+serial). Do not invent AI
-    // (01)/(10)/(21) wrappers — leave for EPCURIConverter / bare-digit parsers.
     if (RegExp(r'^\d{18}$').hasMatch(normalized)) {
       return barcode;
     }
@@ -218,7 +215,6 @@ class GS1BarcodeParser {
   static String _formatRemainder(String remainder) {
     String formattedRemainder = '';
     int position = 0;
-    
     
     if (remainder.length >= position + 6 && 
         RegExp(r'^\d{6}').hasMatch(remainder.substring(position))) {
@@ -320,4 +316,4 @@ class GS1BarcodeParser {
 
     return humanReadable;
   }
-}
+}

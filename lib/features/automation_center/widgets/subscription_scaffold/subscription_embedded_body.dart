@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 
-/// Shared embedded panel body: description row, filters, divider, list slot.
 class SubscriptionEmbeddedBody extends StatelessWidget {
   const SubscriptionEmbeddedBody({
     super.key,
@@ -12,7 +11,6 @@ class SubscriptionEmbeddedBody extends StatelessWidget {
     this.expandBody = true,
   });
 
-  /// Leading description text (and optional trailing widget such as live status).
   final Widget description;
   final Widget filterChips;
   final Widget body;
@@ -35,4 +33,4 @@ class SubscriptionEmbeddedBody extends StatelessWidget {
       ],
     );
   }
-}
+}

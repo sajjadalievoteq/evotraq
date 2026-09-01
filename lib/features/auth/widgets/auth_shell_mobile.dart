@@ -18,6 +18,7 @@ class AuthShellMobile extends StatelessWidget {
 
     return CardWithBackgroundWidget(
       isPrimary: false,
+      margin: EdgeInsets.zero,
       child: SizedBox(
         height: MediaQuery.sizeOf(context).height,
         child: Column(

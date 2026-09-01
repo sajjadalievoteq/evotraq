@@ -4,7 +4,6 @@ import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_q
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/queue_status_strip.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/job_queue_metrics_grid.dart';
 
-/// Production operations console for the Job Queue dashboard tab.
 class JobQueueDashboard extends StatelessWidget {
   const JobQueueDashboard({
     super.key,
@@ -45,4 +44,4 @@ class JobQueueDashboard extends StatelessWidget {
       ],
     );
   }
-}
+}

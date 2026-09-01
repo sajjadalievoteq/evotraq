@@ -1,10 +1,5 @@
 import 'package:dio/dio.dart';
 
-/// A short, stable Dio network failure used at the application's HTTP edge.
-///
-/// It remains a [DioException], so existing service catch blocks continue to
-/// work, while legacy `error.toString()` paths retain a recognizable network
-/// message instead of platform-specific socket details.
 class AppNetworkException extends DioException {
   AppNetworkException.from(DioException source)
     : super(
@@ -21,4 +16,4 @@ class AppNetworkException extends DioException {
 
   @override
   String toString() => messageText;
-}
+}

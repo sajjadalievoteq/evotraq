@@ -4,8 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 
-/// Cross-cutting health rollup â€” no duplicated tab content (metrics, activity
-/// feeds, live toggles, or job dashboards live on their own tabs).
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_health_summary.dart';
 
 class AutomationOverallHealthHero extends StatelessWidget {
@@ -58,4 +56,4 @@ class AutomationOverallHealthHero extends StatelessWidget {
       ),
     );
   }
-}
+}

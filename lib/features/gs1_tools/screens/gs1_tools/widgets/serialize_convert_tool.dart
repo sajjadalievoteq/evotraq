@@ -11,7 +11,6 @@ import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/mode_
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 
-/// One EPCIS document workbench with non-writing Convert and Validate modes.
 class SerializeConvertTool extends StatefulWidget {
   const SerializeConvertTool({super.key});
 
@@ -198,4 +197,4 @@ class _SerializeConvertToolState extends State<SerializeConvertTool>
       },
     );
   }
-}
+}

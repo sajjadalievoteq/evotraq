@@ -11,8 +11,6 @@ import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/mode_
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 
-/// Consolidated conversion workbench: URN ⇄ Digital Link, EPC ⇄ GS1
-/// identifiers, and Digital Link ⇄ element string.
 class ConvertTool extends StatefulWidget {
   const ConvertTool({super.key});
 
@@ -340,4 +338,4 @@ class _ConvertToolState extends State<ConvertTool> with Gs1InitialModeMixin {
       },
     );
   }
-}
+}

@@ -5,8 +5,6 @@ import 'package:traqtrace_app/features/automation_center/cubit/job_queue_state.d
 import 'package:traqtrace_app/features/automation_center/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/automation_center/cubit/notification_state.dart';
 
-/// Cross-cutting health rollup — no duplicated tab content (metrics, activity
-/// feeds, live toggles, or job dashboards live on their own tabs).
 import 'package:traqtrace_app/features/automation_center/screens/automation_center/widgets/automation_health_dashboard.dart';
 
 class AutomationSystemHealthPanel extends StatelessWidget {
@@ -65,4 +63,4 @@ class AutomationSystemHealthPanel extends StatelessWidget {
       },
     );
   }
-}
+}

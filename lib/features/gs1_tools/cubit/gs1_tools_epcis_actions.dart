@@ -173,7 +173,6 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
     );
   }
 
-  /// Runs format → schema → content gates. Does not write to the DB.
   Future<void> validateEpcisImport({required String input}) async {
     await run(Gs1ToolKind.serializeImport, () async {
       final cbvSets = await loadCbvSets();
@@ -201,7 +200,6 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
         );
       }
 
-      // Official EPCIS JSON schema (backend) — second schema confirmation.
       final schemaResponse = await serialization.validateJsonSchema(
         local.document!,
       );
@@ -235,7 +233,6 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
     });
   }
 
-  /// Import only after full conformance. Re-validates before any DB call.
   Future<void> importEpcisEvents({required String input}) async {
     final text = input.trim();
     if (text.isEmpty) {
@@ -311,5 +308,4 @@ extension Gs1ToolsEpcisActions on Gs1ToolsCubit {
     });
   }
 
-  // ─── helpers ──────────────────────────────────────────────────────────────
-}
+}

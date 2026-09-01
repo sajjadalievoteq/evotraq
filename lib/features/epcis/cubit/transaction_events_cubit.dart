@@ -110,7 +110,7 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
           "",
         );
       } else {
-        // TODO: server-side paged multi-action query
+        
         final results = await Future.wait([
           _service.findTransactionEventsByAction("ADD"),
           _service.findTransactionEventsByAction("OBSERVE"),
@@ -413,4 +413,4 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
   void clearError() {
     emit(state.copyWith(clearError: true));
   }
-}
+}

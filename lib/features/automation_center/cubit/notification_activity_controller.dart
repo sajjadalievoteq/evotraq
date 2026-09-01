@@ -90,7 +90,6 @@ class NotificationActivityController {
     }
   }
 
-  /// Appends the next Activity page when the user scrolls near the end.
   Future<void> loadMoreDeliveryActivity() async {
     if (_isClosed() ||
         _deliveryActivityLoadInFlight ||
@@ -240,7 +239,6 @@ class NotificationActivityController {
     }
   }
 
-  /// Compatibility path when `/batches/exhausted` is unavailable.
   Future<({List<NotificationBatch> items, bool hasMore, int page})>
   _legacyExhaustedFallback({required int page}) async {
     if (page > 0) {
@@ -317,4 +315,4 @@ class NotificationActivityController {
       );
     }
   }
-}
+}

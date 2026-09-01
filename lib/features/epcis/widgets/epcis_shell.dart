@@ -10,13 +10,6 @@ import 'package:traqtrace_app/features/epcis/cubit/transaction_events_cubit.dart
 import 'package:traqtrace_app/features/epcis/cubit/transformation_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/validation_cubit.dart';
 
-/// Provides EPCIS cubits for the feature route subtree.
-///
-/// Lifetime matches the go_router [ShellRoute] session: cubits persist across
-/// intra-feature navigation and are disposed when leaving the feature.
-///
-/// [CbvVocabularyCubit] is the GetIt singleton (also used by admin via DI);
-/// startup [CbvVocabularyService.hydrateFromCache] remains in `main()`.
 class EpcisShell extends StatelessWidget {
   const EpcisShell({super.key, required this.child});
 
@@ -52,4 +45,4 @@ class EpcisShell extends StatelessWidget {
       child: child,
     );
   }
-}
+}

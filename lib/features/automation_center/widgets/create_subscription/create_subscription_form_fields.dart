@@ -23,19 +23,11 @@ class CreateSubscriptionFormFields extends StatelessWidget {
   final String selectedDeliveryMethod;
   final ValueChanged<String> onDeliveryMethodChanged;
 
-  /// True when editing an existing subscription — used to adjust the API
-  /// password field's copy (leaving it blank on edit keeps the saved
-  /// credential rather than clearing it).
   final bool isEditing;
 
-  /// Tracked so the batch-cadence dropdown can be shown/hidden and given a
-  /// sensible type-based default without needing a separate form rebuild.
   final String selectedSubscriptionType;
   final ValueChanged<String> onSubscriptionTypeChanged;
 
-  /// Tracked so the time-of-day picker only shows for cadences where a
-  /// specific time actually means something (DAILY/WEEKLY/MONTHLY — not
-  /// IMMEDIATE/HOURLY, which repeat too often for a "time of day" to apply).
   final String? selectedNotificationFrequency;
   final ValueChanged<String> onNotificationFrequencyChanged;
 
@@ -195,4 +187,4 @@ class CreateSubscriptionFormFields extends StatelessWidget {
       ],
     );
   }
-}
+}

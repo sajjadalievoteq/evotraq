@@ -216,7 +216,6 @@ class NotificationApiService {
     }
   }
 
-  /// Paginated webhook history for one subscription.
   Future<({List<domain.WebhookNotification> items, bool hasMore, int page})>
   getWebhookHistory(
     String subscriptionId, {
@@ -257,7 +256,7 @@ class NotificationApiService {
               ),
             );
           } catch (_) {
-            // Skip malformed rows rather than failing the whole panel.
+            
           }
         }
         return (
@@ -277,7 +276,6 @@ class NotificationApiService {
     }
   }
 
-  /// Cross-subscription Activity feed (newest first).
   Future<({List<domain.WebhookNotification> items, bool hasMore, int page})>
   getDeliveryActivity({int page = 0, int size = 20, String? outcome}) async {
     try {
@@ -312,7 +310,7 @@ class NotificationApiService {
               ),
             );
           } catch (_) {
-            // Skip malformed rows rather than failing the whole panel.
+            
           }
         }
         return (
@@ -408,7 +406,6 @@ class NotificationApiService {
     }
   }
 
-  /// Loads batch history for a subscription (last [limit] rows).
   Future<List<domain.NotificationBatch>> getBatchHistory(
     String subscriptionId, {
     int limit = 50,
@@ -435,7 +432,7 @@ class NotificationApiService {
                 ),
               );
             } catch (_) {
-              // Skip malformed rows rather than failing the whole panel.
+              
             }
           }
           return history;
@@ -453,7 +450,6 @@ class NotificationApiService {
     }
   }
 
-  /// Cross-subscription exhausted failed batches (newest first).
   Future<({List<domain.NotificationBatch> items, bool hasMore, int page})>
   getExhaustedBatches({int page = 0, int size = 20}) async {
     try {
@@ -482,7 +478,7 @@ class NotificationApiService {
               ),
             );
           } catch (_) {
-            // Skip malformed rows rather than failing the whole panel.
+            
           }
         }
         return (
@@ -501,7 +497,6 @@ class NotificationApiService {
     }
   }
 
-  /// Triggers a manual retry for an exhausted batch.
   Future<void> retryBatch(String batchId) async {
     try {
       final headers = await _getAuthHeaders();
@@ -532,4 +527,4 @@ class NotificationApiService {
       _statsApi.getSubscriptionStats(id);
 
   Future<Map<String, dynamic>> getSystemStats() => _statsApi.getSystemStats();
-}
+}

@@ -1,8 +1,5 @@
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/widgets/job_queue_status_badge.dart';
 
-/// Cross-cutting health rollup â€” no duplicated tab content (metrics, activity
-/// feeds, live toggles, or job dashboards live on their own tabs).
-
 class AutomationHealthSummary {
   const AutomationHealthSummary({
     required this.overallLabel,
@@ -35,4 +32,4 @@ class AutomationHealthSummary {
   final String workerSummary;
   final double workerUtilization;
   final DateTime? lastUpdated;
-}
+}

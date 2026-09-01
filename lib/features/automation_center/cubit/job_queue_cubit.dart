@@ -6,13 +6,6 @@ import 'package:traqtrace_app/features/automation_center/cubit/job_queue_state.d
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/job_queue_dashboard/job_queue_dashboard_snapshot.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/utils/job_queue_dashboard_snapshot_builder.dart';
 
-/// Drives the Job Queue panel from an initial REST load plus live WebSocket snapshots.
-///
-/// REST is used only for: the initial load, an immediate re-sync on (re)connect, and a low-
-/// frequency fallback poll while disconnected. While the WebSocket is healthy, updates arrive via
-/// push with no fixed polling. Every payload — REST or WS — is funnelled through the same
-/// [buildJobQueueDashboardSnapshot] builder so there is a single parsing path and a single
-/// authoritative snapshot.
 class JobQueueCubit extends Cubit<JobQueueState> {
   final JobQueueService _service;
   final WebSocketService _webSocketService;
@@ -26,7 +19,6 @@ class JobQueueCubit extends Cubit<JobQueueState> {
   static const Duration _fallbackGrace = Duration(seconds: 10);
   static const Duration _fallbackInterval = Duration(seconds: 25);
 
-  // Rolling sparkline samples (mirrors the previous panel behavior: last 16 points).
   final List<double> _activeSparkline = <double>[];
   final List<double> _queuedSparkline = <double>[];
   static const int _sparklineWindow = 16;
@@ -40,7 +32,7 @@ class JobQueueCubit extends Cubit<JobQueueState> {
        _webSocketService = webSocketService,
        super(const JobQueueState()) {
     _initializeWebSocketListeners();
-    // Initial paint from REST, independent of whether/when the socket connects.
+    
     loadInitial();
   }
 
@@ -52,8 +44,6 @@ class JobQueueCubit extends Cubit<JobQueueState> {
       _onConnectionChanged,
     );
   }
-
-  // ---- Live push handling -------------------------------------------------
 
   void _onSnapshotPushed(Map<String, dynamic> payload) {
     if (isClosed) return;
@@ -117,7 +107,7 @@ class JobQueueCubit extends Cubit<JobQueueState> {
       emit(
         state.copyWith(connectionStatus: JobQueueConnectionStatus.connected),
       );
-      // Immediate REST re-sync so the UI is current without waiting for the heartbeat.
+      
       refresh();
     } else {
       emit(
@@ -127,8 +117,6 @@ class JobQueueCubit extends Cubit<JobQueueState> {
     }
   }
 
-  // ---- Connection control (explicit, like NotificationCubit) --------------
-
   void connectWebSocket() {
     if (_webSocketService.isConnected) {
       emit(
@@ -137,11 +125,10 @@ class JobQueueCubit extends Cubit<JobQueueState> {
       return;
     }
     emit(state.copyWith(connectionStatus: JobQueueConnectionStatus.connecting));
-    // Shared socket is session-owned; connect() is idempotent.
+    
     _webSocketService.connect();
   }
 
-  /// Updates local connection UI only. Does not disconnect the shared socket.
   void markWebSocketDisconnectedLocally() {
     _cancelFallback();
     emit(
@@ -149,21 +136,15 @@ class JobQueueCubit extends Cubit<JobQueueState> {
     );
   }
 
-  /// @Deprecated — prefer [markWebSocketDisconnectedLocally]. Never disconnects
-  /// the application-wide [WebSocketService].
   void disconnectWebSocket() => markWebSocketDisconnectedLocally();
 
   bool get isWebSocketConnected => _webSocketService.isConnected;
-
-  // ---- REST loading -------------------------------------------------------
 
   Future<void> loadInitial() async {
     emit(state.copyWith(status: JobQueueStatus.loading));
     await _loadBundle();
   }
 
-  /// One-shot REST reload of the whole dashboard bundle (initial load, on-connect re-sync,
-  /// fallback poll, post-mutation refresh, and the manual Refresh action).
   Future<void> refresh() => _loadBundle();
 
   Future<void> _loadBundle() async {
@@ -201,9 +182,6 @@ class JobQueueCubit extends Cubit<JobQueueState> {
       _loading = false;
     }
   }
-
-  // ---- Mutations (delegate to REST; the resulting backend event pushes a fresh snapshot,
-  //      and we also refresh once for immediate feedback / when the socket is down) ---------
 
   Future<void> submitJob({
     required String jobType,
@@ -264,26 +242,19 @@ class JobQueueCubit extends Cubit<JobQueueState> {
     return result;
   }
 
-  /// Read-only prefill for the worker-pool config dialog.
   Future<Map<String, dynamic>> getWorkerPoolConfig() =>
       _service.getWorkerPoolConfig();
 
-  // ---- App lifecycle ------------------------------------------------------
-
-  /// Backgrounded: stop the disconnected-fallback poll so we do no work while hidden.
   void handleAppPaused() {
     _cancelFallback();
   }
 
-  /// Foregrounded: re-sync immediately, and if still disconnected, resume the fallback poll.
   void handleAppResumed() {
     refresh();
     if (state.connectionStatus != JobQueueConnectionStatus.connected) {
       _scheduleFallback();
     }
   }
-
-  // ---- Fallback poll while disconnected -----------------------------------
 
   void _scheduleFallback() {
     _fallbackGraceTimer?.cancel();
@@ -306,8 +277,6 @@ class JobQueueCubit extends Cubit<JobQueueState> {
     _fallbackPollTimer?.cancel();
     _fallbackPollTimer = null;
   }
-
-  // ---- Snapshot assembly --------------------------------------------------
 
   JobQueueDashboardSnapshot _buildSnapshot({
     required Map<String, dynamic> dashboardData,
@@ -356,7 +325,7 @@ class JobQueueCubit extends Cubit<JobQueueState> {
     await _connectionSubscription?.cancel();
     _connectionSubscription = null;
     _cancelFallback();
-    // Never disconnect the shared WebSocketService singleton here.
+    
     return super.close();
   }
-}
+}

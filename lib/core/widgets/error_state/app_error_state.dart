@@ -7,11 +7,6 @@ import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/empty_state_hover_action.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/empty_state_visual.dart';
 
-/// Application-wide full-content error state.
-///
-/// Pass the original [error] whenever it is available. Network failures are
-/// then detected consistently and use the dedicated offline presentation.
-/// For non-network failures, [iconAsset] should match the current screen.
 class AppErrorState extends StatelessWidget {
   const AppErrorState({
     super.key,
@@ -115,4 +110,4 @@ abstract final class AppErrorClassifier {
     'connection reset',
     'dns',
   ];
-}
+}

@@ -17,9 +17,6 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
   final int itemCount;
   final SubscriptionSkeletonShape shape;
 
-  /// When true, lays out skeletons in an intrinsic [Column] (job-queue
-  /// embedded). When false, uses [ListView.separated] with padding driven by
-  /// [shrinkWrap] (subscription panels / standalone job queue).
   final bool asColumn;
 
   @override
@@ -62,6 +59,4 @@ class SubscriptionLoadingSkeleton extends StatelessWidget {
     );
   }
 }
-
-/// Mirrors [SubscriptionManagementBody]'s LayoutBuilder breakpoint (`maxWidth < 900`
-/// or mobile → stacked; otherwise list + detail side-by-side).
+

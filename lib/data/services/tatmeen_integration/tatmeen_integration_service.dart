@@ -32,7 +32,7 @@ class TatmeenIntegrationService {
     UpdateTatmeenIntegrationSettingsRequest request,
   ) async {
     try {
-      final response = await _dioService.patch(
+      final response = await _dioService.put(
         _settingsPath,
         data: request.toJson(),
       );
@@ -190,7 +190,7 @@ class TatmeenIntegrationService {
 
   Future<void> dismissSyncRecord(String id) async {
     try {
-      await _dioService.patch('/tatmeen-integration/failed-queue/$id/dismiss');
+      await _dioService.put('/tatmeen-integration/failed-queue/$id/dismiss');
     } on DioException catch (e) {
       throw ApiExceptionMapper.fromDio(
         e,

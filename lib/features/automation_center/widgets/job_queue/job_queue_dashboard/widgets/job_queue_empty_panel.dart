@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Compact empty-state used across job-queue dashboard cards and tabs.
 class JobQueueEmptyPanel extends StatelessWidget {
   const JobQueueEmptyPanel({
     super.key,
@@ -49,4 +48,4 @@ class JobQueueEmptyPanel extends StatelessWidget {
       ),
     );
   }
-}
+}

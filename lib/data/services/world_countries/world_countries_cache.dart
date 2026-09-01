@@ -3,11 +3,6 @@ import 'dart:ui' show Locale, PlatformDispatcher;
 import 'package:flutter/foundation.dart';
 import 'package:world_countries/world_countries.dart';
 
-/// Session cache for `world_countries` country picker data.
-///
-/// Pre-warms country translations and flag caches after login/home so opening
-/// [CountryPicker] does not block on first use. Does not require
-/// [TypedLocaleDelegate] in [MaterialApp.localizationsDelegates].
 class WorldCountriesCache {
   static final TypedLocaleDelegate _delegate = TypedLocaleDelegate.selectiveCache(
     isoCollections: IsoCollections(

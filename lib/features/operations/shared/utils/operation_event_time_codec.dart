@@ -30,7 +30,6 @@ abstract final class OperationEventTimeCodec {
     return '$y-$mo-${d}T$h:$mi:$s$sign$hours:$minutes';
   }
 
-  /// Parses an API instant into the UAE wall clock used by operation forms.
   static DateTime? parseApiDateTime(Object? raw) {
     final instant = AppTime.tryParseApi(raw);
     return instant == null ? null : AppTime.toUae(instant);
@@ -43,4 +42,4 @@ abstract final class OperationEventTimeCodec {
       'eventTimeZoneOffset': localTimezoneOffset(local),
     };
   }
-}
+}

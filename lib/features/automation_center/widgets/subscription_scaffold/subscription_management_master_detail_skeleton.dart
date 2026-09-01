@@ -7,9 +7,6 @@ import 'package:traqtrace_app/features/automation_center/widgets/subscription_sc
 class SubscriptionManagementMasterDetailSkeleton extends StatelessWidget {
   const SubscriptionManagementMasterDetailSkeleton({super.key, required this.shrinkWrap});
 
-  /// Matches [SubscriptionManagementBody.shrinkWrap]: intrinsic size when
-  /// nested in a [ListView] (unbounded height). Flex children are only used
-  /// when the parent provides a bounded height.
   final bool shrinkWrap;
 
   @override
@@ -38,8 +35,6 @@ class SubscriptionManagementMasterDetailSkeleton extends StatelessWidget {
           );
         }
 
-        // IntrinsicHeight lets the Row stretch in unbounded parents (workbench
-        // ListView) the same way SubscriptionManagementBody does.
         return IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -59,4 +54,4 @@ class SubscriptionManagementMasterDetailSkeleton extends StatelessWidget {
       },
     );
   }
-}
+}

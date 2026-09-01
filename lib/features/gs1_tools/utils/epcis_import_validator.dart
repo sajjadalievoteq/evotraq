@@ -6,8 +6,6 @@ import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_template.dar
 
 import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validation_result.dart';
 
-/// Three-gate validator: format → schema/structure → content.
-/// Rejects on the first failing gate (later gates are not run).
 abstract final class EpcisImportValidator {
   static EpcisImportValidationResult validate(
     String rawInput, {
@@ -30,7 +28,6 @@ abstract final class EpcisImportValidator {
       );
     }
 
-    // ── Format gate ────────────────────────────────────────────────────────
     if (text.startsWith('<') ||
         !text.startsWith('{') && !text.startsWith('[')) {
       return const EpcisImportValidationResult(
@@ -116,7 +113,6 @@ abstract final class EpcisImportValidator {
       return EpcisImportValidationResult(issues: formatIssues);
     }
 
-    // ── Schema gate ────────────────────────────────────────────────────────
     final schemaIssues = <EpcisImportIssue>[];
     checkUnknownKeys(
       doc.keys.cast<String>(),
@@ -196,7 +192,6 @@ abstract final class EpcisImportValidator {
       return EpcisImportValidationResult(issues: schemaIssues);
     }
 
-    // ── Content gate ───────────────────────────────────────────────────────
     final contentIssues = <EpcisImportIssue>[];
     final serialized = jsonEncode(doc);
     for (final placeholder in EpcisImportTemplate.placeholders) {
@@ -345,4 +340,4 @@ abstract final class EpcisImportValidator {
       }
     }
   }
-}
+}

@@ -142,9 +142,7 @@ class GTINCubit extends Cubit<GTINState> {
           ),
         );
       } else {
-        // Keep already-rendered rows in place while pagination appends. Sorting the
-        // entire accumulated list here moves existing rows above/below the current
-        // viewport and makes the list appear to jump when the next page arrives.
+        
         final List<GTIN> updatedGtins = List.from(state.gtins!)
           ..addAll(_sortGtinsByProductName(gtins, ascending: ascending));
         emit(
@@ -342,4 +340,4 @@ void _logGtinCubit(String operation, Object e, StackTrace st, {String? extra}) {
     debugPrint('[GTIN Cubit] exception in $operation$tail | $e');
   }
   debugPrint(st.toString());
-}
+}

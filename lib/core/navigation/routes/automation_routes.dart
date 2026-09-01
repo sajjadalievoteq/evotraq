@@ -21,7 +21,7 @@ List<RouteBase> automationRoutes(RouteAccess access) => [
         isAdmin: access.authState.isAdmin,
       );
       final requested = state.uri.queryParameters['section'];
-      // Non-admins deep-linked to Job Operations land on Subscriptions.
+      
       if (requested != null &&
           AutomationCenterSections.adminOnlyTabs.contains(
             AutomationCenterSections.normalizeTab(requested),
@@ -31,7 +31,7 @@ List<RouteBase> automationRoutes(RouteAccess access) => [
           AutomationCenterSections.alertSubscriptions,
         );
       }
-      // Normalize unknown / legacy aliases onto a canonical tab query.
+      
       if (requested != tab &&
           requested != AutomationCenterSections.notifications) {
         return AutomationCenterSections.location(tab);
@@ -39,4 +39,4 @@ List<RouteBase> automationRoutes(RouteAccess access) => [
       return null;
     },
   ),
-];
+];

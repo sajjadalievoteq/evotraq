@@ -1,4 +1,3 @@
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/data/services/barcode/barcode_generation_service.dart';
@@ -9,7 +8,6 @@ import 'package:traqtrace_app/data/services/barcode/gs1_barcode_api_service.dart
 import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_state.dart';
 import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_slice.dart';
-
 
 class Gs1ToolsCubit extends Cubit<Gs1ToolsState> {
   Gs1ToolsCubit({
@@ -67,8 +65,6 @@ class Gs1ToolsCubit extends Cubit<Gs1ToolsState> {
     emit(state.copyWith(clearInitialMode: true));
   }
 
-  // ─── Convert ──────────────────────────────────────────────────────────────
-
   void emitError(Gs1ToolKind kind, String message) {
     emit(
       state.withSlice(
@@ -103,4 +99,4 @@ class Gs1ToolsCubit extends Cubit<Gs1ToolsState> {
     if (text.isEmpty || text == 'null') return '—';
     return text;
   }
-}
+}

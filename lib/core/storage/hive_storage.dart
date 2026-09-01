@@ -1,10 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-
-
-
-
 class HiveStorage {
   HiveStorage._();
 
@@ -20,13 +16,11 @@ class HiveStorage {
     return box;
   }
 
-  
   static Future<void> init() async {
     await Hive.initFlutter();
     _box = await Hive.openBox<dynamic>(boxName);
   }
 
-  
   @visibleForTesting
   static Future<void> initForTests(String directoryPath) async {
     Hive.init(directoryPath);
@@ -55,7 +49,6 @@ class HiveStorage {
     return value.toString();
   }
 
-  /// Sync read for redirect-time lookups (Hive box must already be open).
   static String? getStringSync(String key) {
     final value = _prefs.get(key);
     if (value == null) return null;
@@ -95,4 +88,4 @@ class HiveStorage {
   static Future<bool> containsKey(String key) async {
     return _prefs.containsKey(key);
   }
-}
+}

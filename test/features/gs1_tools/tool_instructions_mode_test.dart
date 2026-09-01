@@ -17,7 +17,6 @@ import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/ai_el
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/barcode_tool.dart';
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/validate_tool.dart';
 
-/// The instructions card must describe the mode that is actually selected.
 void main() {
   Gs1ToolsCubit buildCubit() {
     final dio = DioService();
@@ -120,4 +119,4 @@ void main() {
     await selectFromModeDropdown(tester, 'EAN-13');
     expect(find.textContaining('EAN‑13 retail barcode'), findsOneWidget);
   });
-}
+}

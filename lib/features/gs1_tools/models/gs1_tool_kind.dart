@@ -1,5 +1,5 @@
 enum Gs1ToolKind {
-  // Consolidated identifier tools
+  
   convert,
   validate,
   build,
@@ -7,7 +7,7 @@ enum Gs1ToolKind {
   aiElement,
   ndc,
   lookup,
-  // EPCIS Serialization (document-level)
+  
   serializeConvert,
   serializeExport,
   serializeImport,
@@ -47,18 +47,14 @@ extension Gs1ToolKindX on Gs1ToolKind {
     Gs1ToolKind.barcode,
     Gs1ToolKind.aiElement,
     Gs1ToolKind.ndc,
-    // Gs1ToolKind.lookup, // Temporarily hidden: needs an external
-    // Verified-by-GS1 / GEPIR registry integration before it's useful.
+    
   ];
 
-  /// Rail tiles for EPCIS Serialization. Import/Export are implemented but
-  /// temporarily hidden from the workbench until ready to ship.
   static const serializationKinds = [Gs1ToolKind.serializeConvert];
 
-  /// Deep-link / legacy id → tool. Optional mode returned via [resolvedMode].
   static Gs1ToolKind fromId(String? id, {void Function(String mode)? onMode}) {
     switch ((id ?? '').trim().toLowerCase()) {
-      // Convert (absorbs EPC + Digital Link)
+      
       case 'convert':
         return Gs1ToolKind.convert;
       case 'epc':
@@ -76,7 +72,6 @@ extension Gs1ToolKindX on Gs1ToolKind {
         onMode?.call('convert');
         return Gs1ToolKind.aiElement;
 
-      // Validate (absorbs check-digit, validator, identifier, batch, decomposer)
       case 'validate':
       case 'validator':
       case 'validation':
@@ -98,7 +93,6 @@ extension Gs1ToolKindX on Gs1ToolKind {
         onMode?.call('anatomy');
         return Gs1ToolKind.validate;
 
-      // Build
       case 'build':
         return Gs1ToolKind.build;
       case 'sscc-builder':
@@ -109,7 +103,6 @@ extension Gs1ToolKindX on Gs1ToolKind {
         onMode?.call('gtin');
         return Gs1ToolKind.build;
 
-      // Barcode
       case 'barcode':
       case 'generate':
         return Gs1ToolKind.barcode;
@@ -121,7 +114,6 @@ extension Gs1ToolKindX on Gs1ToolKind {
         onMode?.call('pharma');
         return Gs1ToolKind.barcode;
 
-      // AI
       case 'ai':
       case 'ai-parser':
         return Gs1ToolKind.aiElement;
@@ -130,7 +122,6 @@ extension Gs1ToolKindX on Gs1ToolKind {
         onMode?.call('table');
         return Gs1ToolKind.aiElement;
 
-      // NDC / Lookup
       case 'ndc':
       case 'ndc-gtin':
         return Gs1ToolKind.ndc;
@@ -139,7 +130,6 @@ extension Gs1ToolKindX on Gs1ToolKind {
       case 'verified':
         return Gs1ToolKind.lookup;
 
-      // Serialization
       case 'serialize-convert':
       case 'serialize':
       case 'serialization':
@@ -153,11 +143,11 @@ extension Gs1ToolKindX on Gs1ToolKind {
       case 'export':
       case 'serialize-import':
       case 'import':
-        // Hidden for now — fall back to Format Conversion.
+        
         return Gs1ToolKind.serializeConvert;
 
       default:
         return Gs1ToolKind.convert;
     }
   }
-}
+}

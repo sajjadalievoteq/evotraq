@@ -226,8 +226,6 @@ class AggregationEventService {
     return _fetchAllAggregationEvents('$baseUrl/disposition/$disposition');
   }
 
-  /// Resolves the active parent of [childEPC] via `/container` only.
-  /// Does not re-fetch child ADD events (use event history APIs for that).
   Future<AggregationEvent> findCurrentParentOfChild(String childEPC) async {
     final headers = await getHeaders();
 
@@ -298,4 +296,4 @@ class AggregationEventService {
         )
         .toList();
   }
-}
+}

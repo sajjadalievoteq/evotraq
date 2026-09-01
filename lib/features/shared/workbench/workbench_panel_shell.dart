@@ -25,7 +25,6 @@ class WorkbenchPanelShell extends StatelessWidget {
   final WorkbenchSlice slice;
   final List<Widget> actions;
 
-  /// When true, [child] fills remaining height (for nested CRUD/list UIs).
   final bool expandBody;
 
   final WorkbenchInstructions? instructions;
@@ -120,4 +119,4 @@ class WorkbenchPanelShell extends StatelessWidget {
       ],
     );
   }
-}
+}

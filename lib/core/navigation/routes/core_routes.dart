@@ -16,8 +16,7 @@ import 'package:traqtrace_app/features/product_journey/screens/journey_dashboard
 import 'package:traqtrace_app/features/user/screens/profile/profile_screen.dart';
 
 List<RouteBase> coreRoutes() => [
-  // Branding splash is shown once before [GoRouter] mounts. This entry only
-  // exists so explicit `/splash` URLs resolve; [AppRouter] redirect exits it.
+  
   GoRoute(
     path: Constants.splashRoute,
     pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(

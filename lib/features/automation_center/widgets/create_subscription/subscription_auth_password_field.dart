@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
-/// A [FormBuilderTextField] with an obscure-text/eye-icon toggle, matching the
-/// visual convention used elsewhere in the app for password entry (see
-/// `AuthInputField`), but built on `FormBuilderTextField` since this field
-/// lives inside a `FormBuilder` (subscription create/edit dialog).
 class SubscriptionAuthPasswordField extends StatefulWidget {
   const SubscriptionAuthPasswordField({
     super.key,
@@ -50,4 +46,4 @@ class _SubscriptionAuthPasswordFieldState
       ),
     );
   }
-}
+}

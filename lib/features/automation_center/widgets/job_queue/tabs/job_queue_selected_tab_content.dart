@@ -6,7 +6,6 @@ import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_queue_tab.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/job_queue/tabs/job_queue_worker_pool_tab.dart';
 
-/// Renders the selected tab when the panel is embedded (no [TabBarView]).
 class JobQueueSelectedTabContent extends StatelessWidget {
   final int tabIndex;
   final JobQueueDashboardSnapshot dashboardSnapshot;
@@ -110,4 +109,4 @@ class JobQueueSelectedTabContent extends StatelessWidget {
         return const SizedBox.shrink();
     }
   }
-}
+}

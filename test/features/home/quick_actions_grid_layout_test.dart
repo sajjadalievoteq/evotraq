@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/quick_actions/widgets/dashboard_quick_action_card.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/quick_actions/widgets/quick_actions_grid.dart';
 
-/// Number of tiles rendered in the first row, i.e. the resolved column count.
 int _columnsInFirstRow(WidgetTester tester) {
   final cards = find.byType(DashboardQuickActionCard);
   final tops = tester
@@ -41,7 +40,6 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    // Content width of a 1024px browser window minus the dashboard gutters.
     await _pumpAtWidth(tester, 965);
     expect(_columnsInFirstRow(tester), 5);
   });
@@ -71,4 +69,4 @@ void main() {
     expect(size.height, lessThanOrEqualTo(92.0));
     expect(size.width, greaterThan(size.height));
   });
-}
+}

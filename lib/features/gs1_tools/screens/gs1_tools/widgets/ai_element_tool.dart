@@ -13,8 +13,6 @@ import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/ai_el
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 
-/// Consolidated Application Identifier tool: parse an element string, build
-/// one from AI/value pairs, or browse the bundled AI reference table.
 class AiElementTool extends StatefulWidget {
   const AiElementTool({super.key});
 
@@ -218,4 +216,4 @@ class _AiElementToolState extends State<AiElementTool>
       },
     );
   }
-}
+}

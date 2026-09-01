@@ -82,7 +82,6 @@ class GLNService {
     return all;
   }
 
-  /// Lightweight picker catalog. Falls through to caller on 404/unavailable.
   Future<List<GLN>> fetchPickerSummaries() async {
     final all = <GLN>[];
     var page = 0;
@@ -447,4 +446,4 @@ class GLNService {
       responseBody: response.data is String ? response.data as String? : null,
     );
   }
-}
+}

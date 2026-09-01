@@ -51,7 +51,7 @@ class HierarchyNode {
     return HierarchyNode(
       epc: json['epc'] as String,
       type: nodeType,
-      // Cycle nodes must not be expandable (backend also forces hasChildren=false).
+      
       hasChildren: cycle == true ? false : hasChildrenRaw,
       childCount: (json['childCount'] as num?)?.toInt(),
       gtin: json['gtin'] as String?,
@@ -66,4 +66,4 @@ class HierarchyNode {
       focused: json['focused'] as bool?,
     );
   }
-}
+}

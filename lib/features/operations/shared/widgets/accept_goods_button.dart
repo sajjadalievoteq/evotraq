@@ -81,8 +81,7 @@ class _AcceptGoodsButtonState extends State<AcceptGoodsButton> {
     setState(() {
       _evaluating = false;
       _eligible = matches;
-      // Operational GLN doesn't match the receiving location: hide the button
-      // entirely (no disabled button or message), same as the return buttons.
+      
     });
   }
 
@@ -182,4 +181,4 @@ class _AcceptGoodsButtonState extends State<AcceptGoodsButton> {
       ),
     );
   }
-}
+}

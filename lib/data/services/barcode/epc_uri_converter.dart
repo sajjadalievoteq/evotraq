@@ -2,11 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/data/services/barcode/gs1_barcode_parser.dart';
 
-
 class EPCURIConverter {
   static const String _dlBase = 'https://id.gs1.org';
 
-  
   static String normalizeForStorage(String input) {
     final trimmed = input.trim();
     if (trimmed.isEmpty) return trimmed;
@@ -29,10 +27,6 @@ class EPCURIConverter {
       return _urnToDigitalLink(barcode);
     }
 
-    // Bare 18 digits are ambiguous (SSCC vs GTIN-14 + numeric serial). Prefer
-    // SGTIN when the first 14 digits are a valid GTIN; only emit SSCC when the
-    // full 18-digit string is a valid SSCC. Never invent /00/ without a valid
-    // check digit (and never prefer SSCC when GTIN+serial is also valid).
     if (RegExp(r'^\d{18}$').hasMatch(barcode)) {
       final gtin14 = barcode.substring(0, 14);
       final serial = barcode.substring(14);
@@ -52,7 +46,6 @@ class EPCURIConverter {
       final serial = parsed['SERIAL']?.toString();
       final gtinRaw = parsed['GTIN']?.toString();
 
-      
       if (ssccDigits.length == 18) {
         return convertSSCCToEPCUri(ssccDigits);
       }
@@ -303,7 +296,6 @@ class EPCURIConverter {
     return null;
   }
 
-  
   static String? extractSSCCFromEPCUri(String epcUri) {
     final dlMatch =
         RegExp(r'^https://id\.gs1\.org/00/(\d{18})$').firstMatch(epcUri);
@@ -399,4 +391,4 @@ class EPCURIConverter {
     final checkDigit = CheckDigitUtils.calculateMod10(body);
     return '$body$checkDigit';
   }
-}
+}

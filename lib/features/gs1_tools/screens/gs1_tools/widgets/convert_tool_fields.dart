@@ -4,9 +4,6 @@ import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/mode_selector.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_slice.dart';
 
-/// Consolidated conversion workbench: URN ⇄ Digital Link, EPC ⇄ GS1
-/// identifiers, and Digital Link ⇄ element string.
-
 import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools/widgets/convert_tool_identifier_fields.dart';
 
 class ConvertToolFields extends StatelessWidget {
@@ -201,4 +198,4 @@ class ConvertToolFields extends StatelessWidget {
         );
     }
   }
-}
+}

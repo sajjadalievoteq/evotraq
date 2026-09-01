@@ -14,8 +14,7 @@ bool canManuallyEditSsccStatus(
   LogisticUnitStatus status, {
   bool isCreating = false,
 }) {
-  // Create always persists ALLOCATED (or explicit draft via dedicated draft flows).
-  // Users must not pick ACTIVE / IN_TRANSIT / etc. on create.
+  
   if (isCreating) return false;
   return status == LogisticUnitStatus.DRAFT;
 }

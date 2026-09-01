@@ -11,7 +11,6 @@ bool productHierarchyShowsCompactDetail(ProductHierarchyState state) {
       (state.hierarchyError ?? '').isNotEmpty;
 }
 
-/// Phone and tablet: recent/search list first, then the tree after a selection.
 class ProductHierarchyCompactBody extends StatelessWidget {
   const ProductHierarchyCompactBody({
     super.key,
@@ -40,4 +39,4 @@ class ProductHierarchyCompactBody extends StatelessWidget {
       },
     );
   }
-}
+}

@@ -7,9 +7,6 @@ import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 
 import 'package:traqtrace_app/features/gs1_tools/utils/epcis_import_validation_result.dart';
 
-/// Three-gate validator: format → schema/structure → content.
-/// Rejects on the first failing gate (later gates are not run).
-
 class EpcisImportContentValidator {
   static void validateEventContent(
     Map<String, dynamic> event,
@@ -145,7 +142,7 @@ class EpcisImportContentValidator {
           ),
         );
       } else {
-        // Reuse Gs1DateUtils for calendar validity via YYMMDD conversion.
+        
         final yymmdd =
             '${exp.substring(2, 4)}${exp.substring(5, 7)}${exp.substring(8, 10)}';
         final err = Gs1DateUtils.validateYymmdd(
@@ -164,4 +161,4 @@ class EpcisImportContentValidator {
       }
     }
   }
-}
+}

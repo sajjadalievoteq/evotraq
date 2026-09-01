@@ -40,11 +40,11 @@ class InboundCatalogState extends Equatable {
       selectedCategoryId: clearSelectedCategory
           ? null
           : (selectedCategoryId ?? this.selectedCategoryId),
-      // Matches NotificationState / JobQueueState: error is not carried forward.
+      
       error: error,
     );
   }
 
   @override
   List<Object?> get props => [status, catalog, selectedCategoryId, error];
-}
+}

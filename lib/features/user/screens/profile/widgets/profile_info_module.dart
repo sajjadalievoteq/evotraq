@@ -228,6 +228,7 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
                       ],
                     )
                   : CustomElevatedButton(
+                fontSize: 14,
                       label: UserStrings.editProfile,
                       onPressed: _toggleEdit,
                       isEnabled: true,

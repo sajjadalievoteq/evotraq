@@ -13,7 +13,6 @@ class User {
   final bool emailNotifications;
   final bool appNotifications;
 
-  /// Client preference: GLN used for pharma return flows. Server-persisted.
   final String? operationalGln;
 
   User({
@@ -106,4 +105,4 @@ class User {
     'appNotifications': appNotifications,
     'operationalGln': operationalGln,
   };
-}
+}

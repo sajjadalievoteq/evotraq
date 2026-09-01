@@ -4,10 +4,6 @@ import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
-/// Access point for the user's Operational GLN preference.
-///
-/// Public API is unchanged (`getGln` / `setGln`). Persistence is server-first
-/// via `PUT /users/profile`, with Hive kept as an offline mirror/cache.
 class OperationalGlnStore {
   OperationalGlnStore._();
 
@@ -31,7 +27,7 @@ class OperationalGlnStore {
         }
       }
     } catch (_) {
-      // Fall through to Hive when profile is unavailable.
+      
     }
 
     return _readHive(userId);
@@ -65,8 +61,6 @@ class OperationalGlnStore {
     }
   }
 
-  /// One-time Hive → DB migration for users who set Operational GLN before
-  /// server persistence shipped. No-op when the server already has a value.
   static Future<void> backfillIfNeeded(User user) async {
     final server = _normalize(user.operationalGln);
     if (server != null) {
@@ -80,7 +74,7 @@ class OperationalGlnStore {
     try {
       await setGln(user.id, hive);
     } catch (_) {
-      // Keep Hive value; next successful auth/profile load will retry.
+      
     }
   }
 
@@ -104,4 +98,4 @@ class OperationalGlnStore {
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
   }
-}
+}

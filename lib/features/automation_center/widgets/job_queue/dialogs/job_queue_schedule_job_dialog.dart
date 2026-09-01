@@ -30,8 +30,7 @@ class JobQueueScheduleJobDialog extends StatefulWidget {
 }
 
 class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
-  // TODO(scheduling): real deferred/cron execution requires a backend
-  // scheduled-submit endpoint + quartz/scheduler; out of scope here.
+  
   static const _jobTypeOptions = [
     {
       'value': 'NOTIFICATION_BATCH',
@@ -219,4 +218,4 @@ class _JobQueueScheduleJobDialogState extends State<JobQueueScheduleJobDialog> {
       ],
     );
   }
-}
+}

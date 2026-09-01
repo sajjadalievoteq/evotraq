@@ -1,6 +1,5 @@
 abstract final class ThroughputChartUtils {
-  /// Deterministic loading silhouette. Cycled when the selected range has
-  /// more bars than this pattern (e.g. 24 hourly buckets).
+  
   static const List<double> placeholderFractions = [
     0.30,
     0.55,
@@ -39,4 +38,4 @@ abstract final class ThroughputChartUtils {
     final interval = niceInterval(maxVal);
     return interval * (maxVal / interval).ceil();
   }
-}
+}

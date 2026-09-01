@@ -251,7 +251,6 @@ class TatmeenRecordsQuery {
   final int pageSize;
 }
 
-/// Result of a manual Tatmeen retry attempt, with a ready-to-display user message.
 class TatmeenRetryOutcome {
   const TatmeenRetryOutcome._({required this.succeeded, required this.message});
 
@@ -264,4 +263,4 @@ class TatmeenRetryOutcome {
 
   factory TatmeenRetryOutcome.failure(String message) =>
       TatmeenRetryOutcome._(succeeded: false, message: message);
-}
+}

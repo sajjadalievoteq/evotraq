@@ -8,10 +8,6 @@ import 'package:traqtrace_app/features/automation_center/utils/notification_cons
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_meta_chip.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/subscription_card/subscription_status_chip.dart';
 
-/// Header card for the subscription details page: name + status at a glance,
-/// plus a row of meta chips (delivery method, subscription type, format)
-/// summarizing how this subscription is configured without needing to read
-/// the sections below.
 class SubscriptionDetailsHeaderCard extends StatelessWidget {
   const SubscriptionDetailsHeaderCard({super.key, required this.subscription});
 
@@ -80,4 +76,4 @@ class SubscriptionDetailsHeaderCard extends StatelessWidget {
       ),
     );
   }
-}
+}

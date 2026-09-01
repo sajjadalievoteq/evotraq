@@ -39,7 +39,7 @@ class TatmeenStatusBreakdownChart extends StatelessWidget {
       return const AppEmptyState(
         iconAsset: AppAssets.iconDashboard,
         title: 'No status data yet',
-        subtitle: 'Monthly status breakdown will appear here.',
+        subtitle: 'Current status breakdown will appear here.',
       );
     }
     return LayoutBuilder(

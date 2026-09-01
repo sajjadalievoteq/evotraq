@@ -1,9 +1,5 @@
 import 'package:intl/intl.dart';
 
-/// Application-wide timestamp policy.
-///
-/// API instants are UTC. Legacy values without an offset are interpreted as
-/// UTC. UAE presentation uses UTC+04:00; the UAE has no daylight-saving time.
 abstract final class AppTime {
   static const uaeOffset = Duration(hours: 4);
 
@@ -35,4 +31,4 @@ abstract final class AppTime {
 
   static String formatUae(DateTime value, DateFormat format) =>
       format.format(toUae(value));
-}
+}

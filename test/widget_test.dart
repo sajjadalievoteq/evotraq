@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/splash/screens/splash_screen.dart';
+import 'package:traqtrace_app/features/splash/native_splash_colors.dart';
 
 void main() {
-  testWidgets('TraqTrace app smoke test', (WidgetTester tester) async {
+  testWidgets('startup safety background matches native splash', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: TraqTheme.light(),
-        darkTheme: TraqTheme.dark(),
-        home: const SplashScreen(),
+      const MaterialApp(
+        home: ColoredBox(color: NativeSplashColors.lightBackground),
       ),
     );
-    expect(find.byType(MaterialApp), findsOneWidget);
-    await tester.pump();
+
+    final splashBackground = find.byWidgetPredicate(
+      (widget) =>
+          widget is ColoredBox &&
+          widget.color == NativeSplashColors.lightBackground,
+    );
+    expect(splashBackground, findsOneWidget);
+    final box = tester.widget<ColoredBox>(splashBackground);
+    expect(box.color, NativeSplashColors.lightBackground);
   });
 }

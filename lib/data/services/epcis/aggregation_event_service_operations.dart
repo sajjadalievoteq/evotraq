@@ -4,8 +4,7 @@ import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
 
 extension AggregationEventServiceOperations on AggregationEventService {
-  /// @Deprecated Prefer [PackingOperationService.createPackingOperation]
-  /// (`POST /operations/packing`). Kept for non-UI callers only.
+  
   @Deprecated('Use PackingOperationService.createPackingOperation instead')
   Future<AggregationEvent> createPackEvent(
     String parentEPC,
@@ -74,8 +73,6 @@ extension AggregationEventServiceOperations on AggregationEventService {
     }
   }
 
-  /// @Deprecated Prefer [UnpackingOperationService.createUnpackingOperation]
-  /// (`POST /operations/unpacking`). Kept for non-UI callers only.
   @Deprecated('Use UnpackingOperationService.createUnpackingOperation instead')
   Future<AggregationEvent> createUnpackEvent(
     String parentEPC,
@@ -205,9 +202,6 @@ extension AggregationEventServiceOperations on AggregationEventService {
     }
   }
 
-  /// Direct children of [parentEPC] via the canonical hierarchy children API
-  /// (`GET /events/aggregation/children`). Prefer this over traversal
-  /// `contained-items` for product/ops UIs.
   Future<List<String>> findContainerContents(String parentEPC) async {
     final headers = await getHeaders();
     const pageSize = 200;
@@ -251,8 +245,6 @@ extension AggregationEventServiceOperations on AggregationEventService {
     }
   }
 
-  /// Integrity check using the same children/container APIs as the hierarchy UI
-  /// (no separate traversal `contained-items` round-trip).
   Future<bool> verifyHierarchy(String epc) async {
     try {
       await findContainerContents(epc);
@@ -273,4 +265,4 @@ extension AggregationEventServiceOperations on AggregationEventService {
       }
     }
   }
-}
+}

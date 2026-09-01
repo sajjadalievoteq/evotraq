@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 
-/// Interpolates the headline throughput figure from its previous value.
 class AnimatedThroughputTotal extends StatelessWidget {
   const AnimatedThroughputTotal({
     super.key,
@@ -35,4 +34,4 @@ class AnimatedThroughputTotal extends StatelessWidget {
       },
     );
   }
-}
+}

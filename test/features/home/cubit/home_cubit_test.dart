@@ -619,7 +619,7 @@ void main() {
 
     test('connecting triggers an immediate REST re-sync and stops the fallback poll', () async {
       final cubit = await seedReadyCubit();
-      cubit.startPolling(accountEmail: 'user@example.com'); // simulate a prior disconnected state
+      cubit.startPolling(accountEmail: 'user@example.com'); 
       clearInteractions(mockService);
 
       when(mockService.getSummary(
@@ -683,8 +683,6 @@ void main() {
       expect(cubit.state.throughputHours, 168);
       expect(cubit.state.stats?.throughputBuckets, {5: 10});
 
-      // The heartbeat push always uses the default (24h) window with different figures — a
-      // non-default selection must keep the previously-fetched throughput, not the push's.
       final withDifferentThroughput = pushPayload(gtin: 42);
       withDifferentThroughput['throughput'] = {
         'buckets': [
@@ -710,9 +708,9 @@ void main() {
       await cubit.close();
 
       verifyNever(mockWs.disconnect());
-      // Emitting after close must not throw (subscriptions were cancelled).
+      
       expect(() => dashboardPushController.add(pushPayload(gtin: 1)), returnsNormally);
       expect(() => connectionController.add(true), returnsNormally);
     });
   });
-}
+}

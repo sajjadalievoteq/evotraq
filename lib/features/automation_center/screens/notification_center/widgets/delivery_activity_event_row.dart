@@ -15,17 +15,6 @@ import 'package:traqtrace_app/features/automation_center/screens/notification_ce
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/delivery_activity_error_banner.dart';
 import 'package:traqtrace_app/features/automation_center/screens/notification_center/widgets/delivery_activity_dense_row.dart';
 
-
-/// One durable delivery attempt from `webhook_notifications`, rendered as a
-/// theme-matching tile: a bordered [TraqCard] with a tinted circular status
-/// icon (same tint/color language as [SubscriptionStatusChip] and the job
-/// queue's status badges), the subscription name as a [SubscriptionMetaChip]
-/// (the same chip used on subscription cards), and — for failures — the
-/// error message in its own tinted banner instead of plain red text.
-///
-/// [dense] renders a compact single-row variant instead, for contexts with
-/// less room (e.g. an embedded recent-activity feed).
-
 class DeliveryActivityEventRow extends StatefulWidget {
   const DeliveryActivityEventRow({
     super.key,
@@ -201,4 +190,4 @@ class _DeliveryActivityEventRowState extends State<DeliveryActivityEventRow> {
       ),
     );
   }
-}
+}

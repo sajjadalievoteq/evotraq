@@ -9,7 +9,6 @@ import 'package:traqtrace_app/data/services/user_management/user_management_serv
 import 'package:traqtrace_app/features/automation_center/widgets/inbound/create_system_user_dialog.dart';
 import 'package:traqtrace_app/features/automation_center/widgets/inbound/b2b_users_list_skeleton.dart';
 
-/// Survives Outbound ↔ Inbound panel remounts within the same app session.
 List<UserResponse> _sessionB2bUsers = const [];
 
 class SystemUsersCard extends StatefulWidget {
@@ -33,7 +32,7 @@ class _SystemUsersCardState extends State<SystemUsersCard> {
   }
 
   Future<void> _load({bool force = true}) async {
-    // Keep the existing list visible on remount / soft refresh.
+    
     if (!force && _users.isNotEmpty) return;
 
     setState(() {
@@ -174,4 +173,4 @@ class _SystemUsersCardState extends State<SystemUsersCard> {
       ),
     );
   }
-}
+}

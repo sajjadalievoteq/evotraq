@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_background_texture.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -27,17 +27,10 @@ class OperationDetailStatusBanner extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: context.colors.primary,
-          image: DecorationImage(
-            image: AssetImage(AppAssets.traqBackgroundPng),
-            fit: BoxFit.cover,
-            opacity: 0.2,
-          ),
         ),
         child: Stack(
           children: [
-            Positioned.fill(
-              child: Container(color: Colors.black.withOpacity(0.1)),
-            ),
+            const Positioned.fill(child: TraqBackgroundTexture()),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(

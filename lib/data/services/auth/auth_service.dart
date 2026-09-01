@@ -8,13 +8,11 @@ import 'package:traqtrace_app/data/models/auth/register_request.dart';
 import 'package:traqtrace_app/data/models/auth/auth_response.dart';
 import 'package:traqtrace_app/data/models/auth/user.dart';
 
-
 class AuthService {
   final DioService dioService;
 
   AuthService({required this.dioService});
 
-  /// Current Bearer token from Dio's cache/storage (same source used by API calls).
   Future<String?> getAuthToken() => dioService.getAuthToken();
 
   String? _extractMessageFromDecodedBody(dynamic decoded) {
@@ -431,8 +429,7 @@ class AuthService {
         acceptAllStatusCodes: true,
       );
     } catch (_) {
-      // Best-effort: a failed ping must not take down an otherwise valid session.
-      // Idle expiry is still enforced by the backend on the next authenticated call.
+      
     }
   }
 
@@ -445,9 +442,9 @@ class AuthService {
         acceptAllStatusCodes: true,
       );
     } catch (_) {
-      // Local logout must always succeed even if the backend is unreachable.
+      
     } finally {
       await dioService.removeAuthToken();
     }
   }
-}
+}

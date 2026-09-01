@@ -8,11 +8,6 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/utils/product_hierarchy_tree_flatten.dart';
 
-/// Loading placeholder for the hierarchy tree (right panel).
-///
-/// Mirrors [ProductHierarchyNodeTile] + [ProductHierarchyGroupChrome]:
-/// bordered expandable headers, muted group bodies with accent rails, and
-/// borderless leaf rows with a status subtitle.
 class ProductHierarchyTreeSkeleton extends StatelessWidget {
   const ProductHierarchyTreeSkeleton({super.key});
 
@@ -106,4 +101,4 @@ class ProductHierarchyTreeSkeleton extends StatelessWidget {
       ),
     );
   }
-}
+}

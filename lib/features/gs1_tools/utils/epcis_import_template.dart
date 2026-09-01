@@ -1,7 +1,3 @@
-/// Canonical EPCIS 2.0 JSON-LD import template (bundled asset).
-///
-/// Shape matches [EPCISJsonLdSerializer] output: `@context`, `type=EPCISDocument`,
-/// `schemaVersion`, `epcisBody.eventList` with compact CBV and Digital Link EPCs.
 abstract final class EpcisImportTemplate {
   static const String assetPath = 'assets/gs1/epcis-import-template.jsonld';
   static const String downloadFilename = 'epcis-import-template.jsonld';
@@ -10,7 +6,6 @@ abstract final class EpcisImportTemplate {
   static const String contextUri =
       'https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld';
 
-  /// Placeholder markers that must be replaced before import.
   static const Set<String> placeholders = {
     'REPLACE_WITH_ISO_CREATION_DATE',
     'REPLACE_WITH_DOCUMENT_URN_UUID',
@@ -74,4 +69,4 @@ abstract final class EpcisImportTemplate {
     'AggregationEvent',
   };
 
-}
+}

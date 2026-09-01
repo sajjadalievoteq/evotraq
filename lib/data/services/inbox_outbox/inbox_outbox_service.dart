@@ -61,8 +61,7 @@ class InboxOutboxService {
     required int size,
     String? search,
   }) async {
-    // Sequential on purpose: concurrent INBOUND+OUTBOUND held two heavy DB
-    // connections per user and exhausted Hikari under load. Same merge result.
+    
     final inbound = await getInTransitOperationsPage(
       gln: gln,
       direction: InboxOutboxDirection.inbound,
@@ -160,4 +159,4 @@ class InboxOutboxService {
       );
     }
   }
-}
+}

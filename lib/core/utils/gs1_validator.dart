@@ -4,8 +4,6 @@ import 'package:traqtrace_app/data/services/barcode/gs1_barcode_parser.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 
-/// Thin facade over [CheckDigitUtils] / canonical EPC helpers.
-/// Prefer calling [CheckDigitUtils] directly in new code.
 @Deprecated(
   'Use CheckDigitUtils (and Gs1CanonicalIdentifier / GS1BarcodeParser) instead.',
 )
@@ -27,8 +25,6 @@ class GS1Validator {
     return Gs1CanonicalIdentifier.isValid(epcUri);
   }
 
-  /// Parses GS1 element strings / human-readable AI forms via [GS1BarcodeParser].
-  /// Returns `null` when valid; otherwise a reason string.
   static String? validateBarcodeData(String? barcodeData) {
     if (barcodeData == null || barcodeData.trim().isEmpty) {
       return 'Barcode data cannot be empty';
@@ -51,4 +47,4 @@ class GS1Validator {
 
   static String? validateSerialNumber(String? serial) =>
       sgtin_validators.validateSerialNumber(serial);
-}
+}

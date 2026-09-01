@@ -41,14 +41,10 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
     super.dispose();
   }
 
-  /// Load the view-root's earlier sibling page when the user scrolls up to the
-  /// very top. Gated on an active upward drag so it never fires on the
-  /// programmatic settle right after a climb (which lands pinned at the top).
   void _onScroll() {
     if (!mounted || _loadingPrevious || !_scrollController.hasClients) return;
     final pos = _scrollController.position;
-    // ScrollDirection.forward == the user is dragging content down (toward the
-    // top / revealing earlier rows).
+    
     if (pos.userScrollDirection != ScrollDirection.forward) return;
     if (pos.pixels > pos.minScrollExtent + 120) return;
 
@@ -58,10 +54,6 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
     _handleLoadPrevious();
   }
 
-  /// Fetch the previous page and preserve the visual scroll position: the list
-  /// grows above the viewport, so we advance the offset by the measured extent
-  /// growth to keep the row the user was looking at stable (and push the
-  /// spinner off the top so it can't cascade).
   Future<void> _handleLoadPrevious() async {
     if (_loadingPrevious || !_scrollController.hasClients) return;
     final cubit = context.read<ProductHierarchyCubit>();
@@ -91,9 +83,6 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
     }
   }
 
-  /// Animate to [scrollToEpc]. Parent/root (index 0) scrolls to the top;
-  /// nested search hits center in the viewport. Cheap: one post-frame pass,
-  /// no layout measurement loops.
   void _scheduleScrollToEpc(
     List<ProductHierarchyFlatItem> items,
     String? scrollToEpc,
@@ -117,7 +106,7 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
       const estimatedRowExtent = 64.0;
       final double targetOffset;
       if (index == 0) {
-        // Climb lands on the new view-root — pin it to the top.
+        
         targetOffset = position.minScrollExtent;
       } else {
         targetOffset =
@@ -130,7 +119,6 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
         position.maxScrollExtent,
       );
 
-      // Already in place — skip animation work.
       if ((position.pixels - clamped).abs() < 1.0) {
         context.read<ProductHierarchyCubit>().clearScrollToEpc();
         return;
@@ -195,9 +183,6 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
       builder: (context, state) {
         final cubit = context.read<ProductHierarchyCubit>();
 
-        // Keep both panels in sync: show skeleton if we are resolving the root,
-        // climbing levels, loading node details for the first time,
-        // or if the initial "recent parents" list is still loading on the left.
         final showSkeleton =
             state.isResolvingRoot ||
             state.isClimbing ||
@@ -252,4 +237,4 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
       },
     );
   }
-}
+}

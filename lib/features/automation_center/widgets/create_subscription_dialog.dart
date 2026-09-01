@@ -381,9 +381,6 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           ? formData['preferredTime'] as TimeOfDay?
           : null;
 
-      // Only meaningful for WEBHOOK/API delivery. On edit, leaving these blank
-      // means "don't change" for the password (see UpdateSubscriptionRequest);
-      // an empty username is sent as-is since there's no saved value to protect.
       final String? webhookAuthUsername = deliveryMethod == 'WEBHOOK'
           ? (formData['webhookAuthUsername'] as String?)
           : null;
@@ -427,4 +424,4 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       }
     }
   }
-}
+}

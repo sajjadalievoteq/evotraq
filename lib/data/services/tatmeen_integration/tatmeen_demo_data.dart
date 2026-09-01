@@ -2,12 +2,8 @@
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_dashboard_models.dart';
 import 'package:traqtrace_app/data/models/tatmeen_integration/tatmeen_records_models.dart';
 
-/// Hard-coded demo data for the Tatmeen Integration module.
-/// Used when [TatmeenIntegrationService.demoMode] == true.
-/// Flip [TatmeenIntegrationService.demoMode] to false to restore live API calls.
 abstract final class TatmeenDemoData {
-  // ── Dashboard stats ────────────────────────────────────────────────────────
-
+  
   static TatmeenDashboardStats get dashboardStats => TatmeenDashboardStats(
         totalSynced: 142,
         successfulThisMonth: 58,
@@ -19,14 +15,10 @@ abstract final class TatmeenDemoData {
         lastSyncedAt: DateTime.now().subtract(const Duration(minutes: 23)),
       );
 
-  // ── Chart – last N days ────────────────────────────────────────────────────
-
-  // ~60 % of days are "high" (≥ 70), the rest are low — fixed so the chart
-  // always looks the same on every build.
   static const _successValues = [
-    82, 91, 25, 78, 88, 14, 95, 76, 38, 85, // days 0-9
-    74, 93, 22, 87, 79, 42, 96, 83, 17, 89, // days 10-19
-    72, 35, 94, 81, 28, 86, 75, 12, 92, 77, // days 20-29
+    82, 91, 25, 78, 88, 14, 95, 76, 38, 85, 
+    74, 93, 22, 87, 79, 42, 96, 83, 17, 89, 
+    72, 35, 94, 81, 28, 86, 75, 12, 92, 77, 
   ];
   static const _failedValues = [
     0, 2, 1, 0, 0, 3, 0, 1, 0, 0,
@@ -47,15 +39,11 @@ abstract final class TatmeenDemoData {
     });
   }
 
-  // ── Status breakdown ───────────────────────────────────────────────────────
-
   static const TatmeenStatusBreakdown statusBreakdown = TatmeenStatusBreakdown(
     successful: 136,
     failed: 4,
     pending: 2,
   );
-
-  // ── Recent activity ────────────────────────────────────────────────────────
 
   static List<TatmeenSyncEvent> recentActivity({int limit = 10}) {
     final now = DateTime.now();
@@ -134,8 +122,6 @@ abstract final class TatmeenDemoData {
     return all.take(limit.clamp(1, all.length)).toList();
   }
 
-  // ── Error summary ──────────────────────────────────────────────────────────
-
   static const List<TatmeenErrorSummaryItem> errorSummary = [
     TatmeenErrorSummaryItem(
       message: 'Tatmeen service timeout — request exceeded 30s',
@@ -146,8 +132,6 @@ abstract final class TatmeenDemoData {
       count: 1,
     ),
   ];
-
-  // ── Sync records ───────────────────────────────────────────────────────────
 
   static TatmeenSyncRecordsPage syncRecordsPage({
     TatmeenRecordsStatusFilter status = TatmeenRecordsStatusFilter.all,
@@ -282,4 +266,4 @@ abstract final class TatmeenDemoData {
         ],
         createdAt: createdAt,
       );
-}
+}

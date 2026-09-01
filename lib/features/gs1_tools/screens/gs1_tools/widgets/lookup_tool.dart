@@ -9,7 +9,6 @@ import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_state.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_panel_shell.dart';
 
-/// GS1 registry lookup for a single GTIN or GLN. Requires network access.
 class LookupTool extends StatefulWidget {
   const LookupTool({super.key});
 
@@ -88,4 +87,4 @@ class _LookupToolState extends State<LookupTool> {
       },
     );
   }
-}
+}

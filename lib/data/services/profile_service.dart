@@ -111,10 +111,6 @@ class ProfileService {
     }
   }
 
-  /// Partial profile update for the Operational GLN preference.
-  ///
-  /// Pass a 13-digit code to set, or `null`/blank to clear. Other profile
-  /// fields are left unchanged on the server.
   Future<User> updateOperationalGln(String? operationalGln) async {
     final headers = await _getAuthHeaders();
     final value = operationalGln?.trim() ?? '';
@@ -365,4 +361,4 @@ class ProfileService {
       );
     }
   }
-}
+}

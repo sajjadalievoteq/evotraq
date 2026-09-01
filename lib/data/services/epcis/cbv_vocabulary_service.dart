@@ -83,11 +83,6 @@ class CbvVocabularyService {
     _attempt = 0;
     _networkStarted = false;
 
-    // Invalidate ALL cached vocabulary so the next session re-fetches from the
-    // backend. Without this, a new login (or a change to the backend vocabulary)
-    // keeps serving the previous session's cached terms: hydrateFromCache()
-    // early-returns on the surviving _session, and the master-data in-memory
-    // cache short-circuits the network fetch.
     _session = null;
     _cacheHydrated = false;
     _masterDataService.clearCache();
@@ -215,4 +210,4 @@ class CbvVocabularyService {
     _ttlTimer?.cancel();
     _eventsController.close();
   }
-}
+}

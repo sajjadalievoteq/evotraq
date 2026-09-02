@@ -328,4 +328,4 @@ class JobQueueCubit extends Cubit<JobQueueState> {
     
     return super.close();
   }
-}
+}

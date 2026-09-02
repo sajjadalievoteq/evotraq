@@ -7,4 +7,4 @@ class RouteAwareSelectionArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SelectionArea(child: child);
-}
+}

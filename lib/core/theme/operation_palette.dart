@@ -393,4 +393,4 @@ class OperationPalette {
       Color(0xFF818CF8),
     ],
   );
-}
+}

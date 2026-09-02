@@ -3,12 +3,10 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/storage/recent_login_usernames_store.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/data/models/auth/login_request.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/auth/screens/login/widgets/login_username_autocomplete_field.dart';
 import 'package:traqtrace_app/features/auth/screens/login/widgets/login_username_input_field.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_footer_link_row.dart';
@@ -29,15 +27,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   final _usernameController = TextEditingController();
   final _usernameFocusNode = FocusNode();
   final _passwordController = TextEditingController();
-  final _usernameStore = const RecentLoginUsernamesStore();
   bool _hasRequiredInput = false;
-  List<String> _recentUsernames = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadRecentUsernames();
-  }
 
   @override
   void dispose() {
@@ -45,18 +35,6 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
     _usernameFocusNode.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadRecentUsernames() async {
-    final usernames = await _usernameStore.getUsernames();
-    if (!mounted) return;
-
-    setState(() => _recentUsernames = usernames);
-
-    if (usernames.isNotEmpty) {
-      _usernameController.text = usernames.first;
-      _updateButtonState();
-    }
   }
 
   void _submitForm() {
@@ -67,7 +45,6 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
         password: _passwordController.text,
       );
 
-      _usernameStore.rememberUsername(username);
       context.read<AuthCubit>().login(loginRequest);
     }
   }
@@ -87,27 +64,17 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   Widget build(BuildContext context) {
     final isLoading = widget.state.status == AuthStatus.loading;
 
-    final usernameField = _recentUsernames.isEmpty
-        ? LoginUsernameInputField(
-            controller: _usernameController,
-            focusNode: _usernameFocusNode,
-            isLoading: isLoading,
-            onChanged: _updateButtonState,
-          )
-        : LoginUsernameAutocompleteField(
-            controller: _usernameController,
-            focusNode: _usernameFocusNode,
-            isLoading: isLoading,
-            recentUsernames: _recentUsernames,
-            onChanged: _updateButtonState,
-          );
-
     return Form(
       key: _formKey,
       onChanged: _updateButtonState,
       child: TraqStaggeredEntrance(
         children: [
-          usernameField,
+          LoginUsernameInputField(
+            controller: _usernameController,
+            focusNode: _usernameFocusNode,
+            isLoading: isLoading,
+            onChanged: _updateButtonState,
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 16),
             child: AuthInputField(

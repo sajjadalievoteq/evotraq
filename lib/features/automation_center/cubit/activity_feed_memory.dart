@@ -25,4 +25,4 @@ abstract final class ActivityFeedMemory {
     if (items.length <= maxRecords) return List<T>.from(items);
     return items.sublist(items.length - maxRecords);
   }
-}
+}

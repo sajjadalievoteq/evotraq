@@ -1,13 +1,13 @@
-# Native launch — solid brand color + logo only. Bootstrap runs behind this
-# screen until [dismissNativeSplash] is called from [AppStartupGate].
+# Native launch — patterned background and an independently scaled logo.
+# Android 12+ only permits a solid background and system-managed icon.
 #
-# Source logo: assets/images/logo/logo.svg
-# Regenerate platform splashes: python tool/generate_native_splash.py
+# Source logo: assets/branding/logo.svg
+# Regenerate platform splashes: dart run flutter_native_splash:create --path=flutter_native_splash.yaml
 flutter_native_splash:
-  color: "#F2F2EF"
-  color_dark: "#1C1C1B"
-  image: assets/images/logo/logo.svg
-  image_dark: assets/images/logo/logo.svg
+  background_image: assets/images/native_splash_mobile_tablet.png
+  background_image_dark: assets/images/native_splash_mobile_tablet_dark.png
+  image: assets/branding/splash-lockup-light.png
+  image_dark: assets/branding/splash-lockup-dark.png
   android_gravity: center
   ios_content_mode: scaleAspectFit
   web_image_mode: center
@@ -19,7 +19,9 @@ flutter_native_splash:
   android_12:
     color: "#F2F2EF"
     color_dark: "#1C1C1B"
-    image: assets/images/logo/logo.svg
-    image_dark: assets/images/logo/logo.svg
+    image: assets/branding/icon-black.png
+    image_dark: assets/branding/icon-white.png
+    branding: assets/branding/splash-branding-evoteq.png
+    branding_dark: assets/branding/splash-branding-evoteq.png
     icon_background_color: "#F2F2EF"
     icon_background_color_dark: "#1C1C1B"

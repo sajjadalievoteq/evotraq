@@ -30,17 +30,26 @@ class AuthResponsiveFormLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     if (AuthShellScope.isActive(context)) {
       final isLarge = context.layout.isLarge;
+      if (!isLarge) {
+        return AuthFormPanel(
+          header: header,
+          wrapInCard: wrapInCard,
+          compactHeader: true,
+          child: child,
+        );
+      }
+
       final padding = context.padding;
-      
-      
-      
+
       return LayoutBuilder(
         builder: (context, constraints) {
           final minHeight = constraints.hasBoundedHeight
-              ? (constraints.maxHeight - padding.vertical).clamp(0.0, double.infinity)
+              ? (constraints.maxHeight - padding.vertical).clamp(
+                  0.0,
+                  double.infinity,
+                )
               : 0.0;
           return SingleChildScrollView(
             padding: padding,
@@ -50,11 +59,11 @@ class AuthResponsiveFormLayout extends StatelessWidget {
                 minHeight: minHeight,
               ),
               child: Align(
-                alignment: isLarge ? Alignment.centerLeft : Alignment.center,
+                alignment: Alignment.centerLeft,
                 child: AuthFormPanel(
                   header: header,
                   wrapInCard: wrapInCard,
-                  compactHeader: !isLarge,
+                  compactHeader: false,
                   child: child,
                 ),
               ),

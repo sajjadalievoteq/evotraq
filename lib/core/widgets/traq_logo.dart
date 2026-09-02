@@ -24,6 +24,7 @@ class TraqLogo extends StatelessWidget {
       child: SvgPicture.asset(
         assetPath,
         fit: BoxFit.contain,
+        colorFilter: ColorFilter.mode(c.textPrimary, BlendMode.srcIn),
         errorBuilder: (context, error, stackTrace) {
           return TraqIcon(
             AppAssets.iconBrokenImage,

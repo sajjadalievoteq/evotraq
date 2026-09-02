@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/config/platform_startup_route.dart';
 import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/features/splash/native_splash_dismiss.dart';
+import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/traq_trace_app.dart';
 
 Future<void> main() async {
@@ -21,7 +22,8 @@ Future<void> main() async {
   try {
     await initializeApplication(startupRoute: startupRoute);
     await bootstrapAuthSession();
-    runApp(const TraqTraceApp());
+    final initialIsDarkMode = await ThemeCubit.loadThemePreference();
+    runApp(TraqTraceApp(initialIsDarkMode: initialIsDarkMode));
   } catch (error, stackTrace) {
     FlutterError.reportError(
       FlutterErrorDetails(

@@ -39,7 +39,12 @@ class AuthActionButton extends StatelessWidget {
 
     final labelChild = Text(
       label,
-      style: TextStyle(fontSize: fontSize, color: Colors.white),
+      style: TextStyle(
+        fontSize: fontSize,
+        height: 1.2,
+        leadingDistribution: TextLeadingDistribution.even,
+        color: Colors.white,
+      ),
     );
 
     final button = isLoading
@@ -52,7 +57,14 @@ class AuthActionButton extends StatelessWidget {
                     side: BorderSide(color: colors.primary.withOpacity(0.55)),
                     foregroundColor: colors.primary.withOpacity(0.75),
                   ),
-                  child: Text(label, style: TextStyle(fontSize: fontSize)),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      height: 1.2,
+                      leadingDistribution: TextLeadingDistribution.even,
+                    ),
+                  ),
                 ));
 
     return SizedBox(

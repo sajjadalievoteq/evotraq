@@ -47,4 +47,4 @@ class _SessionActivityListenerState extends State<SessionActivityListener> {
       child: widget.child,
     );
   }
-}
+}

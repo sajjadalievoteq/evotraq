@@ -172,4 +172,4 @@ class SubscriptionManagementScreenState
   void _resumeSubscription(String subscriptionId) {
     context.read<NotificationCubit>().resumeSubscription(subscriptionId);
   }
-}
+}

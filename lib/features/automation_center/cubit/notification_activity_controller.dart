@@ -315,4 +315,4 @@ class NotificationActivityController {
       );
     }
   }
-}
+}

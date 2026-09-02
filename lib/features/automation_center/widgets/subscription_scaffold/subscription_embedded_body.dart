@@ -33,4 +33,4 @@ class SubscriptionEmbeddedBody extends StatelessWidget {
       ],
     );
   }
-}
+}

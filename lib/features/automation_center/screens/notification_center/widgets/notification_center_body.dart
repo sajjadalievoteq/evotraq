@@ -190,4 +190,4 @@ class NotificationCenterBody extends StatelessWidget {
       ),
     );
   }
-}
+}

@@ -1,9 +1,11 @@
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_branding_entrance.dart';
 
 class AuthBrandingSection extends StatelessWidget {
@@ -40,54 +42,75 @@ class AuthBrandingSection extends StatelessWidget {
       builder: (context, constraints) {
         final layoutWidth =
             constraints.maxWidth.isFinite && constraints.maxWidth > 0
-                ? constraints.maxWidth
-                : TraqAnimationConstants.brandingSlidePx;
+            ? constraints.maxWidth
+            : TraqAnimationConstants.brandingSlidePx;
 
         if (!isLarge) {
           return AuthBrandingEntrance(
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'traq',
-                    style: context.text.h2.copyWith(
-                      color: c.textPrimary,
-                      fontSize: 62,
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Column(
+
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        SizedBox(
+                          width: 180,
+                          height: 48,
+                          child: SvgPicture.asset(
+                            logoAssetPath,
+                            fit: BoxFit.contain,
+                            colorFilter: ColorFilter.mode(
+                              c.textPrimary,
+                              BlendMode.srcIn,
+                            ),
+                            alignment: Alignment.centerLeft,
+                            semanticsLabel: title,
+                          ),
+                        ),
+                        const SizedBox(height: TraqSpacing.xs),
+                        Text(
+                          'EVOTEQ',
+                          style: t.mono.copyWith(
+                            color: c.primary,
+                            fontSize: 12,
+                            letterSpacing: 0.8,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(height: TraqSpacing.xxxl),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'GS1 TRACK & TRACE',
+                        style: t.mono.copyWith(
+                          fontSize: 11,
+                          letterSpacing: 1.4,
+                          color: c.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: TraqSpacing.sm),
+                      Text(
+                        'Every package.\nEvery event.\nVerified.',
+                        style: t.h1.copyWith(
+                          fontSize: 22,
+                          height: 1.12,
+                          color: c.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Text(
-                    'GS1 TRACK & TRACE',
-                    style: t.mono.copyWith(
-                      fontSize: 12,
-                      letterSpacing: 1.2,
-                      color: c.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: textAlign,
-                  ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Text(
-                    'Every package.\nEvery event.\nVerified.',
-                    style: t.h1.copyWith(
-                      fontSize: 20,
-                      height: 1.05,
-                      color: c.textPrimary,
-                    ),
-                  ),
-                ),
               ),
             ],
           );
@@ -97,8 +120,9 @@ class AuthBrandingSection extends StatelessWidget {
             ? Alignment.centerLeft
             : Alignment.center;
 
-        final panelHeight =
-            constraints.maxHeight.isFinite ? constraints.maxHeight : null;
+        final panelHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : null;
 
         return SizedBox(
           height: panelHeight,
@@ -113,20 +137,27 @@ class AuthBrandingSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          'traq',
-                          style: context.text.h2.copyWith(
-                            color: c.textPrimary,
-                            fontSize: 62,
+                        SizedBox(
+                          width: 230,
+                          height: 62,
+                          child: SvgPicture.asset(
+                            logoAssetPath,
+                            fit: BoxFit.contain,
+                            colorFilter: ColorFilter.mode(
+                              c.textPrimary,
+                              BlendMode.srcIn,
+                            ),
+                            alignment: Alignment.centerLeft,
+                            semanticsLabel: title,
                           ),
                         ),
                         const SizedBox(height: 5),
                         Text(
                           'EVOTEQ',
                           style: context.text.h2.copyWith(
-                            color: c.textPrimary,
+                            color: c.primary,
                             fontSize: 16,
                           ),
                         ),
@@ -198,4 +229,4 @@ class AuthBrandingSection extends StatelessWidget {
       },
     );
   }
-}
+}

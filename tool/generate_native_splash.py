@@ -14,11 +14,14 @@ SVG = ROOT / "assets" / "images" / "logo" / "logo.svg"
 RASTER = ROOT / "tool" / ".native_splash_logo.png"
 YAML = ROOT / "flutter_native_splash.yaml"
 WEB_INDEX = ROOT / "web" / "index.html"
+DESKTOP_BACKGROUND = ROOT / "assets" / "images" / "native_splash_desktop.png"
+MOBILE_BACKGROUND = ROOT / "assets" / "images" / "native_splash_mobile_tablet.png"
+WEB_SPLASH_IMAGES = ROOT / "web" / "splash" / "img"
 
 # Responsive source-image box. The raster contains transparent safe-area
 # padding, so the visible mark occupies roughly 20% of the shorter viewport.
-WEB_SPLASH_LOGO_VMIN = 40
-WEB_SPLASH_LOGO_MIN_PX = 140
+WEB_SPLASH_LOGO_VMIN = 34
+WEB_SPLASH_LOGO_MIN_PX = 136
 WEB_SPLASH_LOGO_MAX_PX = 300
 
 
@@ -71,26 +74,63 @@ def patch_web_responsive_splash() -> None:
 
     text = WEB_INDEX.read_text(encoding="utf-8")
     marker = "/* traq-native-splash-responsive */"
-    if marker not in text:
-        responsive_rule = f"""
+    responsive_rule = f"""
     {marker}
+    #splash {{
+      position: fixed;
+      inset: 0;
+      display: block;
+      background-image: url("splash/img/native-splash-desktop.png");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }}
+
     #splash img.center {{
       width: clamp({WEB_SPLASH_LOGO_MIN_PX}px, {WEB_SPLASH_LOGO_VMIN}vmin, {WEB_SPLASH_LOGO_MAX_PX}px);
       height: auto;
       max-width: 50vw;
       max-height: 50vh;
       object-fit: contain;
-}}
+    }}
+
+    @media (orientation: portrait), (max-width: 1024px) {{
+      #splash {{
+        background-image: url("splash/img/native-splash-mobile-tablet.png");
+      }}
+
+      #splash img.center {{
+        width: clamp(128px, 38vmin, 260px);
+      }}
+    }}
 """
+    if marker not in text:
         anchor = "  </style>\n  <script id=\"splash-screen-script\">"
         if anchor not in text:
             raise SystemExit("Could not patch web/index.html for responsive splash logo.")
         text = text.replace(anchor, f"{responsive_rule}\n{anchor}", 1)
+    else:
+        text = re.sub(
+            rf"    {re.escape(marker)}.*?(?=\n\s*</style>)",
+            responsive_rule.rstrip(),
+            text,
+            count=1,
+            flags=re.DOTALL,
+        )
 
     # flutter_native_splash emits whitespace-only lines; normalize them so
     # generated output remains diff-clean across platforms.
     text = "\n".join(line.rstrip() for line in text.splitlines()) + "\n"
     WEB_INDEX.write_text(text, encoding="utf-8")
+
+
+def copy_web_backgrounds() -> None:
+    WEB_SPLASH_IMAGES.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(DESKTOP_BACKGROUND, WEB_SPLASH_IMAGES / "native-splash-desktop.png")
+    shutil.copy2(
+        MOBILE_BACKGROUND,
+        WEB_SPLASH_IMAGES / "native-splash-mobile-tablet.png",
+    )
 
 
 def main() -> int:
@@ -106,6 +146,7 @@ def main() -> int:
             cwd=ROOT,
             check=True,
         )
+        copy_web_backgrounds()
         patch_web_responsive_splash()
     finally:
         restore_yaml(original_yaml)

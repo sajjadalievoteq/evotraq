@@ -26,7 +26,9 @@ import 'package:traqtrace_app/data/services/profile_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
 class TraqTraceApp extends StatelessWidget {
-  const TraqTraceApp({super.key});
+  const TraqTraceApp({super.key, required this.initialIsDarkMode});
+
+  final bool initialIsDarkMode;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +42,10 @@ class TraqTraceApp extends StatelessWidget {
           ),
         ),
         BlocProvider<ThemeCubit>(
-          create: (context) =>
-              ThemeCubit(profileCubit: context.read<ProfileCubit>()),
+          create: (context) => ThemeCubit(
+            profileCubit: context.read<ProfileCubit>(),
+            initialIsDarkMode: initialIsDarkMode,
+          ),
         ),
         BlocProvider<SystemSettingsCubit>(
           create: (context) =>

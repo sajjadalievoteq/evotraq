@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
-import 'package:traqtrace_app/core/animation/traq_fade_scale_transition.dart';
 import 'package:traqtrace_app/core/widgets/route_aware_selection_area.dart';
 import 'package:traqtrace_app/core/widgets/router_transitions/traq_fade_through_transition.dart';
 import 'package:traqtrace_app/core/widgets/router_transitions/traq_modal_transition.dart';
@@ -10,7 +9,6 @@ import 'package:traqtrace_app/core/widgets/router_transitions/traq_shared_axis_h
 import 'package:traqtrace_app/core/widgets/router_transitions/transition_pointer_guard.dart';
 
 enum TraqNavigationTransitionType {
-  
   fadeThrough,
 
   sharedAxisHorizontal,
@@ -93,23 +91,12 @@ abstract final class TraqRouterTransitions {
     required LocalKey key,
     required Widget child,
   }) {
-    return CustomTransitionPage<T>(
-      key: key,
-      child: RouteAwareSelectionArea(child: child),
-      transitionDuration: TraqAnimationConstants.formDuration,
-      reverseTransitionDuration: TraqAnimationConstants.formDuration,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final content = TraqAnimationManager.reduceMotion(context)
-            ? child
-            : TraqFadeScaleTransition(
-                animation: animation,
-                beginScale: TraqAnimationConstants.formInitialScale,
-                alignment: Alignment.center,
-                child: child,
-              );
-        return TransitionPointerGuard(animation: animation, child: content);
-      },
-    );
+    // The auth shell persists while its child route changes. A page-level
+    // transition keeps the outgoing form painted briefly, which makes the
+    // previous form flash before the selected one appears. AuthFormPanel
+    // already provides the content entrance animation, so swap routes here
+    // without retaining the outgoing page.
+    return NoTransitionPage<T>(key: key, child: child);
   }
 
   static Page<T> modalPage<T extends Object?>({
@@ -165,4 +152,4 @@ abstract final class TraqRouterTransitions {
       },
     );
   }
-}
+}

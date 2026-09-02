@@ -119,4 +119,4 @@ class WorkbenchPanelShell extends StatelessWidget {
       ],
     );
   }
-}
+}

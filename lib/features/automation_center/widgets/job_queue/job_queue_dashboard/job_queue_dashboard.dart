@@ -44,4 +44,4 @@ class JobQueueDashboard extends StatelessWidget {
       ],
     );
   }
-}
+}

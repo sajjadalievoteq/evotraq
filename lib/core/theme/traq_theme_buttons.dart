@@ -12,7 +12,11 @@ abstract final class TraqThemeButtons {
     style: FilledButton.styleFrom(
       backgroundColor: c.primary,
       foregroundColor: onPrimaryInk,
-      textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600, height: 1.0),
+      textStyle: text.bodySm.copyWith(
+        fontWeight: FontWeight.w600,
+        height: 1.2,
+        leadingDistribution: TextLeadingDistribution.even,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       shape: const RoundedRectangleBorder(borderRadius: TraqRadius.button),
       minimumSize: const Size(0, TraqSpacing.buttonH),
@@ -27,7 +31,11 @@ abstract final class TraqThemeButtons {
     style: ElevatedButton.styleFrom(
       backgroundColor: c.primary,
       foregroundColor: onPrimaryInk,
-      textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600, height: 1.0),
+      textStyle: text.bodySm.copyWith(
+        fontWeight: FontWeight.w600,
+        height: 1.2,
+        leadingDistribution: TextLeadingDistribution.even,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       shape: const RoundedRectangleBorder(borderRadius: TraqRadius.button),
       minimumSize: const Size(0, TraqSpacing.buttonH),
@@ -42,7 +50,8 @@ abstract final class TraqThemeButtons {
           side: BorderSide(color: c.borderVariant),
           textStyle: text.bodySm.copyWith(
             fontWeight: FontWeight.w500,
-            height: 1.0,
+            height: 1.2,
+            leadingDistribution: TextLeadingDistribution.even,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           shape: const RoundedRectangleBorder(borderRadius: TraqRadius.button),
@@ -54,7 +63,10 @@ abstract final class TraqThemeButtons {
       TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: c.textPrimary,
-          textStyle: text.bodySm.copyWith(height: 1.0),
+          textStyle: text.bodySm.copyWith(
+            height: 1.2,
+            leadingDistribution: TextLeadingDistribution.even,
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           shape: const RoundedRectangleBorder(borderRadius: TraqRadius.button),
         ),
@@ -64,7 +76,11 @@ abstract final class TraqThemeButtons {
       SegmentedButtonThemeData(
         style: ButtonStyle(
           textStyle: WidgetStatePropertyAll(
-            text.bodySm.copyWith(fontWeight: FontWeight.w500, height: 1.0),
+            text.bodySm.copyWith(
+              fontWeight: FontWeight.w500,
+              height: 1.2,
+              leadingDistribution: TextLeadingDistribution.even,
+            ),
           ),
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) return c.primary;

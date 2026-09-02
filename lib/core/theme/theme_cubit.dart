@@ -31,9 +31,11 @@ class ThemeCubit extends Cubit<ThemeState> {
   final ProfileCubit _profileCubit;
   StreamSubscription? _profileSubscription;
 
-  ThemeCubit({required ProfileCubit profileCubit})
-    : _profileCubit = profileCubit,
-      super(const ThemeState(isDarkMode: false)) {
+  ThemeCubit({
+    required ProfileCubit profileCubit,
+    bool initialIsDarkMode = false,
+  }) : _profileCubit = profileCubit,
+       super(ThemeState(isDarkMode: initialIsDarkMode)) {
     _initThemePreference();
     _profileSubscription = _profileCubit.stream.listen((profileState) {
       if (profileState.status != ProfileStatus.preferencesUpdated) return;

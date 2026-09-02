@@ -237,4 +237,4 @@ class _EmptyMetrics {
   final TextStyle Function(ThemeData theme) titleStyle;
 }
 
-const kDefaultEmptyStateIcon = NavIcons.packaging;
+const kDefaultEmptyStateIcon = NavIcons.packaging;

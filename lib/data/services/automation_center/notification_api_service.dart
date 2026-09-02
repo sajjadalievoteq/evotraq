@@ -527,4 +527,4 @@ class NotificationApiService {
       _statsApi.getSubscriptionStats(id);
 
   Future<Map<String, dynamic>> getSystemStats() => _statsApi.getSystemStats();
-}
+}

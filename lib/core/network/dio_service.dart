@@ -421,4 +421,4 @@ class DioService {
     _cachedAuthToken = null;
     await _secureStorage.delete(key: AppConfig.authTokenKey);
   }
-}
+}

@@ -56,8 +56,7 @@ class _AuthInputFieldState extends State<AuthInputField> {
   @override
   Widget build(BuildContext context) {
     final showPasswordToggle =
-        widget.suffixIcon == null &&
-        widget.type == AuthInputFieldType.password;
+        widget.suffixIcon == null && widget.type == AuthInputFieldType.password;
     final hasSuffix = widget.suffixIcon != null || showPasswordToggle;
 
     return TextFormField(
@@ -68,11 +67,7 @@ class _AuthInputFieldState extends State<AuthInputField> {
           : false,
       enabled: widget.enabled,
       keyboardType: AuthInputFieldUtils.keyboardType(widget.type),
-      autofillHints: switch (widget.type) {
-        AuthInputFieldType.email => const [AutofillHints.email],
-        AuthInputFieldType.username => const [AutofillHints.username],
-        _ => null,
-      },
+      autofillHints: const <String>[],
       autocorrect: widget.type == AuthInputFieldType.email ? false : true,
       enableSuggestions: widget.type == AuthInputFieldType.email ? false : true,
       textCapitalization:
@@ -117,12 +112,13 @@ class _AuthInputFieldState extends State<AuthInputField> {
             ? null
             : TextStyle(color: widget.helperTextColor),
       ),
-      validator: widget.validator ??
+      validator:
+          widget.validator ??
           (value) => AuthInputFieldUtils.defaultValidator(
-                widget.type,
-                widget.labelText,
-                value,
-              ),
+            widget.type,
+            widget.labelText,
+            value,
+          ),
     );
   }
 }

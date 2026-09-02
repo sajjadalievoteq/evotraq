@@ -320,4 +320,4 @@ class JobQueuePanelState extends State<JobQueuePanel>
       context.showError('Failed to submit job: $e');
     }
   }
-}
+}

@@ -105,4 +105,4 @@ class GlnPickerCatalog {
   }
 
   void clear() => invalidate();
-}
+}

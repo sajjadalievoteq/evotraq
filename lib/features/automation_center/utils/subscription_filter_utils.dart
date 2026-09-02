@@ -63,4 +63,4 @@ abstract final class SubscriptionFilterUtils {
           sub.subscriptionType.toLowerCase().contains(q);
     }).toList();
   }
-}
+}

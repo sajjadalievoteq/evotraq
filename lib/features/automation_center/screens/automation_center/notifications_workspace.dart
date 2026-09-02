@@ -270,4 +270,4 @@ class NotificationsWorkspaceState extends State<NotificationsWorkspace> {
 
     return Title(title: 'Notifications', color: Colors.white, child: body);
   }
-}
+}

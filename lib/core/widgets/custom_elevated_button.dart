@@ -34,7 +34,12 @@ class CustomElevatedButton extends StatelessWidget {
           )
         : Text(
             label,
-            style: TextStyle(fontSize: fontSize, color: Colors.white),
+            style: TextStyle(
+              fontSize: fontSize,
+              height: 1.2,
+              leadingDistribution: TextLeadingDistribution.even,
+              color: Colors.white,
+            ),
           );
 
     return SizedBox(
@@ -49,24 +54,31 @@ class CustomElevatedButton extends StatelessWidget {
               ),
             )
           : (isEnabled
-              ? FilledButton(
-                  onPressed: onPressed,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: child,
-                  ),
-                )
-              : OutlinedButton(
-                  onPressed: null,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: c.primary.withOpacity(0.55)),
-                    foregroundColor: c.primary.withOpacity(0.75),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text(label, style: TextStyle(fontSize: fontSize)),
-                  ),
-                )),
+                ? FilledButton(
+                    onPressed: onPressed,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: child,
+                    ),
+                  )
+                : OutlinedButton(
+                    onPressed: null,
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: c.primary.withOpacity(0.55)),
+                      foregroundColor: c.primary.withOpacity(0.75),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          height: 1.2,
+                          leadingDistribution: TextLeadingDistribution.even,
+                        ),
+                      ),
+                    ),
+                  )),
     );
   }
 }

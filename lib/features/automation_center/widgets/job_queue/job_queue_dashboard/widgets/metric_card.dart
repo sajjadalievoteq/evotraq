@@ -133,4 +133,4 @@ class _JobQueueMetricCardState extends State<JobQueueMetricCard> {
       ),
     );
   }
-}
+}

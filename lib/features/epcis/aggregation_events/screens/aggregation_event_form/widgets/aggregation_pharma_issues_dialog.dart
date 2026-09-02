@@ -89,4 +89,4 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
             ],
     );
   }
-}
+}

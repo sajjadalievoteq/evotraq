@@ -392,4 +392,4 @@ class WebSocketService {
     _dashboardController.close();
     _connectionController.close();
   }
-}
+}

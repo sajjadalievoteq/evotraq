@@ -1,12 +1,14 @@
-import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_branding_section.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_mobile_scroll_body.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_standards_footer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 
 class AuthShellMobile extends StatelessWidget {
-  const AuthShellMobile({required this.layout, required this.child});
+  const AuthShellMobile({super.key, required this.layout, required this.child});
 
   final AppLayoutData layout;
   final Widget child;
@@ -19,45 +21,33 @@ class AuthShellMobile extends StatelessWidget {
     return CardWithBackgroundWidget(
       isPrimary: false,
       margin: EdgeInsets.zero,
-      child: SizedBox(
-        height: MediaQuery.sizeOf(context).height,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding:  EdgeInsets.all(context.padding.bottom,),
-              child: AuthBrandingSection(
+      child: SafeArea(
+        child: AuthMobileScrollBody(
+          layout: layout,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AuthBrandingSection(
                 layout: layout,
                 primary: c.primary,
                 textSecondary: c.textMuted,
               ),
-            ),
-            Expanded(child: child),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'GS1 EPCIS 2.0',
-                    style: t.body.copyWith(color: c.textMuted),
-                  ),
-                  const SizedBox(width: 20),
-                  Container(
-                    height: 5,
-                    width: 5,
-                    decoration: BoxDecoration(
-                      color: c.textMuted,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  Text('CBV 2.0', style: t.body.copyWith(color: c.textMuted)),
-                ],
+              const SizedBox(height: TraqSpacing.lg),
+
+
+              child,
+              const SizedBox(height: TraqSpacing.xl),
+              AuthStandardsFooter(
+                muted: c.textMuted,
+                style: t.mono.copyWith(
+                  color: c.textMuted,
+                  fontSize: 11,
+                  letterSpacing: 0.5,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

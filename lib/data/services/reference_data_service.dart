@@ -152,4 +152,4 @@ class ReferenceDataService {
     _gtinNameCache.clear();
     _glnCache.clear();
   }
-}
+}

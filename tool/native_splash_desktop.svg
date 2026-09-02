@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="3840"
+     height="2160"
+     viewBox="0 0 3840 2160">
+  <rect width="3840" height="2160" fill="#F2F2EF"/>
+  <image x="0" y="0" width="3840" height="2160"
+         opacity="0.2" preserveAspectRatio="xMidYMid slice"
+         xlink:href="../assets/images/traq_background.svg"/>
+  <rect width="3840" height="2160" fill="#000000" opacity="0.1"/>
+</svg>

@@ -8,14 +8,10 @@ class TatmeenBrandIcon extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(5),
-      child: SvgPicture.asset(
-        AppAssets.iconTatmeenIntegration,
-        width: size,
-        height: size,
-      ),
-    );
-  }
-}
+  Widget build(BuildContext context) => SvgPicture.asset(
+    AppAssets.iconTatmeenIntegration,
+    width: size,
+    height: size,
+    fit: BoxFit.contain,
+  );
+}

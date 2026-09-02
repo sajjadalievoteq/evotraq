@@ -199,7 +199,7 @@ class Constants {
   static const String adminUsersEndpoint = '/admin/users';
   static const String adminApprovalsEndpoint = '/admin/approvals';
 
-  static const String logoImage = 'assets/images/logo/logo.svg';
+  static const String logoImage = 'assets/branding/logo.svg';
 
   static const String iconImage = 'assets/icons/icon_app.png';
 }

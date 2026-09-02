@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer/utils/drawer_scroll_memory.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class BackgroundContainerWidget extends StatelessWidget {
   const BackgroundContainerWidget({
@@ -22,16 +20,7 @@ class BackgroundContainerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: showAppBar
-          ? TraqAppBar(
-              context,
-              title: Text(appBarTitle ?? ''),
-              leading: Builder(
-                builder: (context) => IconButton(
-                  icon: const TraqIcon(AppAssets.iconMenu),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
-              ),
-            )
+          ? TraqAppBar(context, title: Text(appBarTitle ?? ''))
           : null,
       drawer: showDrawer == true ? const AppDrawer() : null,
       onDrawerChanged: showDrawer == true

@@ -185,4 +185,4 @@ class NotificationState extends Equatable {
     lastLoadedStatsSubscriptionId,
     lastRealtimeNotification,
   ];
-}
+}

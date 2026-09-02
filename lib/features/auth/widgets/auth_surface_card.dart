@@ -23,10 +23,8 @@ class AuthSurfaceCard extends StatelessWidget {
         border: Border.all(color: c.border),
       ),
       child: Column(
-        children: [
-
-          child,
-        ],
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [child],
       ),
     );
   }

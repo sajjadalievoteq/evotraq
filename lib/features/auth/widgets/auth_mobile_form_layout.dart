@@ -1,10 +1,12 @@
-import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/layout/app_layout_data.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_tokens.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_branding_section.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_panel.dart';
-import 'package:traqtrace_app/features/auth/widgets/auth_branding_section.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_mobile_scroll_body.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_standards_footer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 
 class AuthMobileFormLayout extends StatelessWidget {
@@ -29,69 +31,47 @@ class AuthMobileFormLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
+    final maxWidth = smallMaxWidth < layout.maxContentWidth
+        ? smallMaxWidth
+        : layout.maxContentWidth;
 
     return CardWithBackgroundWidget(
       isPrimary: false,
       margin: EdgeInsets.zero,
-      child: SizedBox(
-        height: MediaQuery.sizeOf(context).height,
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: smallMaxWidth),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                context.padding.bottom,
-                0,
-                context.padding.bottom,
-                context.padding.bottom,
+      child: SafeArea(
+        child: AuthMobileScrollBody(
+          layout: layout,
+          maxWidth: maxWidth,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (showBrandingOnSmall) ...[
+                AuthBrandingSection(
+                  layout: layout,
+                  primary: c.primary,
+                  textSecondary: c.textMuted,
+                ),
+                const SizedBox(height: TraqSpacing.lg),
+                Divider(height: 1, thickness: 1, color: c.border),
+                const SizedBox(height: TraqSpacing.lg),
+              ],
+              AuthFormPanel(
+                header: header,
+                wrapInCard: wrapInCard,
+                compactHeader: true,
+                child: child,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (showBrandingOnSmall)
-                    AuthBrandingSection(
-                      layout: layout,
-                      primary: c.primary,
-                      textSecondary: c.textMuted,
-                    ),
-                  AuthFormPanel(
-                    header: header,
-                    wrapInCard: wrapInCard,
-                    compactHeader: true,
-                    child: child,
-                  ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'GS1 EPCIS 2.0',
-                          style: t.body.copyWith(color: c.textMuted),
-                        ),
-                        const SizedBox(width: 20),
-                        Container(
-                          height: 5,
-                          width: 5,
-                          decoration: BoxDecoration(
-                            color: c.textMuted,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        Text(
-                          'CBV 2.0',
-                          style: t.body.copyWith(color: c.textMuted),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              const SizedBox(height: TraqSpacing.xl),
+              AuthStandardsFooter(
+                muted: c.textMuted,
+                style: t.mono.copyWith(
+                  color: c.textMuted,
+                  fontSize: 11,
+                  letterSpacing: 0.5,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

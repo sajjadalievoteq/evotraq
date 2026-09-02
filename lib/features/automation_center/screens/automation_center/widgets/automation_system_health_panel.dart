@@ -63,4 +63,4 @@ class AutomationSystemHealthPanel extends StatelessWidget {
       },
     );
   }
-}
+}

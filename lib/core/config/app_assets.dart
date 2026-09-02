@@ -1,7 +1,8 @@
 class AppAssets {
   static const String _traqIcons = 'assets/icons';
 
-  static const String logo = 'assets/images/logo/logo.svg';
+  static const String logo = 'assets/branding/logo.svg';
+  static const String brandIcon = 'assets/branding/icon.svg';
   static const String traqBackgroundSvg = 'assets/images/traq_background.svg';
 
   static const String iconAddCircle = '$_traqIcons/add-circle.svg';

@@ -383,4 +383,4 @@ abstract final class DioServiceLogger {
   }
 
   static bool _isSensitiveKey(String key) => _sensitiveKey.hasMatch(key);
-}
+}

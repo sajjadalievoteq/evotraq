@@ -14,20 +14,20 @@ abstract final class TraqThemeChips {
     checkmarkColor: onPrimary,
     deleteIconColor: c.textMuted,
     secondarySelectedColor: c.primary,
-    
+
     labelStyle: text.bodySm.copyWith(
       color: WidgetStateColor.resolveWith(
         (states) =>
             states.contains(WidgetState.selected) ? onPrimary : c.textPrimary,
       ),
-      height: 1.0,
+      height: 1.2,
     ),
     secondaryLabelStyle: text.bodySm.copyWith(
       color: WidgetStateColor.resolveWith(
         (states) =>
             states.contains(WidgetState.selected) ? onPrimary : c.textPrimary,
       ),
-      height: 1.0,
+      height: 1.2,
     ),
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     shape: RoundedRectangleBorder(
@@ -36,4 +36,4 @@ abstract final class TraqThemeChips {
     ),
     showCheckmark: true,
   );
-}
+}

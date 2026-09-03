@@ -3,6 +3,8 @@ import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 import 'package:traqtrace_app/core/animation/traq_fade_scale_transition.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_buttons.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_typography.dart';
 
 class AuthActionButton extends StatelessWidget {
   final String label;
@@ -37,8 +39,11 @@ class AuthActionButton extends StatelessWidget {
       child: CircularProgressIndicator(color: colors.primary, strokeWidth: 2.2),
     );
 
+    final style = TraqThemeButtons.fixedHeight(height);
+
     final labelChild = Text(
       label,
+      textHeightBehavior: TraqText.heightBehavior,
       style: TextStyle(
         fontSize: fontSize,
         height: 1.2,
@@ -48,17 +53,29 @@ class AuthActionButton extends StatelessWidget {
     );
 
     final button = isLoading
-        ? FilledButton(onPressed: null, child: loadingChild)
+        ? FilledButton(
+            onPressed: null,
+            clipBehavior: Clip.none,
+            style: style,
+            child: loadingChild,
+          )
         : (isEnabled
-              ? FilledButton(onPressed: onPressed, child: labelChild)
+              ? FilledButton(
+                  onPressed: onPressed,
+                  clipBehavior: Clip.none,
+                  style: style,
+                  child: labelChild,
+                )
               : OutlinedButton(
                   onPressed: null,
+                  clipBehavior: Clip.none,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: colors.primary.withOpacity(0.55)),
                     foregroundColor: colors.primary.withOpacity(0.75),
-                  ),
+                  ).merge(style),
                   child: Text(
                     label,
+                    textHeightBehavior: TraqText.heightBehavior,
                     style: TextStyle(
                       fontSize: fontSize,
                       height: 1.2,
@@ -87,7 +104,11 @@ class AuthActionButton extends StatelessWidget {
           key: ValueKey<String>(
             isLoading ? 'loading' : (isEnabled ? 'enabled' : 'disabled'),
           ),
-          child: SizedBox(height: 40, width: double.infinity, child: button),
+          child: SizedBox(
+            height: height,
+            width: double.infinity,
+            child: button,
+          ),
         ),
       ),
     );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_buttons.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_typography.dart';
 
 class CustomElevatedButton extends StatelessWidget {
   const CustomElevatedButton({
@@ -22,6 +24,7 @@ class CustomElevatedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final style = TraqThemeButtons.fixedHeight(height);
 
     final child = isLoading
         ? SizedBox(
@@ -34,6 +37,7 @@ class CustomElevatedButton extends StatelessWidget {
           )
         : Text(
             label,
+            textHeightBehavior: TraqText.heightBehavior,
             style: TextStyle(
               fontSize: fontSize,
               height: 1.2,
@@ -48,34 +52,31 @@ class CustomElevatedButton extends StatelessWidget {
       child: isLoading
           ? FilledButton(
               onPressed: null,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: child,
-              ),
+              clipBehavior: Clip.none,
+              style: style,
+              child: child,
             )
           : (isEnabled
                 ? FilledButton(
                     onPressed: onPressed,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: child,
-                    ),
+                    clipBehavior: Clip.none,
+                    style: style,
+                    child: child,
                   )
                 : OutlinedButton(
                     onPressed: null,
+                    clipBehavior: Clip.none,
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: c.primary.withOpacity(0.55)),
                       foregroundColor: c.primary.withOpacity(0.75),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: fontSize,
-                          height: 1.2,
-                          leadingDistribution: TextLeadingDistribution.even,
-                        ),
+                    ).merge(style),
+                    child: Text(
+                      label,
+                      textHeightBehavior: TraqText.heightBehavior,
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        height: 1.2,
+                        leadingDistribution: TextLeadingDistribution.even,
                       ),
                     ),
                   )),

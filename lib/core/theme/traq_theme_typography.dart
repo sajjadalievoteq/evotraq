@@ -4,6 +4,14 @@ import 'package:traqtrace_app/core/theme/traq_theme_colors.dart';
 class TraqText {
   static const String fontFamily = 'Nekst';
 
+  /// Nekst's ascent/descent is taller than the em-square. Flutter's default
+  /// [TextHeightBehavior] scales those metrics by [TextStyle.height], which
+  /// clips glyphs on mobile web (buttons, labels, field text).
+  static const TextHeightBehavior heightBehavior = TextHeightBehavior(
+    applyHeightToFirstAscent: false,
+    applyHeightToLastDescent: false,
+  );
+
   final TextStyle display;
   final TextStyle h1;
   final TextStyle h2;

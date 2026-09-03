@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme_typography.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 
 import 'package:traqtrace_app/features/auth/widgets/session_activity_listener.dart';
@@ -74,12 +75,15 @@ class TraqTraceApp extends StatelessWidget {
               localizationsDelegates: const [
                 ...GlobalMaterialLocalizations.delegates,
               ],
-              builder: (context, child) => SnackBarInteractionScope(
-                child: SessionActivityListener(
-                  child: AppScreenUtilInit(
-                    child: AppLayoutBuilder(
-                      builder: (context, layout) =>
-                          child ?? const SizedBox.shrink(),
+              builder: (context, child) => DefaultTextHeightBehavior(
+                textHeightBehavior: TraqText.heightBehavior,
+                child: SnackBarInteractionScope(
+                  child: SessionActivityListener(
+                    child: AppScreenUtilInit(
+                      child: AppLayoutBuilder(
+                        builder: (context, layout) =>
+                            child ?? const SizedBox.shrink(),
+                      ),
                     ),
                   ),
                 ),

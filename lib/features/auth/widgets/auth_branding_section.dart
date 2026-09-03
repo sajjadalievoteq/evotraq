@@ -72,7 +72,6 @@ class AuthBrandingSection extends StatelessWidget {
                             semanticsLabel: title,
                           ),
                         ),
-                        const SizedBox(height: TraqSpacing.xs),
                         Text(
                           'EVOTEQ',
                           style: t.mono.copyWith(
@@ -99,7 +98,6 @@ class AuthBrandingSection extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: TraqSpacing.sm),
                       Text(
                         'Every package.\nEvery event.\nVerified.',
                         style: t.h1.copyWith(
@@ -153,7 +151,7 @@ class AuthBrandingSection extends StatelessWidget {
                             semanticsLabel: title,
                           ),
                         ),
-                        const SizedBox(height: 5),
+
                         Text(
                           'EVOTEQ',
                           style: context.text.h2.copyWith(
@@ -180,17 +178,14 @@ class AuthBrandingSection extends StatelessWidget {
                         ),
                         Align(
                           alignment: align,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Text(
-                              'Every package.\nEvery event.\nVerified.',
-                              style: t.h1.copyWith(
-                                fontSize: isLarge ? 44 : 36,
-                                height: 1.05,
-                                color: c.textPrimary,
-                              ),
-                              textAlign: textAlign,
+                          child: Text(
+                            'Every package.\nEvery event.\nVerified.',
+                            style: t.h1.copyWith(
+                              fontSize: isLarge ? 44 : 36,
+                              height: 1.05,
+                              color: c.textPrimary,
                             ),
+                            textAlign: textAlign,
                           ),
                         ),
                       ],

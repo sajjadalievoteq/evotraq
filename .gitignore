@@ -57,3 +57,15 @@ android/app/build/
 
 # Ephemeral raster extracted from logo.svg for flutter_native_splash
 tool/.native_splash_logo.png
+
+# Local-only development material
+/test/
+/scripts/
+/prompts/
+/_to_delete/
+/.vscode/
+/coverage/
+/tmp/
+/.tmp/
+*.bak
+*_tmp.*

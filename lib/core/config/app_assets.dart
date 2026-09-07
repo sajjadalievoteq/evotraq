@@ -3,6 +3,10 @@ class AppAssets {
 
   static const String logo = 'assets/branding/logo.svg';
   static const String brandIcon = 'assets/branding/icon.svg';
+  static const String splashLockupLight =
+      'assets/branding/splash-lockup-light.png';
+  static const String splashLockupDark =
+      'assets/branding/splash-lockup-dark.png';
   static const String traqBackgroundSvg = 'assets/images/traq_background.svg';
 
   static const String iconAddCircle = '$_traqIcons/add-circle.svg';

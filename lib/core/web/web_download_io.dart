@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 
@@ -7,13 +7,13 @@ Future<void> downloadBytes({
   required String filename,
   String mimeType = 'application/octet-stream',
 }) async {
-  final path = await FilePicker.saveFile(
+  await FilePicker.saveFile(
     fileName: filename,
+    bytes: Uint8List.fromList(bytes),
+    mimeType: mimeType,
     type: FileType.custom,
     allowedExtensions: _extensionsFor(filename),
   );
-  if (path == null) return;
-  await File(path).writeAsBytes(bytes);
 }
 
 List<String>? _extensionsFor(String filename) {

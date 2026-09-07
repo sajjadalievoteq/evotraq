@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/network/api_cache/api_cache_interceptor.dart';
+import 'package:traqtrace_app/core/network/api_cache/api_cache_store.dart';
 import 'package:traqtrace_app/core/network/dio_service_logging.dart';
 import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/app_network_exception.dart';
@@ -25,7 +27,8 @@ class DioService {
     : _appConfig = AppConfig(
         apiBaseUrl: const String.fromEnvironment(
           'API_BASE_URL',
-          defaultValue: 'http://localhost:8080/api',
+          defaultValue:
+              'https://backend.calmdesert-164bc904.eastus2.azurecontainerapps.io/api',
         ),
         appName: 'traq',
         appVersion: '1.0.0',
@@ -136,7 +139,6 @@ class DioService {
     }
 
     if (statusCode == 403) {
-      
       return;
     }
   }
@@ -243,7 +245,10 @@ class DioService {
         },
       ),
     );
+    _dio.interceptors.add(ApiCacheInterceptor());
   }
+
+  Future<void> clearApiCache() => ApiCacheStore.instance.clear();
 
   Duration? _sendTimeoutForBody(dynamic data) {
     if (data == null) return null;
@@ -420,5 +425,6 @@ class DioService {
   Future<void> removeAuthToken() async {
     _cachedAuthToken = null;
     await _secureStorage.delete(key: AppConfig.authTokenKey);
+    await clearApiCache();
   }
 }

@@ -35,6 +35,10 @@ class AuthCubit extends Cubit<AuthState> {
   final Duration sessionIdleTimeout;
   final Duration sessionActivityPingThrottle;
 
+  /// Idle auto-logout is web-only; mobile keeps the session until token expiry
+  /// or explicit logout.
+  final bool Function() enableIdleLogout;
+
   static const Duration authCheckTimeout = Duration(seconds: 10);
 
   static const Duration loginTimeout = Duration(seconds: 15);
@@ -53,6 +57,7 @@ class AuthCubit extends Cubit<AuthState> {
     Duration? verifyEmailTimeout,
     Duration? idleTimeout,
     Duration? activityPingThrottle,
+    bool Function()? enableIdleLogout,
   }) : authService = authService,
        tokenManager = tokenManager ?? TokenManager(),
        _authCheckTimeout = authCheckTimeout ?? AuthCubit.authCheckTimeout,
@@ -61,6 +66,7 @@ class AuthCubit extends Cubit<AuthState> {
        sessionIdleTimeout = idleTimeout ?? AuthCubit.idleTimeout,
        sessionActivityPingThrottle =
            activityPingThrottle ?? AuthCubit.activityPingThrottle,
+       enableIdleLogout = enableIdleLogout ?? (() => kIsWeb),
        super(const AuthState(status: AuthStatus.initial));
 
   @visibleForTesting

@@ -21,9 +21,11 @@ Future<void> main() async {
 
   try {
     await initializeApplication(startupRoute: startupRoute);
-    await bootstrapAuthSession();
     final initialIsDarkMode = await ThemeCubit.loadThemePreference();
+    // Show the branded Flutter splash immediately, then resolve the session
+    // while it remains visible. That screen removes the native launch layer.
     runApp(TraqTraceApp(initialIsDarkMode: initialIsDarkMode));
+    await bootstrapAuthSession();
   } catch (error, stackTrace) {
     FlutterError.reportError(
       FlutterErrorDetails(
@@ -33,8 +35,8 @@ Future<void> main() async {
       ),
     );
     runApp(_StartupFailureApp(error: error));
+    WidgetsBinding.instance.addPostFrameCallback((_) => dismissNativeSplash());
   }
-  WidgetsBinding.instance.addPostFrameCallback((_) => dismissNativeSplash());
 }
 
 class _StartupFailureApp extends StatelessWidget {

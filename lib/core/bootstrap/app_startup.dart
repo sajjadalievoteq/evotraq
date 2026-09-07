@@ -16,7 +16,8 @@ Future<void> initializeApplication({required String startupRoute}) async {
   final appConfig = AppConfig(
     apiBaseUrl: const String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'http://localhost:8080/api',
+      defaultValue:
+          'https://backend.calmdesert-164bc904.eastus2.azurecontainerapps.io/api',
     ),
     appName: 'traq',
     appVersion: '1.0.0',

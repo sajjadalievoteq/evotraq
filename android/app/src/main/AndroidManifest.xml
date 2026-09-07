@@ -2,8 +2,22 @@
     <!-- Location permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Network: REST API (dio) + WebSocket (web_socket_channel) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Barcode / GS1 DataMatrix scanning (mobile_scanner) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
+    <!-- Reading user-picked files on older Android (file_picker).
+         Android 13+ uses the Storage Access Framework and needs no permission,
+         so this is scoped to API <= 32. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <application
-        android:label="traqtrace_app"
+        android:label="Traq"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:traqtrace_app/core/config/app_navigation.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/data/models/auth/user.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
@@ -15,7 +16,6 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 
 extension AuthCubitSession on AuthCubit {
-  
   static const Set<String> _frontendBlockedRoles = {'B2B_SERVICE'};
 
   Future<bool> rejectIfFrontendBlockedRole(User user) async {
@@ -99,6 +99,7 @@ extension AuthCubitSession on AuthCubit {
   }
 
   void noteUserActivity() {
+    if (!enableIdleLogout()) return;
     if (state.status != AuthStatus.authenticated) return;
     lastUserActivityAt = DateTime.now();
     _scheduleIdleLogout();
@@ -107,6 +108,8 @@ extension AuthCubitSession on AuthCubit {
 
   void _scheduleIdleLogout() {
     idleTimer?.cancel();
+    idleTimer = null;
+    if (!enableIdleLogout()) return;
     idleTimer = Timer(sessionIdleTimeout, () {
       if (state.status != AuthStatus.authenticated) return;
       unawaited(sessionExpired());
@@ -147,6 +150,7 @@ extension AuthCubitSession on AuthCubit {
   }
 
   bool _isUserIdle() {
+    if (!enableIdleLogout()) return false;
     final last = lastUserActivityAt;
     if (last == null) return true;
     return DateTime.now().difference(last) >= sessionIdleTimeout;
@@ -178,11 +182,7 @@ extension AuthCubitSession on AuthCubit {
   }
 
   void backfillOperationalGln(User user) {
-    unawaited(
-      OperationalGlnStore.backfillIfNeeded(user).catchError((_) {
-        
-      }),
-    );
+    unawaited(OperationalGlnStore.backfillIfNeeded(user).catchError((_) {}));
   }
 
   void _ensureSharedWebSocketConnected() {
@@ -225,6 +225,9 @@ extension AuthCubitSession on AuthCubit {
     _clearWorldCountriesCache();
     _clearReferenceDataService();
     _resetCbvVocabulary();
+    if (getIt.isRegistered<DioService>()) {
+      unawaited(getIt<DioService>().clearApiCache());
+    }
   }
 
   void _preloadGlnPickerCatalog() {

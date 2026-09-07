@@ -51,7 +51,7 @@ dependencies:
   fl_chart: ^1.1.1
   
   # Camera / barcode scanning (Web + Android + iOS)
-  mobile_scanner: ^7.2.1
+  mobile_scanner: ^7.4.0
   
   # Maps
   flutter_map: ^8.0.0
@@ -59,7 +59,7 @@ dependencies:
   get_it: ^9.2.1
   shimmer: ^3.0.0
   world_countries: ^4.2.0
-  file_picker: ^11.0.2
+  file_picker: ^12.2.0
   http_parser: ^4.1.2
   flutter_native_splash: ^2.4.6
 
@@ -74,8 +74,6 @@ dev_dependencies:
   
   # Testing
   bloc_test: ^10.0.0
-  integration_test:
-    sdk: flutter
   mocktail: ^1.0.5
 flutter:
   uses-material-design: true

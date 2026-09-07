@@ -264,6 +264,7 @@ void main() {
           tokenManager: tokenManager,
           idleTimeout: const Duration(milliseconds: 80),
           activityPingThrottle: const Duration(hours: 1),
+          enableIdleLogout: () => true,
         );
         await cubit.login(request);
         expect(cubit.state.status, AuthStatus.authenticated);

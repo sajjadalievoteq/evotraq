@@ -63,7 +63,6 @@ class AppRouter {
     required this.featureRoutes,
     String? initialLocation,
   }) : _initialLocation = initialLocation ?? resolvePlatformStartupRoute() {
-    
     GoRouter.optionURLReflectsImperativeAPIs = true;
   }
 

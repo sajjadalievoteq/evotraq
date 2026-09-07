@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit_session.dart';
 
+/// Tracks input so web sessions can idle-logout. No-op on mobile.
 class SessionActivityListener extends StatefulWidget {
   const SessionActivityListener({super.key, required this.child});
 
@@ -17,12 +19,16 @@ class _SessionActivityListenerState extends State<SessionActivityListener> {
   @override
   void initState() {
     super.initState();
-    HardwareKeyboard.instance.addHandler(_onKeyEvent);
+    if (kIsWeb) {
+      HardwareKeyboard.instance.addHandler(_onKeyEvent);
+    }
   }
 
   @override
   void dispose() {
-    HardwareKeyboard.instance.removeHandler(_onKeyEvent);
+    if (kIsWeb) {
+      HardwareKeyboard.instance.removeHandler(_onKeyEvent);
+    }
     super.dispose();
   }
 
@@ -40,6 +46,7 @@ class _SessionActivityListenerState extends State<SessionActivityListener> {
 
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb) return widget.child;
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => _markActivity(),

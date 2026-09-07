@@ -1,27 +1,27 @@
-# Native launch — patterned background and an independently scaled logo.
-# Android 12+ only permits a solid background and system-managed icon.
+# Minimal required platform launch screen. The Flutter branded splash takes
+# over on the first successful frame.
 #
-# Source logo: assets/branding/logo.svg
-# Regenerate platform splashes: dart run flutter_native_splash:create --path=flutter_native_splash.yaml
+# web: false — web splash is maintained separately in web/index.html
+# (see tool/generate_native_splash.py). Do not regenerate web from this file.
+#
+# Regenerate Android/iOS only:
+#   dart run flutter_native_splash:create --path=flutter_native_splash.yaml
 flutter_native_splash:
-  background_image: assets/images/native_splash_mobile_tablet.png
-  background_image_dark: assets/images/native_splash_mobile_tablet_dark.png
-  image: assets/branding/splash-lockup-light.png
-  image_dark: assets/branding/splash-lockup-dark.png
+  color: "#F2F2EF"
+  color_dark: "#1C1C1B"
+  image: assets/branding/splash-icon-black-padded.png
+  image_dark: assets/branding/splash-icon-white-padded.png
   android_gravity: center
-  ios_content_mode: scaleAspectFit
-  web_image_mode: center
+  ios_content_mode: center
   fullscreen: true
   android: true
   ios: true
-  web: true
+  web: false
 
   android_12:
     color: "#F2F2EF"
     color_dark: "#1C1C1B"
-    image: assets/branding/icon-black.png
-    image_dark: assets/branding/icon-white.png
-    branding: assets/branding/splash-branding-evoteq.png
-    branding_dark: assets/branding/splash-branding-evoteq.png
+    image: assets/branding/splash-icon-black-padded.png
+    image_dark: assets/branding/splash-icon-white-padded.png
     icon_background_color: "#F2F2EF"
     icon_background_color_dark: "#1C1C1B"

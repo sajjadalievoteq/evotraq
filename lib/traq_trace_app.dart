@@ -1,9 +1,12 @@
 import 'package:traqtrace_app/core/layout/app_layout_builder.dart';
+import 'package:traqtrace_app/core/navigation/mobile_back/mobile_back_button_dispatcher.dart';
+import 'package:traqtrace_app/core/navigation/mobile_back/mobile_back_handler.dart';
 import 'package:traqtrace_app/core/widgets/snack_bar_interaction_scope.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -26,10 +29,27 @@ import 'package:traqtrace_app/data/services/profile_service.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
-class TraqTraceApp extends StatelessWidget {
+class TraqTraceApp extends StatefulWidget {
   const TraqTraceApp({super.key, required this.initialIsDarkMode});
 
   final bool initialIsDarkMode;
+
+  @override
+  State<TraqTraceApp> createState() => _TraqTraceAppState();
+}
+
+class _TraqTraceAppState extends State<TraqTraceApp> {
+  late final GoRouter _router;
+  late final MobileBackButtonDispatcher _mobileBackDispatcher;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = getIt<AppRouter>().router;
+    _mobileBackDispatcher = MobileBackButtonDispatcher(
+      MobileBackHandler(router: _router),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +65,7 @@ class TraqTraceApp extends StatelessWidget {
         BlocProvider<ThemeCubit>(
           create: (context) => ThemeCubit(
             profileCubit: context.read<ProfileCubit>(),
-            initialIsDarkMode: initialIsDarkMode,
+            initialIsDarkMode: widget.initialIsDarkMode,
           ),
         ),
         BlocProvider<SystemSettingsCubit>(
@@ -71,7 +91,12 @@ class TraqTraceApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               darkTheme: TraqTheme.dark(),
               themeMode: themeState.themeMode,
-              routerConfig: getIt<AppRouter>().router,
+              // Expand routerConfig so we own the back dispatcher and intercept
+              // OS back before GoRouter finishes the Android activity.
+              routeInformationProvider: _router.routeInformationProvider,
+              routeInformationParser: _router.routeInformationParser,
+              routerDelegate: _router.routerDelegate,
+              backButtonDispatcher: _mobileBackDispatcher,
               localizationsDelegates: const [
                 ...GlobalMaterialLocalizations.delegates,
               ],

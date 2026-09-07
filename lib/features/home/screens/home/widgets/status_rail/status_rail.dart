@@ -47,7 +47,7 @@ class StatusRail extends StatelessWidget {
                   : CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+              if(layout.isCompact==false)  Text(
                   zoneText,
                   style: context.text.bodySm.copyWith(
                     fontSize: 11,
@@ -58,7 +58,8 @@ class StatusRail extends StatelessWidget {
                   textAlign: TextAlign.end,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                if(layout.isCompact==true) const SizedBox(height: 13),
+                if(layout.isCompact==false) SizedBox(height: 2,),
                 Text(
                   timeText,
                   style: context.text.bodySm.copyWith(

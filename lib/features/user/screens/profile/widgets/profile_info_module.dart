@@ -73,14 +73,10 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
   }
 
   Future<void> _pickAndUploadProfilePicture() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.image,
-      withData: true,
-    );
+    final file = await FilePicker.pickFile(type: FileType.image);
+    if (file == null) return;
 
-    final file = result?.files.single;
-    if (file == null || file.bytes == null) return;
-
+    final bytes = await file.readAsBytes();
     final name = (file.name.isNotEmpty) ? file.name : 'profile_picture.png';
     final ext = (file.extension ?? '').toLowerCase();
     final contentType = switch (ext) {
@@ -90,7 +86,7 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
     };
 
     await context.read<ProfileCubit>().uploadProfilePicture(
-      bytes: file.bytes!,
+      bytes: bytes,
       filename: name,
       contentType: contentType,
     );

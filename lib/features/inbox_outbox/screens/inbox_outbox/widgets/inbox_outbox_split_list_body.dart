@@ -5,7 +5,9 @@ import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
+import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/inbox_outbox/inbox_outbox_list_filter.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
@@ -35,7 +37,8 @@ class InboxOutboxSplitListBody extends StatefulWidget {
   final String? emptyIconAsset;
 
   @override
-  State<InboxOutboxSplitListBody> createState() => _InboxOutboxSplitListBodyState();
+  State<InboxOutboxSplitListBody> createState() =>
+      _InboxOutboxSplitListBodyState();
 }
 
 class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
@@ -108,18 +111,24 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
   @override
   Widget build(BuildContext context) {
     if (_loadingGln) {
-      return const Center(child: CircularProgressIndicator());
+      return _wrapStandalone(
+        context,
+        const Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (_myGln == null) {
-      return AppEmptyState(
-        iconAsset: NavIcons.inboxOutbox,
-        title: 'Operational GLN not set',
-        subtitle:
-            'Set your operational location in Profile to load in-transit shipments for your site.',
-        primaryActionLabel: 'Open Profile',
-        primaryActionIconAsset: NavIcons.profile,
-        onPrimaryAction: () => context.go(Constants.profileRoute),
+      return _wrapStandalone(
+        context,
+        AppEmptyState(
+          iconAsset: NavIcons.inboxOutbox,
+          title: 'Operational GLN not set',
+          subtitle:
+              'Set your operational location in Profile to load in-transit shipments for your site.',
+          primaryActionLabel: 'Open Profile',
+          primaryActionIconAsset: NavIcons.profile,
+          onPrimaryAction: () => context.go(Constants.profileRoute),
+        ),
       );
     }
 
@@ -128,8 +137,14 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
       child: BlocConsumer<InboxOutboxCubit, OperationsState<Operation>>(
         listener: (context, state) {
           if (!widget.embedded) return;
-          final ids = state.items.map((op) => op.navigableOperationId).whereType<String>().toList();
-          context.read<OperationSplitCubit>().updateOperationIds(ids, isEmpty: ids.isEmpty);
+          final ids = state.items
+              .map((op) => op.navigableOperationId)
+              .whereType<String>()
+              .toList();
+          context.read<OperationSplitCubit>().updateOperationIds(
+            ids,
+            isEmpty: ids.isEmpty,
+          );
           context.read<OperationSplitCubit>().setListLoading(state.isLoading);
         },
         builder: (context, state) {
@@ -174,7 +189,8 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
               filter: _listFilter,
               onRetry: _cubit.refresh,
               onRefresh: _cubit.refresh,
-              onClearFilters: () => _onFilterSelected(InboxOutboxListFilter.all),
+              onClearFilters: () =>
+                  _onFilterSelected(InboxOutboxListFilter.all),
               emptyIconAsset: widget.emptyIconAsset ?? NavIcons.inboxOutbox,
               hasMore: state.hasMore,
               isLoadingMore: state.isLoadingMore,
@@ -185,10 +201,18 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
             ),
           );
 
-          if (widget.embedded) return body;
-          return Scaffold(body: body);
+          return _wrapStandalone(context, body);
         },
       ),
+    );
+  }
+
+  Widget _wrapStandalone(BuildContext context, Widget body) {
+    if (widget.embedded) return body;
+    return Scaffold(
+      appBar: TraqAppBar(context, title: const Text('Inbox / Outbox')),
+      drawer: const AppDrawer(),
+      body: body,
     );
   }
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
@@ -13,19 +12,18 @@ import 'package:traqtrace_app/features/home/screens/home/home_screen.dart';
 import 'package:traqtrace_app/features/inbox_outbox/screens/inbox_outbox/inbox_outbox_screen.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/product_hierarchy_screen.dart';
 import 'package:traqtrace_app/features/product_journey/screens/journey_dashboard/journey_dashboard_screen.dart';
+import 'package:traqtrace_app/features/splash/traq_splash_screen.dart';
 import 'package:traqtrace_app/features/user/screens/profile/profile_screen.dart';
 
 List<RouteBase> coreRoutes() => [
-  
   GoRoute(
     path: Constants.splashRoute,
     pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
       key: state.pageKey,
       animate: false,
-      child: const SizedBox.shrink(),
+      child: const TraqSplashScreen(),
     ),
   ),
-
   ShellRoute(
     builder: (context, state, child) => AuthShell(child: child),
     routes: [

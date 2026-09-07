@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DEBUG-ONLY network security config.
+  Lives in src/debug so it NEVER affects release builds or the web build.
+  Permits cleartext HTTP only to the local development backend:
+    - 10.0.2.2  : Android emulator alias for the host machine's localhost
+    - localhost / 127.0.0.1 : physical-device / other local setups
+  Everything else keeps Android's secure (HTTPS-only) default.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>
